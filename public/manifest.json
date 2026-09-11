@@ -1,0 +1,20 @@
+{
+  "name": "EG Commerce - إي جي كوميرس",
+  "short_name": "EG Commerce",
+  "description": "منصة التجارة الإلكترونية واكتشاف الأزياء بالمحتوى",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0c141f",
+  "theme_color": "#0c141f",
+  "orientation": "portrait-primary",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "/logo_eg_fashion_arabic.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

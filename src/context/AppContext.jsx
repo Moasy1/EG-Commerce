@@ -272,6 +272,18 @@ export function AppProvider({ children }) {
     ));
   };
 
+  const addProduct = (newProd) => {
+    setProducts(prev => [newProd, ...prev]);
+  };
+
+  const updateProduct = (updatedProd) => {
+    setProducts(prev => prev.map(p => p.id === updatedProd.id ? updatedProd : p));
+  };
+
+  const deleteProduct = (productId) => {
+    setProducts(prev => prev.filter(p => p.id !== productId));
+  };
+
   const [cartItems, setCartItems] = useState([
     {
       id: 'c-1',
@@ -399,6 +411,9 @@ export function AppProvider({ children }) {
       orders,
       setOrders,
       updateProductSyndication,
+      addProduct,
+      updateProduct,
+      deleteProduct,
       unreadNotifications,
       setUnreadNotifications
     }}>

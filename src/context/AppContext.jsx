@@ -23,11 +23,42 @@ export const MERCHANTS_DATA = [
     announcement: '✨ كولكشن صيف 2026 متاح الآن • شحن مجاني للطلبات فوق 1,500 ج.م بكود TALIESKA15',
     promoCode: 'TALIESKA15',
     discountPct: 15,
-    themeColor: '#ff4646',
+    themeColor: '#d00000',
     whatsapp: '+201002345678',
     instagram: '@talieska.studio',
     bostaAccount: 'BST-EG-8921',
     instapayHandle: 'talieska@instapay',
+    themeConfig: {
+      themeMode: 'dark', // 'dark' | 'light' | 'midnight'
+      accentColor: '#d00000',
+      fontFamily: 'sans', // 'sans' | 'serif' | 'cairo'
+      borderRadius: 'rounded-2xl', // 'rounded-none' | 'rounded-xl' | 'rounded-2xl' | 'rounded-3xl'
+      heroStyle: 'wide_cinema', // 'wide_cinema' | 'split_editorial' | 'minimal_card'
+      heroHeadline: 'إحياء فخامة الكتان الطبيعي بأيادٍ مصرية أصيلة',
+      heroSubheadline: 'أزياء مصرية معاصرة منسوجة يدوياً 100% من أجود ألياف الكتان طويل التيلة بالقاهرة لتمنحك إطلالة راقية تدوم لسنوات.',
+      heroCtaText: 'تسوق كولكشن 2026',
+      productsGridCols: 3, // 2 | 3 | 4
+      showRatings: true,
+      showStockBadges: true,
+    },
+    layoutConfig: {
+      showAnnouncementBar: true,
+      showHeroBanner: true,
+      showTrustBadges: true,
+      showProductsCatalog: true,
+      showCommunityReels: true,
+      showSocialMediaFeed: true,
+      showTestimonials: true,
+      showContactSection: true,
+      showWhatsAppFloat: true,
+      showAboutUsTab: true,
+      trustBadges: [
+        { id: 'b1', icon: 'local_shipping', title: 'شحن سريع بوسطة', desc: 'توصيل لباب بيتك خلال 24-48 ساعة' },
+        { id: 'b2', icon: 'verified', title: 'كتان طبيعي 100%', desc: 'أقمشة مصرية معالجة ضد الانكماش' },
+        { id: 'b3', icon: 'assignment_return', title: 'معاينة عند الاستلام', desc: 'حق الاستبدال خلال 14 يوم مجاناً' },
+        { id: 'b4', icon: 'support_agent', title: 'استشارة مقاسات فورية', desc: 'فريق متخصص عبر الواتساب لحظياً' }
+      ]
+    },
     stats: {
       grossSales: 142500,
       growthPct: 18.4,
@@ -66,6 +97,37 @@ export const MERCHANTS_DATA = [
     instagram: '@khan.craft.eg',
     bostaAccount: 'BST-EG-4412',
     instapayHandle: 'khancraft@instapay',
+    themeConfig: {
+      themeMode: 'dark',
+      accentColor: '#feb700',
+      fontFamily: 'serif',
+      borderRadius: 'rounded-2xl',
+      heroStyle: 'wide_cinema',
+      heroHeadline: 'سحر الحرف الفاطمية والتراث المصري الأصيل',
+      heroSubheadline: 'فوانيس نحاسية منقوشة وسجاد كليم يدوي مصنوع بأيدي أمهر شيوخ الصنعة في خان الخليلي.',
+      heroCtaText: 'استكشف التحف النحاسية',
+      productsGridCols: 3,
+      showRatings: true,
+      showStockBadges: true,
+    },
+    layoutConfig: {
+      showAnnouncementBar: true,
+      showHeroBanner: true,
+      showTrustBadges: true,
+      showProductsCatalog: true,
+      showCommunityReels: true,
+      showSocialMediaFeed: true,
+      showTestimonials: true,
+      showContactSection: true,
+      showWhatsAppFloat: true,
+      showAboutUsTab: true,
+      trustBadges: [
+        { id: 'b1', icon: 'local_shipping', title: 'شحن آمن مع بوسطة', desc: 'تغليف خاص ومقاوم للصدمات' },
+        { id: 'b2', icon: 'workspace_premium', title: 'نحاس أحمر نقي 100%', desc: 'نقش وتخريم يدوي يدوم للأبد' },
+        { id: 'b3', icon: 'verified', title: 'شهادة أصالة تراثية', desc: 'مختومة من ورش خان الخليلي' },
+        { id: 'b4', icon: 'support_agent', title: 'طلبات تصنيع خاصة', desc: 'حفر الأسماء والإهداءات حسب الطلب' }
+      ]
+    },
     stats: {
       grossSales: 89400,
       growthPct: 12.2,
@@ -104,6 +166,37 @@ export const MERCHANTS_DATA = [
     instagram: '@tiba.jewels',
     bostaAccount: 'BST-EG-1190',
     instapayHandle: 'tiba@instapay',
+    themeConfig: {
+      themeMode: 'midnight',
+      accentColor: '#10b981',
+      fontFamily: 'cairo',
+      borderRadius: 'rounded-xl',
+      heroStyle: 'split_editorial',
+      heroHeadline: 'حلي فرعونية ملكية مفعمة بسحر التاريخ',
+      heroSubheadline: 'مجوهرات مصوغة من الفضة عيار 925 المطلية بذهب عيار 18 المستوحاة من رموز مصر القديمة.',
+      heroCtaText: 'تسوق قطع اللوتس',
+      productsGridCols: 3,
+      showRatings: true,
+      showStockBadges: true,
+    },
+    layoutConfig: {
+      showAnnouncementBar: true,
+      showHeroBanner: true,
+      showTrustBadges: true,
+      showProductsCatalog: true,
+      showCommunityReels: true,
+      showSocialMediaFeed: true,
+      showTestimonials: true,
+      showContactSection: true,
+      showWhatsAppFloat: true,
+      showAboutUsTab: true,
+      trustBadges: [
+        { id: 'b1', icon: 'local_shipping', title: 'توصيل مصفح وسريع', desc: 'معاينة وفحص الصياغة قبل الدفع' },
+        { id: 'b2', icon: 'diamond', title: 'فضة 925 مطلية بالذهب', desc: 'ضمان ثبات اللون لمدة عامين' },
+        { id: 'b3', icon: 'redeem', title: 'علبة هدايا ملكية', desc: 'تغليف مخملي فاخر مع كارت إهداء' },
+        { id: 'b4', icon: 'verified', title: 'شهادة ضمان معتمدة', desc: 'توثيق عيار الفضة ونسبة الذهب' }
+      ]
+    },
     stats: {
       grossSales: 63800,
       growthPct: 24.1,
@@ -324,6 +417,27 @@ export function AppProvider({ children }) {
     setProducts(prev => prev.filter(p => p.id !== productId));
   };
 
+  const updateMerchant = (merchantId, updatedFields) => {
+    setMerchants(prev => prev.map(m => {
+      if (m.id === merchantId) {
+        return {
+          ...m,
+          ...updatedFields,
+          themeColor: updatedFields.themeConfig?.accentColor || updatedFields.themeColor || m.themeColor,
+          themeConfig: {
+            ...(m.themeConfig || {}),
+            ...(updatedFields.themeConfig || {})
+          },
+          layoutConfig: {
+            ...(m.layoutConfig || {}),
+            ...(updatedFields.layoutConfig || {})
+          }
+        };
+      }
+      return m;
+    }));
+  };
+
   const [cartItems, setCartItems] = useState([
     {
       id: 'c-1',
@@ -454,6 +568,7 @@ export function AppProvider({ children }) {
       addProduct,
       updateProduct,
       deleteProduct,
+      updateMerchant,
       unreadNotifications,
       setUnreadNotifications
     }}>

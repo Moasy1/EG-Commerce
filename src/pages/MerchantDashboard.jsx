@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import ProductFormModal from '../components/merchant/ProductFormModal';
+import StorefrontThemeCustomizer from '../components/merchant/StorefrontThemeCustomizer';
 
 export default function MerchantDashboard() {
   const { 
@@ -853,6 +854,13 @@ export default function MerchantDashboard() {
               </div>
             </div>
           </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* SUBTAB 4: STOREFRONT THEME & LAYOUT CUSTOMIZER                            */}
+        {/* ========================================================================= */}
+        {activeSubTab === 'theme' && (
+          <StorefrontThemeCustomizer />
         )}
       </main>
 

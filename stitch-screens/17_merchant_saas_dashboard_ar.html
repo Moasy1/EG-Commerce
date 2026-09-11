@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة تحكم التاجر السحابية - EG Commerce SaaS Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              primary: '#FF4646',
+              primaryHover: '#ff5c5c',
+              accent: '#C2714F',
+              dark: '#0c141f',
+              darker: '#070e1a',
+              card: '#151c28',
+              cardBorder: '#222c3c',
+              surfaceLight: '#1e2838',
+              emerald: '#10B981',
+              amber: '#F59E0B'
+            }
+          },
+          fontFamily: {
+            sans: ['Alexandria', 'Plus Jakarta Sans', 'sans-serif'],
+            en: ['Plus Jakarta Sans', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Alexandria', sans-serif;
+      background-color: #0c141f;
+      color: #f1f5f9;
+      -webkit-font-smoothing: antialiased;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .badge-glow {
+      box-shadow: 0 0 12px rgba(255, 70, 70, 0.25);
+    }
+  </style>
+</head>
+<body class="bg-[#0c141f] text-slate-100 min-h-screen pb-12 antialiased selection:bg-rose-500/20 selection:text-rose-300">
+
+  <!-- Top App Navigation / Cloud Platform Bar -->
+  <header class="sticky top-0 z-40 bg-[#070e1a]/95 backdrop-blur-md border-b border-[#222c3c]">
+    <div class="px-4 py-3 flex items-center justify-between">
+      <!-- Brand & Store Switcher -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#FF4646] to-[#E11D48] flex items-center justify-center font-black text-white text-base shadow-lg shadow-rose-900/30">
+          EG
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-semibold px-2 py-0.5 rounded bg-rose-500/15 text-rose-400 border border-rose-500/30">تاجر سحابي SaaS</span>
+            <span class="text-xs text-slate-400 font-en flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              v3.8 Active
+            </span>
+          </div>
+          <div class="flex items-center gap-1.5 cursor-pointer mt-0.5 group">
+            <h1 class="text-sm font-bold text-white group-hover:text-rose-400 transition-colors">تاليسكا ستوديو • Talieska</h1>
+            <svg class="w-4 h-4 text-slate-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action: Notifications & Avatar -->
+      <div class="flex items-center gap-2">
+        <button class="relative w-9 h-9 rounded-xl bg-[#151c28] border border-[#222c3c] flex items-center justify-center text-slate-300 hover:text-white transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+          </svg>
+          <span class="absolute 1 top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500"></span>
+        </button>
+
+        <a href="#" class="w-9 h-9 rounded-xl overflow-hidden border border-rose-500/40 p-0.5 bg-[#151c28] block">
+          <img src="https://lh3.googleusercontent.com/aida/AEtjO1Uv2BDLSnQnmwRfTTDz_vGLZ7C3LEzLP-_Zl9KaMRMh6jQ9CB2JFXsg0NubbuDO72k_8xi1ZbQiSintcM1t8eL4SKlDgQAG4s_sRKIk1C9AlsqBkVHaW4--WUhUqapIiZVeAX1Nvt07SHB6EU-UsFOHDGZFU2BlpHjZWlvbPKIWIb6qyFi-0UOa6C8-ePTqjTYRDgEqIObzL3pYRMzD4LimCFEyJlZiUa4CNYyP6OCRRwmaJEis1arUlg" alt="Merchant Owner" class="w-full h-full object-cover rounded-lg">
+        </a>
+      </div>
+    </div>
+
+    <!-- Store Live Domain Banner Bar -->
+    <div class="bg-[#101724] border-t border-[#1a2333] px-4 py-2 flex items-center justify-between text-xs">
+      <div class="flex items-center gap-2 text-slate-300 overflow-hidden text-ellipsis whitespace-nowrap">
+        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">SSL متصل</span>
+        <span class="font-en text-slate-300 text-[11px] truncate tracking-tight">talieska.eg-commerce.com</span>
+      </div>
+      <a href="#" class="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-400 hover:text-rose-300 transition shrink-0 bg-rose-500/10 px-2.5 py-1 rounded-lg border border-rose-500/20">
+        <span>عرض المتجر</span>
+        <svg class="w-3 h-3 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+        </svg>
+      </a>
+    </div>
+
+    <!-- Navigation Tabs (Horizontal Scrollable) -->
+    <div class="flex items-center gap-2 px-4 py-2 overflow-x-auto no-scrollbar border-t border-[#1a2333] bg-[#0c141f]">
+      <button class="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#FF4646] text-white shadow-sm shrink-0 flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+        </svg>
+        نظرة عامة
+      </button>
+
+      <button class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white bg-[#151c28] border border-[#222c3c] shrink-0 flex items-center gap-1.5 transition">
+        <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+        </svg>
+        المنتجات والمخزون
+      </button>
+
+      <button class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white bg-[#151c28] border border-[#222c3c] shrink-0 flex items-center gap-1.5 transition relative">
+        <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+        </svg>
+        الطلبات والشحن
+        <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+      </button>
+
+      <button class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white bg-[#151c28] border border-[#222c3c] shrink-0 flex items-center gap-1.5 transition">
+        <svg class="w-3.5 h-3.5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+        </svg>
+        حملات الصناع (UGC)
+      </button>
+
+      <button class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white bg-[#151c28] border border-[#222c3c] shrink-0 flex items-center gap-1.5 transition">
+        <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
+        </svg>
+        مظهر المتجر
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="p-4 space-y-4 max-w-xl mx-auto">
+
+    <!-- Quick Action / Omnichannel Sync Banner -->
+    <div class="p-3.5 rounded-2xl bg-gradient-to-r from-[#17202e] via-[#1a2333] to-[#17202e] border border-rose-500/25 flex items-center justify-between shadow-md">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-rose-400 shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <span class="text-xs font-bold text-white">الربط المتزامن مع سوق EG وسوق الريلز</span>
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-0.5">منتجاتك معروضة في سوق الموضة الموحد وفيديوهات صانعات المحتوى</p>
+        </div>
+      </div>
+      <button class="bg-[#FF4646] hover:bg-[#ff5c5c] text-white text-[11px] font-bold px-3 py-1.5 rounded-lg shrink-0 shadow-sm transition">
+        إدارة المزامنة
+      </button>
+    </div>
+
+    <!-- Section 1: KPI Metrics Grid -->
+    <div class="space-y-2">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xs font-bold text-slate-300 uppercase tracking-wider">مؤشرات الأداء الرئيسية (هذا الشهر)</h2>
+        <span class="text-[11px] text-slate-400 font-en">Oct 1 - Oct 31, 2024</span>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2.5">
+        <!-- Metric 1: Total Sales -->
+        <div class="bg-[#151c28] border border-[#222c3c] rounded-2xl p-3.5 flex flex-col justify-between relative overflow-hidden">
+          <div class="absolute -left-6 -bottom-6 w-20 h-20 bg-rose-500/5 rounded-full blur-xl pointer-events-none"></div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs text-slate-400">إجمالي المبيعات</span>
+            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 font-en flex items-center gap-0.5">
+              +18.4%
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+              </svg>
+            </span>
+          </div>
+          <div>
+            <div class="text-lg font-black text-white font-en tracking-tight">142,500 <span class="text-xs font-normal text-slate-400 font-sans">ج.م</span></div>
+            <p class="text-[10px] text-slate-400 mt-1">مقابل 120,300 ج.م الشهر السابق</p>
+          </div>
+        </div>
+
+        <!-- Metric 2: Orders Count -->
+        <div class="bg-[#151c28] border border-[#222c3c] rounded-2xl p-3.5 flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs text-slate-400">إجمالي الطلبات</span>
+            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400">8 معلقة</span>
+          </div>
+          <div>
+            <div class="text-lg font-black text-white font-en">118 <span class="text-xs font-normal text-slate-400 font-sans">طلب</span></div>
+            <div class="text-[10px] text-slate-400 mt-1 flex items-center gap-1.5">
+              <span class="text-rose-400 font-medium">8 تجهيز</span>
+              <span>•</span>
+              <span class="text-emerald-400 font-medium">14 مع Bosta</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Metric 3: Reels Attribution (Key Spec) -->
+        <div class="bg-[#151c28] border border-rose-500/30 rounded-2xl p-3.5 flex flex-col justify-between relative overflow-hidden bg-gradient-to-b from-[#151c28] to-[#1a1724]">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold text-rose-300 flex items-center gap-1">
+              <svg class="w-3.5 h-3.5 text-rose-400" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
+              </svg>
+              مبيعات الريلز والمحتوى
+            </span>
+            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-400 font-en">41% حصة</span>
+          </div>
+          <div>
+            <div class="text-lg font-black text-white font-en">58,200 <span class="text-xs font-normal text-slate-400 font-sans">ج.م</span></div>
+            <p class="text-[10px] text-rose-300/80 mt-1">عبر 6 حملات صناع محتوى معتمدة</p>
+          </div>
+        </div>
+
+        <!-- Metric 4: Average Order Value (AOV) -->
+        <div class="bg-[#151c28] border border-[#222c3c] rounded-2xl p-3.5 flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs text-slate-400">متوسط قيمة السلة (AOV)</span>
+            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 font-en">+8.2%</span>
+          </div>
+          <div>
+            <div class="text-lg font-black text-white font-en">1,210 <span class="text-xs font-normal text-slate-400 font-sans">ج.م</span></div>
+            <p class="text-[10px] text-slate-400 mt-1">بفضل ميزة الشحن الموحد الذكي</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: Attribution Spotlight - Top UGC Creator -->
+    <div class="bg-[#151c28] border border-[#222c3c] rounded-2xl p-4 space-y-3">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-lg bg-rose-500/15 flex items-center justify-center text-rose-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-xs font-bold text-white">الأعلى أداءً من صانعات المحتوى</h3>
+            <p class="text-[10px] text-slate-400">تتبع مباشر للتحويلات من الفيديوهات (Attribution Engine)</p>
+          </div>
+        </div>
+        <a href="#" class="text-xs font-semibold text-rose-400 hover:underline">تقرير العمولات</a>
+      </div>
+
+      <div class="p-3 bg-[#0c141f] rounded-xl border border-[#222c3c] flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="relative">
+            <img src="https://lh3.googleusercontent.com/aida/AEtjO1UCPudt9_U6qNOmPn00ca_YPQSNMUZHHf-8X7QvxQ8a3ErtASRO3jzkjvTqPUJqj3HjH_aGouWN_PenxFpb954H6v0CDIlVG1LVm2_p85LGw6pLGeVuVEDFfSe7T4N1DRTSgzetit8mnjUuldc1L8xE_LZd10GWAiEXkPKTYs7rXvb0WCcjTzN4G1jYXxIkW_64Tn1dMtYC9C9x1x3lVYrT5Y3HhKdj3kmUSw4CnrsO2LGIfM3G7UXRZ9E" alt="Top Creator" class="w-11 h-11 rounded-full object-cover border-2 border-rose-500/60">
+            <span class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full flex items-center justify-center text-[9px] text-white font-bold">✓</span>
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-xs font-bold text-white font-en">@nour_style</span>
+              <span class="text-[10px] bg-rose-500/20 text-rose-300 px-1.5 py-0.2 rounded font-medium">نخبة الموضة</span>
+            </div>
+            <p class="text-[11px] text-slate-400 mt-0.5">فيديو ريل: فستان كتان صيفي بوهيمي</p>
+          </div>
+        </div>
+
+        <div class="text-left">
+          <div class="text-sm font-black text-white font-en">24 <span class="text-xs font-normal text-slate-400 font-sans">طلب مؤكد</span></div>
+          <div class="text-[10px] text-emerald-400 font-en font-medium mt-0.5">34,800 ج.م إيراد مباشر</div>
+        </div>
+      </div>
+
+      <!-- Creator Campaign Progress Bar Mini -->
+      <div class="bg-[#101724] p-2.5 rounded-xl border border-[#1e2838] flex items-center justify-between text-xs">
+        <div class="flex items-center gap-2">
+          <span class="text-[11px] text-slate-400">حملة صيف 2026:</span>
+          <span class="text-[11px] text-slate-200 font-medium">4 صانعات أرسلن مسودات الفيديو</span>
+        </div>
+        <button class="text-[10px] font-bold text-white bg-slate-800 hover:bg-slate-700 px-2.5 py-1 rounded-lg border border-slate-700">
+          مراجعة المسودات (4)
+        </button>
+      </div>
+    </div>
+
+    <!-- Section 3: Recent Orders Table / Management -->
+    <div class="bg-[#151c28] border border-[#222c3c] rounded-2xl p-4 space-y-3">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-lg bg-emerald-500/15 flex items-center justify-center text-emerald-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-xs font-bold text-white">أحدث طلبات المتجر المباشرة</h3>
+            <p class="text-[10px] text-slate-400">تجهيز وشحن فوري عبر بوسطة Bosta ونظام InstaPay</p>
+          </div>
+        </div>
+        <a href="#" class="text-xs font-semibold text-rose-400 hover:underline">عرض كل الطلبات (118)</a>
+      </div>
+
+      <!-- Orders List Items -->
+      <div class="space-y-2.5">
+        <!-- Order 1: Ready to Ship via Bosta, InstaPay confirmed -->
+        <div class="p-3.5 bg-[#0c141f] rounded-xl border border-[#222c3c] hover:border-slate-600 transition space-y-2.5">
+          <div class="flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-white font-en text-xs">#EG-8841</span>
+              <span class="text-[10px] text-slate-400 font-en">اليوم، 02:15 م</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">InstaPay مؤكد</span>
+            </div>
+            <span class="font-bold text-white font-en">1,450 ج.م</span>
+          </div>
+
+          <div class="flex items-center justify-between text-xs pt-1 border-t border-[#1a2333]">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-rose-400 font-bold text-xs shrink-0">
+                👗
+              </div>
+              <div>
+                <div class="text-xs font-medium text-slate-200">فستان كتان بوهيمي (Off-White)</div>
+                <div class="text-[10px] text-slate-400">العميلة: فريدة س. • المعادي، القاهرة</div>
+              </div>
+            </div>
+
+            <button class="px-3 py-1.5 rounded-lg bg-rose-500 hover:bg-rose-600 text-white font-bold text-[11px] flex items-center gap-1 shadow-sm transition">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <span>تسليم بوسطة Bosta</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Order 2: Out for Delivery with Bosta, COD -->
+        <div class="p-3.5 bg-[#0c141f] rounded-xl border border-[#222c3c] hover:border-slate-600 transition space-y-2.5">
+          <div class="flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-white font-en text-xs">#EG-8840</span>
+              <span class="text-[10px] text-slate-400 font-en">أمس، 06:40 م</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/20">دفع عند الاستلام (COD)</span>
+            </div>
+            <span class="font-bold text-white font-en">1,980 ج.م</span>
+          </div>
+
+          <div class="flex items-center justify-between text-xs pt-1 border-t border-[#1a2333]">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-rose-400 font-bold text-xs shrink-0">
+                👘
+              </div>
+              <div>
+                <div class="text-xs font-medium text-slate-200">كيمونو رملي من الكتان والتطريز</div>
+                <div class="text-[10px] text-slate-400">العميلة: سارة م. • التجمع الخامس</div>
+              </div>
+            </div>
+
+            <div class="inline-flex items-center gap-1.5 text-[11px] text-slate-300 bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-700">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+              <span>مع مندوب Bosta</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 4: Live Storefront Customization & Merchandising -->
+    <div class="bg-[#151c28] border border-[#222c3c] rounded-2xl p-4 space-y-3">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-lg bg-indigo-500/15 flex items-center justify-center text-indigo-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-xs font-bold text-white">إدارة واجهة المتجر السحابي</h3>
+            <p class="text-[10px] text-slate-400">تخصيص ثيم الصيف والبنرات وعروض الخصم</p>
+          </div>
+        </div>
+        <button class="text-xs font-bold text-rose-400 hover:text-rose-300">محرر الثيم</button>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2 text-xs">
+        <div class="p-3 bg-[#0c141f] rounded-xl border border-[#222c3c] flex flex-col justify-between">
+          <div>
+            <div class="text-[10px] text-slate-400">كود الخصم الترحيبي النشط</div>
+            <div class="text-xs font-bold text-white font-en mt-1">TALIESKA15 (خصم 15%)</div>
+          </div>
+          <div class="mt-2 text-[10px] text-emerald-400 font-medium">مستخدم 64 مرة هذا الأسبوع</div>
+        </div>
+
+        <div class="p-3 bg-[#0c141f] rounded-xl border border-[#222c3c] flex flex-col justify-between">
+          <div>
+            <div class="text-[10px] text-slate-400">الثيم المعتمد للمتجر</div>
+            <div class="text-xs font-bold text-white mt-1">Kinetic Editorial Dark</div>
+          </div>
+          <div class="mt-2 text-[10px] text-slate-400">مخصص لماركات الكتان والأزياء</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 5: B2B SaaS Quick Launch Action Bar -->
+    <div class="p-4 rounded-2xl bg-gradient-to-r from-rose-900/30 via-[#151c28] to-[#151c28] border border-rose-500/30 flex items-center justify-between shadow-xl">
+      <div>
+        <h4 class="text-xs font-bold text-white">ترغب في زيادة مبيعات قطع الكتان؟</h4>
+        <p class="text-[11px] text-slate-400 mt-0.5">أطلق حملة محتوى جديدة لصانعات الموضة بنقرة واحدة</p>
+      </div>
+      <button class="bg-[#FF4646] hover:bg-[#ff5c5c] text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-lg shadow-rose-900/40 flex items-center gap-1.5 transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        <span>إطلاق حملة UGC</span>
+      </button>
+    </div>
+
+  </main>
+
+  <!-- Sticky Bottom Admin Bar for Quick Shortcuts -->
+  <div class="fixed bottom-0 inset-x-0 bg-[#070e1a]/95 backdrop-blur-md border-t border-[#222c3c] py-2.5 px-4 z-40 max-w-xl mx-auto flex items-center justify-around text-slate-400 text-[10px]">
+    <button class="flex flex-col items-center gap-1 text-rose-400 font-bold">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+      </svg>
+      <span>الرئيسية</span>
+    </button>
+    <button class="flex flex-col items-center gap-1 hover:text-white transition">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+      </svg>
+      <span>المنتجات</span>
+    </button>
+    <button class="flex flex-col items-center gap-1 hover:text-white transition relative">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+      </svg>
+      <span>الطلبيات</span>
+      <span class="w-1.5 h-1.5 rounded-full bg-amber-400 absolute -top-0.5 right-2"></span>
+    </button>
+    <button class="flex flex-col items-center gap-1 hover:text-white transition">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+      </svg>
+      <span>صناع المحتوى</span>
+    </button>
+    <button class="flex flex-col items-center gap-1 hover:text-white transition">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+      </svg>
+      <span>الإعدادات</span>
+    </button>
+  </div>
+
+</body>
+</html>

@@ -17,13 +17,15 @@ export default function Header() {
     switch (activeTab) {
       case 'reels': return 'Reels • ريلز';
       case 'shop':
-      case 'product': return 'Shop • السوق';
+      case 'product': return 'Shop • السوق الموحد';
+      case 'storefront': return 'Storefront • متجر مستقل';
+      case 'dashboard':
+      case 'merchant': return 'SaaS Hub • لوحة التاجر';
       case 'cart': return 'Cart • السلة';
       case 'checkout': return 'Checkout • الدفع';
       case 'tracking': return 'Tracking • التتبع';
       case 'rewards': return 'Rewards • مكافآت';
       case 'studio': return 'Creator Studio';
-      case 'merchant': return 'Merchant Hub';
       case 'profile': return 'My Profile';
       default: return 'Reels';
     }
@@ -44,7 +46,7 @@ export default function Header() {
           />
           <div className="flex flex-col">
             <span className="text-sm font-bold text-on-surface leading-none tracking-tight">
-              EG FASHION
+              EG COMMERCE
             </span>
             <span className="text-[11px] text-secondary font-medium leading-none mt-1">
               {getSubTitle()}
@@ -56,7 +58,7 @@ export default function Header() {
         <nav className="hidden md:flex items-center gap-1 bg-surface-container-low px-2 py-1 rounded-full border border-surface-container-high">
           <button
             onClick={() => setActiveTab('reels')}
-            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
+            className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all ${
               activeTab === 'reels'
                 ? 'bg-primary text-on-primary shadow-sm'
                 : 'text-on-surface-variant hover:text-on-surface'
@@ -66,7 +68,7 @@ export default function Header() {
           </button>
           <button
             onClick={() => setActiveTab('shop')}
-            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
+            className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all ${
               activeTab === 'shop' || activeTab === 'product'
                 ? 'bg-primary text-on-primary shadow-sm'
                 : 'text-on-surface-variant hover:text-on-surface'
@@ -75,18 +77,28 @@ export default function Header() {
             Shop
           </button>
           <button
-            onClick={() => setActiveTab('rewards')}
-            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
-              activeTab === 'rewards'
+            onClick={() => setActiveTab('storefront')}
+            className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1 ${
+              activeTab === 'storefront'
+                ? 'bg-primary text-on-primary shadow-sm'
+                : 'text-on-surface-variant hover:text-on-surface'
+            }`}
+          >
+            <span>🏬 المتجر المستقل</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('dashboard')}
+            className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1 ${
+              activeTab === 'dashboard' || activeTab === 'merchant'
                 ? 'bg-secondary text-on-secondary shadow-sm'
                 : 'text-on-surface-variant hover:text-on-surface'
             }`}
           >
-            Rewards
+            <span>⚙️ لوحة التاجر (SaaS)</span>
           </button>
           <button
             onClick={() => setActiveTab('studio')}
-            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
+            className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all ${
               activeTab === 'studio'
                 ? 'bg-primary text-on-primary shadow-sm'
                 : 'text-on-surface-variant hover:text-on-surface'
@@ -95,14 +107,14 @@ export default function Header() {
             Creator Studio
           </button>
           <button
-            onClick={() => setActiveTab('merchant')}
-            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
-              activeTab === 'merchant'
+            onClick={() => setActiveTab('rewards')}
+            className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all ${
+              activeTab === 'rewards'
                 ? 'bg-secondary text-on-secondary shadow-sm'
                 : 'text-on-surface-variant hover:text-on-surface'
             }`}
           >
-            Merchant Hub
+            Rewards
           </button>
         </nav>
 
@@ -128,14 +140,16 @@ export default function Header() {
                 const newRole = e.target.value;
                 setRole(newRole);
                 if (newRole === 'creator') setActiveTab('studio');
-                else if (newRole === 'merchant') setActiveTab('merchant');
+                else if (newRole === 'merchant_admin') setActiveTab('dashboard');
+                else if (newRole === 'merchant_store') setActiveTab('storefront');
                 else setActiveTab('reels');
               }}
               className="bg-surface-container-low px-2.5 py-1 rounded-lg text-xs font-medium text-on-surface border border-surface-container-high focus:outline-none focus:border-secondary cursor-pointer"
             >
               <option value="buyer">👤 Buyer (مشتري)</option>
+              <option value="merchant_store">🏬 Brand Store (متجر مستقل)</option>
+              <option value="merchant_admin">⚙️ Merchant SaaS (لوحة التاجر)</option>
               <option value="creator">🎬 Creator (صانع محتوى)</option>
-              <option value="merchant">🏪 Merchant (تاجر)</option>
             </select>
           </div>
 

@@ -177,27 +177,46 @@ Can:
 
 ---
 
-# 3. Database Architecture
+# 3. B2B SaaS & Multi-Tenancy Architecture
 
-The database design follows the principle of:
+EG-Commerce combines a **B2B SaaS Storefront Engine (Shopify/Salla model)** with an **Integrated Consumer Discovery Layer (TikTok Shop/Marketplace model)**.
 
-> **Single Database + Soft Tenancy using `merchant_id`**
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                           EG-COMMERCE PLATFORM                            │
+├─────────────────────────────────────┬─────────────────────────────────────┤
+│         1. B2B Merchant SaaS        │      2. Discovery & Viral Engine    │
+│           (Shopify Cycle)           │        (Ecosystem Network Effect)   │
+├─────────────────────────────────────┼─────────────────────────────────────┤
+│ • Dedicated Standalone Storefront   │ • Unified Marketplace Feed          │
+│   (e.g., talieska.eg-commerce.com   │ • Product Reels & Video Discovery   │
+│    or custom domain)                │ • Cross-Merchant Cart & Multi-Cart  │
+│ • Merchant SaaS Back-Office         │ • Shared Loyalty & Points Engine    │
+│ • Custom Themes, Banners & Branding │ • UGC Creator Marketplace           │
+│ • Independent Direct Checkout       │ • Content Sales Attribution         │
+│ • Local Logistics (Bosta, Aramex)   │ • Platform-wide Search & Categories │
+│ • Local Payments (InstaPay, COD)    │                                     │
+└─────────────────────────────────────┴─────────────────────────────────────┘
+```
 
-This approach keeps all merchants inside one shared database while logically isolating merchant-owned data through `merchant_id`.
+The database design follows:
+
+> **Single Database + Soft Tenancy using `merchant_id` with Subdomain & Custom Domain Routing**
+
+### Multi-Tenancy Routing Logic
+
+1. **Subdomain Resolution**:
+   - Host `talieska.eg-commerce.com` → Middleware extracts slug `talieska` → queries `merchants` WHERE `slug = 'talieska'` → loads branded storefront with merchant's theme settings.
+2. **Custom Domain Resolution**:
+   - Host `www.talieskastudio.com` → Middleware queries `merchants` WHERE `custom_domain = 'www.talieskastudio.com'` → loads branded storefront.
+3. **Marketplace & Reels App**:
+   - Host `eg-commerce.com` or `app.eg-commerce.com` → loads unified discovery app with reels, global marketplace, creator studio, and unified cart.
 
 ### Why this architecture?
 
-It simplifies:
-
-- Unified cart
-- Global marketplace search
-- Cross-merchant product discovery
-- Reels-to-product relationships
-- UGC campaign relationships
-- Sales attribution
-- Analytics
-
-It also reduces query complexity compared with separate databases per merchant.
+- **Zero-Code Store Creation**: Merchants get an immediate high-converting e-commerce website for their Instagram/TikTok bio without writing code.
+- **Built-in Traffic Channel**: Unlike Shopify where merchants are stranded without traffic, EG-Commerce merchants can syndicate catalog items to the shared Reels and Marketplace with a single toggle.
+- **Unified Attribution**: Content creators can link to products whether purchased via the unified cart or directly on the merchant's dedicated domain.
 
 ---
 
@@ -205,7 +224,7 @@ It also reduces query complexity compared with separate databases per merchant.
 
 ```text
 [Users] ──┬── (1:1) ─── [Merchants] ──── (1:N) ─── [Products] ──┬── (1:N) ── [ReelProducts]
-          │                                           │         │
+          │                     │                     │         │
           ├── (1:1) ─── [Creators] ◄────────┐         │         └── (1:N) ── [UgcCampaigns]
           │                                  │         │                            │
           └── (1:N) ─── [Reels] ─────────────┼─────────┴────────────────────────────┼── (1:N) ── [UgcApplications]
@@ -237,22 +256,34 @@ The main shared account for every platform user.
 
 ### `merchants`
 
-Merchant/store profile.
+Merchant/store SaaS profile and multi-tenant configuration.
 
 | Field | Type | Description |
 |---|---|---|
 | `id` | PK | Merchant ID |
-| `user_id` | FK → `users.id` | Merchant owner |
-| `store_name` | String | Store name |
-| `slug` | String | Unique store URL/subdomain identifier |
-| `commission_rate` | Decimal | Platform commission rate |
-| `is_verified` | Boolean | Verification status |
+| `user_id` | FK → `users.id` | Merchant owner (Unique) |
+| `store_name` | String | Store name (e.g. "Talieska Studio") |
+| `slug` | String | Unique store subdomain identifier (`talieska`) |
+| `custom_domain` | String | Optional custom domain (`shop.talieskastudio.com`) |
+| `subscription_tier` | Enum | `starter`, `growth`, `enterprise` |
+| `subscription_status` | Enum | `trial`, `active`, `past_due`, `cancelled` |
+| `commission_rate` | Decimal | Platform marketplace commission rate (e.g., 5.0%) |
+| `is_verified` | Boolean | Verified merchant badge status |
+| `logo_url` | String | Brand logo URL |
+| `cover_banner_url` | String | Storefront hero banner URL |
+| `brand_bio` | Text | Store bio and craftsmanship story |
+| `theme_settings` | JSONB | `{ primary_color, font_family, announcement_text, promo_code }` |
+| `payment_settings` | JSONB | `{ instapay_handle, fawry_code, cod_enabled, card_enabled }` |
+| `shipping_settings` | JSONB | `{ courier: 'bosta', express_fee: 60, standard_fee: 45, free_shipping_threshold: 1500 }` |
+| `social_links` | JSONB | `{ instagram: '@talieska.studio', whatsapp: '+201000000000', tiktok: '@talieska' }` |
 | `created_at` | Timestamp | Creation date |
 | `updated_at` | Timestamp | Last update |
 
 Constraint:
 
-- `user_id` should be Unique.
+- `user_id` must be Unique.
+- `slug` must be Unique and URL-safe.
+- `custom_domain` must be Unique if not null.
 
 ### `creators`
 
@@ -288,10 +319,12 @@ Products listed by merchants.
 | `title` | String | Product title |
 | `slug` | String | Product URL slug |
 | `description` | Text | Product description |
+| `sku` | String | Merchant stock keeping unit |
 | `base_price` | Decimal | Original price |
 | `sale_price` | Decimal | Current sale price |
 | `stock_quantity` | Integer | Available stock |
-| `affiliate_commission_rate` | Decimal | Creator commission per sale |
+| `is_marketplace_syndicated` | Boolean | True if listed in EG shared Marketplace & Reels |
+| `affiliate_commission_rate` | Decimal | Creator commission per sale (e.g. 10%) |
 | `status` | Enum | `draft`, `active`, `archived` |
 | `created_at` | Timestamp | Creation date |
 | `updated_at` | Timestamp | Last update |

@@ -15,6 +15,8 @@ import RewardsHub from './pages/RewardsHub';
 import CreatorStudio from './pages/CreatorStudio';
 import MerchantCampaign from './pages/MerchantCampaign';
 import ProfileCloset from './pages/ProfileCloset';
+import MerchantStorefront from './pages/MerchantStorefront';
+import MerchantDashboard from './pages/MerchantDashboard';
 
 function MainContent() {
   const { activeTab } = useApp();
@@ -25,6 +27,13 @@ function MainContent() {
         return <DiscoverReels />;
       case 'shop':
         return <Marketplace />;
+      case 'storefront':
+        return <MerchantStorefront />;
+      case 'dashboard':
+      case 'merchant':
+        return <MerchantDashboard />;
+      case 'merchant_campaign':
+        return <MerchantCampaign />;
       case 'product':
         return <ProductDetail />;
       case 'cart':
@@ -37,8 +46,6 @@ function MainContent() {
         return <RewardsHub />;
       case 'studio':
         return <CreatorStudio />;
-      case 'merchant':
-        return <MerchantCampaign />;
       case 'profile':
         return <ProfileCloset />;
       default:

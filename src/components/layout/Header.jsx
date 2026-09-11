@@ -13,40 +13,52 @@ export default function Header() {
     unreadNotifications
   } = useApp();
 
+  const getSubTitle = () => {
+    switch (activeTab) {
+      case 'reels': return 'Reels';
+      case 'shop':
+      case 'product': return 'Shop';
+      case 'cart': return 'Cart';
+      case 'checkout': return 'Checkout';
+      case 'tracking': return 'Tracking';
+      case 'rewards': return 'Rewards';
+      case 'studio': return 'Studio';
+      case 'merchant': return 'Merchant';
+      case 'profile': return 'Profile';
+      default: return 'Reels';
+    }
+  };
+
   return (
-    <header className="sticky top-0 w-full z-40 pt-safe bg-surface/90 backdrop-blur-xl border-b border-surface-container-high shadow-sm">
+    <header className="sticky top-0 w-full z-40 pt-safe bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.03)] border-b border-surface-container-highest/60">
       <div className="max-w-7xl mx-auto h-16 px-4 md:px-6 flex items-center justify-between gap-3">
-        {/* Brand Logo & Tagline */}
+        {/* Brand Logo & Title from Stitch */}
         <div 
           onClick={() => setActiveTab('reels')}
           className="flex items-center gap-3 cursor-pointer group"
         >
           <img 
-            src="/logo_eg_fashion_arabic.svg" 
-            alt="EG Commerce Logo" 
-            className="h-9 w-auto object-contain transition-transform group-hover:scale-105"
-            onError={(e) => {
-              // Fallback if SVG not loaded
-              e.target.style.display = 'none';
-            }}
+            src="https://lh3.googleusercontent.com/aida/AEtjO1UsXahJOBRjcwbXiXmz3TE4x4htExvhEyoiAS-VhpZxl7TSsGo3f-_x6Nzo3bd6fUdk8XVLlkhu_LNVjAOLz5YkLhGNnJlFrbdfwwZ9HkhFGb6j1Ix7TEYGz59jTLLodtg5NNNejkcbXNor9JZLHkKKnts9DucaUoOYkWns-jxicpyqYpAUFdx_0u9OAd13k8x56JzWkNvt025UsBYL--PhogjlvLHma0ScCiAjTbZb8kaAfaMgjpv2hw" 
+            alt="EG Fashion Arabic Minimal Logo" 
+            className="h-8 w-auto object-contain"
           />
           <div className="flex flex-col">
-            <span className="text-base font-bold tracking-tight text-on-surface leading-none">
+            <span className="text-sm font-bold text-on-surface leading-none tracking-tight">
               EG FASHION
             </span>
-            <span className="text-[11px] font-medium text-primary leading-none mt-1">
-              موضة • محتوى • مكافآت
+            <span className="text-[11px] text-on-surface-variant leading-none mt-1">
+              {getSubTitle()}
             </span>
           </div>
         </div>
 
-        {/* Desktop Top Navigation Tabs */}
-        <nav className="hidden md:flex items-center gap-1 bg-surface-container-low px-2 py-1 rounded-full border border-surface-variant/40">
+        {/* Desktop Navigation Tabs */}
+        <nav className="hidden md:flex items-center gap-1 bg-surface-container-low px-2 py-1 rounded-full border border-surface-container-high">
           <button
             onClick={() => setActiveTab('reels')}
-            className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${
+            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
               activeTab === 'reels'
-                ? 'bg-primary text-white shadow-sm'
+                ? 'bg-primary text-on-primary shadow-sm'
                 : 'text-on-surface-variant hover:text-on-surface'
             }`}
           >
@@ -54,9 +66,9 @@ export default function Header() {
           </button>
           <button
             onClick={() => setActiveTab('shop')}
-            className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${
+            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
               activeTab === 'shop' || activeTab === 'product'
-                ? 'bg-primary text-white shadow-sm'
+                ? 'bg-primary text-on-primary shadow-sm'
                 : 'text-on-surface-variant hover:text-on-surface'
             }`}
           >
@@ -64,7 +76,7 @@ export default function Header() {
           </button>
           <button
             onClick={() => setActiveTab('rewards')}
-            className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${
+            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
               activeTab === 'rewards'
                 ? 'bg-secondary text-on-secondary shadow-sm'
                 : 'text-on-surface-variant hover:text-on-surface'
@@ -74,9 +86,9 @@ export default function Header() {
           </button>
           <button
             onClick={() => setActiveTab('studio')}
-            className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${
+            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
               activeTab === 'studio'
-                ? 'bg-tertiary text-on-tertiary shadow-sm'
+                ? 'bg-primary text-on-primary shadow-sm'
                 : 'text-on-surface-variant hover:text-on-surface'
             }`}
           >
@@ -84,31 +96,31 @@ export default function Header() {
           </button>
           <button
             onClick={() => setActiveTab('merchant')}
-            className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${
+            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
               activeTab === 'merchant'
-                ? 'bg-primary-container text-white shadow-sm'
+                ? 'bg-secondary text-on-secondary shadow-sm'
                 : 'text-on-surface-variant hover:text-on-surface'
             }`}
           >
-            بوابة التاجر
+            لوحة التاجر
           </button>
         </nav>
 
-        {/* Header Action Controls */}
-        <div className="flex items-center gap-1.5 sm:gap-2">
+        {/* Action Controls matching Stitch header icons */}
+        <div className="flex items-center gap-1">
           {/* Device Mockup Toggle on Desktop */}
           <button
             onClick={() => setDeviceMode(prev => prev === 'responsive' ? 'mobile-frame' : 'responsive')}
             title="تبديل وضع العرض (موقع متجاوب / تطبيق هاتف)"
-            className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-surface-container-high hover:bg-surface-variant text-on-surface transition-all border border-surface-variant/50"
+            className="hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-surface-container-low hover:bg-surface-container text-on-surface transition-all border border-surface-container-high"
           >
-            <span className="material-symbols-outlined text-[18px]">
+            <span className="material-symbols-outlined text-[17px]">
               {deviceMode === 'mobile-frame' ? 'desktop_windows' : 'smartphone'}
             </span>
-            <span>{deviceMode === 'mobile-frame' ? 'وضع الويب' : 'عرض التطبيق'}</span>
+            <span>{deviceMode === 'mobile-frame' ? 'عرض الويب' : 'عرض التطبيق'}</span>
           </button>
 
-          {/* Role Dropdown / Switcher */}
+          {/* Role Dropdown */}
           <div className="hidden sm:flex items-center">
             <select
               value={role}
@@ -119,58 +131,58 @@ export default function Header() {
                 else if (newRole === 'merchant') setActiveTab('merchant');
                 else setActiveTab('reels');
               }}
-              className="bg-surface-container px-2.5 py-1.5 rounded-lg text-xs font-medium text-on-surface border border-surface-variant/40 focus:outline-none focus:border-primary cursor-pointer"
+              className="bg-surface-container-low px-2.5 py-1 rounded-lg text-xs font-medium text-on-surface border border-surface-container-high focus:outline-none focus:border-secondary cursor-pointer"
             >
               <option value="buyer">👤 مشتري</option>
-              <option value="creator">🎬 صانع محتوى (UGC)</option>
-              <option value="merchant">🏪 تاجر / علامة تجارية</option>
+              <option value="creator">🎬 صانع محتوى</option>
+              <option value="merchant">🏪 تاجر</option>
             </select>
           </div>
 
           {/* Search Button */}
           <button 
             onClick={() => setActiveTab('shop')}
-            aria-label="بحث في المنتجات"
-            className="w-10 h-10 flex items-center justify-center rounded-full text-on-surface hover:bg-surface-container-high transition-colors"
+            aria-label="بحث"
+            className="w-10 h-10 flex items-center justify-center text-on-surface hover:text-primary transition-colors"
           >
             <span className="material-symbols-outlined text-[22px]">search</span>
           </button>
 
-          {/* Notification Pip */}
+          {/* Notifications Button */}
           <button 
             onClick={() => setActiveTab('profile')}
             aria-label="التنبيهات"
-            className="relative w-10 h-10 flex items-center justify-center rounded-full text-on-surface hover:bg-surface-container-high transition-colors"
+            className="w-10 h-10 flex items-center justify-center text-on-surface hover:text-primary relative transition-colors"
           >
             <span className="material-symbols-outlined text-[22px]">notifications</span>
             {unreadNotifications > 0 && (
-              <span className="absolute top-2.5 left-2.5 w-2 h-2 rounded-full bg-secondary ring-2 ring-surface animate-pulse" />
+              <span className="absolute top-2.5 left-2.5 w-1.5 h-1.5 rounded-full bg-secondary" />
             )}
           </button>
 
-          {/* Cart Icon & Badge */}
+          {/* Cart Button */}
           <button 
             onClick={() => setActiveTab('cart')}
-            aria-label="السلة الموحدة"
-            className="relative w-10 h-10 flex items-center justify-center rounded-full text-on-surface hover:bg-surface-container-high transition-colors"
+            aria-label="حقيبة التسوق"
+            className="w-10 h-10 flex items-center justify-center text-on-surface hover:text-primary relative transition-colors"
           >
             <span className="material-symbols-outlined text-[22px]">shopping_bag</span>
             {totalCartCount > 0 && (
-              <span className="absolute top-1.5 left-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center leading-none ring-2 ring-surface">
+              <span className="absolute top-2 left-2 min-w-[16px] h-4 px-1 rounded-full bg-primary text-on-primary text-[9px] font-medium flex items-center justify-center leading-none">
                 {totalCartCount}
               </span>
             )}
           </button>
 
-          {/* User Avatar */}
+          {/* User Profile Avatar */}
           <div 
             onClick={() => setActiveTab('profile')}
-            className="cursor-pointer pr-1 flex items-center"
+            className="pr-1 flex items-center cursor-pointer"
           >
             <img 
               src="https://lh3.googleusercontent.com/aida-public/AB6AXuBebD1XV7lyRsAl9IX8tKvw96y0vY-A3gyXbIFikiB9lcBqnBPraZyUu4KwB5cr8o2GSX3cq4h9v-tUoDKKT4cqFSr8eWnzqEj8vLK4YSx_rLs9XllzyohklMCsnt1PwT9FRovU6hVvUny8XCCEDLqQDyPOieiXb5w3HOCsbrm7L8CfFkF4E0PCcCZ1TA5VPM1qQ8214MO3rQB2O-zWXR5ggSKybljFH39T3QKh6AgE9rTLMKNbH4AW"
               alt="الملف الشخصي" 
-              className="w-8 h-8 rounded-full object-cover ring-2 ring-outline-variant/40 hover:ring-primary transition-all"
+              className="w-8 h-8 rounded-full object-cover ring-1 ring-surface-container-high"
             />
           </div>
         </div>

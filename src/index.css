@@ -6,18 +6,16 @@
   html, body {
     margin: 0;
     padding: 0;
-    background-color: #0c141f;
-    color: #dce2f3;
-    font-family: 'IBM Plex Sans Arabic', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #fbf9f6;
+    color: #1b1c1a;
+    font-family: 'IBM Plex Sans Arabic', sans-serif;
     -webkit-tap-highlight-color: transparent;
   }
   
-  /* Prevent rubber banding on iOS */
   body {
     overscroll-behavior-y: none;
   }
 
-  /* Safe areas for iPhone notch and home bar */
   .pb-safe {
     padding-bottom: env(safe-area-inset-bottom, 16px);
   }
@@ -26,7 +24,6 @@
     padding-top: env(safe-area-inset-top, 0px);
   }
 
-  /* Custom scrollbar hiding */
   ::-webkit-scrollbar {
     display: none;
     width: 0px;
@@ -39,7 +36,6 @@
   }
 }
 
-/* Material Symbols configuration */
 .material-symbols-outlined {
   font-family: 'Material Symbols Outlined';
   font-weight: normal;
@@ -59,12 +55,11 @@
   font-family: 'Noto Serif', serif;
 }
 
-/* Smooth fade and slide animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
+  from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }

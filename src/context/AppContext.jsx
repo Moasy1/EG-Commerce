@@ -5,8 +5,8 @@ const AppContext = createContext();
 export const INITIAL_PRODUCTS = [
   {
     id: 'p-01',
-    title: 'فستان كتان صيفي بوهيمي أصيل',
-    merchant: 'تاليسكا ستوديو',
+    title: 'فستان كتان كايزن بوهيمي • Linen Bohemian Dress',
+    merchant: 'Talieska Studio • تاليسكا',
     merchantId: 'm-01',
     merchantVerified: true,
     price: 1450,
@@ -15,15 +15,15 @@ export const INITIAL_PRODUCTS = [
     reviewsCount: 142,
     image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB6M9R0STgJd832SzAKcYCBaZhk4lsAzKzNpUB5n0JAA3r_XOv4G8K7SRfSjpFZX3X5DVQqEfIdf6qaXQ748hfWdQOUPny6vW4aM9gK-0hTe2qrsaPInpzFrR-6iMSoxdoDFEbD2TiJkzXX4PR4veBKMzG8olzd2ZgOJicW2d0e24Klq2ebAK1hRX09eProZ4BsgCNRQVpP5WP8gA8TnfF2WPVMam-pQfxkwL7jgYwnTNfzzmsF6ThB',
     pointsEarned: 140,
-    category: 'كاجوال كتان',
+    category: 'Linen كاجوال كتان',
     description: 'فستان صيفي فاخر مصنوع 100% من الكتان الطبيعي المصري المنسوج يدويًا. قصة انسيابية مريحة مع تفاصيل درابيه عصرية تناسب الإطلالات اليومية والمسائية الراقية.',
     sizes: ['S', 'M', 'L', 'XL'],
-    colors: ['تيراكوتا (طوبي)', 'رملي بيج', 'أسود ملكي']
+    colors: ['Terracotta تيراكوتا', 'Sandy Beige بيج رملي', 'Black أسود ملكي']
   },
   {
     id: 'p-02',
-    title: 'حقيبة جلدية كانفاس يدوية مفرغة',
-    merchant: 'ورشة خان الخليلي',
+    title: 'شنطة كانفاس وجلد طبيعي • Handmade Canvas Tote',
+    merchant: 'Khan El Khalili Craft • ورشة خان الخليلي',
     merchantId: 'm-02',
     merchantVerified: true,
     price: 920,
@@ -32,15 +32,15 @@ export const INITIAL_PRODUCTS = [
     reviewsCount: 89,
     image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBNw8oHJNy-iuluOMJkZtPITehUTfKsAy6gonznoc7BK1dnPSNx6c0GcsNsYqQBVburDLidf8N75P8B6TsR-ZbJgjkiL7rRLdGIglykt-D784IpJ0yW8Qm_KZApdx6XKH2oRx-K0eBOGvBfxv3HKsKbdk270VBclA24as6PkV6Klh-RXsmR3Nx55SabuCE6hULUPE66YadEXdrWwrVRphcJRKI8xzylI74xZAqoQTOM-acylJZBMeBp',
     pointsEarned: 92,
-    category: 'حقائب جلدية',
-    description: 'حقيبة تجمع بين خامات الكانفاس المتين وجلد العجل الطبيعي المشغول بحرفية يدوية مصرية أصيلة.',
-    sizes: ['مقاس موحد'],
-    colors: ['بيج وبني']
+    category: 'Leather Bags شنط جلد',
+    description: 'شنطة تجمع بين خامات الكانفاس المتين وجلد العجل الطبيعي المشغول بحرفية يدوية مصرية أصيلة.',
+    sizes: ['One Size مقاس موحد'],
+    colors: ['Beige & Brown بيج وبني']
   },
   {
     id: 'p-03',
-    title: 'عقد ذهبي مستوحى من زهرة اللوتس',
-    merchant: 'مجوهرات طيبة',
+    title: 'عقد ذهبي مستوحى من اللوتس • Lotus Gold Necklace',
+    merchant: 'Tiba Jewelry • مجوهرات طيبة',
     merchantId: 'm-03',
     merchantVerified: true,
     price: 640,
@@ -49,15 +49,15 @@ export const INITIAL_PRODUCTS = [
     reviewsCount: 56,
     image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAE6ElFeAGR-jIwUUr_wmAwZXRDdMDVrRwDHjllEmGcOlSrCYklmm1xdpIhs_IlvPLQH4kQgUDxNfixTvsfWJLCzTgGDxXnYt2p_SusYhDHzVjNIb-qWn702MHMMm_hBuaBGZ6vFMWwem1s46gRwVBvyNSCHfDBF2zmtaDHkopaECJ3eoJDP6TNDxqeOfSplpK4Ml1l2IdoZjjzjvMgomVSs5iLdru16sJ9KDTh_qJ5ygxobd2xN6XY',
     pointsEarned: 64,
-    category: 'إكسسوارات ذهبية وفضية',
-    description: 'سلسال فضة عيار 925 مطلي بطبقة سميكة من الذهب عيار 18 بتصميم فرعوني معاصر مستلهم من زهرة اللوتس.',
-    sizes: ['45 سم'],
-    colors: ['ذهب أصفر']
+    category: 'Jewelry إكسسوارات ومجوهرات',
+    description: 'سلسال فضة 925 مطلي بطبقة سميكة من الذهب عيار 18 بتصميم فرعوني معاصر مستلهم من زهرة اللوتس.',
+    sizes: ['45 cm'],
+    colors: ['Yellow Gold ذهب أصفر']
   },
   {
     id: 'p-04',
-    title: 'كيمونو كتان رملي مطرز',
-    merchant: 'دار الكتان المصري',
+    title: 'كيمونو كتان رملي مطرز • Embroidered Sand Kimono',
+    merchant: 'Egyptian Linen House • دار الكتان المصري',
     merchantId: 'm-01',
     merchantVerified: true,
     price: 1980,
@@ -66,10 +66,10 @@ export const INITIAL_PRODUCTS = [
     reviewsCount: 38,
     image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDx2U5J1mKvtOYiWzhpQW4Za5R89tel2hIhZLv72GVzbqdEDC8xfmHtp6b7LVoqbpa4dXH-_RH1slnuQVziFgRbDBEX17p2JNHuLm8ZGwDWXz4EEHIyxS7bncuxrWwlfA9qR8IBJYvFyv8mI51ST6MDVBpEbdhfCgbkv33cfNlTi1Rm0emv8PIgIEk2yVN1ZJaEc8-iOwsDVDcR2Apg0kn4jvdfV9laevlMPlHnSkO3zxfYrv57Coz8',
     pointsEarned: 198,
-    category: 'عبايات وقفاطين',
-    description: 'قطعة فنية بتطريزات دقيقة من خيوط الحرير على أطراف الأكمام والياقة مع كتان رملي خفيف.',
+    category: 'Abayas & Kimonos عبايات',
+    description: 'قطعة فنية بتطريزات دقيقة من خيوط الحرير على أطراف الأكمام والياقة مع كتان رملي خفيف ومريح.',
     sizes: ['52', '54', '56', '58'],
-    colors: ['بيج رملي', 'زيتي هادئ']
+    colors: ['Sandy Beige بيج رملي', 'Olive Green زيتي']
   }
 ];
 
@@ -83,23 +83,23 @@ export function AppProvider({ children }) {
     {
       id: 'c-1',
       productId: 'p-01',
-      title: 'فستان كتان صيفي بوهيمي أصيل',
-      merchant: 'تاليسكا ستوديو',
+      title: 'فستان كتان كايزن بوهيمي • Linen Dress',
+      merchant: 'Talieska Studio • تاليسكا',
       price: 1450,
       quantity: 1,
       size: 'M',
-      color: 'تيراكوتا (طوبي)',
+      color: 'Terracotta تيراكوتا',
       image: INITIAL_PRODUCTS[0].image
     },
     {
       id: 'c-2',
       productId: 'p-02',
-      title: 'حقيبة جلدية كانفاس يدوية مفرغة',
-      merchant: 'ورشة خان الخليلي',
+      title: 'شنطة كانفاس وجلد طبيعي • Canvas Tote',
+      merchant: 'Khan El Khalili Craft • خان الخليلي',
       price: 920,
       quantity: 1,
-      size: 'مقاس موحد',
-      color: 'بيج وبني',
+      size: 'One Size',
+      color: 'Beige & Brown بيج وبني',
       image: INITIAL_PRODUCTS[1].image
     }
   ]);
@@ -143,7 +143,7 @@ export function AppProvider({ children }) {
           price: product.price,
           quantity: 1,
           size: selectedVariant.size || 'M',
-          color: selectedVariant.color || 'اللون الافتراضي',
+          color: selectedVariant.color || 'Default',
           image: product.image
         }
       ];

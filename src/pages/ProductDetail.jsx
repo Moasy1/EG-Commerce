@@ -11,7 +11,7 @@ export default function ProductDetail() {
 
   const handleAddToCart = () => {
     addToCart(selectedProduct, { size: selectedSize, color: selectedColor });
-    setNotification('تمت إضافة القطعة إلى سلتك الموحدة بنجاح');
+    setNotification('تمت إضافة القطعة إلى الـ Cart بنجاح! ✨');
     setTimeout(() => setNotification(''), 3000);
   };
 
@@ -28,7 +28,7 @@ export default function ProductDetail() {
         className="inline-flex items-center gap-1.5 text-xs font-semibold text-on-surface-variant hover:text-primary mb-4 transition-colors"
       >
         <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-        <span>العودة إلى المعروضات</span>
+        <span>Back to Shop • العودة للتسوق</span>
       </button>
 
       {/* Toast */}
@@ -50,7 +50,7 @@ export default function ProductDetail() {
           />
           <div className="absolute top-3 right-3 bg-surface/90 backdrop-blur-md px-2.5 py-1 rounded text-[11px] font-semibold text-secondary flex items-center gap-1 shadow-sm">
             <span className="material-symbols-outlined text-[13px]">stars</span>
-            <span>+{selectedProduct.pointsEarned} نقطة مكافأة</span>
+            <span>+{selectedProduct.pointsEarned} Points مكافأة</span>
           </div>
         </div>
 
@@ -67,7 +67,7 @@ export default function ProductDetail() {
                   <span className="material-symbols-outlined text-secondary text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>
                     verified
                   </span>
-                  دار أزياء موثقة
+                  Verified Brand • براند موثق
                 </span>
               )}
             </div>
@@ -80,15 +80,15 @@ export default function ProductDetail() {
             <div className="flex items-baseline justify-between pb-3 mb-4 border-b border-surface-container-high">
               <div className="flex items-baseline gap-2">
                 <span className="font-serif text-2xl md:text-3xl font-bold text-on-surface">{selectedProduct.price.toLocaleString()}</span>
-                <span className="text-xs text-on-surface-variant">ج.م</span>
+                <span className="text-xs text-on-surface-variant font-semibold">EGP</span>
                 {selectedProduct.originalPrice && (
-                  <span className="text-xs text-outline line-through">{selectedProduct.originalPrice.toLocaleString()} ج.م</span>
+                  <span className="text-xs text-outline line-through">{selectedProduct.originalPrice.toLocaleString()} EGP</span>
                 )}
               </div>
               <div className="flex items-center gap-1 text-xs bg-surface-container-low px-2.5 py-1 rounded-lg">
                 <span className="material-symbols-outlined text-secondary text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
                 <span className="font-bold text-on-surface">{selectedProduct.rating}</span>
-                <span className="text-[10px] text-on-surface-variant">({selectedProduct.reviewsCount})</span>
+                <span className="text-[10px] text-on-surface-variant">({selectedProduct.reviewsCount} تقييم)</span>
               </div>
             </div>
 
@@ -99,8 +99,8 @@ export default function ProductDetail() {
             {/* Size Options */}
             <div className="mb-4">
               <div className="flex justify-between items-center mb-1.5">
-                <label className="text-xs font-semibold text-on-surface">المقاس</label>
-                <button className="text-[11px] text-secondary hover:underline">دليل المقاسات</button>
+                <label className="text-xs font-semibold text-on-surface">Size • المقاس</label>
+                <button className="text-[11px] text-secondary hover:underline">Size Guide • دليل المقاسات</button>
               </div>
               <div className="flex gap-2 flex-wrap">
                 {selectedProduct.sizes?.map((size) => (
@@ -121,7 +121,7 @@ export default function ProductDetail() {
 
             {/* Color Options */}
             <div className="mb-6">
-              <label className="block text-xs font-semibold text-on-surface mb-1.5">اللون</label>
+              <label className="block text-xs font-semibold text-on-surface mb-1.5">Color • اللون</label>
               <div className="flex gap-2 flex-wrap">
                 {selectedProduct.colors?.map((col) => (
                   <button
@@ -147,33 +147,33 @@ export default function ProductDetail() {
               className="flex-1 py-3 px-4 rounded-xl font-bold text-xs border border-primary text-primary hover:bg-surface-container-low transition-all flex items-center justify-center gap-1.5 active:scale-95"
             >
               <span className="material-symbols-outlined text-[18px]">shopping_bag</span>
-              <span>أضف إلى السلة</span>
+              <span>Add to Cart • أضف للـ Cart</span>
             </button>
             <button
               onClick={handleBuyNow}
               className="flex-1 py-3 px-4 rounded-xl font-bold text-xs bg-primary text-on-primary hover:bg-secondary transition-all flex items-center justify-center gap-1.5 active:scale-95 shadow-sm"
             >
               <span className="material-symbols-outlined text-[18px]">flash_on</span>
-              <span>شراء فوري</span>
+              <span>Instant Buy • شراء فوري</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* UGC Showcase Section: فيديوهات الريلز المرتبطة */}
+      {/* UGC Showcase Section: Reels & Styling */}
       <section className="mt-8 pt-6 border-t border-surface-container-high">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="font-serif text-base font-bold text-on-surface">تنسيقات الريلز من صناع المحتوى (UGC)</h2>
+            <h2 className="font-serif text-base font-bold text-on-surface">Reels & Outfits • فيديوهات التنسيق</h2>
             <p className="text-[11px] text-on-surface-variant mt-0.5">
-              شاهدي تجارب وتنسيقات حقيقية لهذه القطعة بأعين مبدعات الموضة
+              تنسيقات وستايلينج حقيقية للقطعة من فاشون بلوجرز وصناع محتوى في مصر
             </p>
           </div>
           <button 
             onClick={() => setActiveTab('reels')}
             className="text-xs font-semibold text-secondary hover:underline flex items-center gap-0.5"
           >
-            <span>شاهد في الريلز</span>
+            <span>Watch Reels • شاهد في الريلز</span>
             <span className="material-symbols-outlined text-[16px]">play_circle</span>
           </button>
         </div>
@@ -192,7 +192,7 @@ export default function ProductDetail() {
             },
             {
               creator: '@cairo.modest',
-              caption: 'إطلالة شمس الصباح الهادئة',
+              caption: 'إطلالة شمس الصباح الهادئة بالجونة',
               image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBNw8oHJNy-iuluOMJkZtPITehUTfKsAy6gonznoc7BK1dnPSNx6c0GcsNsYqQBVburDLidf8N75P8B6TsR-ZbJgjkiL7rRLdGIglykt-D784IpJ0yW8Qm_KZApdx6XKH2oRx-K0eBOGvBfxv3HKsKbdk270VBclA24as6PkV6Klh-RXsmR3Nx55SabuCE6hULUPE66YadEXdrWwrVRphcJRKI8xzylI74xZAqoQTOM-acylJZBMeBp'
             }
           ].map((video, idx) => (

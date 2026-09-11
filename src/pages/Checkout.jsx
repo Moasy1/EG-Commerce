@@ -22,12 +22,12 @@ export default function Checkout() {
         className="inline-flex items-center gap-1.5 text-xs font-semibold text-on-surface-variant hover:text-primary mb-4"
       >
         <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-        <span>العودة إلى السلة</span>
+        <span>Back to Cart • العودة للـ Cart</span>
       </button>
 
-      <h1 className="font-serif text-xl md:text-2xl font-bold text-on-surface mb-1">إتمام الشراء والدفع الموحد</h1>
+      <h1 className="font-serif text-xl md:text-2xl font-bold text-on-surface mb-1">Checkout • إتمام الشراء والدفع</h1>
       <p className="text-xs text-on-surface-variant mb-6">
-        طلب موحد سيتم تجميعه وتوصيله من دور الأزياء المستقلة مباشرة إلى عنوانك
+        أوردر موحد هيتجمع ويتشحن من البراندات المصرية لعنوانك مباشرة
       </p>
 
       <div className="space-y-4">
@@ -36,9 +36,9 @@ export default function Checkout() {
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-1.5">
               <span className="material-symbols-outlined text-secondary text-[18px]">location_on</span>
-              <h2 className="text-xs font-bold text-on-surface">عنوان التوصيل</h2>
+              <h2 className="text-xs font-bold text-on-surface">Shipping Address • عنوان التوصيل</h2>
             </div>
-            <button className="text-[11px] text-secondary font-semibold hover:underline">تعديل</button>
+            <button className="text-[11px] text-secondary font-semibold hover:underline">Edit • تعديل</button>
           </div>
           <p className="text-xs text-on-surface-variant bg-surface-container-low p-2.5 rounded-lg border border-surface-container-high">
             {address}
@@ -49,17 +49,17 @@ export default function Checkout() {
         <div className="rounded-xl bg-surface-container-lowest border border-surface-container-high p-4 shadow-sm">
           <div className="flex items-center gap-1.5 mb-3">
             <span className="material-symbols-outlined text-secondary text-[18px]">local_shipping</span>
-            <h2 className="text-xs font-bold text-on-surface">مواعيد التوصيل المقدرة للطرود</h2>
+            <h2 className="text-xs font-bold text-on-surface">Estimated Delivery • مواعيد وصول الطرود</h2>
           </div>
 
           <div className="space-y-2">
             <div className="flex items-center justify-between p-2.5 rounded-lg bg-surface-container-low text-xs border border-surface-container-high">
-              <span className="font-semibold text-on-surface">تاليسكا ستوديو</span>
-              <span className="text-[11px] text-secondary font-medium">التوصيل خلال 48 ساعة</span>
+              <span className="font-semibold text-on-surface">Talisca Studio • تاليسكا ستوديو</span>
+              <span className="text-[11px] text-secondary font-medium">Delivery in 24-48 hrs • التوصيل خلال 24-48 ساعة</span>
             </div>
             <div className="flex items-center justify-between p-2.5 rounded-lg bg-surface-container-low text-xs border border-surface-container-high">
-              <span className="font-semibold text-on-surface">ورشة خان الخليلي</span>
-              <span className="text-[11px] text-on-surface-variant font-medium">التوصيل خلال 3-4 أيام عمل</span>
+              <span className="font-semibold text-on-surface">Khan El Khalili Workshop • ورشة خان الخليلي</span>
+              <span className="text-[11px] text-on-surface-variant font-medium">Delivery in 3-4 days • خلال 3-4 أيام عمل</span>
             </div>
           </div>
         </div>
@@ -68,15 +68,15 @@ export default function Checkout() {
         <div className="rounded-xl bg-surface-container-lowest border border-surface-container-high p-4 shadow-sm">
           <div className="flex items-center gap-1.5 mb-3">
             <span className="material-symbols-outlined text-secondary text-[18px]">payments</span>
-            <h2 className="text-xs font-bold text-on-surface">طريقة الدفع المتاحة</h2>
+            <h2 className="text-xs font-bold text-on-surface">Payment Method • طريقة الدفع</h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             {[
-              { id: 'instapay', title: 'إنستاباي (InstaPay)', desc: 'تحويل لحظي مباشر', icon: 'bolt' },
-              { id: 'card', title: 'بطاقة بنكية', desc: 'فيزا، ماستركارد، ميزة', icon: 'credit_card' },
-              { id: 'vodafone', title: 'المحافظ الإلكترونية', desc: 'فودافون كاش ومحفظتي', icon: 'account_balance_wallet' },
-              { id: 'cod', title: 'الدفع عند الاستلام', desc: 'نقداً لمندوب الشحن', icon: 'handshake' }
+              { id: 'instapay', title: 'InstaPay • إنستاباي', desc: 'تحويل لحظي فوري (Instant Transfer)', icon: 'bolt' },
+              { id: 'card', title: 'Credit / Debit Card • كارت بنكي', desc: 'Visa, Mastercard, Meeza (ميزة)', icon: 'credit_card' },
+              { id: 'vodafone', title: 'E-Wallets • محافظ إلكترونية', desc: 'Vodafone Cash, Orange, Etisalat', icon: 'account_balance_wallet' },
+              { id: 'cod', title: 'Cash on Delivery (COD) • كاش', desc: 'الدفع نقداً مع مندوب الشحن', icon: 'handshake' }
             ].map(method => (
               <button
                 key={method.id}
@@ -105,22 +105,22 @@ export default function Checkout() {
         <div className="rounded-xl bg-surface-container-lowest border border-surface-container-high p-4 shadow-sm">
           <div className="space-y-2 text-xs text-on-surface-variant mb-3 pb-3 border-b border-surface-container-high">
             <div className="flex justify-between">
-              <span>المجموع الفرعي:</span>
-              <span className="text-on-surface font-semibold">{subtotal.toLocaleString()} ج.م</span>
+              <span>Subtotal • المجموع:</span>
+              <span className="text-on-surface font-semibold">{subtotal.toLocaleString()} EGP</span>
             </div>
             {discountFromPoints > 0 && (
               <div className="flex justify-between text-secondary">
-                <span>خصم نقاط الولاء:</span>
-                <span className="font-semibold">-{discountFromPoints} ج.م</span>
+                <span>Points Discount • خصم النقاط:</span>
+                <span className="font-semibold">-{discountFromPoints} EGP</span>
               </div>
             )}
             <div className="flex justify-between">
-              <span>الشحن الموحد:</span>
-              <span className="text-on-surface font-semibold">{shippingTotal} ج.م</span>
+              <span>Consolidated Shipping • الشحن الموحد:</span>
+              <span className="text-on-surface font-semibold">{shippingTotal} EGP</span>
             </div>
             <div className="flex justify-between text-sm pt-1.5 text-on-surface font-bold">
-              <span>المبلغ الإجمالي المطلوب:</span>
-              <span className="font-serif text-lg text-secondary font-bold">{grandTotal.toLocaleString()} ج.م</span>
+              <span>Total to Pay • الإجمالي للدفع:</span>
+              <span className="font-serif text-lg text-secondary font-bold">{grandTotal.toLocaleString()} EGP</span>
             </div>
           </div>
 
@@ -132,12 +132,12 @@ export default function Checkout() {
             {isProcessing ? (
               <>
                 <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                <span>جاري معالجة الطلب...</span>
+                <span>Processing Order • جاري معالجة الطلب...</span>
               </>
             ) : (
               <>
                 <span className="material-symbols-outlined text-[17px]">verified</span>
-                <span>تأكيد الطلب والدفع ({grandTotal.toLocaleString()} ج.م)</span>
+                <span>Confirm Order • تأكيد الطلب ({grandTotal.toLocaleString()} EGP)</span>
               </>
             )}
           </button>

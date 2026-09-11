@@ -25,40 +25,40 @@ export default function DiscoverReels() {
           className="absolute inset-0 w-full h-full bg-cover bg-center transition-transform duration-700 hover:scale-105"
           style={{ backgroundImage: `url('${currentProduct.image}')` }}
         >
-          {/* Vignette and Contrast Scrims matching 01_discover_reels_ar */}
+          {/* Vignette and Contrast Scrims */}
           <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/25 to-primary/40 pointer-events-none" />
         </div>
 
-        {/* Top Feed Tabs */}
+        {/* Top Feed Tabs (For You / Following) */}
         <div className="absolute top-4 inset-x-0 flex items-center justify-center gap-6 z-20">
           <button 
             onClick={() => setFeedType('foryou')}
-            className={`relative py-1 font-headline-sm text-base transition-all flex flex-col items-center ${
+            className={`relative py-1 font-bold text-sm tracking-wide transition-all flex flex-col items-center ${
               feedType === 'foryou' ? 'text-on-primary' : 'text-on-primary/60 hover:text-on-primary'
             }`}
           >
-            <span>لك</span>
+            <span>For You</span>
             {feedType === 'foryou' && (
               <span className="w-5 h-0.5 bg-on-primary rounded-full mt-1" />
             )}
           </button>
           <button 
             onClick={() => setFeedType('following')}
-            className={`relative py-1 font-headline-sm text-base transition-all flex flex-col items-center ${
+            className={`relative py-1 font-bold text-sm tracking-wide transition-all flex flex-col items-center ${
               feedType === 'following' ? 'text-on-primary' : 'text-on-primary/60 hover:text-on-primary'
             }`}
           >
-            <span>المتابعون</span>
+            <span>Following</span>
             {feedType === 'following' && (
               <span className="w-1.5 h-1.5 rounded-full bg-secondary mt-1" />
             )}
           </button>
         </div>
 
-        {/* Video Audio Track Tag */}
+        {/* Audio Track Tag */}
         <div className="absolute top-4 right-4 z-20 flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/40 backdrop-blur-md text-on-primary shadow-sm border border-white/10">
           <span className="material-symbols-outlined text-[16px] animate-pulse text-secondary-fixed">music_note</span>
-          <span className="text-xs truncate max-w-[130px]">موسيقى هادئة - إيقاع أصيل</span>
+          <span className="text-xs truncate max-w-[130px]">Original Audio • Lo-Fi Chill</span>
         </div>
 
         {/* Left Interactive Rail (RTL) */}
@@ -82,7 +82,7 @@ export default function DiscoverReels() {
             </button>
           </div>
 
-          {/* Like Action */}
+          {/* Like */}
           <div className="flex flex-col items-center">
             <button 
               onClick={toggleLike}
@@ -97,7 +97,7 @@ export default function DiscoverReels() {
                 favorite
               </span>
             </button>
-            <span className="text-xs mt-1 drop-shadow-sm font-semibold">{likesCount.toLocaleString()}</span>
+            <span className="text-xs mt-1 drop-shadow-sm font-semibold">42.8K</span>
           </div>
 
           {/* Comments */}
@@ -105,10 +105,10 @@ export default function DiscoverReels() {
             <button className="w-11 h-11 rounded-full bg-primary/30 backdrop-blur-md flex items-center justify-center transition-transform active:scale-90 hover:bg-primary/50 text-on-primary">
               <span className="material-symbols-outlined text-[24px]">chat_bubble</span>
             </button>
-            <span className="text-xs mt-1 drop-shadow-sm font-semibold">1.2 ألف</span>
+            <span className="text-xs mt-1 drop-shadow-sm font-semibold">1.2K</span>
           </div>
 
-          {/* Bookmark */}
+          {/* Save / Bookmark */}
           <div className="flex flex-col items-center">
             <button 
               onClick={() => setIsSaved(prev => !prev)}
@@ -121,7 +121,7 @@ export default function DiscoverReels() {
                 bookmark
               </span>
             </button>
-            <span className="text-xs mt-1 drop-shadow-sm font-semibold">14 ألف</span>
+            <span className="text-xs mt-1 drop-shadow-sm font-semibold">14K</span>
           </div>
 
           {/* Share */}
@@ -129,26 +129,26 @@ export default function DiscoverReels() {
             <button className="w-11 h-11 rounded-full bg-primary/30 backdrop-blur-md flex items-center justify-center transition-transform active:scale-90 hover:bg-primary/50 text-on-primary">
               <span className="material-symbols-outlined text-[24px] transform -scale-x-100">share</span>
             </button>
-            <span className="text-xs mt-1 drop-shadow-sm font-semibold">مشاركة</span>
+            <span className="text-xs mt-1 drop-shadow-sm font-semibold">Share</span>
           </div>
         </aside>
 
-        {/* Creator Info & Caption (Right / Start aligned) */}
+        {/* Creator Info & Caption */}
         <div className="absolute bottom-28 right-4 left-20 z-20 text-on-primary text-right pointer-events-none">
           <div className="flex items-center gap-1.5 mb-1.5 pointer-events-auto">
             <span className="font-serif text-base font-semibold tracking-wide">@nour_style</span>
             <span className="material-symbols-outlined text-[16px] text-secondary-fixed" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-            <span className="text-on-primary/70 text-[10px] px-1.5 py-0.5 rounded bg-on-primary/10">مستدام</span>
+            <span className="text-on-primary/70 text-[10px] px-1.5 py-0.5 rounded bg-on-primary/10">Verified Creator</span>
           </div>
           <p className="text-xs text-on-primary/95 line-clamp-2 leading-relaxed">
-            إطلالة الصيف الهادئة مستوحاة من عمارة المعز، كتان طبيعي منسوج يدوياً بنسبة 100% ✨
+            ستايلينج كاجوال لصيف القاهرة، الكتان المصري الطبيعي 100% ✨ كود خصم إضافي: <b>NOUR15</b>
           </p>
         </div>
 
-        {/* Quick Buy Editorial Drawer Card matching 01_discover_reels_ar */}
+        {/* Quick Buy Editorial Drawer Card */}
         <div className="absolute bottom-3 inset-x-3 z-30 bg-surface-container-lowest/95 backdrop-blur-xl rounded-xl p-3 shadow-xl border border-surface-container-high/60">
           <div className="flex items-center gap-3">
-            {/* Product Thumbnail with Tag */}
+            {/* Product Thumbnail */}
             <div 
               onClick={() => openProductDetail(currentProduct)}
               className="relative w-16 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-surface-container cursor-pointer"
@@ -159,7 +159,7 @@ export default function DiscoverReels() {
                 className="w-full h-full object-cover"
               />
               <div className="absolute top-1 right-1 bg-primary text-on-primary px-1 py-0.5 rounded text-[8px] leading-none font-bold">
-                حصري
+                Exclusive
               </div>
             </div>
 
@@ -183,23 +183,23 @@ export default function DiscoverReels() {
               <div className="flex items-baseline justify-between mt-auto">
                 <div className="flex items-baseline gap-1.5">
                   <span className="font-serif text-base font-bold text-on-surface">{currentProduct.price.toLocaleString()}</span>
-                  <span className="text-[10px] text-on-surface-variant">ج.م</span>
-                  <span className="text-[10px] text-outline line-through">{currentProduct.originalPrice.toLocaleString()} ج.م</span>
+                  <span className="text-[10px] text-on-surface-variant font-bold">EGP</span>
+                  <span className="text-[10px] text-outline line-through">{currentProduct.originalPrice.toLocaleString()} EGP</span>
                 </div>
                 <div className="flex items-center gap-1 bg-secondary-fixed/50 text-on-secondary-fixed-variant px-1.5 py-0.5 rounded">
                   <span className="material-symbols-outlined text-[12px]">stars</span>
-                  <span className="text-[10px] font-semibold">+{currentProduct.pointsEarned} نقطة</span>
+                  <span className="text-[10px] font-semibold">+{currentProduct.pointsEarned} Pts</span>
                 </div>
               </div>
             </div>
 
-            {/* Buy Action Button */}
+            {/* Quick Buy CTA */}
             <button 
               onClick={() => openQuickBuy(currentProduct)}
-              className="h-20 w-14 rounded-lg bg-primary text-on-primary flex flex-col items-center justify-center gap-1 hover:bg-secondary transition-all active:scale-95 flex-shrink-0 shadow-md"
+              className="h-20 w-16 rounded-lg bg-primary text-on-primary flex flex-col items-center justify-center gap-1 hover:bg-secondary transition-all active:scale-95 flex-shrink-0 shadow-md"
             >
-              <span className="material-symbols-outlined text-[20px]">shopping_bag</span>
-              <span className="text-[11px] font-bold">شراء</span>
+              <span className="material-symbols-outlined text-[20px]">flash_on</span>
+              <span className="text-[11px] font-bold">Quick Buy</span>
             </button>
           </div>
         </div>

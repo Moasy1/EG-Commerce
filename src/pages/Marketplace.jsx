@@ -3,54 +3,62 @@ import { useApp, INITIAL_PRODUCTS } from '../context/AppContext';
 
 export default function Marketplace() {
   const { openProductDetail, addToCart, setActiveTab } = useApp();
-  const [selectedCategory, setSelectedCategory] = useState('الكل');
+  const [selectedCategory, setSelectedCategory] = useState('All • الكل');
   const [searchQuery, setSearchQuery] = useState('');
 
   const categories = [
-    'الكل',
-    'عبايات وقفاطين',
-    'كاجوال كتان',
-    'حقائب جلدية',
-    'إكسسوارات ذهبية وفضية'
+    'All • الكل',
+    'Dresses فساتين',
+    'Abayas عبايات',
+    'Linen كتان كاجوال',
+    'Bags شنط جلد',
+    'Jewelry إكسسوارات'
   ];
 
   const creatorStories = [
     {
       creator: '@layla_style',
-      role: 'مصممة أزياء',
+      role: 'Fashion Designer • ستايليست',
       caption: 'تنسيق كيمونو كتان رملي مع فستان أبيض خفيف',
       image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDx2U5J1mKvtOYiWzhpQW4Za5R89tel2hIhZLv72GVzbqdEDC8xfmHtp6b7LVoqbpa4dXH-_RH1slnuQVziFgRbDBEX17p2JNHuLm8ZGwDWXz4EEHIyxS7bncuxrWwlfA9qR8IBJYvFyv8mI51ST6MDVBpEbdhfCgbkv33cfNlTi1Rm0emv8PIgIEk2yVN1ZJaEc8-iOwsDVDcR2Apg0kn4jvdfV9laevlMPlHnSkO3zxfYrv57Coz8'
     },
     {
       creator: '@farah.cairo',
-      role: 'ستايليست',
-      caption: 'تفاصيل مجوهرات اللوتس اليومية',
+      role: 'Stylist • فاشون بلوجر',
+      caption: 'تفاصيل مجوهرات اللوتس اليومية اليوم بالجونة',
       image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBZv9gw2oRrJXoipcG4_zjKKbFTkjPBAfducf2TrVLv9aicAV3y9i-MnmIktqOKCf_76Vyv93WEC3Mr9OvobtOtxA4FepmXHDdA8QVFKydJfU7OdjNv1-y3x25q6PYVC9F1_hge_w4uXUOoni36WnmVe03b9EDQAL4dnEHDR4cgkgvtxtQ_bGebQi411CyE8TSvzM_uVn_ISTDbLJYLqe0H3KkkNqVdXxF2ez_vjzYyxRpDUMVqMiK6'
     },
     {
       creator: '@yara_linen',
-      role: 'صانعة محتوى',
-      caption: 'خامات الكتان في شمس أسوان الهادئة',
+      role: 'Content Creator • صانعة محتوى',
+      caption: 'خامات الكتان الصيفي الطبيعي من أسوان',
       image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB6M9R0STgJd832SzAKcYCBaZhk4lsAzKzNpUB5n0JAA3r_XOv4G8K7SRfSjpFZX3X5DVQqEfIdf6qaXQ748hfWdQOUPny6vW4aM9gK-0hTe2qrsaPInpzFrR-6iMSoxdoDFEbD2TiJkzXX4PR4veBKMzG8olzd2ZgOJicW2d0e24Klq2ebAK1hRX09eProZ4BsgCNRQVpP5WP8gA8TnfF2WPVMam-pQfxkwL7jgYwnTNfzzmsF6ThB'
     }
   ];
 
   const filteredProducts = INITIAL_PRODUCTS.filter(item => {
-    const matchesCat = selectedCategory === 'الكل' || item.category === selectedCategory;
-    const matchesSearch = item.title.includes(searchQuery) || item.merchant.includes(searchQuery);
+    const matchesCat = selectedCategory === 'All • الكل' || 
+      (selectedCategory.includes('Dresses') && item.category.includes('عبايات')) ||
+      (selectedCategory.includes('Abayas') && item.category.includes('عبايات')) ||
+      (selectedCategory.includes('Linen') && item.category.includes('كتان')) ||
+      (selectedCategory.includes('Bags') && item.category.includes('حقائب')) ||
+      (selectedCategory.includes('Jewelry') && item.category.includes('إكسسوارات')) ||
+      item.category === selectedCategory;
+    const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      item.merchant.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCat && matchesSearch;
   });
 
   return (
     <div className="w-full flex-1 max-w-7xl mx-auto px-4 md:px-6 py-4 pb-28 md:pb-12 text-on-surface">
-      {/* Smart Search & Visual Lens matching 02_shop_marketplace_ar */}
+      {/* Smart Search & Visual Lens */}
       <div className="relative w-full mb-4">
         <div className="w-full bg-surface-container-low rounded-xl px-4 py-2.5 flex items-center justify-between shadow-sm border border-surface-container-high transition-all focus-within:bg-surface-container-lowest focus-within:shadow-md">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <span className="material-symbols-outlined text-on-surface-variant text-[20px]">search</span>
             <input
               type="text"
-              placeholder="ابحثي عن فساتين، حقائب، براندات محلية..."
+              placeholder="Search فساتين، Bags، براندات مصرية محلية..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="bg-transparent w-full text-on-surface placeholder:text-on-surface-variant text-xs md:text-sm focus:outline-none"
@@ -58,7 +66,8 @@ export default function Marketplace() {
           </div>
           <button 
             type="button"
-            aria-label="البحث بالصور"
+            aria-label="Visual Lens Search"
+            title="Visual Search • بحث بالصور"
             className="flex items-center justify-center p-1.5 rounded-lg bg-surface-container text-on-surface hover:text-secondary transition-colors"
           >
             <span className="material-symbols-outlined text-[19px]">photo_camera</span>
@@ -66,7 +75,7 @@ export default function Marketplace() {
         </div>
       </div>
 
-      {/* Minimal Fashion Taxonomy Chips */}
+      {/* Fashion Taxonomy Chips */}
       <div className="w-full overflow-x-auto no-scrollbar mb-6">
         <div className="flex items-center gap-2 whitespace-nowrap py-1">
           {categories.map((cat) => (
@@ -85,18 +94,18 @@ export default function Marketplace() {
         </div>
       </div>
 
-      {/* Editorial Section: Curated by Egyptian Creators */}
+      {/* Editorial Section: Creator Picks */}
       <div className="w-full mb-8">
         <div className="flex items-center justify-between mb-3">
           <div className="flex flex-col">
-            <h2 className="font-serif text-lg font-bold text-on-surface">مختارات صناع الموضة</h2>
-            <span className="text-xs text-on-surface-variant">تنسيقات وإطلالات حصرية من مبدعات القاهرة</span>
+            <h2 className="font-serif text-lg font-bold text-on-surface">Creator Picks • اختيارات صناع الموضة</h2>
+            <span className="text-xs text-on-surface-variant">Outfits وتنسيقات حصرية من فاشون بلوجرز القاهرة والجونة</span>
           </div>
           <button 
             onClick={() => setActiveTab('reels')}
             className="flex items-center gap-1 text-secondary text-xs font-semibold hover:opacity-80 transition-opacity"
           >
-            <span>عرض الكل</span>
+            <span>See All • عرض الكل</span>
             <span className="material-symbols-outlined text-[16px] rtl:rotate-180">arrow_forward</span>
           </button>
         </div>
@@ -133,16 +142,16 @@ export default function Marketplace() {
         </div>
       </div>
 
-      {/* Catalog Grid Section */}
+      {/* Catalog Grid Section: Latest Drops */}
       <div className="w-full">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-baseline gap-2">
-            <h2 className="font-serif text-lg font-bold text-on-surface">أحدث القطع المضافة</h2>
-            <span className="text-xs text-on-surface-variant">({filteredProducts.length} قطعة)</span>
+            <h2 className="font-serif text-lg font-bold text-on-surface">Latest Drops • أحدث التشكيلات</h2>
+            <span className="text-xs text-on-surface-variant">({filteredProducts.length} Items)</span>
           </div>
           <button className="flex items-center gap-1 px-3 py-1 rounded-lg bg-surface-container-low text-xs font-semibold text-on-surface-variant hover:text-on-surface border border-surface-container-high">
             <span className="material-symbols-outlined text-[16px]">tune</span>
-            <span>تصفية</span>
+            <span>Filter • تصفية</span>
           </button>
         </div>
 
@@ -166,7 +175,7 @@ export default function Marketplace() {
                 <div className="absolute top-2 right-2">
                   <span className="px-2 py-0.5 rounded bg-surface/90 backdrop-blur-md text-secondary text-[9px] font-semibold flex items-center gap-0.5 shadow-sm">
                     <span className="material-symbols-outlined text-[11px]">stars</span>
-                    +{product.pointsEarned} نقطة
+                    +{product.pointsEarned} Points
                   </span>
                 </div>
                 <button
@@ -174,14 +183,14 @@ export default function Marketplace() {
                     e.stopPropagation();
                     addToCart(product);
                   }}
-                  title="إضافة سريعة للسلة"
+                  title="Add to Cart • أضف للـ Cart"
                   className="absolute bottom-2 left-2 w-8 h-8 rounded-full bg-primary hover:bg-secondary text-on-primary flex items-center justify-center shadow-md transition-all active:scale-90"
                 >
                   <span className="material-symbols-outlined text-[17px]">shopping_bag</span>
                 </button>
               </div>
 
-              {/* Product Meta in warm editorial style */}
+              {/* Product Meta */}
               <div 
                 onClick={() => openProductDetail(product)}
                 className="p-3 flex flex-col flex-1 cursor-pointer text-right"
@@ -202,10 +211,10 @@ export default function Marketplace() {
                 <div className="flex items-baseline justify-between mt-2 pt-2 border-t border-surface-container-high/60">
                   <div className="flex items-baseline gap-1">
                     <span className="font-serif text-sm font-bold text-on-surface">{product.price.toLocaleString()}</span>
-                    <span className="text-[10px] text-on-surface-variant">ج.م</span>
+                    <span className="text-[10px] text-on-surface-variant font-semibold">EGP</span>
                   </div>
                   {product.originalPrice && (
-                    <span className="text-[10px] text-outline line-through">{product.originalPrice.toLocaleString()} ج.م</span>
+                    <span className="text-[10px] text-outline line-through">{product.originalPrice.toLocaleString()} EGP</span>
                   )}
                 </div>
               </div>

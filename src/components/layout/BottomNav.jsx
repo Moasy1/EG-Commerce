@@ -5,11 +5,11 @@ export default function BottomNav() {
   const { activeTab, setActiveTab } = useApp();
 
   const navItems = [
-    { id: 'reels', label: 'اكتشاف', icon: 'play_circle' },
-    { id: 'shop', label: 'السوق', icon: 'storefront' },
-    { id: 'rewards', label: 'المكافآت', icon: 'stars' },
-    { id: 'studio', label: 'ستوديو', icon: 'video_camera_front' },
-    { id: 'profile', label: 'خزانتي', icon: 'person' },
+    { id: 'reels', label: 'Reels', icon: 'play_circle' },
+    { id: 'shop', label: 'Shop', icon: 'storefront' },
+    { id: 'rewards', label: 'Rewards', icon: 'stars' },
+    { id: 'studio', label: 'Studio', icon: 'video_camera_front' },
+    { id: 'profile', label: 'Profile', icon: 'person' },
   ];
 
   return (
@@ -40,8 +40,8 @@ export default function BottomNav() {
                   <span className="absolute -top-1 -left-1 w-2 h-2 rounded-full bg-secondary" />
                 )}
               </div>
-              <span className={`text-[11px] mt-0.5 font-medium tracking-tight ${
-                isActive ? 'font-bold text-primary' : ''
+              <span className={`text-[11px] mt-0.5 tracking-tight ${
+                isActive ? 'font-bold text-primary' : 'font-medium'
               }`}>
                 {item.label}
               </span>

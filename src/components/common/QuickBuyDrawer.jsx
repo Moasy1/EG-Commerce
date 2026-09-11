@@ -49,14 +49,14 @@ export default function QuickBuyDrawer() {
               <span className="text-xs text-secondary font-semibold">{quickBuyProduct.merchant}</span>
               <h3 className="text-sm font-bold text-on-surface leading-snug">{quickBuyProduct.title}</h3>
               <div className="flex items-baseline gap-2 mt-1">
-                <span className="font-serif text-base font-bold text-on-surface">{quickBuyProduct.price.toLocaleString()} ج.م</span>
+                <span className="font-serif text-base font-bold text-on-surface">{quickBuyProduct.price.toLocaleString()} EGP</span>
                 {quickBuyProduct.originalPrice && (
-                  <span className="text-xs text-outline line-through">{quickBuyProduct.originalPrice.toLocaleString()} ج.م</span>
+                  <span className="text-xs text-outline line-through">{quickBuyProduct.originalPrice.toLocaleString()} EGP</span>
                 )}
               </div>
               <div className="flex items-center gap-1 text-[10px] text-secondary mt-0.5">
                 <span className="material-symbols-outlined text-[13px]">stars</span>
-                <span>+{quickBuyProduct.pointsEarned} نقطة مكافأة</span>
+                <span>+{quickBuyProduct.pointsEarned} Points مكافأة</span>
               </div>
             </div>
           </div>
@@ -70,7 +70,7 @@ export default function QuickBuyDrawer() {
 
         {/* Size Selection */}
         <div className="mb-3">
-          <label className="block text-xs font-semibold text-on-surface mb-1.5">المقاس</label>
+          <label className="block text-xs font-semibold text-on-surface mb-1.5">Size • المقاس</label>
           <div className="flex gap-1.5 flex-wrap">
             {quickBuyProduct.sizes?.map((size) => (
               <button
@@ -90,7 +90,7 @@ export default function QuickBuyDrawer() {
 
         {/* Color Selection */}
         <div className="mb-5">
-          <label className="block text-xs font-semibold text-on-surface mb-1.5">اللون</label>
+          <label className="block text-xs font-semibold text-on-surface mb-1.5">Color • اللون</label>
           <div className="flex gap-1.5 flex-wrap">
             {quickBuyProduct.colors?.map((col) => (
               <button
@@ -108,23 +108,27 @@ export default function QuickBuyDrawer() {
           </div>
         </div>
 
-        {/* Actions */}
-        <div className="flex gap-2.5">
+        {/* Action Buttons */}
+        <div className="flex gap-2.5 pt-3 border-t border-surface-container-high">
           <button
             onClick={handleAddToCart}
-            className={`flex-1 py-2.5 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 border border-primary text-primary hover:bg-surface-container-low transition-all active:scale-95 ${
-              addedAnimation ? 'bg-primary text-on-primary' : ''
+            className={`flex-1 py-3 px-3 rounded-xl font-bold text-xs border border-primary transition-all flex items-center justify-center gap-1.5 active:scale-95 ${
+              addedAnimation 
+                ? 'bg-secondary text-on-secondary border-secondary' 
+                : 'text-primary hover:bg-surface-container-low'
             }`}
           >
-            <span className="material-symbols-outlined text-[17px]">shopping_bag</span>
-            <span>{addedAnimation ? 'تمت الإضافة بنجاح' : 'أضف للسلة'}</span>
+            <span className="material-symbols-outlined text-[17px]">
+              {addedAnimation ? 'check' : 'shopping_bag'}
+            </span>
+            <span>{addedAnimation ? 'Added! • تم بنجاح' : 'Add to Cart • أضف للـ Cart'}</span>
           </button>
           <button
             onClick={handleInstantBuy}
-            className="flex-1 py-2.5 px-4 rounded-xl font-bold text-xs bg-primary text-on-primary hover:bg-secondary transition-all flex items-center justify-center gap-1.5 active:scale-95 shadow-sm"
+            className="flex-1 py-3 px-3 rounded-xl font-bold text-xs bg-primary text-on-primary hover:bg-secondary transition-all flex items-center justify-center gap-1.5 active:scale-95 shadow-sm"
           >
             <span className="material-symbols-outlined text-[17px]">flash_on</span>
-            <span>شراء فوري</span>
+            <span>Instant Buy • شراء فوري</span>
           </button>
         </div>
       </div>

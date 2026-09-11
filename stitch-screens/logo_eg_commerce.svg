@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 48" fill="none">
+  <rect width="40" height="40" y="4" rx="10" fill="url(#eg-grad)"/>
+  <path d="M14 17H26V21H18V23.5H24V27.5H18V31H26V35H14V17Z" fill="#FFFFFF"/>
+  <path d="M28 26C28 21.58 31.58 18 36 18H38V22H36C33.79 22 32 23.79 32 26V30C32 32.21 33.79 34 36 34H37V28H34V24H41V35C41 36.65 39.65 38 38 38H36C31.58 38 28 34.42 28 30V26Z" fill="#FFFFFF" fill-opacity="0.95"/>
+  <text x="48" y="32" fill="#FFFFFF" font-family="Plus Jakarta Sans, sans-serif" font-size="20" font-weight="800" letter-spacing="-0.5">EG<tspan fill="#FF5733">.</tspan><tspan fill="#94A3B8" font-size="16" font-weight="600">SHOP</tspan></text>
+  <defs>
+    <linearGradient id="eg-grad" x1="0" y1="4" x2="40" y2="44" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF5733"/>
+      <stop offset="1" stop-color="#E11D48"/>
+    </linearGradient>
+  </defs>
+</svg>

@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "on-primary-fixed-variant": "#930012", "on-tertiary-fixed": "#002113", "tertiary-container": "#00a572", "surface-variant": "#2e3542", "on-tertiary": "#003824", "secondary-container": "#feb700", "secondary-fixed": "#ffdea8", "surface-container-low": "#151c28", "surface-container-high": "#232a37", "on-surface-variant": "#e5bdba", "on-primary-container": "#5c0007", "inverse-surface": "#dce2f3", "surface-bright": "#323946", "tertiary": "#4edea3", "on-tertiary-container": "#00311f", "on-secondary-fixed-variant": "#5e4200", "tertiary-fixed-dim": "#4edea3", "primary-fixed": "#ffdad7", "surface": "#0c141f", "on-secondary": "#412d00", "on-primary": "#68000a", "on-error": "#690005", "on-tertiary-fixed-variant": "#005236", "on-error-container": "#ffdad6", "secondary-fixed-dim": "#ffba20", "on-surface": "#dce2f3", "background": "#0c141f", "on-background": "#dce2f3", "surface-container-lowest": "#070e1a", "error-container": "#93000a", "surface-dim": "#0c141f", "on-secondary-fixed": "#271900", "tertiary-fixed": "#6ffbbe", "surface-container-highest": "#2e3542", "secondary": "#ffdb9d", "error": "#ffb4ab", "primary-container": "#ff5450", "primary-fixed-dim": "#ffb3ad", "outline": "#ac8885", "inverse-primary": "#bd0e1f", "surface-container": "#19202c", "inverse-on-surface": "#2a313d", "primary": "#ffb3ad", "on-secondary-container": "#6b4b00", "outline-variant": "#5c403d", "surface-tint": "#ffb3ad", "on-primary-fixed": "#410004" }, borderRadius: { DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px" }, spacing: { "space-xs": "0.25rem", "margin-tablet": "1.5rem", "margin-desktop": "2.5rem", "space-lg": "1.25rem", "space-sm": "0.5rem", "gutter-tablet": "1rem", "gutter": "0.75rem", "space-md": "0.75rem", "margin": "1rem", "space-xl": "2rem", "gutter-desktop": "1.5rem" }, fontFamily: { "title-md": ["Plus Jakarta Sans"], "display-lg": ["Plus Jakarta Sans"], "body-lg": ["Plus Jakarta Sans"], "label-lg": ["Plus Jakarta Sans"], "display-lg-mobile": ["Plus Jakarta Sans"], "body-md": ["Plus Jakarta Sans"], "headline-lg-mobile": ["Plus Jakarta Sans"], "price-display": ["Plus Jakarta Sans"], "label-sm": ["Plus Jakarta Sans"], "headline-md": ["Plus Jakarta Sans"], "headline-lg": ["Plus Jakarta Sans"], "label-md": ["Plus Jakarta Sans"] }, fontSize: { "title-md": ["16px", { lineHeight: "22px", letterSpacing: "-0.005em", fontWeight: "600" }], "display-lg": ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "800" }], "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }], "label-lg": ["14px", { lineHeight: "18px", letterSpacing: "0.01em", fontWeight: "600" }], "display-lg-mobile": ["30px", { lineHeight: "38px", letterSpacing: "-0.02em", fontWeight: "800" }], "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }], "headline-lg-mobile": ["24px", { lineHeight: "32px", letterSpacing: "-0.01em", fontWeight: "700" }], "price-display": ["22px", { lineHeight: "26px", letterSpacing: "-0.02em", fontWeight: "800" }], "label-sm": ["10px", { lineHeight: "14px", letterSpacing: "0.04em", fontWeight: "700" }], "headline-md": ["20px", { lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "700" }], "headline-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.015em", fontWeight: "700" }], "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.02em", fontWeight: "600" }] } } } };</script><style>@layer base{html,body{width:100vw;margin:0;padding:0;background-color:#0c141f;color:#dce2f3;}body{overscroll-behavior-y:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface text-on-surface font-body-md text-body-md flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 pt-safe bg-surface-container-lowest/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.25)]"><div class="h-16 px-gutter flex items-center justify-between gap-space-sm"><div class="flex items-center gap-space-sm"><img alt="EG Commerce Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XtrXeBPOB5ucmDE3UAwQCgFUdoF7wznx7By7dFoS7lbf4uOJs-e1PejmilLJyY54Nrg7s7LbShrb5XdjCj7yPDXO6k7h4naj5Boj5BW8VpdVSAUa1rG3-znqatq12SBIthsddunUTUogPq0fahbfGpRULeMZHMfxinKtmnuxfyI0qQ23bIedXArWpssxEnT2ZSYk6zBr1zLOEKtgVq1albEV-WRWe2CyvE_d72LEr6pdgSb01sLSr1q70"/><div class="flex flex-col"><span class="font-label-md text-label-md tracking-wider uppercase text-primary font-bold">EG Commerce</span><span class="font-title-md text-title-md text-on-surface truncate max-w-[110px]">Marketplace</span></div></div><div class="flex items-center gap-space-xs"><button aria-label="Search" class="w-11 h-11 flex items-center justify-center rounded-full hover:bg-surface-bright/30 transition-colors text-on-surface"><span class="material-symbols-outlined text-[22px]">search</span></button><button aria-label="Notifications" class="relative w-11 h-11 flex items-center justify-center rounded-full hover:bg-surface-bright/30 transition-colors text-on-surface"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-primary-container ring-2 ring-surface-container-lowest animate-pulse"></span></button><button aria-label="Unified Cart" class="relative w-11 h-11 flex items-center justify-center rounded-full hover:bg-surface-bright/30 transition-colors text-on-surface"><span class="material-symbols-outlined text-[22px]">shopping_bag</span><span class="absolute top-2 right-2 min-w-[16px] h-4 px-1 rounded-full bg-primary-container text-on-primary font-label-sm text-label-sm flex items-center justify-center leading-none font-bold">3</span></button><div class="pl-space-xs flex items-center"><img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-1 ring-outline-variant/40" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPyhaKxpteJhxQk3K94siGQploRjZI0El43cPOawvlTRYn6NPxBj0QCPKxxHPv8x2OUphwkmPb6FdzVfaahhNXiuVFYgIFLhPTD-olohzE5Hga3wXpYQaSQmitwHrVZfDnTXbn26Y7_bykRaY_EUmeYTMWfoTN2zkp8AEV4nur5GIRfAHNsQ-wDo4Nsn8QujwvweNzu8UtWBAyRgXEyBR5KCDgfPcHNcMjM6OnFfmXf4foqN_Zv_uO"/></div></div></div></header><main class="flex flex-col relative w-full pt-16 pb-20 bg-surface min-h-screen"><div class="flex flex-col w-full pb-10">
+<!-- Search & Category Header Area -->
+<section class="px-gutter pt-space-md flex flex-col gap-space-sm">
+<!-- Omnisearch Input Bar -->
+<div class="relative flex items-center w-full bg-surface-container-low rounded-full px-space-md py-2.5 shadow-sm focus-within:ring-1 focus-within:ring-primary-container transition-all">
+<span class="material-symbols-outlined text-outline text-[20px] mr-2">search</span>
+<input class="w-full bg-transparent text-on-surface placeholder:text-outline text-body-md font-body-md focus:outline-none" placeholder="Search reels, creators, or verified products..." type="text"/>
+<div class="flex items-center gap-1.5 pl-2 border-l border-surface-variant/40">
+<button aria-label="Visual Reel Search" class="w-7 h-7 flex items-center justify-center rounded-full text-outline hover:text-on-surface hover:bg-surface-variant/50 transition-colors">
+<span class="material-symbols-outlined text-[18px]">photo_camera</span>
+</button>
+<button aria-label="Voice Search" class="w-7 h-7 flex items-center justify-center rounded-full text-outline hover:text-on-surface hover:bg-surface-variant/50 transition-colors">
+<span class="material-symbols-outlined text-[18px]">mic</span>
+</button>
+</div>
+</div>
+<!-- Category Filter Chips (Horizontal Scroll) -->
+<div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 -mx-gutter px-gutter">
+<button class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-primary-container text-on-primary font-label-md text-label-md whitespace-nowrap shadow-sm active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[15px]" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+<span>Trending Reels</span>
+</button>
+<button class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-surface-container-low text-on-surface-variant hover:text-on-surface font-label-md text-label-md whitespace-nowrap active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[15px]">headphones</span>
+<span>Tech &amp; Audio</span>
+</button>
+<button class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-surface-container-low text-on-surface-variant hover:text-on-surface font-label-md text-label-md whitespace-nowrap active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[15px]">styler</span>
+<span>Streetwear</span>
+</button>
+<button class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-surface-container-low text-on-surface-variant hover:text-on-surface font-label-md text-label-md whitespace-nowrap active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[15px]">desk</span>
+<span>Home Setup</span>
+</button>
+<button class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-surface-container-low text-on-surface-variant hover:text-on-surface font-label-md text-label-md whitespace-nowrap active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[15px]">spa</span>
+<span>Beauty</span>
+</button>
+<button class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-surface-container-low text-secondary-fixed-dim hover:text-secondary font-label-md text-label-md whitespace-nowrap active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[15px]">percent</span>
+<span>On Sale</span>
+</button>
+</div>
+</section>
+<!-- Curated by Top Creators Hero Section -->
+<section class="mt-space-lg flex flex-col gap-space-sm">
+<div class="px-gutter flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-primary-container animate-ping"></div>
+<h2 class="font-headline-md text-headline-md text-on-surface tracking-tight">Curated by Top Creators</h2>
+</div>
+<a class="text-primary font-label-md text-label-md flex items-center gap-0.5 hover:underline" href="#">
+        See All <span class="material-symbols-outlined text-[14px]">arrow_forward_ios</span>
+</a>
+</div>
+<!-- Reel Previews with Live Product Tags & Interactive Quick Popups -->
+<div class="flex gap-3 overflow-x-auto no-scrollbar px-gutter pt-1 pb-2 -mx-0">
+<!-- Creator Card 1 -->
+<div class="relative flex-shrink-0 w-64 h-80 rounded-xl overflow-hidden bg-surface-container-low shadow-md group">
+<img class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Cinematic vertical video frame of stylish urban creator demonstrating tech everyday carry sling bag inside a neon lit cyber aesthetic coffee shop with cinematic shadows and soft warm backlighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBlpf14KOvxPXoA2lSq7IR3WtoUfBsQ8qVs3JE93TSnwqaQaDvJx153qR13jdjc8XDDEDJOQ9gs2Pnc2w7ks7__UZBL0Gciu9ukRXkCY3QpVesvLr01TmUpWypQGjno6be7K-Y-QySppyhthTjMHFWHXGJuMxglYJEXaZDsmdd8HjyGrVcVBR5wvCE3rHjv_akZ9Hc3ms1Kgo3KcRIH_yjd6tMbj-Jd52YDC4PilobD0IH6sXWUROpg"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-surface-container-lowest/30 to-black/30"></div>
+<!-- Live Reel Top Pills -->
+<div class="absolute top-2.5 inset-x-2.5 flex items-center justify-between">
+<div class="flex items-center gap-1.5 bg-surface-container-lowest/80 backdrop-blur-md px-2 py-0.5 rounded-full">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+<span class="font-label-sm text-label-sm text-on-surface">@kai_nomad</span>
+</div>
+<span class="bg-primary-container text-on-primary font-label-sm text-label-sm px-2 py-0.5 rounded-full font-bold shadow-sm">
+            -20% LIVE
+          </span>
+</div>
+<!-- Center Play Micro Reaction Indicator -->
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+<div class="w-10 h-10 rounded-full bg-surface-container-lowest/60 backdrop-blur-md flex items-center justify-center text-on-surface shadow-md">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</div>
+</div>
+<!-- Overlaid Interactive Product Tag Pin -->
+<div class="absolute bottom-2.5 inset-x-2.5 bg-surface-container-high/90 backdrop-blur-lg rounded-lg p-2.5 flex items-center justify-between shadow-lg">
+<div class="flex items-center gap-2 min-w-0">
+<img class="w-10 h-10 rounded-md object-cover flex-shrink-0 bg-surface-container" data-alt="Crisp studio product shot of a black waterproof ballistic nylon sling bag pro with magnetic quick release buckle on neutral dark slate surface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAcIWQh5OKwABZ-AWFKBZeC-aTB4gaNyflFOe0yxyPQ8tKlg8W9-NWq_yYPa953mSWUXubhrbqEwNY98a7FXUtQ8tgOzyxHIYF-3OCU5ZmRq1ZWbY7wQ4GDUBr_6l_-IndPD-0OXaR1L7saEseleIWau4D_FXTifFXUnMD1t805n-TBYfe5voQd9OxW_0rF0UCU4MolWHf7ryZFnYl_3blnJNzZe461hylBlbpqSqSkDCNiHFwdJCkn"/>
+<div class="flex flex-col min-w-0">
+<span class="font-title-md text-label-md text-on-surface truncate font-semibold">Tech Sling Pro</span>
+<div class="flex items-center gap-1.5">
+<span class="font-price-display text-label-lg text-primary font-bold">$68.00</span>
+<span class="font-label-sm text-label-sm text-outline line-through">$85.00</span>
+</div>
+</div>
+</div>
+<button class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center shadow-md active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-[16px]">add_shopping_cart</span>
+</button>
+</div>
+</div>
+<!-- Creator Card 2 -->
+<div class="relative flex-shrink-0 w-64 h-80 rounded-xl overflow-hidden bg-surface-container-low shadow-md group">
+<img class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Aesthetic modern home kitchen setting with morning sun flare as a creator brews precision coffee using a matte black ceramic pour-over cone on rich walnut wooden stand." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBCYhexPCAiK-aS1wEFGjraUFNZGQPnIAh87Jm1R7kkxoKjH5wIH5rHg2wfEdmIradxSvCmfJMe7HajsJWNPEYQFn6BoP33JBE5jmLIC1QtLYKgzYneMAMq6MPdOUI8T5T7FiZeX5bkTQO_FXToWLA2bu6iS4vmf3L7qWpd0xzZeWDCjrUAv8jSw2syTfLrxzHD74AOq0FyfR9yj_OWBzB-9d8dHfcWWRzaulxJiUBAyLpBolI3EEZG"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-surface-container-lowest/30 to-black/30"></div>
+<div class="absolute top-2.5 inset-x-2.5 flex items-center justify-between">
+<div class="flex items-center gap-1.5 bg-surface-container-lowest/80 backdrop-blur-md px-2 py-0.5 rounded-full">
+<span class="w-2 h-2 rounded-full bg-secondary-container"></span>
+<span class="font-label-sm text-label-sm text-on-surface">@elena_craft</span>
+</div>
+<span class="bg-surface-variant text-on-surface font-label-sm text-label-sm px-2 py-0.5 rounded-full">
+            18.2k Views
+          </span>
+</div>
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+<div class="w-10 h-10 rounded-full bg-surface-container-lowest/60 backdrop-blur-md flex items-center justify-center text-on-surface shadow-md">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</div>
+</div>
+<div class="absolute bottom-2.5 inset-x-2.5 bg-surface-container-high/90 backdrop-blur-lg rounded-lg p-2.5 flex items-center justify-between shadow-lg">
+<div class="flex items-center gap-2 min-w-0">
+<img class="w-10 h-10 rounded-md object-cover flex-shrink-0 bg-surface-container" data-alt="Artisanal ribbed ceramic dripper funnel in matte midnight charcoal finish isolated on minimal dark granite pedestal." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCx7vGTs0nBHJ0L5JVyOHmRB-UrkGyJZHlU3EWhyv6EWOG_15qkpuvCSuzDURaFcFECMb84j3GPt_Xzs_A9gdVpcYzpz6_XAVzBy44vMMzEXcxRMVzJi4K_lN5m8PgAKWU9pAhcbako1Pi0h8WF-ATlA-Lje6aFzxoPNNiCH7b2At1TlbB4RNEklv4old8ZwFrk6la9ldqlFW683hPohmn7eurh1WR7Vw1amu37MgofuXLgY2r5I5bf"/>
+<div class="flex flex-col min-w-0">
+<span class="font-title-md text-label-md text-on-surface truncate font-semibold">Pour-Over Dripper</span>
+<div class="flex items-center gap-1.5">
+<span class="font-price-display text-label-lg text-secondary font-bold">$34.00</span>
+<span class="font-label-sm text-label-sm text-tertiary">+120 pts</span>
+</div>
+</div>
+</div>
+<button class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center shadow-md active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-[16px]">add_shopping_cart</span>
+</button>
+</div>
+</div>
+<!-- Creator Card 3 -->
+<div class="relative flex-shrink-0 w-64 h-80 rounded-xl overflow-hidden bg-surface-container-low shadow-md group">
+<img class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Dark desk setup macro video still showcasing custom mechanical keyboard with luminous RGB lighting glowing through semi-transparent keycaps under atmospheric ambient studio illumination." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB5uecgeKtbMP59Wsb3XL5yuqYhL_hY-k2XnBzrNr-biWzFiyKLvPK3u79WLqSSsBI5IcD8SwUUVl2-3u3A-BqcydHo3_Iq-JFx7ihRFrHEI9rY1x5HHyjOVsRY3Y1SIocLzL9cr2n4y9aJF2T_itS4VXQEM7QVVpP3yqfO4SRbBUgdNjrZdAa88P0eFUpJ44m1Zfe8vEd1MUmsJi2aI1M0Mu2PU7f9BpBKJTqPIQH0YXfZvT_6dgBD"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-surface-container-lowest/30 to-black/30"></div>
+<div class="absolute top-2.5 inset-x-2.5 flex items-center justify-between">
+<div class="flex items-center gap-1.5 bg-surface-container-lowest/80 backdrop-blur-md px-2 py-0.5 rounded-full">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="font-label-sm text-label-sm text-on-surface">@desk_techie</span>
+</div>
+<span class="bg-primary-container text-on-primary font-label-sm text-label-sm px-2 py-0.5 rounded-full font-bold">
+            HOT REEL
+          </span>
+</div>
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+<div class="w-10 h-10 rounded-full bg-surface-container-lowest/60 backdrop-blur-md flex items-center justify-center text-on-surface shadow-md">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</div>
+</div>
+<div class="absolute bottom-2.5 inset-x-2.5 bg-surface-container-high/90 backdrop-blur-lg rounded-lg p-2.5 flex items-center justify-between shadow-lg">
+<div class="flex items-center gap-2 min-w-0">
+<img class="w-10 h-10 rounded-md object-cover flex-shrink-0 bg-surface-container" data-alt="Top-down visual of compact mechanical gaming keyboard with custom gradient keycaps and diffused RGB underglow on textured dark deskpad." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOCOBJ9IGPfAKKAqme1I-KAG1TjUFcLROeZFNl2KIE6Dih1ubbkjeyElqKoSP6EqVccBXeFZ5d23ME5s3WfmWsoIDHwj1B9oW2HD-jnuthQwNzEdMogDy-S-WUq4Hst8NhcX_4P82dFZ-g8ORj__eE4LVC-glvFwZcVKlLhfRdIiGkITcJK4z-LWBsGtOvuPXGwdl_Nc7lmC3BOG5dICuAA82WiaRNMgSjBXgL05UtEuwaz87kRL2B"/>
+<div class="flex flex-col min-w-0">
+<span class="font-title-md text-label-md text-on-surface truncate font-semibold">AuraLite RGB 75%</span>
+<div class="flex items-center gap-1.5">
+<span class="font-price-display text-label-lg text-primary font-bold">$119.00</span>
+<span class="font-label-sm text-label-sm text-outline line-through">$140</span>
+</div>
+</div>
+</div>
+<button class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center shadow-md active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-[16px]">add_shopping_cart</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Multi-Merchant Flash Deal Banner -->
+<section class="px-gutter mt-space-md">
+<div class="relative overflow-hidden rounded-xl bg-gradient-to-r from-surface-container-high via-surface-container to-surface-container-high p-4 shadow-md">
+<!-- Ambient decorative glow -->
+<div class="absolute -right-8 -top-8 w-28 h-28 rounded-full bg-secondary-container/15 blur-2xl pointer-events-none"></div>
+<div class="absolute -left-8 -bottom-8 w-28 h-28 rounded-full bg-primary-container/15 blur-2xl pointer-events-none"></div>
+<div class="relative flex items-center justify-between gap-3">
+<div class="flex items-start gap-3">
+<div class="w-10 h-10 rounded-full bg-secondary-container/20 text-secondary-fixed flex items-center justify-center flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[22px]">local_shipping</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary-container font-extrabold">Unified Cart Flash Sale</span>
+<span class="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded bg-surface-variant text-on-surface font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[12px] text-tertiary">timer</span> 04:18:22
+              </span>
+</div>
+<p class="font-title-md text-title-md text-on-surface font-bold mt-0.5">Free shipping across all merchants</p>
+<p class="font-body-md text-body-md text-on-surface-variant text-[13px] leading-tight">Automatically applies at checkout when bundling 2+ items from different creator shops.</p>
+</div>
+</div>
+</div>
+<!-- Live Bundle Tier Progress -->
+<div class="mt-3.5 pt-3 border-t border-surface-variant/30 flex items-center justify-between text-label-sm font-label-sm">
+<span class="text-tertiary flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+          Current Cart: 2 Merchants Qualified!
+        </span>
+<span class="text-on-surface-variant">Savings unlocked: <strong class="text-secondary">$14.50</strong></span>
+</div>
+</div>
+</section>
+<!-- Cross-Merchant Product Catalog Section -->
+<section class="px-gutter mt-space-lg flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<h2 class="font-headline-md text-headline-md text-on-surface">Explore Marketplace</h2>
+<span class="font-body-md text-body-md text-on-surface-variant text-[13px]">Direct from independent creators &amp; verified brand hubs</span>
+</div>
+<button class="flex items-center gap-1 text-on-surface-variant font-label-md text-label-md px-2.5 py-1.5 rounded-full bg-surface-container-low hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[16px]">tune</span>
+<span>Filter</span>
+</button>
+</div>
+<!-- 2-Column Product Grid -->
+<div class="grid grid-cols-2 gap-3 mt-1">
+<!-- Product 1: Nomad Tech Sling Pro -->
+<div class="flex flex-col rounded-xl bg-surface-container-low overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
+<!-- Visual Container with Tag Overlays -->
+<div class="relative w-full aspect-square bg-surface-container overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Apex Goods Nomad Tech Sling Pro waterproof crossbody bag in carbon black with magnetic hardware shown on minimal geometric dark pedestals." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAHuTKXjSAQIQzsd1b41TUxTW1OE9nYUHUyyHf3AhWc6im5sKNBUbVTOzAxhKRGLp2CoKEEe9hxAe2mMq2DiEo2DQbi07p_1qCp0yw6MRaLXOoh6yBsMOHbsnbes5O2D8lxDB6Wf_2riMkqLJOFYiYGb3lVX4OwwhsJnUOO_RuyZNWxLeXouaqLwbsrm8VG7szj0QKG_PPhLIN9GeZH-mziYx_jIwufzSawK25Huw_NDOIBLjDldlGL"/>
+<!-- Reel Indicator Tag -->
+<div class="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container-lowest/80 backdrop-blur-md text-primary font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[13px]" style="font-variation-settings: 'FILL' 1;">movie</span>
+<span>14 Reels</span>
+</div>
+<!-- Quick Reel Watch Action -->
+<button aria-label="Watch tagged reels" class="absolute bottom-2 left-2 w-7 h-7 rounded-full bg-surface-container-lowest/70 backdrop-blur-md text-on-surface flex items-center justify-center hover:bg-primary-container hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-[15px]" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+<!-- Quick Add to Cart Button -->
+<button aria-label="Add Nomad Tech Sling Pro to cart" class="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center shadow-lg active:scale-90 transition-transform" onclick="triggerCartAdd(this)">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+<!-- Product Details Body -->
+<div class="p-3 flex flex-col justify-between flex-grow gap-2">
+<div>
+<!-- Merchant Label & Rating -->
+<div class="flex items-center justify-between gap-1">
+<span class="font-label-sm text-label-sm text-outline truncate">by Apex Goods</span>
+<div class="flex items-center gap-0.5 text-secondary font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[13px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-on-surface">4.9</span>
+</div>
+</div>
+<!-- Title -->
+<h3 class="font-title-md text-title-md text-on-surface font-semibold line-clamp-2 mt-1 leading-snug">Nomad Tech Sling Pro</h3>
+</div>
+<div>
+<!-- Social Commerce Social Proof Tag -->
+<div class="flex items-center gap-1.5 mb-1.5">
+<span class="font-label-sm text-label-sm text-on-surface-variant bg-surface-variant/40 px-1.5 py-0.5 rounded">3.4k sold</span>
+<span class="font-label-sm text-label-sm text-tertiary">+136 pts</span>
+</div>
+<!-- Price Display -->
+<div class="flex items-baseline justify-between">
+<span class="font-price-display text-price-display text-on-surface font-extrabold">$68.00</span>
+<span class="font-label-sm text-label-sm text-outline">Free Ship</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Product 2: Ceramic Pour-Over Dripper -->
+<div class="flex flex-col rounded-xl bg-surface-container-low overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
+<div class="relative w-full aspect-square bg-surface-container overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Artisan Craft Ceramic Pour-Over Dripper in textured volcanic black glaze displayed with delicate steam emerging from handcrafted glass carafe." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDcC_zst_5bL12B0drpP_oC5rKzlq_tKLQHqpqJ3pJOI_HAngzgmYTAKK9nMcEBnFHuxAyvK4DtF4sv5J0DB0VWoj6aYrj47fTPo3_lrWml0siNWTATpwslPdQ2WgiAfErUkv4iE_MX5CkJLHVuuFnsDErF9-EUr6bd49jcU9Sq0Gd2KyuK_K923-xLQ_gSjpR79R9RtmqifLiZQZ7atf3PhljTqD6aBb3pGpzbOdCbTLutEUeKoC-T"/>
+<!-- Creator Choice Badge -->
+<div class="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-bold shadow-sm">
+<span class="material-symbols-outlined text-[13px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+<span>Creator Choice</span>
+</div>
+<button aria-label="Watch tagged reels" class="absolute bottom-2 left-2 w-7 h-7 rounded-full bg-surface-container-lowest/70 backdrop-blur-md text-on-surface flex items-center justify-center hover:bg-primary-container hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-[15px]" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+<button aria-label="Add Pour-Over Dripper to cart" class="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center shadow-lg active:scale-90 transition-transform" onclick="triggerCartAdd(this)">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+<div class="p-3 flex flex-col justify-between flex-grow gap-2">
+<div>
+<div class="flex items-center justify-between gap-1">
+<span class="font-label-sm text-label-sm text-outline truncate">by Artisan Craft</span>
+<div class="flex items-center gap-0.5 text-secondary font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[13px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-on-surface">4.8</span>
+</div>
+</div>
+<h3 class="font-title-md text-title-md text-on-surface font-semibold line-clamp-2 mt-1 leading-snug">Ceramic Pour-Over Dripper</h3>
+</div>
+<div>
+<div class="flex items-center gap-1.5 mb-1.5">
+<span class="font-label-sm text-label-sm text-on-surface-variant bg-surface-variant/40 px-1.5 py-0.5 rounded">1.1k sold</span>
+<span class="font-label-sm text-label-sm text-tertiary">+68 pts</span>
+</div>
+<div class="flex items-baseline justify-between">
+<span class="font-price-display text-price-display text-on-surface font-extrabold">$34.00</span>
+<span class="font-label-sm text-label-sm text-tertiary">In Stock</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Product 3: AuraLite RGB Keyboard -->
+<div class="flex flex-col rounded-xl bg-surface-container-low overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
+<div class="relative w-full aspect-square bg-surface-container overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="KeebsCraft AuraLite RGB mechanical custom keyboard illuminated with pastel violet and teal underglow on dark executive wood table." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVpfNP5IKKOZ9Qvepk7Nh5z646b4ZuHGJ0njUgAmtm48N2VMgMuT2naxVhOUINvqBxMULXezVk3uzA2dnjyMoGVby5L7DtumMYzAKKL5DObJuGpQXY1Wi3yHLEcRcP76uUjPSVFWScAVKiPlL4ejgxEOs9dOdDUpkQumkcyKRCJgIAnRsWCzJ75TQ1rqTv7Uav1E7QOtAOYNyPhhQV-7dnQk54u4uU9jkHFOsZfVHdzog3C3SVqRSf"/>
+<!-- 15% OFF Badge -->
+<div class="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary-container text-on-primary font-label-sm text-label-sm font-bold shadow-sm">
+<span>15% OFF</span>
+</div>
+<button aria-label="Watch tagged reels" class="absolute bottom-2 left-2 w-7 h-7 rounded-full bg-surface-container-lowest/70 backdrop-blur-md text-on-surface flex items-center justify-center hover:bg-primary-container hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-[15px]" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+<button aria-label="Add AuraLite Keyboard to cart" class="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center shadow-lg active:scale-90 transition-transform" onclick="triggerCartAdd(this)">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+<div class="p-3 flex flex-col justify-between flex-grow gap-2">
+<div>
+<div class="flex items-center justify-between gap-1">
+<span class="font-label-sm text-label-sm text-outline truncate">by KeebsCraft</span>
+<div class="flex items-center gap-0.5 text-secondary font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[13px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-on-surface">5.0</span>
+</div>
+</div>
+<h3 class="font-title-md text-title-md text-on-surface font-semibold line-clamp-2 mt-1 leading-snug">AuraLite RGB Keyboard</h3>
+</div>
+<div>
+<div class="flex items-center gap-1.5 mb-1.5">
+<span class="font-label-sm text-label-sm text-tertiary-container bg-tertiary-container/15 px-1.5 py-0.5 rounded font-bold text-tertiary">+240 Points</span>
+</div>
+<div class="flex items-baseline justify-between">
+<div>
+<span class="font-price-display text-price-display text-on-surface font-extrabold">$119.00</span>
+<span class="font-label-sm text-label-sm text-outline line-through ml-1">$140</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Product 4: Studio Noise-Cancelling Headphones -->
+<div class="flex flex-col rounded-xl bg-surface-container-low overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
+<div class="relative w-full aspect-square bg-surface-container overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Sonar Audio Studio Noise Cancelling over-ear headphones in matte titanium grey with memory foam ear cushions resting against modern studio sound diffuser panel." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0wectq2ZUZ4_MMr39oXdGAiXT8iBEj3S8soXZLMA5E6T-skU1ebftfv1CFDMDDtdEQylSimcMwNnUFT3YRKrlaruc8esRcIqDA7a5j1rgjkqdxnsFNz4bcj616_oWwMdynjLUS-lCCA0SapfqQm0Odm7lXECgAL1OsE8NB8bQkYcJwTMkbCP-N78M4KWrsDHfXbNR1tQpPhwg2cQXe-CVkKxZQ1LTmvRhpeHgT21Q_893ADs8i-nJ"/>
+<!-- High Commission Creator Affiliate Tag -->
+<div class="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-variant/90 backdrop-blur-md text-tertiary font-label-sm text-label-sm font-semibold shadow-sm">
+<span class="material-symbols-outlined text-[12px]">monetization_on</span>
+<span>High Commission</span>
+</div>
+<button aria-label="Watch tagged reels" class="absolute bottom-2 left-2 w-7 h-7 rounded-full bg-surface-container-lowest/70 backdrop-blur-md text-on-surface flex items-center justify-center hover:bg-primary-container hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-[15px]" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+<button aria-label="Add Studio Headphones to cart" class="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center shadow-lg active:scale-90 transition-transform" onclick="triggerCartAdd(this)">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+<div class="p-3 flex flex-col justify-between flex-grow gap-2">
+<div>
+<div class="flex items-center justify-between gap-1">
+<span class="font-label-sm text-label-sm text-outline truncate">by Sonar Audio</span>
+<div class="flex items-center gap-0.5 text-secondary font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[13px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-on-surface">4.9</span>
+</div>
+</div>
+<h3 class="font-title-md text-title-md text-on-surface font-semibold line-clamp-2 mt-1 leading-snug">Studio ANC Headphones</h3>
+</div>
+<div>
+<div class="flex items-center gap-1.5 mb-1.5">
+<span class="font-label-sm text-label-sm text-on-surface-variant bg-surface-variant/40 px-1.5 py-0.5 rounded">890 sold</span>
+<span class="font-label-sm text-label-sm text-tertiary">+378 pts</span>
+</div>
+<div class="flex items-baseline justify-between">
+<span class="font-price-display text-price-display text-on-surface font-extrabold">$189.00</span>
+<span class="font-label-sm text-label-sm text-primary font-semibold">Fast 2-Day</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Live Social Shopper Stream / Community Activity -->
+<section class="px-gutter mt-space-lg mb-4">
+<div class="bg-surface-container-lowest rounded-xl p-3 flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-2.5 min-w-0">
+<div class="relative flex -space-x-2 flex-shrink-0">
+<div class="w-6 h-6 rounded-full bg-secondary-container flex items-center justify-center text-[10px] font-bold text-on-secondary ring-2 ring-surface-container-lowest">JD</div>
+<div class="w-6 h-6 rounded-full bg-primary-container flex items-center justify-center text-[10px] font-bold text-on-primary ring-2 ring-surface-container-lowest">SK</div>
+<div class="w-6 h-6 rounded-full bg-tertiary-container flex items-center justify-center text-[10px] font-bold text-on-tertiary ring-2 ring-surface-container-lowest">AM</div>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant text-[12px] truncate">
+<span class="text-on-surface font-semibold">Elena K.</span> &amp; 42 others purchased from KeebsCraft today
+        </p>
+</div>
+<span class="material-symbols-outlined text-outline text-[18px] flex-shrink-0">trending_up</span>
+</div>
+</section>
+<!-- Unified Cart Floating Notification Pill (Anchored above App Shell Navigation) -->
+<div class="sticky bottom-3 z-40 px-gutter w-full">
+<div class="w-full bg-surface-container-high/95 backdrop-blur-xl rounded-full p-2 pl-3.5 pr-2.5 flex items-center justify-between shadow-[0_8px_32px_rgba(0,0,0,0.55)] border-t border-white/10 transition-all duration-300" id="unified-cart-pill">
+<!-- Cart Meta Information -->
+<div class="flex items-center gap-2.5 min-w-0">
+<div class="relative flex-shrink-0">
+<div class="w-9 h-9 rounded-full bg-primary-container/20 text-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">shopping_bag</span>
+</div>
+<span class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-primary-container text-on-primary font-label-sm text-[10px] font-extrabold flex items-center justify-center">
+            3
+          </span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-1.5">
+<span class="font-title-md text-title-md text-on-surface font-bold truncate">3 items</span>
+<span class="text-[11px] text-outline">•</span>
+<span class="font-label-sm text-label-sm text-tertiary font-semibold truncate">2 merchants bundled</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant text-[11px] truncate">Total: <strong class="text-on-surface font-price-display text-[13px]">$221.00</strong> (Saved $14.50 ship)</span>
+</div>
+</div>
+<!-- Quick Checkout Pill Action -->
+<button class="flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary-container text-on-primary font-label-md text-label-md font-bold shadow-[0_4px_16px_rgba(255,84,80,0.4)] active:scale-95 transition-all whitespace-nowrap">
+<span>Checkout</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<script>
+  function triggerCartAdd(button) {
+    const originalContent = button.innerHTML;
+    button.classList.add('bg-tertiary', 'text-on-tertiary');
+    button.classList.remove('bg-primary-container', 'text-on-primary');
+    button.innerHTML = '<span class="material-symbols-outlined text-[18px]">check</span>';
+    
+    // Animate cart notification pill
+    const pill = document.getElementById('unified-cart-pill');
+    if (pill) {
+      pill.classList.add('scale-105', 'ring-2', 'ring-primary-container');
+      setTimeout(() => {
+        pill.classList.remove('scale-105', 'ring-2', 'ring-primary-container');
+      }, 300);
+    }
+
+    setTimeout(() => {
+      button.classList.remove('bg-tertiary', 'text-on-tertiary');
+      button.classList.add('bg-primary-container', 'text-on-primary');
+      button.innerHTML = originalContent;
+    }, 1200);
+  }
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface-container-lowest/85 backdrop-blur-xl shadow-[0_-4px_24px_rgba(0,0,0,0.4)]" data-active-classes="text-primary-container drop-shadow-[0_0_12px_rgba(255,84,80,0.6)] font-semibold"><div class="flex justify-around items-center h-16 px-gutter"><a class="flex flex-col items-center justify-center gap-0.5 w-14 h-12 text-on-surface-variant transition-all" data-path="reels" href="#"><span class="material-symbols-outlined text-[24px]">play_circle</span><span class="font-label-sm text-label-sm">Reels</span></a><a aria-current="page" class="flex flex-col items-center justify-center gap-0.5 w-14 h-12 transition-all text-primary-container drop-shadow-[0_0_12px_rgba(255,84,80,0.6)] font-semibold" data-path="marketplace" href="#"><span class="material-symbols-outlined text-[24px]">storefront</span><span class="font-label-sm text-label-sm">Shop</span></a><a class="flex flex-col items-center justify-center gap-0.5 w-14 h-12 text-on-surface-variant transition-all" data-path="create" href="#"><div class="w-9 h-9 rounded-full bg-primary-container/20 flex items-center justify-center text-primary-container"><span class="material-symbols-outlined text-[22px]">video_call</span></div><span class="font-label-sm text-label-sm mt-[-2px]">Create</span></a><a class="relative flex flex-col items-center justify-center gap-0.5 w-14 h-12 text-on-surface-variant transition-all" data-path="rewards" href="#"><span class="material-symbols-outlined text-[24px]">auto_awesome</span><span class="font-label-sm text-label-sm">Rewards</span><span class="absolute top-1 right-2.5 w-1.5 h-1.5 rounded-full bg-secondary-container"></span></a><a class="flex flex-col items-center justify-center gap-0.5 w-14 h-12 text-on-surface-variant transition-all" data-path="profile" href="#"><span class="material-symbols-outlined text-[24px]">account_circle</span><span class="font-label-sm text-label-sm">Profile</span></a></div></nav></body></html>

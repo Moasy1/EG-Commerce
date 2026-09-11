@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "on-primary-fixed-variant": "#930012", "on-tertiary-fixed": "#002113", "tertiary-container": "#00a572", "surface-variant": "#2e3542", "on-tertiary": "#003824", "secondary-container": "#feb700", "secondary-fixed": "#ffdea8", "surface-container-low": "#151c28", "surface-container-high": "#232a37", "on-surface-variant": "#e5bdba", "on-primary-container": "#5c0007", "inverse-surface": "#dce2f3", "surface-bright": "#323946", "tertiary": "#4edea3", "on-tertiary-container": "#00311f", "on-secondary-fixed-variant": "#5e4200", "tertiary-fixed-dim": "#4edea3", "primary-fixed": "#ffdad7", "surface": "#0c141f", "on-secondary": "#412d00", "on-primary": "#68000a", "on-error": "#690005", "on-tertiary-fixed-variant": "#005236", "on-error-container": "#ffdad6", "secondary-fixed-dim": "#ffba20", "on-surface": "#dce2f3", "background": "#0c141f", "on-background": "#dce2f3", "surface-container-lowest": "#070e1a", "error-container": "#93000a", "surface-dim": "#0c141f", "on-secondary-fixed": "#271900", "tertiary-fixed": "#6ffbbe", "surface-container-highest": "#2e3542", "secondary": "#ffdb9d", "error": "#ffb4ab", "primary-container": "#ff5450", "primary-fixed-dim": "#ffb3ad", "outline": "#ac8885", "inverse-primary": "#bd0e1f", "surface-container": "#19202c", "inverse-on-surface": "#2a313d", "primary": "#ffb3ad", "on-secondary-container": "#6b4b00", "outline-variant": "#5c403d", "surface-tint": "#ffb3ad", "on-primary-fixed": "#410004" }, borderRadius: { DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px" }, spacing: { "space-xs": "0.25rem", "margin-tablet": "1.5rem", "margin-desktop": "2.5rem", "space-lg": "1.25rem", "space-sm": "0.5rem", "gutter-tablet": "1rem", "gutter": "0.75rem", "space-md": "0.75rem", "margin": "1rem", "space-xl": "2rem", "gutter-desktop": "1.5rem" }, fontFamily: { "title-md": ["Plus Jakarta Sans"], "display-lg": ["Plus Jakarta Sans"], "body-lg": ["Plus Jakarta Sans"], "label-lg": ["Plus Jakarta Sans"], "display-lg-mobile": ["Plus Jakarta Sans"], "body-md": ["Plus Jakarta Sans"], "headline-lg-mobile": ["Plus Jakarta Sans"], "price-display": ["Plus Jakarta Sans"], "label-sm": ["Plus Jakarta Sans"], "headline-md": ["Plus Jakarta Sans"], "headline-lg": ["Plus Jakarta Sans"], "label-md": ["Plus Jakarta Sans"] }, fontSize: { "title-md": ["16px", { lineHeight: "22px", letterSpacing: "-0.005em", fontWeight: "600" }], "display-lg": ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "800" }], "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }], "label-lg": ["14px", { lineHeight: "18px", letterSpacing: "0.01em", fontWeight: "600" }], "display-lg-mobile": ["30px", { lineHeight: "38px", letterSpacing: "-0.02em", fontWeight: "800" }], "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }], "headline-lg-mobile": ["24px", { lineHeight: "32px", letterSpacing: "-0.01em", fontWeight: "700" }], "price-display": ["22px", { lineHeight: "26px", letterSpacing: "-0.02em", fontWeight: "800" }], "label-sm": ["10px", { lineHeight: "14px", letterSpacing: "0.04em", fontWeight: "700" }], "headline-md": ["20px", { lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "700" }], "headline-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.015em", fontWeight: "700" }], "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.02em", fontWeight: "600" }] } } } };</script><style>@layer base{html,body{width:100vw;margin:0;padding:0;background-color:#0c141f;color:#dce2f3;}body{overscroll-behavior-y:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface text-on-surface font-body-md text-body-md flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 pt-safe bg-surface-container-lowest/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.25)]"><div class="h-16 px-gutter flex items-center justify-between gap-space-sm"><div class="flex items-center gap-space-sm"><img alt="EG Commerce Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XtrXeBPOB5ucmDE3UAwQCgFUdoF7wznx7By7dFoS7lbf4uOJs-e1PejmilLJyY54Nrg7s7LbShrb5XdjCj7yPDXO6k7h4naj5Boj5BW8VpdVSAUa1rG3-znqatq12SBIthsddunUTUogPq0fahbfGpRULeMZHMfxinKtmnuxfyI0qQ23bIedXArWpssxEnT2ZSYk6zBr1zLOEKtgVq1albEV-WRWe2CyvE_d72LEr6pdgSb01sLSr1q70"/><div class="flex flex-col"><span class="font-label-md text-label-md tracking-wider uppercase text-primary font-bold">EG Commerce</span><span class="font-title-md text-title-md text-on-surface truncate max-w-[110px]">Create</span></div></div><div class="flex items-center gap-space-xs"><button aria-label="Search" class="w-11 h-11 flex items-center justify-center rounded-full hover:bg-surface-bright/30 transition-colors text-on-surface"><span class="material-symbols-outlined text-[22px]">search</span></button><button aria-label="Notifications" class="relative w-11 h-11 flex items-center justify-center rounded-full hover:bg-surface-bright/30 transition-colors text-on-surface"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-primary-container ring-2 ring-surface-container-lowest animate-pulse"></span></button><button aria-label="Unified Cart" class="relative w-11 h-11 flex items-center justify-center rounded-full hover:bg-surface-bright/30 transition-colors text-on-surface"><span class="material-symbols-outlined text-[22px]">shopping_bag</span><span class="absolute top-2 right-2 min-w-[16px] h-4 px-1 rounded-full bg-primary-container text-on-primary font-label-sm text-label-sm flex items-center justify-center leading-none font-bold">3</span></button><div class="pl-space-xs flex items-center"><img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-1 ring-outline-variant/40" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPyhaKxpteJhxQk3K94siGQploRjZI0El43cPOawvlTRYn6NPxBj0QCPKxxHPv8x2OUphwkmPb6FdzVfaahhNXiuVFYgIFLhPTD-olohzE5Hga3wXpYQaSQmitwHrVZfDnTXbn26Y7_bykRaY_EUmeYTMWfoTN2zkp8AEV4nur5GIRfAHNsQ-wDo4Nsn8QujwvweNzu8UtWBAyRgXEyBR5KCDgfPcHNcMjM6OnFfmXf4foqN_Zv_uO"/></div></div></div></header><main class="flex flex-col relative w-full pt-16 pb-20 bg-surface min-h-screen"><div class="flex flex-col w-full pb-10">
+<!-- Creator Studio Hero & Snapshot -->
+<div class="px-gutter pt-space-md flex flex-col gap-space-md">
+<!-- Header Greeting & Status -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="relative">
+<img class="w-12 h-12 rounded-full object-cover shadow-md" data-alt="Close up aesthetic portrait of a trendy creator in moody cinematic lighting with neon red ambient backlights, obsidian background, styled streetwear." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4VmOHd9omQPr4zZ3e3UOoXCifMnCsEegmb8uM1hKxFX_5VtTebCcTTTHRjarvCPLvTKhADWEj9BmCRd3i50U_dR9RvyY_H2elAjJy_BWbUtSXJP_kkSKsng-zpTwOpqA_oX8YuXUSVwqR0ILlrUwC-9KIdhfaq1pVVqih_A_XJjvB5sM5fGW8P_QjyDFDK0aITxwsSFS9Qn3XLyDInJ5LcdV9lxDK3Frb1NQNnJD_oGtcPRar-pul"/>
+<span class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-tertiary-container rounded-full flex items-center justify-center text-on-tertiary-container">
+<span class="material-symbols-outlined text-[10px]" style="font-variation-settings: 'FILL' 1;">check</span>
+</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-1.5">
+<span class="font-headline-md text-headline-md text-on-surface truncate">Creator Studio</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container/20 text-secondary-container font-label-sm text-label-sm">PRO</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant truncate">Alex Morgan • Tier 1 Partner</p>
+</div>
+</div>
+<button class="flex items-center gap-1 px-3 py-1.5 rounded-full bg-surface-container-high hover:bg-surface-bright text-primary font-label-md text-label-md shadow-sm transition-all">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span>Media Kit</span>
+</button>
+</div>
+<!-- Creator Financial & Performance Stats Matrix -->
+<div class="grid grid-cols-2 gap-space-sm">
+<!-- Total Earnings -->
+<div class="p-space-md rounded-xl bg-surface-container-high flex flex-col justify-between shadow-md relative overflow-hidden">
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="font-label-md text-label-md">Total Earnings</span>
+<span class="material-symbols-outlined text-[18px] text-tertiary">payments</span>
+</div>
+<div class="mt-2 flex flex-col">
+<span class="font-price-display text-price-display text-on-surface tracking-tight">$3,420.50</span>
+<div class="flex items-center gap-1 mt-0.5 text-tertiary font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+<span>+18.4% this month</span>
+</div>
+</div>
+<div class="absolute -right-4 -bottom-4 w-16 h-16 rounded-full bg-tertiary-container/10 blur-xl pointer-events-none"></div>
+</div>
+<!-- Escrow Pending -->
+<div class="p-space-md rounded-xl bg-surface-container flex flex-col justify-between shadow-sm">
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="font-label-md text-label-md">Escrow Pending</span>
+<span class="material-symbols-outlined text-[18px] text-secondary-fixed-dim">hourglass_top</span>
+</div>
+<div class="mt-2 flex flex-col">
+<span class="font-price-display text-price-display text-on-surface tracking-tight">$450.00</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-0.5">Releases post review</span>
+</div>
+</div>
+<!-- Attributed Sales -->
+<div class="p-space-md rounded-xl bg-surface-container flex flex-col justify-between shadow-sm">
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="font-label-md text-label-md">Attributed Sales</span>
+<span class="material-symbols-outlined text-[18px] text-primary">local_mall</span>
+</div>
+<div class="mt-2 flex flex-col">
+<span class="font-price-display text-price-display text-on-surface tracking-tight">248 <span class="text-body-md font-body-md text-on-surface-variant">units</span></span>
+<span class="font-label-sm text-label-sm text-primary font-bold mt-0.5">8.2% Conv. Rate</span>
+</div>
+</div>
+<!-- Creator Rating -->
+<div class="p-space-md rounded-xl bg-surface-container flex flex-col justify-between shadow-sm">
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="font-label-md text-label-md">Merchant Rating</span>
+<span class="material-symbols-outlined text-[18px] text-secondary-container" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<div class="mt-2 flex flex-col">
+<div class="flex items-baseline gap-1">
+<span class="font-price-display text-price-display text-on-surface tracking-tight">4.9</span>
+<span class="font-label-md text-label-md text-secondary-container">★</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-0.5">Top 3% creator reliability</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Active Task / Ongoing Pipeline Widget (Approved & In Progress) -->
+<div class="px-gutter mt-space-lg">
+<div class="p-space-md rounded-xl bg-gradient-to-r from-surface-container-high to-surface-container shadow-xl relative overflow-hidden">
+<div class="flex items-center justify-between mb-space-sm">
+<div class="flex items-center gap-2">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-container opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-primary-container"></span>
+</span>
+<span class="font-label-md text-label-md uppercase tracking-wider text-primary font-bold">Approved &amp; In Progress</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-surface-variant text-on-surface-variant font-label-sm text-label-sm">Due in 4 days</span>
+</div>
+<div class="flex items-start gap-space-sm">
+<img class="w-14 h-14 rounded-lg object-cover shadow-sm flex-shrink-0" data-alt="Matte black mechanical keyboard with custom dye sub keycaps in low key studio lighting with a slight purple hue" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWpzZvMHK-UECVcfT0Tjdhdme9ciHwWLEra4LYXQenkmD6SdCHxUa9c9Fu637pK6efXhO9Muw_uqZOFkkRsPPOCmgBkfxhk37vp8G4hi98TEmFXW_ikF7ScMKKRwPKu16PwCjC1vEcI4dbhYaaFsGsmOctCfBGD4u3oCRfpAzLeZ5HY8_zzB8_PwtJc7NRabQmHtZUEsLN3I4yTivyyPTKV5PLODZHox__Gb_OMUvGwHkodZx_lotR"/>
+<div class="flex flex-col min-w-0 flex-1">
+<h3 class="font-title-md text-title-md text-on-surface truncate">Vortex RGB Studio Keypad</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Brand: KeebsCraft • Commission: $120.00 Fixed</p>
+<!-- Stepper Progress -->
+<div class="flex items-center gap-1.5 mt-3">
+<div class="flex items-center gap-1 text-tertiary font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span>Shipped</span>
+</div>
+<div class="w-6 h-0.5 bg-tertiary"></div>
+<div class="flex items-center gap-1 text-primary-container font-label-sm text-label-sm font-bold">
+<span class="material-symbols-outlined text-[16px] animate-pulse">radio_button_checked</span>
+<span>Submit Draft</span>
+</div>
+<div class="w-6 h-0.5 bg-surface-variant"></div>
+<div class="flex items-center gap-1 text-on-surface-variant/60 font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px]">hourglass_empty</span>
+<span>Payout</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Button inside Widget -->
+<div class="mt-space-md pt-space-sm flex gap-space-sm">
+<button class="flex-1 py-2.5 px-4 rounded-full bg-primary-container text-on-primary font-label-lg text-label-lg flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(255,84,80,0.35)] active:scale-[0.98] transition-all" id="uploadDraftBtn">
+<span class="material-symbols-outlined text-[18px]">upload_file</span>
+<span>Submit Video Draft (Reel)</span>
+</button>
+<button class="w-11 h-11 rounded-full bg-surface-variant flex items-center justify-center text-on-surface hover:bg-surface-bright transition-colors" title="Message Merchant">
+<span class="material-symbols-outlined text-[20px]">chat</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Performance Analytics Preview: Sales Attribution Graph -->
+<div class="px-gutter mt-space-lg">
+<div class="p-space-md rounded-xl bg-surface-container shadow-md flex flex-col">
+<div class="flex items-center justify-between mb-space-sm">
+<div>
+<span class="font-title-md text-title-md text-on-surface font-bold">Reel Sales Attribution</span>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Direct sales driven from creator link tags</p>
+</div>
+<span class="font-price-display text-price-display text-tertiary">+$1,890</span>
+</div>
+<!-- Sparkline SVG & Chart -->
+<div class="w-full h-24 mt-2 relative flex items-end">
+<svg class="w-full h-full overflow-visible" preserveaspectratio="none" viewbox="0 0 340 70">
+<defs>
+<lineargradient id="chartGrad" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#4edea3" stop-opacity="0.35"></stop>
+<stop offset="100%" stop-color="#4edea3" stop-opacity="0.0"></stop>
+</lineargradient>
+</defs>
+<!-- Gradient fill -->
+<path d="M 0,60 Q 40,40 70,45 T 140,25 T 210,38 T 270,12 T 340,5 L 340,70 L 0,70 Z" fill="url(#chartGrad)"></path>
+<!-- Trend line -->
+<path d="M 0,60 Q 40,40 70,45 T 140,25 T 210,38 T 270,12 T 340,5" fill="none" stroke="#4edea3" stroke-linecap="round" stroke-width="2.5"></path>
+<!-- Highlighted hot points -->
+<circle cx="140" cy="25" fill="#4edea3" r="3.5"></circle>
+<circle cx="270" cy="12" fill="#4edea3" r="3.5"></circle>
+<circle class="animate-pulse" cx="340" cy="5" fill="#4edea3" r="4.5"></circle>
+</svg>
+</div>
+<!-- Attribution Reels Mini Row -->
+<div class="grid grid-cols-3 gap-2 mt-space-sm pt-space-xs">
+<div class="flex flex-col p-1.5 rounded-lg bg-surface-container-high text-center">
+<span class="font-label-sm text-label-sm text-on-surface-variant truncate">Minimal Sling</span>
+<span class="font-label-md text-label-md text-on-surface font-bold">$940.00</span>
+<span class="font-label-sm text-label-sm text-tertiary">74 orders</span>
+</div>
+<div class="flex flex-col p-1.5 rounded-lg bg-surface-container-high text-center">
+<span class="font-label-sm text-label-sm text-on-surface-variant truncate">Desk Pad RGB</span>
+<span class="font-label-md text-label-md text-on-surface font-bold">$610.00</span>
+<span class="font-label-sm text-label-sm text-tertiary">51 orders</span>
+</div>
+<div class="flex flex-col p-1.5 rounded-lg bg-surface-container-high text-center">
+<span class="font-label-sm text-label-sm text-on-surface-variant truncate">Pour-Over Kit</span>
+<span class="font-label-md text-label-md text-on-surface font-bold">$340.00</span>
+<span class="font-label-sm text-label-sm text-tertiary">23 orders</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Interactive Filter Tabs -->
+<div class="mt-space-lg">
+<div class="px-gutter flex items-center justify-between">
+<span class="font-headline-md text-headline-md text-on-surface">Merchant Campaigns</span>
+<button class="flex items-center gap-1 text-primary font-label-md text-label-md">
+<span class="material-symbols-outlined text-[16px]">tune</span>
+<span>Filter</span>
+</button>
+</div>
+<!-- Scrollable Pills -->
+<div class="flex items-center gap-2 overflow-x-auto px-gutter mt-space-sm pb-1 no-scrollbar">
+<button class="tab-btn px-4 py-2 rounded-full bg-primary-container text-on-primary font-label-md text-label-md whitespace-nowrap shadow-sm transition-all" data-tab="active">
+        Active Campaigns (24)
+      </button>
+<button class="tab-btn px-4 py-2 rounded-full bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-md text-label-md whitespace-nowrap transition-all" data-tab="applications">
+        My Applications (3)
+      </button>
+<button class="tab-btn px-4 py-2 rounded-full bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-md text-label-md whitespace-nowrap transition-all" data-tab="progress">
+        In Progress (1)
+      </button>
+<button class="tab-btn px-4 py-2 rounded-full bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-md text-label-md whitespace-nowrap transition-all" data-tab="payouts">
+        Payouts
+      </button>
+</div>
+</div>
+<!-- Campaign Discovery Cards Stack -->
+<div class="px-gutter mt-space-md flex flex-col gap-space-md">
+<!-- Campaign 1: Nomad Tech Sling by Apex Goods -->
+<div class="p-space-md rounded-xl bg-surface-container shadow-md flex flex-col gap-space-sm relative overflow-hidden group">
+<!-- Top Merchant Meta & Badges -->
+<div class="flex items-start justify-between gap-space-sm">
+<div class="flex items-center gap-2.5 min-w-0">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-primary font-bold text-lg flex-shrink-0">
+<span class="material-symbols-outlined">backpack</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-1.5">
+<span class="font-label-md text-label-md text-on-surface-variant">Apex Goods</span>
+<span class="px-1.5 py-0.2 rounded-full bg-tertiary-container/20 text-tertiary font-label-sm text-label-sm flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[10px]" style="font-variation-settings: 'FILL' 1;">check</span> Verified
+              </span>
+</div>
+<span class="font-title-md text-title-md text-on-surface font-bold truncate">Nomad Tech Sling - Real World Durability Test</span>
+</div>
+</div>
+<!-- Deadline Tag -->
+<span class="px-2 py-1 rounded-md bg-surface-variant text-on-surface-variant font-label-sm text-label-sm flex-shrink-0">
+          3 days left
+        </span>
+</div>
+<!-- Campaign Visual Banner -->
+<div class="relative w-full h-36 rounded-lg overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="High tech ballistic nylon urban sling bag resting on wet city pavement with neon reflection, moody cinematic urban techwear aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZDnj4Z1OdQUYI3YoS68ZJsAqWT2H2tg6J9JzD5auQ6LGC4sH1SzPD7ef6p_Z_h3H_P-bo_LIMzCLPlB1h97nICozf-6Ss3H8XTDUuPRSQx8hFkSHVnG1hSzdcYuT13rsT22OYJOqVAl4liIjIQuTNOedJyGxoJCjbzjYD7RXiEYvK4YNLblGAKy8CGaiAncg0g_nOqgwncHnnTGsIXVE7FdREt6juoprUTej5Flqnw7bgM8rsE4PF"/>
+<!-- Reward Overlay Pill -->
+<div class="absolute bottom-2.5 left-2.5 px-3 py-1 rounded-full bg-surface-container-lowest/85 backdrop-blur-md shadow-md flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px] text-secondary-container" style="font-variation-settings: 'FILL' 1;">stars</span>
+<span class="font-label-sm text-label-sm text-secondary-fixed font-bold tracking-wide">Free Product + $150 Fixed + 8% Comm.</span>
+</div>
+</div>
+<!-- Brief Summary -->
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2">
+        Create a 30s-60s Reel showing daily commuter essentials packed in the sling. Highlight water resistance and quick-draw laptop access.
+      </p>
+<!-- Slot Availability & CTAs -->
+<div class="pt-space-xs flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Remaining Capacity</span>
+<div class="flex items-center gap-1.5 mt-0.5">
+<div class="w-24 h-2 bg-surface-variant rounded-full overflow-hidden">
+<div class="w-3/5 h-full bg-primary-container rounded-full"></div>
+</div>
+<span class="font-label-sm text-label-sm text-primary font-bold">4 of 10 slots</span>
+</div>
+</div>
+<button class="px-5 py-2.5 rounded-full bg-primary-container text-on-primary font-label-md text-label-md font-bold shadow-[0_4px_14px_rgba(255,84,80,0.3)] active:scale-95 transition-all" onclick="openApplyModal('Nomad Tech Sling - Real World Durability Test', 'Apex Goods', '$150 Fixed + 8%')">
+          Apply to Campaign
+        </button>
+</div>
+</div>
+<!-- Campaign 2: AuraLite RGB Keyboard by KeebsCraft -->
+<div class="p-space-md rounded-xl bg-surface-container shadow-md flex flex-col gap-space-sm relative overflow-hidden group">
+<div class="flex items-start justify-between gap-space-sm">
+<div class="flex items-center gap-2.5 min-w-0">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-primary font-bold text-lg flex-shrink-0">
+<span class="material-symbols-outlined">keyboard</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-1.5">
+<span class="font-label-md text-label-md text-on-surface-variant">KeebsCraft</span>
+<span class="px-1.5 py-0.2 rounded-full bg-tertiary-container/20 text-tertiary font-label-sm text-label-sm flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[10px]" style="font-variation-settings: 'FILL' 1;">check</span> Verified
+              </span>
+</div>
+<span class="font-title-md text-title-md text-on-surface font-bold truncate">AuraLite RGB Keyboard Sound Test</span>
+</div>
+</div>
+<span class="px-2 py-1 rounded-md bg-surface-variant text-on-surface-variant font-label-sm text-label-sm flex-shrink-0">
+          Fast Review
+        </span>
+</div>
+<div class="relative w-full h-36 rounded-lg overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Close-up macro of custom mechanical keyboard switches being pressed, dramatic warm glowing backlight, minimalist desk aesthetic, dark luxury tone" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAcEViF1Pu1GI1D26qigdicwN9tamXCbdLEzSZWr8PGtd_8VHTAKuHoa1yGGrdExZFHhTs1kgR0B-7K4X0pAqE_Q4wYe_EtYFGiE8NKVqIun9aFHJo8RO4tG6yGpu5XBqSb3Jdi3_2EzodBULmTwa3STL5Or7W3WpMTrRHbHriqznFJcBmW5DGuZyJxyKczvetBoskC9jHX3jgNjv2s7ZDbKdhP1zpAsqyGFClvJpWYsV_3_Z2aGvGx"/>
+<div class="absolute bottom-2.5 left-2.5 px-3 py-1 rounded-full bg-surface-container-lowest/85 backdrop-blur-md shadow-md flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px] text-tertiary">redeem</span>
+<span class="font-label-sm text-label-sm text-tertiary-fixed font-bold tracking-wide">Free Product + 12% Commission</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2">
+        ASMR mechanical keyboard typing test in minimalist dark desk setup. Emphasize creamy acoustics and custom software illumination.
+      </p>
+<div class="pt-space-xs flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Remaining Capacity</span>
+<div class="flex items-center gap-1.5 mt-0.5">
+<div class="w-24 h-2 bg-surface-variant rounded-full overflow-hidden">
+<div class="w-3/5 h-full bg-secondary-container rounded-full"></div>
+</div>
+<span class="font-label-sm text-label-sm text-secondary-fixed-dim font-bold">2 of 5 slots</span>
+</div>
+</div>
+<button class="px-5 py-2.5 rounded-full bg-primary-container text-on-primary font-label-md text-label-md font-bold shadow-[0_4px_14px_rgba(255,84,80,0.3)] active:scale-95 transition-all" onclick="openApplyModal('AuraLite RGB Keyboard Sound Test', 'KeebsCraft', 'Free Product + 12%')">
+          Apply to Campaign
+        </button>
+</div>
+</div>
+<!-- Campaign 3: Minimalist Coffee Ritual by Artisan Craft (Closed) -->
+<div class="p-space-md rounded-xl bg-surface-container-low opacity-75 flex flex-col gap-space-sm relative">
+<div class="flex items-start justify-between gap-space-sm">
+<div class="flex items-center gap-2.5 min-w-0">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-on-surface-variant font-bold text-lg flex-shrink-0">
+<span class="material-symbols-outlined">coffee</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md text-on-surface-variant">Artisan Craft</span>
+<span class="font-title-md text-title-md text-on-surface font-semibold truncate">Minimalist Coffee Ritual</span>
+</div>
+</div>
+<span class="px-2 py-1 rounded-md bg-error-container text-on-error font-label-sm text-label-sm flex-shrink-0">
+          Closed
+        </span>
+</div>
+<div class="relative w-full h-28 rounded-lg overflow-hidden filter grayscale contrast-125">
+<img class="w-full h-full object-cover" data-alt="Pour over artisan ceramic dripper brewing dark rich coffee, warm steam in dim atmospheric boutique coffee shop setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDNgJBT6_2kY8BM76HNBodm6fdNJPdRxGzvGDyY1nO7q3Ot-jbBYfheGUqxjEaHEXYg-KSrg-9gVmnBl90cR0VziHAXgk6-TBPmi0Uo30VF-ZNttMAX0-FsQiounZLRg3HMr04_D0woUjwuiAP3WZDZhkYNB3HxHchRnMHFHvdhI06-FmNhFHkF-ce44PW60Mg1nBr6yt-f8Rfji4r-wozT0Kj2SKmfBssYqrDcP6Hbd3uJFJTCovE8"/>
+<div class="absolute bottom-2.5 left-2.5 px-3 py-1 rounded-full bg-surface-container-lowest/90 text-on-surface-variant text-label-sm font-label-sm">
+          Fixed Pay $200
+        </div>
+</div>
+<div class="pt-space-xs flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant">10 of 10 creators selected</span>
+<button class="px-4 py-2 rounded-full bg-surface-variant text-on-surface-variant/60 font-label-md text-label-md cursor-not-allowed" disabled="">
+          Applications Closed
+        </button>
+</div>
+</div>
+</div>
+<!-- Bottom Interactive Application Bottom-Sheet Modal (Hidden by Default) -->
+<div class="fixed inset-0 z-50 flex flex-col justify-end bg-surface-container-lowest/80 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300" id="applyModal">
+<div class="w-full bg-surface-container-high rounded-t-2xl p-gutter flex flex-col gap-space-md shadow-[0_-12px_32px_rgba(0,0,0,0.6)] transform translate-y-full transition-transform duration-300 ease-out" id="modalDrawer">
+<!-- Sheet Handle -->
+<div class="w-10 h-1 bg-surface-variant rounded-full mx-auto"></div>
+<div class="flex items-center justify-between">
+<div>
+<span class="font-label-md text-label-md text-primary font-bold uppercase tracking-wider">Campaign Application</span>
+<h2 class="font-headline-md text-headline-md text-on-surface truncate max-w-[260px]" id="modalCampaignTitle">Nomad Tech Sling</h2>
+</div>
+<button class="w-9 h-9 rounded-full bg-surface-variant flex items-center justify-center text-on-surface hover:bg-surface-bright transition-colors" onclick="closeApplyModal()">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<div class="flex flex-col gap-space-sm">
+<label class="font-label-md text-label-md text-on-surface-variant">Why are you a good fit for this brief?</label>
+<textarea class="w-full p-3 rounded-lg bg-surface text-on-surface font-body-md text-body-md focus:outline-none focus:ring-1 focus:ring-primary-container placeholder-on-surface-variant/40 resize-none" id="applicationPitch" placeholder="Tell the brand about your planned video concept, audio selection, or audience demographics..." rows="3"></textarea>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-on-surface-variant">Estimated Delivery Timeframe</label>
+<div class="grid grid-cols-3 gap-2">
+<button class="py-2 rounded-lg bg-surface-variant text-on-surface font-label-md text-label-md text-center hover:bg-primary-container hover:text-on-primary transition-colors">3 Days</button>
+<button class="py-2 rounded-lg bg-primary-container text-on-primary font-label-md text-label-md text-center font-bold">5 Days</button>
+<button class="py-2 rounded-lg bg-surface-variant text-on-surface font-label-md text-label-md text-center hover:bg-primary-container hover:text-on-primary transition-colors">7 Days</button>
+</div>
+</div>
+<div class="pt-space-xs flex gap-space-sm">
+<button class="flex-1 py-3 rounded-full bg-primary-container text-on-primary font-label-lg text-label-lg font-bold shadow-[0_4px_16px_rgba(255,84,80,0.4)] active:scale-95 transition-all" onclick="submitApplication()">
+          Submit Pitch to Brand
+        </button>
+</div>
+</div>
+</div>
+<!-- Toast Notification System -->
+<div class="fixed top-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-full bg-surface-container-highest text-on-surface shadow-xl flex items-center gap-2 opacity-0 pointer-events-none transition-all duration-300" id="toastNotification">
+<span class="material-symbols-outlined text-[18px] text-tertiary" id="toastIcon">check_circle</span>
+<span class="font-label-md text-label-md" id="toastText">Application submitted successfully!</span>
+</div>
+</div>
+<script>
+  function openApplyModal(title, brand, reward) {
+    const modal = document.getElementById('applyModal');
+    const drawer = document.getElementById('modalDrawer');
+    const titleElem = document.getElementById('modalCampaignTitle');
+    
+    titleElem.textContent = title;
+    modal.classList.remove('opacity-0', 'pointer-events-none');
+    modal.classList.add('opacity-100');
+    drawer.classList.remove('translate-y-full');
+    drawer.classList.add('translate-y-0');
+  }
+
+  function closeApplyModal() {
+    const modal = document.getElementById('applyModal');
+    const drawer = document.getElementById('modalDrawer');
+    
+    drawer.classList.remove('translate-y-0');
+    drawer.classList.add('translate-y-full');
+    setTimeout(() => {
+      modal.classList.remove('opacity-100');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+    }, 250);
+  }
+
+  function showToast(message, icon = 'check_circle', color = 'text-tertiary') {
+    const toast = document.getElementById('toastNotification');
+    const toastText = document.getElementById('toastText');
+    const toastIcon = document.getElementById('toastIcon');
+
+    toastText.textContent = message;
+    toastIcon.textContent = icon;
+    toastIcon.className = `material-symbols-outlined text-[18px] ${color}`;
+
+    toast.classList.remove('opacity-0', 'pointer-events-none', '-translate-y-2');
+    toast.classList.add('opacity-100', 'translate-y-0');
+
+    setTimeout(() => {
+      toast.classList.remove('opacity-100', 'translate-y-0');
+      toast.classList.add('opacity-0', 'pointer-events-none', '-translate-y-2');
+    }, 3200);
+  }
+
+  function submitApplication() {
+    closeApplyModal();
+    setTimeout(() => {
+      showToast('Application sent! Apex Goods typically reviews within 24h.');
+    }, 300);
+  }
+
+  // Upload video draft button micro-action
+  document.getElementById('uploadDraftBtn')?.addEventListener('click', function() {
+    showToast('Opening video asset uploader...', 'video_camera_back', 'text-primary');
+  });
+
+  // Tab switching interaction
+  const tabs = document.querySelectorAll('.tab-btn');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => {
+        t.classList.remove('bg-primary-container', 'text-on-primary');
+        t.classList.add('bg-surface-container-high', 'text-on-surface-variant');
+      });
+      tab.classList.remove('bg-surface-container-high', 'text-on-surface-variant');
+      tab.classList.add('bg-primary-container', 'text-on-primary');
+    });
+  });
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface-container-lowest/85 backdrop-blur-xl shadow-[0_-4px_24px_rgba(0,0,0,0.4)]" data-active-classes="text-primary-container drop-shadow-[0_0_12px_rgba(255,84,80,0.6)] font-semibold"><div class="flex justify-around items-center h-16 px-gutter"><a class="flex flex-col items-center justify-center gap-0.5 w-14 h-12 text-on-surface-variant transition-all" data-path="reels" href="#"><span class="material-symbols-outlined text-[24px]">play_circle</span><span class="font-label-sm text-label-sm">Reels</span></a><a class="flex flex-col items-center justify-center gap-0.5 w-14 h-12 text-on-surface-variant transition-all" data-path="marketplace" href="#"><span class="material-symbols-outlined text-[24px]">storefront</span><span class="font-label-sm text-label-sm">Shop</span></a><a aria-current="page" class="flex flex-col items-center justify-center gap-0.5 w-14 h-12 transition-all text-primary-container drop-shadow-[0_0_12px_rgba(255,84,80,0.6)] font-semibold" data-path="create" href="#"><div class="w-9 h-9 rounded-full bg-primary-container/20 flex items-center justify-center text-primary-container"><span class="material-symbols-outlined text-[22px]">video_call</span></div><span class="font-label-sm text-label-sm mt-[-2px]">Create</span></a><a class="relative flex flex-col items-center justify-center gap-0.5 w-14 h-12 text-on-surface-variant transition-all" data-path="rewards" href="#"><span class="material-symbols-outlined text-[24px]">auto_awesome</span><span class="font-label-sm text-label-sm">Rewards</span><span class="absolute top-1 right-2.5 w-1.5 h-1.5 rounded-full bg-secondary-container"></span></a><a class="flex flex-col items-center justify-center gap-0.5 w-14 h-12 text-on-surface-variant transition-all" data-path="profile" href="#"><span class="material-symbols-outlined text-[24px]">account_circle</span><span class="font-label-sm text-label-sm">Profile</span></a></div></nav></body></html>

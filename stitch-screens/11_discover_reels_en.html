@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "on-primary-fixed-variant": "#930012", "on-tertiary-fixed": "#002113", "tertiary-container": "#00a572", "surface-variant": "#2e3542", "on-tertiary": "#003824", "secondary-container": "#feb700", "secondary-fixed": "#ffdea8", "surface-container-low": "#151c28", "surface-container-high": "#232a37", "on-surface-variant": "#e5bdba", "on-primary-container": "#5c0007", "inverse-surface": "#dce2f3", "surface-bright": "#323946", "tertiary": "#4edea3", "on-tertiary-container": "#00311f", "on-secondary-fixed-variant": "#5e4200", "tertiary-fixed-dim": "#4edea3", "primary-fixed": "#ffdad7", "surface": "#0c141f", "on-secondary": "#412d00", "on-primary": "#68000a", "on-error": "#690005", "on-tertiary-fixed-variant": "#005236", "on-error-container": "#ffdad6", "secondary-fixed-dim": "#ffba20", "on-surface": "#dce2f3", "background": "#0c141f", "on-background": "#dce2f3", "surface-container-lowest": "#070e1a", "error-container": "#93000a", "surface-dim": "#0c141f", "on-secondary-fixed": "#271900", "tertiary-fixed": "#6ffbbe", "surface-container-highest": "#2e3542", "secondary": "#ffdb9d", "error": "#ffb4ab", "primary-container": "#ff5450", "primary-fixed-dim": "#ffb3ad", "outline": "#ac8885", "inverse-primary": "#bd0e1f", "surface-container": "#19202c", "inverse-on-surface": "#2a313d", "primary": "#ffb3ad", "on-secondary-container": "#6b4b00", "outline-variant": "#5c403d", "surface-tint": "#ffb3ad", "on-primary-fixed": "#410004" }, borderRadius: { DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px" }, spacing: { "space-xs": "0.25rem", "margin-tablet": "1.5rem", "margin-desktop": "2.5rem", "space-lg": "1.25rem", "space-sm": "0.5rem", "gutter-tablet": "1rem", "gutter": "0.75rem", "space-md": "0.75rem", "margin": "1rem", "space-xl": "2rem", "gutter-desktop": "1.5rem" }, fontFamily: { "title-md": ["Plus Jakarta Sans"], "display-lg": ["Plus Jakarta Sans"], "body-lg": ["Plus Jakarta Sans"], "label-lg": ["Plus Jakarta Sans"], "display-lg-mobile": ["Plus Jakarta Sans"], "body-md": ["Plus Jakarta Sans"], "headline-lg-mobile": ["Plus Jakarta Sans"], "price-display": ["Plus Jakarta Sans"], "label-sm": ["Plus Jakarta Sans"], "headline-md": ["Plus Jakarta Sans"], "headline-lg": ["Plus Jakarta Sans"], "label-md": ["Plus Jakarta Sans"] }, fontSize: { "title-md": ["16px", { lineHeight: "22px", letterSpacing: "-0.005em", fontWeight: "600" }], "display-lg": ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "800" }], "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }], "label-lg": ["14px", { lineHeight: "18px", letterSpacing: "0.01em", fontWeight: "600" }], "display-lg-mobile": ["30px", { lineHeight: "38px", letterSpacing: "-0.02em", fontWeight: "800" }], "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }], "headline-lg-mobile": ["24px", { lineHeight: "32px", letterSpacing: "-0.01em", fontWeight: "700" }], "price-display": ["22px", { lineHeight: "26px", letterSpacing: "-0.02em", fontWeight: "800" }], "label-sm": ["10px", { lineHeight: "14px", letterSpacing: "0.04em", fontWeight: "700" }], "headline-md": ["20px", { lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "700" }], "headline-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.015em", fontWeight: "700" }], "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.02em", fontWeight: "600" }] } } } };</script><style>@layer base{html,body{width:100vw;margin:0;padding:0;background-color:#0c141f;color:#dce2f3;}body{overscroll-behavior-y:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface text-on-surface font-body-md text-body-md flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 pt-safe bg-surface-container-lowest/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.25)]"><div class="h-16 px-gutter flex items-center justify-between gap-space-sm"><div class="flex items-center gap-space-sm"><img alt="EG Commerce Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XtrXeBPOB5ucmDE3UAwQCgFUdoF7wznx7By7dFoS7lbf4uOJs-e1PejmilLJyY54Nrg7s7LbShrb5XdjCj7yPDXO6k7h4naj5Boj5BW8VpdVSAUa1rG3-znqatq12SBIthsddunUTUogPq0fahbfGpRULeMZHMfxinKtmnuxfyI0qQ23bIedXArWpssxEnT2ZSYk6zBr1zLOEKtgVq1albEV-WRWe2CyvE_d72LEr6pdgSb01sLSr1q70"/><div class="flex flex-col"><span class="font-label-md text-label-md tracking-wider uppercase text-primary font-bold">EG Commerce</span><span class="font-title-md text-title-md text-on-surface truncate max-w-[110px]">Reels</span></div></div><div class="flex items-center gap-space-xs"><button aria-label="Search" class="w-11 h-11 flex items-center justify-center rounded-full hover:bg-surface-bright/30 transition-colors text-on-surface"><span class="material-symbols-outlined text-[22px]">search</span></button><button aria-label="Notifications" class="relative w-11 h-11 flex items-center justify-center rounded-full hover:bg-surface-bright/30 transition-colors text-on-surface"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-primary-container ring-2 ring-surface-container-lowest animate-pulse"></span></button><button aria-label="Unified Cart" class="relative w-11 h-11 flex items-center justify-center rounded-full hover:bg-surface-bright/30 transition-colors text-on-surface"><span class="material-symbols-outlined text-[22px]">shopping_bag</span><span class="absolute top-2 right-2 min-w-[16px] h-4 px-1 rounded-full bg-primary-container text-on-primary font-label-sm text-label-sm flex items-center justify-center leading-none font-bold">3</span></button><div class="pl-space-xs flex items-center"><img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-1 ring-outline-variant/40" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPyhaKxpteJhxQk3K94siGQploRjZI0El43cPOawvlTRYn6NPxBj0QCPKxxHPv8x2OUphwkmPb6FdzVfaahhNXiuVFYgIFLhPTD-olohzE5Hga3wXpYQaSQmitwHrVZfDnTXbn26Y7_bykRaY_EUmeYTMWfoTN2zkp8AEV4nur5GIRfAHNsQ-wDo4Nsn8QujwvweNzu8UtWBAyRgXEyBR5KCDgfPcHNcMjM6OnFfmXf4foqN_Zv_uO"/></div></div></div></header><main class="flex flex-col relative w-full pt-16 pb-20 bg-surface min-h-screen"><div class="flex flex-col w-full relative select-none">
+<!-- Interactive Full-Height Discovery Reel Card Container -->
+<div class="relative w-full overflow-hidden rounded-xl bg-surface-container-lowest" style="height: calc(100vh - 9rem);">
+<!-- Dynamic Lifestyle Video Reel Backdrop -->
+<div class="absolute inset-0 w-full h-full bg-cover bg-center" data-alt="Cinematic macro shot of an aesthetic wireless cyber mechanical keyboard with frosted keycaps and subdued neon coral backlighting sitting on a sleek dark felt desk mat. An aesthetic female creator hands gracefully hovering and typing with golden hour sunset lighting cast over dark slate ambient studio backdrop." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBNw8oHJNy-iuluOMJkZtPITehUTfKsAy6gonznoc7BK1dnPSNx6c0GcsNsYqQBVburDLidf8N75P8B6TsR-ZbJgjkiL7rRLdGIglykt-D784IpJ0yW8Qm_KZApdx6XKH2oRx-K0eBOGvBfxv3HKsKbdk270VBclA24as6PkV6Klh-RXsmR3Nx55SabuCE6hULUPE66YadEXdrWwrVRphcJRKI8xzylI74xZAqoQTOM-acylJZBMeBp')">
+<!-- Vignette Gradients for Text Contrast and Media Immersion -->
+<div class="absolute inset-0 bg-gradient-to-b from-surface-container-lowest/80 via-transparent to-surface-container-lowest/95"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-surface-container-lowest/40 to-transparent"></div>
+</div>
+<!-- Floating Top Segment Navigation & Sound HUD -->
+<div class="absolute top-3 left-0 right-0 z-20 px-gutter flex items-center justify-between pointer-events-auto">
+<div class="flex items-center gap-space-md mx-auto pl-8">
+<button class="font-label-lg text-label-lg text-on-surface-variant/70 hover:text-on-surface transition-colors py-1">Following</button>
+<div class="relative flex flex-col items-center">
+<button class="font-label-lg text-label-lg text-on-surface font-bold py-1 drop-shadow-sm">For You</button>
+<span class="absolute -bottom-0.5 w-5 h-0.5 rounded-full bg-primary-container shadow-[0_0_8px_rgba(255,84,80,0.8)]"></span>
+</div>
+</div>
+<button aria-label="Toggle Sound" class="w-9 h-9 rounded-full bg-surface-container-low/60 backdrop-blur-md flex items-center justify-center text-on-surface transition-transform active:scale-90" id="sound-toggle-btn">
+<span class="material-symbols-outlined text-[18px]" id="sound-icon">volume_up</span>
+</button>
+</div>
+<!-- Right-Hand Floating Engagement HUD Column -->
+<div class="absolute right-gutter bottom-36 z-20 flex flex-col items-center gap-space-md pointer-events-auto">
+<!-- Creator Avatar + Follow Badge -->
+<div class="relative flex flex-col items-center mb-1">
+<div class="w-12 h-12 rounded-full p-0.5 bg-gradient-to-tr from-primary-container to-secondary-container shadow-md">
+<img class="w-full h-full rounded-full object-cover" data-alt="Close up portrait of trendy female tech reviewer Elena with soft studio ring light, natural makeup, smiling stylishly against dark moody room" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZv9gw2oRrJXoipcG4_zjKKbFTkjPBAfducf2TrVLv9aicAV3y9i-MnmIktqOKCf_76Vyv93WEC3Mr9OvobtOtxA4FepmXHDdA8QVFKydJfU7OdjNv1-y3x25q6PYVC9F1_hge_w4uXUOoni36WnmVe03b9EDQAL4dnEHDR4cgkgvtxtQ_bGebQi411CyE8TSvzM_uVn_ISTDbLJYLqe0H3KkkNqVdXxF2ez_vjzYyxRpDUMVqMiK6"/>
+</div>
+<button aria-label="Follow Creator" class="absolute -bottom-1.5 w-5 h-5 rounded-full bg-primary-container text-on-primary flex items-center justify-center shadow-lg transition-transform hover:scale-110 active:scale-95" id="follow-badge-btn">
+<span class="material-symbols-outlined text-[14px]" id="follow-icon">add</span>
+</button>
+</div>
+<!-- Like Heart Micro-Action -->
+<div class="flex flex-col items-center gap-0.5">
+<button aria-label="Like Video" class="w-11 h-11 rounded-full bg-surface-container-low/65 backdrop-blur-md flex items-center justify-center text-on-surface transition-all active:scale-125 shadow-sm group" id="like-btn">
+<span class="material-symbols-outlined text-[26px] text-on-surface group-hover:text-primary-container transition-colors" id="heart-icon">favorite</span>
+</button>
+<span class="font-label-sm text-label-sm text-on-surface/90 font-bold drop-shadow">42.8k</span>
+</div>
+<!-- Comment Drawer Micro-Action -->
+<div class="flex flex-col items-center gap-0.5">
+<button aria-label="View Comments" class="w-11 h-11 rounded-full bg-surface-container-low/65 backdrop-blur-md flex items-center justify-center text-on-surface transition-transform active:scale-90 shadow-sm" id="comment-btn">
+<span class="material-symbols-outlined text-[24px]">chat_bubble</span>
+</button>
+<span class="font-label-sm text-label-sm text-on-surface/90 font-bold drop-shadow">1.2k</span>
+</div>
+<!-- Bookmark / Save Micro-Action -->
+<div class="flex flex-col items-center gap-0.5">
+<button aria-label="Save Video" class="w-11 h-11 rounded-full bg-surface-container-low/65 backdrop-blur-md flex items-center justify-center text-on-surface transition-transform active:scale-95 shadow-sm" id="bookmark-btn">
+<span class="material-symbols-outlined text-[24px]" id="bookmark-icon">bookmark</span>
+</button>
+<span class="font-label-sm text-label-sm text-on-surface/90 font-bold drop-shadow">14.3k</span>
+</div>
+<!-- Share Action -->
+<div class="flex flex-col items-center gap-0.5">
+<button aria-label="Share Reel" class="w-11 h-11 rounded-full bg-surface-container-low/65 backdrop-blur-md flex items-center justify-center text-on-surface transition-transform active:scale-90 shadow-sm" id="share-btn">
+<span class="material-symbols-outlined text-[24px]">share</span>
+</button>
+<span class="font-label-sm text-label-sm text-on-surface/90 font-bold drop-shadow">380</span>
+</div>
+<!-- Rotating Audio Vinyl Disc -->
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center p-1.5 animate-spin shadow-md" style="animation-duration: 6s;">
+<div class="w-full h-full rounded-full bg-cover bg-center" data-alt="Lofi retro album art visual miniature dark moody cassette tape aesthetic" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAE6ElFeAGR-jIwUUr_wmAwZXRDdMDVrRwDHjllEmGcOlSrCYklmm1xdpIhs_IlvPLQH4kQgUDxNfixTvsfWJLCzTgGDxXnYt2p_SusYhDHzVjNIb-qWn702MHMMm_hBuaBGZ6vFMWwem1s46gRwVBvyNSCHfDBF2zmtaDHkopaECJ3eoJDP6TNDxqeOfSplpK4Ml1l2IdoZjjzjvMgomVSs5iLdru16sJ9KDTh_qJ5ygxobd2xN6XY')"></div>
+</div>
+</div>
+<!-- Bottom Left Creator Information & Captions Overlay -->
+<div class="absolute left-gutter right-20 bottom-28 z-20 flex flex-col gap-1.5 pointer-events-auto">
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-title-md text-title-md text-on-surface font-bold drop-shadow">@elena.creates</span>
+<span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-tertiary/15 text-tertiary font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[13px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+          Verified Creator
+        </span>
+</div>
+<p class="font-body-md text-body-md text-on-surface/90 line-clamp-2 leading-snug drop-shadow-sm">
+        Obsessed with this minimalist mechanical desk setup! Link below with exclusive 15% off coupon 👇 <span class="font-bold text-primary">#deskgoals</span> <span class="font-bold text-primary">#creatorfinds</span>
+</p>
+<!-- Audio Track Pill -->
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="material-symbols-outlined text-secondary text-[16px]">graphic_eq</span>
+<div class="overflow-hidden whitespace-nowrap max-w-[210px]">
+<span class="font-label-sm text-label-sm text-secondary font-semibold tracking-wide">♪ Lo-Fi Beats — Ambient Chill (Soundtrack)</span>
+</div>
+</div>
+</div>
+<!-- Interactive Floating "Quick-Buy" Bottom Card Banner -->
+<div class="absolute bottom-2.5 left-gutter right-gutter z-30 pointer-events-auto">
+<div class="w-full p-2.5 rounded-xl bg-surface-container-low/95 backdrop-blur-xl shadow-2xl flex items-center justify-between gap-space-sm transition-transform active:scale-[0.99]">
+<!-- Product Thumbnail with Sale Tag -->
+<div class="relative w-14 h-14 rounded-lg overflow-hidden shrink-0 bg-surface-container-high">
+<img class="w-full h-full object-cover" data-alt="High quality top-down product rendering of AuraLite RGB mechanical gaming keyboard with white and translucent frosted keycaps glowing with vivid coral amber lights" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIw8qO4x1GLD1U9adOymAriHixNcwXv_3VSLGe81Pk9KPyYgpik0F3-hrYaSjnVoRu6V8GOciqLztuZ-hB1in-BVTmrnlcBz46x4El89JqTw2_LTsGn7mfTStupdk_UKcWDQ1GkgP3v3cfngwH5dzgK3zt3YW010kD3mNPX3XJYLE-xfWGTL5lh78gsaFVjOkqREf7jDcq1acF3c84IjEBWwZRksQ514sDdKu5G6-RxDWc9qK8Sw2v"/>
+<span class="absolute top-0.5 left-0.5 px-1 py-0.2 rounded bg-primary-container text-on-primary font-label-sm text-[9px] uppercase font-extrabold leading-tight">-20%</span>
+</div>
+<!-- Product Details -->
+<div class="flex flex-col flex-1 min-w-0 pr-1">
+<div class="flex items-center gap-1">
+<span class="font-label-sm text-label-sm text-tertiary truncate">By KeebsCraft Studio</span>
+<span class="material-symbols-outlined text-tertiary text-[12px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<h4 class="font-title-md text-title-md text-on-surface truncate font-bold">AuraLite RGB Cyber Keyboard</h4>
+<div class="flex items-center gap-space-xs mt-0.5">
+<span class="font-price-display text-price-display text-on-surface font-extrabold">$119.00</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant/70 line-through">$149.00</span>
+<span class="inline-flex items-center gap-0.5 px-1 py-0.5 rounded bg-secondary-container/20 text-secondary font-label-sm text-[10px] font-bold">
+<span class="material-symbols-outlined text-[10px]" style="font-variation-settings: 'FILL' 1;">star</span>
+              4.9
+            </span>
+</div>
+</div>
+<!-- Buy Action Pill with Glow -->
+<div class="flex flex-col items-end shrink-0 gap-1">
+<button class="px-3.5 py-2.5 rounded-full bg-primary-container text-on-primary font-label-lg text-label-lg font-extrabold shadow-[0_4px_16px_rgba(255,84,80,0.45)] hover:shadow-[0_4px_22px_rgba(255,84,80,0.65)] transition-all active:scale-95 flex items-center gap-1" id="quick-buy-trigger">
+<span>Quick Buy</span>
+<span class="material-symbols-outlined text-[16px]">flash_on</span>
+</button>
+<span class="font-label-sm text-[10px] text-secondary-fixed font-bold tracking-tight">+240 EG Points</span>
+</div>
+</div>
+</div>
+<!-- Live Floating Hearts Canvas Area (For Tap Delight) -->
+<div class="absolute inset-0 pointer-events-none z-40 overflow-hidden" id="heart-burst-container"></div>
+</div>
+<!-- Quick Checkout Drawer / Bottom Sheet Modal -->
+<div class="fixed inset-0 z-50 pointer-events-none opacity-0 transition-opacity duration-300 flex flex-col justify-end" id="quick-drawer">
+<!-- Backdrop Scrim -->
+<div class="absolute inset-0 bg-surface-container-lowest/80 backdrop-blur-sm pointer-events-auto" id="drawer-backdrop"></div>
+<!-- Slide-Up Drawer Surface -->
+<div class="relative w-full max-w-lg mx-auto bg-surface-container-low rounded-t-2xl p-margin pb-safe shadow-[0_-12px_32px_rgba(0,0,0,0.6)] transform translate-y-full transition-transform duration-300 pointer-events-auto flex flex-col gap-space-md" id="drawer-panel">
+<!-- Drag Indicator Handle -->
+<div class="w-10 h-1 rounded-full bg-surface-variant mx-auto mb-1 cursor-pointer" id="close-drawer-handle"></div>
+<!-- Modal Header -->
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="w-16 h-16 rounded-xl bg-surface-container-high overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="Macro cyber keyboard with tactile switch stem exposed, hot-swap components preview studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBGfwA21iFp1hienv5bQKTaMJFT647XejHIKTnlBWwPTxYFvF4OLjru1gumbQ6HIbPN0ZKwqHHbFsFhgLaH9gPdr1oDMAUPYV0ktM1CfOzbaM6gjEs2HcHT4aM-1-SZXIZJ1d6u_snYdaPpAGWx-RUceQmLqRBBScelc5RiAHsYto9ddZyfptJksit9F6PB8CzJVijfx9NvuaFyk8xR5fk6w_jNntsW6Cuq9Eo442bdOcDpWDLA8z4r"/>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-tertiary">Verified Brand • In Stock</span>
+<h3 class="font-headline-md text-headline-md text-on-surface font-bold leading-snug">AuraLite RGB Cyber</h3>
+<div class="flex items-center gap-space-xs mt-0.5">
+<span class="font-price-display text-price-display text-primary font-extrabold">$119.00</span>
+<span class="font-label-md text-label-md text-on-surface-variant/70 line-through">$149.00</span>
+<span class="px-1.5 py-0.5 rounded bg-primary-container/20 text-primary-container font-label-sm text-label-sm font-bold ml-1">SAVE $30</span>
+</div>
+</div>
+</div>
+<button class="w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center text-on-surface hover:bg-surface-bright transition-colors" id="close-drawer-btn">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<!-- Variant Selectors: Switches -->
+<div class="flex flex-col gap-1.5 mt-1">
+<label class="font-label-md text-label-md text-on-surface-variant font-semibold">Switch Mechanism</label>
+<div class="flex items-center gap-2">
+<button class="flex-1 py-2 px-3 rounded-lg bg-surface-variant font-label-md text-label-md text-primary font-bold shadow-sm flex items-center justify-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+            Linear Red
+          </button>
+<button class="flex-1 py-2 px-3 rounded-lg bg-surface-container font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors flex items-center justify-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-on-surface-variant/40"></span>
+            Tactile Brown
+          </button>
+<button class="flex-1 py-2 px-3 rounded-lg bg-surface-container font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors flex items-center justify-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-on-surface-variant/40"></span>
+            Clicky Blue
+          </button>
+</div>
+</div>
+<!-- Variant Selectors: Colorway -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-on-surface-variant font-semibold">Base Chassis Color</label>
+<div class="flex items-center gap-space-sm">
+<button class="px-3.5 py-1.5 rounded-full bg-surface-variant text-on-surface font-label-md text-label-md font-bold">Obsidian Dark</button>
+<button class="px-3.5 py-1.5 rounded-full bg-surface-container text-on-surface-variant font-label-md text-label-md">Frost White</button>
+<button class="px-3.5 py-1.5 rounded-full bg-surface-container text-on-surface-variant font-label-md text-label-md">Cyber Neon</button>
+</div>
+</div>
+<!-- Loyalty & Free Shipping Highlight -->
+<div class="flex items-center justify-between p-2.5 rounded-xl bg-surface-container">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[20px]">local_shipping</span>
+<span class="font-label-sm text-label-sm text-on-surface font-semibold">Free Express Delivery (2-3 Business Days)</span>
+</div>
+<span class="font-label-sm text-label-sm text-secondary font-bold">+240 Pts</span>
+</div>
+<!-- Action Buttons -->
+<div class="flex items-center gap-space-sm pt-2">
+<button class="flex-1 py-3 rounded-full bg-surface-variant text-on-surface font-label-lg text-label-lg font-bold hover:bg-surface-bright transition-all active:scale-95 flex items-center justify-center gap-1.5" id="drawer-add-cart">
+<span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
+<span>Add to Bag</span>
+</button>
+<button class="flex-1 py-3 rounded-full bg-primary-container text-on-primary font-label-lg text-label-lg font-extrabold shadow-[0_4px_18px_rgba(255,84,80,0.5)] transition-all active:scale-95 flex items-center justify-center gap-1.5" id="drawer-instant-checkout">
+<span class="material-symbols-outlined text-[18px]">bolt</span>
+<span>Instant Buy</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Cart Notification Toast -->
+<div class="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-tertiary-container text-on-tertiary-container px-4 py-2 rounded-full font-label-md text-label-md font-bold shadow-xl flex items-center gap-2 opacity-0 -translate-y-4 pointer-events-none transition-all duration-300" id="cart-toast">
+<span class="material-symbols-outlined text-[18px]">check_circle</span>
+<span>Added AuraLite to Bag!</span>
+</div>
+</div>
+<script>
+  (function initDiscoverFeed() {
+    // Like button toggle & particle feedback
+    const likeBtn = document.getElementById('like-btn');
+    const heartIcon = document.getElementById('heart-icon');
+    const heartContainer = document.getElementById('heart-burst-container');
+    let isLiked = false;
+
+    likeBtn?.addEventListener('click', () => {
+      isLiked = !isLiked;
+      if (isLiked) {
+        heartIcon.style.fontVariationSettings = "'FILL' 1";
+        heartIcon.classList.remove('text-on-surface');
+        heartIcon.classList.add('text-primary-container');
+        createHeartBurst();
+      } else {
+        heartIcon.style.fontVariationSettings = "'FILL' 0";
+        heartIcon.classList.remove('text-primary-container');
+        heartIcon.classList.add('text-on-surface');
+      }
+    });
+
+    function createHeartBurst() {
+      for (let i = 0; i < 4; i++) {
+        const heart = document.createElement('span');
+        heart.className = 'material-symbols-outlined absolute text-primary-container pointer-events-none drop-shadow-md';
+        heart.innerText = 'favorite';
+        heart.style.fontVariationSettings = "'FILL' 1";
+        heart.style.fontSize = (24 + Math.random() * 16) + 'px';
+        heart.style.right = (16 + Math.random() * 24) + 'px';
+        heart.style.bottom = (160 + Math.random() * 40) + 'px';
+        heart.style.transition = 'all 800ms cubic-bezier(0.2, 0.8, 0.2, 1)';
+        heart.style.opacity = '1';
+
+        heartContainer?.appendChild(heart);
+
+        setTimeout(() => {
+          heart.style.transform = `translate(${(Math.random() - 0.5) * 80}px, -${120 + Math.random() * 80}px) rotate(${(Math.random() - 0.5) * 45}deg) scale(1.3)`;
+          heart.style.opacity = '0';
+        }, 10);
+
+        setTimeout(() => {
+          heart.remove();
+        }, 850);
+      }
+    }
+
+    // Follow Toggle
+    const followBtn = document.getElementById('follow-badge-btn');
+    const followIcon = document.getElementById('follow-icon');
+    let isFollowing = false;
+
+    followBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      isFollowing = !isFollowing;
+      if (isFollowing) {
+        followIcon.innerText = 'check';
+        followBtn.classList.remove('bg-primary-container', 'text-on-primary');
+        followBtn.classList.add('bg-tertiary', 'text-on-tertiary');
+      } else {
+        followIcon.innerText = 'add';
+        followBtn.classList.remove('bg-tertiary', 'text-on-tertiary');
+        followBtn.classList.add('bg-primary-container', 'text-on-primary');
+      }
+    });
+
+    // Bookmark Toggle
+    const bookmarkBtn = document.getElementById('bookmark-btn');
+    const bookmarkIcon = document.getElementById('bookmark-icon');
+    let isBookmarked = false;
+
+    bookmarkBtn?.addEventListener('click', () => {
+      isBookmarked = !isBookmarked;
+      if (isBookmarked) {
+        bookmarkIcon.style.fontVariationSettings = "'FILL' 1";
+        bookmarkIcon.classList.add('text-secondary-container');
+      } else {
+        bookmarkIcon.style.fontVariationSettings = "'FILL' 0";
+        bookmarkIcon.classList.remove('text-secondary-container');
+      }
+    });
+
+    // Sound toggle
+    const soundToggle = document.getElementById('sound-toggle-btn');
+    const soundIcon = document.getElementById('sound-icon');
+    let isMuted = false;
+
+    soundToggle?.addEventListener('click', () => {
+      isMuted = !isMuted;
+      soundIcon.innerText = isMuted ? 'volume_off' : 'volume_up';
+    });
+
+    // Drawer functionality
+    const quickBuyTrigger = document.getElementById('quick-buy-trigger');
+    const drawer = document.getElementById('quick-drawer');
+    const drawerPanel = document.getElementById('drawer-panel');
+    const drawerBackdrop = document.getElementById('drawer-backdrop');
+    const closeDrawerBtn = document.getElementById('close-drawer-btn');
+    const closeDrawerHandle = document.getElementById('close-drawer-handle');
+    const toast = document.getElementById('cart-toast');
+
+    function openDrawer() {
+      drawer?.classList.remove('opacity-0', 'pointer-events-none');
+      drawerPanel?.classList.remove('translate-y-full');
+    }
+
+    function closeDrawer() {
+      drawerPanel?.classList.add('translate-y-full');
+      setTimeout(() => {
+        drawer?.classList.add('opacity-0', 'pointer-events-none');
+      }, 200);
+    }
+
+    quickBuyTrigger?.addEventListener('click', openDrawer);
+    drawerBackdrop?.addEventListener('click', closeDrawer);
+    closeDrawerBtn?.addEventListener('click', closeDrawer);
+    closeDrawerHandle?.addEventListener('click', closeDrawer);
+
+    function triggerToast(message) {
+      if (!toast) return;
+      if (message) toast.querySelector('span:last-child').textContent = message;
+      toast.classList.remove('opacity-0', '-translate-y-4', 'pointer-events-none');
+      setTimeout(() => {
+        toast.classList.add('opacity-0', '-translate-y-4', 'pointer-events-none');
+      }, 2400);
+    }
+
+    document.getElementById('drawer-add-cart')?.addEventListener('click', () => {
+      closeDrawer();
+      triggerToast('AuraLite Cyber Keyboard added to bag!');
+    });
+
+    document.getElementById('drawer-instant-checkout')?.addEventListener('click', () => {
+      closeDrawer();
+      triggerToast('Initiating 1-Click Secure Checkout...');
+    });
+  })();
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface-container-lowest/85 backdrop-blur-xl shadow-[0_-4px_24px_rgba(0,0,0,0.4)]" data-active-classes="text-primary-container drop-shadow-[0_0_12px_rgba(255,84,80,0.6)] font-semibold"><div class="flex justify-around items-center h-16 px-gutter"><a aria-current="page" class="flex flex-col items-center justify-center gap-0.5 w-14 h-12 transition-all text-primary-container drop-shadow-[0_0_12px_rgba(255,84,80,0.6)] font-semibold" data-path="reels" href="#"><span class="material-symbols-outlined text-[24px]">play_circle</span><span class="font-label-sm text-label-sm">Reels</span></a><a class="flex flex-col items-center justify-center gap-0.5 w-14 h-12 text-on-surface-variant transition-all" data-path="marketplace" href="#"><span class="material-symbols-outlined text-[24px]">storefront</span><span class="font-label-sm text-label-sm">Shop</span></a><a class="flex flex-col items-center justify-center gap-0.5 w-14 h-12 text-on-surface-variant transition-all" data-path="create" href="#"><div class="w-9 h-9 rounded-full bg-primary-container/20 flex items-center justify-center text-primary-container"><span class="material-symbols-outlined text-[22px]">video_call</span></div><span class="font-label-sm text-label-sm mt-[-2px]">Create</span></a><a class="relative flex flex-col items-center justify-center gap-0.5 w-14 h-12 text-on-surface-variant transition-all" data-path="rewards" href="#"><span class="material-symbols-outlined text-[24px]">auto_awesome</span><span class="font-label-sm text-label-sm">Rewards</span><span class="absolute top-1 right-2.5 w-1.5 h-1.5 rounded-full bg-secondary-container"></span></a><a class="flex flex-col items-center justify-center gap-0.5 w-14 h-12 text-on-surface-variant transition-all" data-path="profile" href="#"><span class="material-symbols-outlined text-[24px]">account_circle</span><span class="font-label-sm text-label-sm">Profile</span></a></div></nav></body></html>

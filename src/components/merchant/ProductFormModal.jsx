@@ -23,10 +23,12 @@ export default function ProductFormModal({ isOpen, onClose, productToEdit = null
   const [affiliateRate, setAffiliateRate] = useState('12');
 
   const presetImages = [
-    { label: 'فستان كتان بوهيمي', url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB6M9R0STgJd832SzAKcYCBaZhk4lsAzKzNpUB5n0JAA3r_XOv4G8K7SRfSjpFZX3X5DVQqEfIdf6qaXQ748hfWdQOUPny6vW4aM9gK-0hTe2qrsaPInpzFrR-6iMSoxdoDFEbD2TiJkzXX4PR4veBKMzG8olzd2ZgOJicW2d0e24Klq2ebAK1hRX09eProZ4BsgCNRQVpP5WP8gA8TnfF2WPVMam-pQfxkwL7jgYwnTNfzzmsF6ThB' },
-    { label: 'كيمونو مطرز', url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDx2U5J1mKvtOYiWzhpQW4Za5R89tel2hIhZLv72GVzbqdEDC8xfmHtp6b7LVoqbpa4dXH-_RH1slnuQVziFgRbDBEX17p2JNHuLm8ZGwDWXz4EEHIyxS7bncuxrWwlfA9qR8IBJYvFyv8mI51ST6MDVBpEbdhfCgbkv33cfNlTi1Rm0emv8PIgIEk2yVN1ZJaEc8-iOwsDVDcR2Apg0kn4jvdfV9laevlMPlHnSkO3zxfYrv57Coz8' },
-    { label: 'حقيبة يد جلد طبيعي', url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBNw8oHJNy-iuluOMJkZtPITehUTfKsAy6gonznoc7BK1dnPSNx6c0GcsNsYqQBVburDLidf8N75P8B6TsR-ZbJgjkiL7rRLdGIglykt-D784IpJ0yW8Qm_KZApdx6XKH2oRx-K0eBOGvBfxv3HKsKbdk270VBclA24as6PkV6Klh-RXsmR3Nx55SabuCE6hULUPE66YadEXdrWwrVRphcJRKI8xzylI74xZAqoQTOM-acylJZBMeBp' },
-    { label: 'عقد لوتس فرعوني', url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAE6ElFeAGR-jIwUUr_wmAwZXRDdMDVrRwDHjllEmGcOlSrCYklmm1xdpIhs_IlvPLQH4kQgUDxNfixTvsfWJLCzTgGDxXnYt2p_SusYhDHzVjNIb-qWn702MHMMm_hBuaBGZ6vFMWwem1s46gRwVBvyNSCHfDBF2zmtaDHkopaECJ3eoJDP6TNDxqeOfSplpK4Ml1l2IdoZjjzjvMgomVSs5iLdru16sJ9KDTh_qJ5ygxobd2xN6XY' }
+    { label: 'عباية كتان فاخرة', url: '/images/products/linen_abaya.jpg' },
+    { label: 'فستان سهرة حرير', url: '/images/products/silk_dress.jpg' },
+    { label: 'بليزر صوف أوفرسايز', url: '/images/products/wool_blazer.jpg' },
+    { label: 'قميص كتان صيفي', url: '/images/products/linen_shirt.jpg' },
+    { label: 'فانوس نحاس أرابيسك', url: '/images/products/copper_lantern.jpg' },
+    { label: 'سجادة كليم يدوي', url: '/images/products/kilim_rug.jpg' }
   ];
 
   // Populate when editing

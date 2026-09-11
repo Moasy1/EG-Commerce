@@ -100,7 +100,7 @@ export default function MerchantStorefront() {
       caption: 'تنسيق فستان الكتان للعمل والمساء ✨ أقمشة مصرية 100%', 
       views: '34.2K', 
       likes: '2.8K',
-      image: merchantProducts[0]?.image,
+      image: '/images/reels/reel_1.jpg',
       taggedProduct: merchantProducts[0]
     },
     { 
@@ -110,7 +110,7 @@ export default function MerchantStorefront() {
       caption: 'ريفيو الكيمونو الرملي على الطبيعة 😍 تطريز يدوي فاخر', 
       views: '28.6K', 
       likes: '1.9K',
-      image: merchantProducts[1]?.image || merchantProducts[0]?.image,
+      image: '/images/reels/reel_2.jpg',
       taggedProduct: merchantProducts[1] || merchantProducts[0]
     },
     { 
@@ -120,8 +120,8 @@ export default function MerchantStorefront() {
       caption: 'إطلالة صيفية هادية وأنيقة بلمسات مينيمال راقية 🏖️', 
       views: '41.5K', 
       likes: '3.4K',
-      image: merchantProducts[0]?.image,
-      taggedProduct: merchantProducts[0]
+      image: '/images/reels/reel_3.jpg',
+      taggedProduct: merchantProducts[2] || merchantProducts[0]
     },
     { 
       id: 'r4', 
@@ -130,8 +130,8 @@ export default function MerchantStorefront() {
       caption: 'تفاصيل الخياطة من مشاغل تاليسكا بالقاهرة 🪡 فخر الصناعة المصرية', 
       views: '19.8K', 
       likes: '1.5K',
-      image: merchantProducts[1]?.image || merchantProducts[0]?.image,
-      taggedProduct: merchantProducts[1] || merchantProducts[0]
+      image: '/images/reels/reel_4.jpg',
+      taggedProduct: merchantProducts[3] || merchantProducts[0]
     }
   ];
 
@@ -780,10 +780,10 @@ export default function MerchantStorefront() {
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {[
-                  { id: 'sm1', label: 'كواليس التطريز اليدوي 🪡', img: merchantProducts[0]?.image },
-                  { id: 'sm2', label: 'مراجعة خامات الكتان النقي 🌿', img: merchantProducts[1]?.image || merchantProducts[0]?.image },
-                  { id: 'sm3', label: 'تنسيقات عصرية لموسم الصيف ☀️', img: merchantProducts[0]?.image },
-                  { id: 'sm4', label: 'تغليف وتجهيز شحنات بوسطة 📦', img: merchantProducts[1]?.image || merchantProducts[0]?.image },
+                  { id: 'sm1', label: 'كواليس التطريز اليدوي 🪡', img: '/images/reels/reel_3.jpg' },
+                  { id: 'sm2', label: 'أزياء الكتان في شوارع المعز 🌿', img: '/images/reels/reel_1.jpg' },
+                  { id: 'sm3', label: 'تنسيقات عصرية للرووف لاونج ☀️', img: '/images/reels/reel_2.jpg' },
+                  { id: 'sm4', label: 'ورشة النحاس والتحف الفاطمية 📦', img: '/images/reels/reel_4.jpg' },
                 ].map((item) => (
                   <div key={item.id} className="group aspect-square rounded-2xl overflow-hidden relative bg-surface-container-low border border-surface-container-high">
                     <img 

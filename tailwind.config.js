@@ -17,7 +17,7 @@ export default {
         "on-primary-fixed": "#1b1b1e",
         "on-primary-fixed-variant": "#47464a",
         
-        "secondary": "#9d4229",
+        "secondary": "#d00000",
         "secondary-container": "#fd8c6d",
         "on-secondary": "#ffffff",
         "on-secondary-container": "#74240e",

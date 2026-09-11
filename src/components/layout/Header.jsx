@@ -40,9 +40,9 @@ export default function Header() {
           className="flex items-center gap-3 cursor-pointer group"
         >
           <img 
-            src="https://lh3.googleusercontent.com/aida/AEtjO1UsXahJOBRjcwbXiXmz3TE4x4htExvhEyoiAS-VhpZxl7TSsGo3f-_x6Nzo3bd6fUdk8XVLlkhu_LNVjAOLz5YkLhGNnJlFrbdfwwZ9HkhFGb6j1Ix7TEYGz59jTLLodtg5NNNejkcbXNor9JZLHkKKnts9DucaUoOYkWns-jxicpyqYpAUFdx_0u9OAd13k8x56JzWkNvt025UsBYL--PhogjlvLHma0ScCiAjTbZb8kaAfaMgjpv2hw" 
+            src="/images/brands/talieska_logo.jpg" 
             alt="EG Fashion Logo" 
-            className="h-8 w-auto object-contain"
+            className="h-9 w-9 rounded-xl object-cover border border-secondary/30 shadow-sm"
           />
           <div className="flex flex-col">
             <span className="text-sm font-bold text-on-surface leading-none tracking-tight">
@@ -194,9 +194,9 @@ export default function Header() {
             className="pr-1 flex items-center cursor-pointer"
           >
             <img 
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBebD1XV7lyRsAl9IX8tKvw96y0vY-A3gyXbIFikiB9lcBqnBPraZyUu4KwB5cr8o2GSX3cq4h9v-tUoDKKT4cqFSr8eWnzqEj8vLK4YSx_rLs9XllzyohklMCsnt1PwT9FRovU6hVvUny8XCCEDLqQDyPOieiXb5w3HOCsbrm7L8CfFkF4E0PCcCZ1TA5VPM1qQ8214MO3rQB2O-zWXR5ggSKybljFH39T3QKh6AgE9rTLMKNbH4AW"
+              src="/images/reels/reel_2.jpg"
               alt="Profile" 
-              className="w-8 h-8 rounded-full object-cover ring-1 ring-surface-container-high"
+              className="w-8 h-8 rounded-full object-cover ring-1 ring-secondary/40"
             />
           </div>
         </div>

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useApp, INITIAL_PRODUCTS } from '../context/AppContext';
 
 export default function Marketplace() {
-  const { openProductDetail, addToCart, setActiveTab } = useApp();
+  const { openProductDetail, addToCart, setActiveTab, products } = useApp();
   const [selectedCategory, setSelectedCategory] = useState('All • الكل');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -19,24 +19,24 @@ export default function Marketplace() {
     {
       creator: '@layla_style',
       role: 'Fashion Designer • ستايليست',
-      caption: 'تنسيق كيمونو كتان رملي مع فستان أبيض خفيف',
-      image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDx2U5J1mKvtOYiWzhpQW4Za5R89tel2hIhZLv72GVzbqdEDC8xfmHtp6b7LVoqbpa4dXH-_RH1slnuQVziFgRbDBEX17p2JNHuLm8ZGwDWXz4EEHIyxS7bncuxrWwlfA9qR8IBJYvFyv8mI51ST6MDVBpEbdhfCgbkv33cfNlTi1Rm0emv8PIgIEk2yVN1ZJaEc8-iOwsDVDcR2Apg0kn4jvdfV9laevlMPlHnSkO3zxfYrv57Coz8'
+      caption: 'تنسيق أزياء الكتان الفاخر في شوارع المعز',
+      image: '/images/reels/reel_1.jpg'
     },
     {
       creator: '@farah.cairo',
       role: 'Stylist • فاشون بلوجر',
-      caption: 'تفاصيل مجوهرات اللوتس اليومية اليوم بالجونة',
-      image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBZv9gw2oRrJXoipcG4_zjKKbFTkjPBAfducf2TrVLv9aicAV3y9i-MnmIktqOKCf_76Vyv93WEC3Mr9OvobtOtxA4FepmXHDdA8QVFKydJfU7OdjNv1-y3x25q6PYVC9F1_hge_w4uXUOoni36WnmVe03b9EDQAL4dnEHDR4cgkgvtxtQ_bGebQi411CyE8TSvzM_uVn_ISTDbLJYLqe0H3KkkNqVdXxF2ez_vjzYyxRpDUMVqMiK6'
+      caption: 'تفاصيل كيمونو صيفي بالرووف لاونج بالزمالك',
+      image: '/images/reels/reel_2.jpg'
     },
     {
       creator: '@yara_linen',
       role: 'Content Creator • صانعة محتوى',
-      caption: 'خامات الكتان الصيفي الطبيعي من أسوان',
-      image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB6M9R0STgJd832SzAKcYCBaZhk4lsAzKzNpUB5n0JAA3r_XOv4G8K7SRfSjpFZX3X5DVQqEfIdf6qaXQ748hfWdQOUPny6vW4aM9gK-0hTe2qrsaPInpzFrR-6iMSoxdoDFEbD2TiJkzXX4PR4veBKMzG8olzd2ZgOJicW2d0e24Klq2ebAK1hRX09eProZ4BsgCNRQVpP5WP8gA8TnfF2WPVMam-pQfxkwL7jgYwnTNfzzmsF6ThB'
+      caption: 'كواليس التطريز اليدوي في مشاغل القاهرة',
+      image: '/images/reels/reel_3.jpg'
     }
   ];
 
-  const filteredProducts = INITIAL_PRODUCTS.filter(item => {
+  const filteredProducts = (products || []).filter(item => {
     const matchesCat = selectedCategory === 'All • الكل' || 
       (selectedCategory.includes('Dresses') && item.category.includes('عبايات')) ||
       (selectedCategory.includes('Abayas') && item.category.includes('عبايات')) ||

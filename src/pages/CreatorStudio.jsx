@@ -59,7 +59,7 @@ export default function CreatorStudio() {
           <div className="flex items-center gap-3.5">
             <div className="relative w-16 h-16 rounded-full p-0.5 bg-surface-container shrink-0">
               <img
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZv9gw2oRrJXoipcG4_zjKKbFTkjPBAfducf2TrVLv9aicAV3y9i-MnmIktqOKCf_76Vyv93WEC3Mr9OvobtOtxA4FepmXHDdA8QVFKydJfU7OdjNv1-y3x25q6PYVC9F1_hge_w4uXUOoni36WnmVe03b9EDQAL4dnEHDR4cgkgvtxtQ_bGebQi411CyE8TSvzM_uVn_ISTDbLJYLqe0H3KkkNqVdXxF2ez_vjzYyxRpDUMVqMiK6"
+                src="/images/reels/reel_1.jpg"
                 alt="Creator Avatar"
                 className="w-full h-full object-cover rounded-full"
               />

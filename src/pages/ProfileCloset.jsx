@@ -11,9 +11,9 @@ export default function ProfileCloset() {
       <div className="rounded-2xl bg-surface-container-lowest border border-surface-container-high p-5 mb-6 shadow-sm flex flex-col sm:flex-row items-center sm:items-start justify-between gap-4 text-center sm:text-right">
         <div className="flex flex-col sm:flex-row items-center gap-3.5">
           <img
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBebD1XV7lyRsAl9IX8tKvw96y0vY-A3gyXbIFikiB9lcBqnBPraZyUu4KwB5cr8o2GSX3cq4h9v-tUoDKKT4cqFSr8eWnzqEj8vLK4YSx_rLs9XllzyohklMCsnt1PwT9FRovU6hVvUny8XCCEDLqQDyPOieiXb5w3HOCsbrm7L8CfFkF4E0PCcCZ1TA5VPM1qQ8214MO3rQB2O-zWXR5ggSKybljFH39T3QKh6AgE9rTLMKNbH4AW"
+            src="/images/reels/reel_2.jpg"
             alt="Profile Avatar"
-            className="w-16 h-16 rounded-full object-cover ring-2 ring-surface-container-high shrink-0"
+            className="w-16 h-16 rounded-full object-cover ring-2 ring-secondary/30 shrink-0"
           />
           <div>
             <h1 className="font-serif text-lg md:text-xl font-bold text-on-surface">Mariam El-Kady • مريم القاضي</h1>

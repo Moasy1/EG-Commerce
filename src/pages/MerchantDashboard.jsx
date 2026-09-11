@@ -812,8 +812,8 @@ export default function MerchantDashboard() {
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {[
-                    { id: 'draft-1', creator: '@nour_style', name: 'نور ستايل', title: 'فيديو مسودة 38 ثانية • تنسيق فستان الكتان', img: merchantProducts[0]?.image },
-                    { id: 'draft-2', creator: '@farida_fashion', name: 'فريدة فاشون', title: 'فيديو مسودة 45 ثانية • تنسيق كيمونو رملي', img: merchantProducts[1]?.image || merchantProducts[0]?.image }
+                    { id: 'draft-1', creator: '@nour_style', name: 'نور ستايل', title: 'فيديو مسودة 38 ثانية • تنسيق عباية الكتان بشارع المعز', img: '/images/reels/reel_1.jpg' },
+                    { id: 'draft-2', creator: '@farida_fashion', name: 'فريدة فاشون', title: 'فيديو مسودة 45 ثانية • إطلالة كيمونو رملي صيفي بالزمالك', img: '/images/reels/reel_2.jpg' }
                   ].map((draft) => {
                     const isApproved = approvedDrafts.includes(draft.id);
                     return (

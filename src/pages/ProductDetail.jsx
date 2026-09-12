@@ -31,14 +31,14 @@ export default function ProductDetail() {
   return (
     <div className="w-full flex-1">
       {/* 1. DESKTOP VIEW (Screen 3: Desktop Product Detail with 4-thumbnail strip) */}
-      <div className="hidden lg:block w-full max-w-[1780px] mx-auto px-4 md:px-8 py-6">
+      <div className="hidden md:block w-full max-w-[1780px] mx-auto px-4 md:px-8 py-6">
         <div className="rounded-3xl border border-gray-200/90 bg-white shadow-sm overflow-hidden">
           <DesktopProductDetail />
         </div>
       </div>
 
       {/* 2. MOBILE VIEW (Screen 3: Product Detail) */}
-      <div className="lg:hidden w-full min-h-[calc(100vh-64px)] bg-white text-slate-900 flex flex-col font-sans select-none pb-24 relative max-w-[430px] mx-auto">
+      <div className="md:hidden w-full min-h-[calc(100vh-64px)] bg-white text-slate-900 flex flex-col font-sans select-none pb-24 relative max-w-[430px] mx-auto">
 
         {/* Top Navigation Bar: Back Arrow, Center Red Logo, Heart & Share */}
         <div className="w-full px-4 py-2 flex items-center justify-between">

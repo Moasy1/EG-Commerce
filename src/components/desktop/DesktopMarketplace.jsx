@@ -91,6 +91,22 @@ export default function DesktopMarketplace() {
     },
   ];
 
+  const topStores = [
+    { id: 'store-1', name: 'Talieska', image: '/images/brands/talieska_logo.jpg' },
+    { id: 'store-2', name: 'ZAY Fashion', image: '/images/products/linen_abaya.jpg' },
+    { id: 'store-3', name: 'Khan', image: '/images/banners/khan_hero.jpg' },
+    { id: 'store-4', name: 'Khat', image: '/images/products/copper_lantern.jpg' },
+    { id: 'store-5', name: 'Dokan', image: '/images/products/kilim_rug.jpg' },
+  ];
+
+  const featuredCreators = [
+    { id: 'c-1', handle: 'mariam.style', avatar: '/images/reels/reel_1.jpg' },
+    { id: 'c-2', handle: 'ahmed_fits', avatar: '/images/reels/reel_2.jpg' },
+    { id: 'c-3', handle: 'sara.fashion', avatar: '/images/reels/reel_3.jpg' },
+    { id: 'c-4', handle: 'omar.daily', avatar: '/images/reels/reel_4.jpg' },
+    { id: 'c-5', handle: 'cairo.chic', avatar: '/images/products/silk_dress.jpg' },
+  ];
+
   return (
     <div className="w-full bg-white text-slate-900 flex flex-col font-sans min-h-[580px] overflow-hidden select-none text-left">
       {/* 1. Top Bar */}
@@ -188,6 +204,51 @@ export default function DesktopMarketplace() {
 
         {/* 4-Column Product Cards Grid */}
         <main className="flex-1 p-4 overflow-y-auto">
+          {/* Desktop Stores & Creators Preview */}
+          <div className="flex gap-4 mb-6">
+            <div className="flex-1 bg-gray-50 border border-gray-100 rounded-2xl p-4">
+              <h3 className="text-xs font-bold text-slate-900 mb-3 flex items-center justify-between">
+                <span>Featured Stores</span>
+                <span className="text-[10px] text-[#d00000] cursor-pointer">View All</span>
+              </h3>
+              <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
+                {topStores.map(store => (
+                  <div 
+                    key={store.id} 
+                    onClick={() => setActiveTab('storefront')}
+                    className="flex flex-col items-center gap-1 cursor-pointer group shrink-0"
+                  >
+                    <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-sm ring-2 ring-gray-100 group-hover:ring-[#d00000]/50 transition-all">
+                      <img src={store.image} alt={store.name} className="w-full h-full object-cover" />
+                    </div>
+                    <span className="text-[9px] font-bold text-slate-700">{store.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex-1 bg-gray-50 border border-gray-100 rounded-2xl p-4">
+              <h3 className="text-xs font-bold text-slate-900 mb-3 flex items-center justify-between">
+                <span>Trending Creators</span>
+                <span className="text-[10px] text-[#d00000] cursor-pointer">Discover</span>
+              </h3>
+              <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
+                {featuredCreators.map(creator => (
+                  <div 
+                    key={creator.id} 
+                    onClick={() => setActiveTab('profile')}
+                    className="w-[84px] bg-white border border-gray-200 rounded-xl p-1.5 flex flex-col items-center cursor-pointer hover:shadow-sm shrink-0"
+                  >
+                    <div className="w-10 h-10 rounded-full overflow-hidden mb-1.5">
+                      <img src={creator.avatar} alt={creator.handle} className="w-full h-full object-cover" />
+                    </div>
+                    <span className="text-[9px] font-bold text-slate-900 truncate w-full text-center">@{creator.handle}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
           <div className="mb-2">
             <h3 className="text-sm font-bold text-slate-900">Explore Marketplace</h3>
             <p className="text-[11px] text-gray-500">Shop the latest Egyptian fashion from local sellers</p>

@@ -102,7 +102,7 @@ export default function ScreenShowcase() {
       {/* 1. MASTER HEADER (Matching Image 3 & Image 4)                             */}
       {/* ========================================================================= */}
       <header className="w-full bg-white border-b border-gray-100 py-4 px-4 md:px-8 shadow-xs">
-        <div className="max-w-[1780px] mx-auto flex flex-col lg:flex-row items-center justify-between gap-4">
+        <div className="max-w-[1780px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           {/* Brand Logo & Subtitle */}
           <div className="flex items-center gap-3.5">
             <EgLogo className="w-10 h-10" color="#d00000" />

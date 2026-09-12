@@ -62,17 +62,35 @@ export default function Marketplace() {
     }
   ];
 
+  // Top Stores & Brands
+  const topStores = [
+    { id: 'store-1', name: 'Talieska', image: '/images/brands/talieska_logo.jpg' },
+    { id: 'store-2', name: 'ZAY Fashion', image: '/images/products/linen_abaya.jpg' },
+    { id: 'store-3', name: 'Khan', image: '/images/banners/khan_hero.jpg' },
+    { id: 'store-4', name: 'Khat', image: '/images/products/copper_lantern.jpg' },
+    { id: 'store-5', name: 'Dokan', image: '/images/products/kilim_rug.jpg' },
+  ];
+
+  // Featured Creators
+  const featuredCreators = [
+    { id: 'c-1', handle: 'mariam.style', avatar: '/images/reels/reel_1.jpg' },
+    { id: 'c-2', handle: 'ahmed_fits', avatar: '/images/reels/reel_2.jpg' },
+    { id: 'c-3', handle: 'sara.fashion', avatar: '/images/reels/reel_3.jpg' },
+    { id: 'c-4', handle: 'omar.daily', avatar: '/images/reels/reel_4.jpg' },
+    { id: 'c-5', handle: 'cairo.chic', avatar: '/images/products/silk_dress.jpg' },
+  ];
+
   return (
-    <div className="w-full flex-1">
+    <div className="w-full flex-1 overflow-y-auto min-h-0 relative">
       {/* 1. DESKTOP VIEW (Screen 2: Explore Marketplace with full filters & 4-col grid) */}
-      <div className="hidden lg:block w-full max-w-[1780px] mx-auto px-4 md:px-8 py-6">
+      <div className="hidden md:block w-full max-w-[1780px] mx-auto px-4 md:px-8 py-6">
         <div className="rounded-3xl border border-gray-200/90 bg-white shadow-sm overflow-hidden">
           <DesktopMarketplace />
         </div>
       </div>
 
       {/* 2. MOBILE VIEW (Screen 2: Search & Discovery) */}
-      <div className="lg:hidden w-full min-h-[calc(100vh-64px)] bg-[#fcfbfa] text-slate-900 pb-24 font-sans select-none max-w-[430px] mx-auto">
+      <div className="md:hidden w-full min-h-[calc(100vh-64px)] bg-[#fcfbfa] text-slate-900 pb-24 font-sans select-none max-w-[430px] mx-auto">
 
         {/* Top Header with Red Logo & Icons */}
         <div className="px-4 py-2 flex items-center justify-between">
@@ -116,8 +134,28 @@ export default function Marketplace() {
           </div>
         </div>
 
+        {/* Top Stores Horizontal Scroll */}
+        <div className="px-4 pt-4 pb-2 flex items-center justify-between">
+          <h3 className="text-sm font-black text-slate-900">Featured Stores</h3>
+          <span className="text-xs font-bold text-[#d00000] cursor-pointer">All</span>
+        </div>
+        <div className="px-4 pb-2 overflow-x-auto no-scrollbar flex items-center gap-4">
+          {topStores.map(store => (
+            <div 
+              key={store.id} 
+              onClick={() => setActiveTab('storefront')}
+              className="flex flex-col items-center gap-1.5 shrink-0 cursor-pointer group"
+            >
+              <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white shadow-sm ring-2 ring-gray-100 group-hover:ring-[#d00000]/50 transition-all">
+                <img src={store.image} alt={store.name} className="w-full h-full object-cover" />
+              </div>
+              <span className="text-[10px] font-bold text-slate-700">{store.name}</span>
+            </div>
+          ))}
+        </div>
+
         {/* Category Visual Cards */}
-        <div className="px-4 py-3">
+        <div className="px-4 py-3 mt-1">
           <div className="grid grid-cols-3 gap-2.5">
             {categories.map((cat) => (
               <div
@@ -142,8 +180,31 @@ export default function Marketplace() {
           </div>
         </div>
 
-        {/* Featured Products Header */}
+        {/* Creators Horizontal Scroll */}
         <div className="px-4 pt-3 pb-2 flex items-center justify-between">
+          <h3 className="text-sm font-black text-slate-900">Trending Creators</h3>
+          <span className="text-xs font-bold text-[#d00000] cursor-pointer">Discover</span>
+        </div>
+        <div className="px-4 pb-4 overflow-x-auto no-scrollbar flex items-center gap-3">
+          {featuredCreators.map(creator => (
+            <div 
+              key={creator.id} 
+              onClick={() => setActiveTab('profile')}
+              className="w-28 p-2 rounded-xl border border-gray-200/80 bg-white shadow-xs shrink-0 flex flex-col items-center cursor-pointer hover:shadow-md transition-shadow"
+            >
+              <div className="w-12 h-12 rounded-full overflow-hidden border border-gray-100 mb-2">
+                <img src={creator.avatar} alt={creator.handle} className="w-full h-full object-cover" />
+              </div>
+              <span className="text-[11px] font-bold text-slate-900 line-clamp-1 truncate w-full text-center">@{creator.handle}</span>
+              <button className="mt-2 w-full py-1 rounded bg-gray-100 text-slate-700 text-[10px] font-bold hover:bg-gray-200">
+                Follow
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {/* Featured Products Header */}
+        <div className="px-4 pt-1 pb-2 flex items-center justify-between">
           <h3 className="text-sm font-black text-slate-900">Featured Egyptian Products</h3>
           <span className="text-xs font-bold text-[#d00000] cursor-pointer">View All</span>
         </div>

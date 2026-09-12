@@ -55,14 +55,14 @@ export default function CreatorStudio() {
   return (
     <div className="w-full flex-1">
       {/* 1. DESKTOP VIEW (Screen 5: Creator Analytics & Campaigns) */}
-      <div className="hidden lg:block w-full max-w-[1780px] mx-auto px-4 md:px-8 py-6">
+      <div className="hidden md:block w-full max-w-[1780px] mx-auto px-4 md:px-8 py-6">
         <div className="rounded-3xl border border-gray-200/90 bg-white shadow-sm overflow-hidden">
           <DesktopCreatorAnalytics />
         </div>
       </div>
 
       {/* 2. MOBILE VIEW (Mobile Creator Studio) */}
-      <div className="lg:hidden w-full flex-1 max-w-5xl mx-auto px-4 md:px-6 py-4 pb-28 md:pb-12 text-slate-900 text-right font-sans">
+      <div className="md:hidden w-full flex-1 max-w-5xl mx-auto px-4 md:px-6 py-4 pb-28 md:pb-12 text-slate-900 text-right font-sans">
         {/* Creator Top Profile Card */}
         <div className="rounded-2xl bg-white border border-gray-200 p-5 mb-6 shadow-xs">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

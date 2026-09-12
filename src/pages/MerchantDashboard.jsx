@@ -225,7 +225,7 @@ export default function MerchantDashboard() {
         {activeSubTab === 'overview' && (
           <div className="space-y-6 animate-fade-in">
             {/* View Mode Switcher on Desktop */}
-            <div className="hidden lg:flex items-center justify-between pb-3 border-b border-surface-container-high">
+            <div className="hidden md:flex items-center justify-between pb-3 border-b border-surface-container-high">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-on-surface-variant">واجهة لوحة التاجر:</span>
                 <div className="flex items-center p-1 rounded-xl bg-surface-container-low border border-surface-container-high text-xs font-bold">

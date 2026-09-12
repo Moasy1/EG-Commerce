@@ -116,7 +116,7 @@ export default function AddProductStudio() {
       {/* ========================================================================= */}
       <div className="max-w-[1780px] mx-auto w-full flex flex-1 p-4 md:p-6 gap-6">
         {/* RIGHT SIDEBAR (RTL) */}
-        <aside className="w-56 shrink-0 hidden lg:flex flex-col justify-between">
+        <aside className="w-56 shrink-0 hidden md:flex flex-col justify-between">
           <div className="space-y-4">
             <nav className="space-y-1 text-xs font-bold">
               <button 

@@ -244,14 +244,14 @@ export default function DiscoverReels() {
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/95 pointer-events-none" />
         </div>
 
-        {/* Top Header Overlay: Feed Tabs & Quick Icons */}
-        <div className="relative z-30 w-full px-4 pt-3 pb-2 flex items-center justify-between">
+        {/* Top Header Overlay: Feed Tabs & Quick Icons (Desktop Only) */}
+        <div className="hidden md:flex relative z-30 w-full px-4 pt-3 pb-2 items-center justify-between">
           {/* Red Arch Logo */}
           <div className="flex items-center cursor-pointer" onClick={() => setActiveTab('reels')}>
             <EgLogo className="w-8 h-8 drop-shadow-md" color="#d00000" />
           </div>
 
-          {/* Feed Tabs (لك / المتابعة / الموضة / مصر) */}
+          {/* Feed Tabs */}
           <div className="flex items-center gap-3 text-xs font-semibold">
             {[
               { id: 'foryou', label: isAr ? 'لك' : 'For You' },
@@ -293,19 +293,19 @@ export default function DiscoverReels() {
           </div>
         </div>
 
-        {/* Audio Track Floating Pill */}
-        <div className="relative z-20 self-center px-3 py-1 rounded-full bg-black/40 backdrop-blur-md text-white/90 text-[11px] flex items-center gap-1.5 border border-white/10 shadow-sm mt-1">
+        {/* Audio Track Floating Pill (Desktop Only) */}
+        <div className="hidden md:flex relative z-20 self-center px-3 py-1 rounded-full bg-black/40 backdrop-blur-md text-white/90 text-[11px] items-center gap-1.5 border border-white/10 shadow-sm mt-1">
           <span className="material-symbols-outlined text-[14px] text-[#d00000] animate-pulse">music_note</span>
           <span className="truncate max-w-[200px]">{reel.music}</span>
         </div>
 
         {/* Main Content Area (Action Sidebar + Creator Info + Product Card) */}
-        <div className="relative z-30 w-full p-4 flex flex-col justify-end space-y-3 pb-4">
+        <div className="relative z-30 w-full p-4 flex flex-col justify-end pb-4 h-full">
           {/* Action Sidebar (Anchored on Right) */}
-          <div className="absolute right-3 bottom-28 z-30 flex flex-col items-center gap-4 text-white">
+          <div className="absolute right-2 bottom-[90px] z-30 flex flex-col items-center gap-5 text-white drop-shadow-md">
             {/* Creator Avatar with Follow (+) */}
             <div 
-              className="relative cursor-pointer group" 
+              className="relative cursor-pointer group mb-2" 
               onClick={(e) => {
                 e.stopPropagation();
                 setIsFollowed(!isFollowed);
@@ -314,12 +314,14 @@ export default function DiscoverReels() {
               <img 
                 src={reel.avatar} 
                 alt={reel.creatorHandle} 
-                className="w-12 h-12 rounded-full border-2 border-white object-cover shadow-xl group-hover:scale-105 transition-transform"
+                className="w-[42px] h-[42px] rounded-full border-2 border-white object-cover shadow-xl group-hover:scale-105 transition-transform"
               />
-              <div className={`absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full flex items-center justify-center text-[11px] font-bold shadow-md transition-all ${
+              <div className={`absolute -bottom-2 left-1/2 -translate-x-1/2 w-5 h-5 rounded-full flex items-center justify-center text-[14px] shadow-md transition-all ${
                 isFollowed ? 'bg-emerald-500 text-white' : 'bg-[#d00000] text-white'
               }`}>
-                {isFollowed ? '✓' : '+'}
+                <span className="material-symbols-outlined text-[14px] font-bold">
+                  {isFollowed ? 'check' : 'add'}
+                </span>
               </div>
             </div>
 
@@ -331,13 +333,14 @@ export default function DiscoverReels() {
               }} 
               className="flex flex-col items-center group"
             >
-              <div className={`w-11 h-11 rounded-full flex items-center justify-center backdrop-blur-md shadow-lg transition-all ${
-                isLiked ? 'bg-[#d00000] text-white scale-110' : 'bg-black/40 hover:bg-black/60 text-white'
-              }`}>
-                <span className="material-symbols-outlined text-[24px]">favorite</span>
-              </div>
-              <span className="text-[11px] font-semibold mt-1 drop-shadow-md">
-                {(likesCount / 1000).toFixed(1)}k
+              <span 
+                className={`material-symbols-outlined text-[34px] drop-shadow-lg transition-transform ${isLiked ? 'text-[#d00000] scale-110' : 'text-white/90 hover:scale-110'}`}
+                style={{ fontVariationSettings: isLiked ? "'FILL' 1" : "'FILL' 0" }}
+              >
+                favorite
+              </span>
+              <span className="text-[12px] font-bold mt-1 drop-shadow-md">
+                {(likesCount / 1000).toFixed(1)}K
               </span>
             </button>
 
@@ -347,28 +350,12 @@ export default function DiscoverReels() {
                 e.stopPropagation();
                 setIsCommentsOpen(true);
               }} 
-              className="flex flex-col items-center group"
+              className="flex flex-col items-center group text-white/90 hover:text-white"
             >
-              <div className="w-11 h-11 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-md flex items-center justify-center text-white shadow-lg transition-all">
-                <span className="material-symbols-outlined text-[24px]">chat_bubble</span>
-              </div>
-              <span className="text-[11px] font-semibold mt-1 drop-shadow-md">{reel.comments}</span>
-            </button>
-
-            {/* Save / Bookmark Button */}
-            <button 
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsSaved(!isSaved);
-              }} 
-              className="flex flex-col items-center group"
-            >
-              <div className={`w-11 h-11 rounded-full flex items-center justify-center backdrop-blur-md shadow-lg transition-all ${
-                isSaved ? 'bg-amber-500 text-white' : 'bg-black/40 hover:bg-black/60 text-white'
-              }`}>
-                <span className="material-symbols-outlined text-[24px]">bookmark</span>
-              </div>
-              <span className="text-[11px] font-semibold mt-1 drop-shadow-md">{reel.saves}</span>
+              <span className="material-symbols-outlined text-[32px] drop-shadow-lg transition-transform hover:scale-110" style={{ fontVariationSettings: "'FILL' 1" }}>
+                chat_bubble
+              </span>
+              <span className="text-[12px] font-bold mt-1 drop-shadow-md">{reel.comments}</span>
             </button>
 
             {/* Share Button */}
@@ -376,73 +363,82 @@ export default function DiscoverReels() {
               onClick={(e) => {
                 e.stopPropagation();
                 if (navigator.share) {
-                  navigator.share({ title: reel.caption, url: window.location.href });
+                  navigator.share({ title: reel.caption, url: window.location.href })
+                    .catch((err) => {
+                      if (err.name !== 'AbortError') {
+                        console.error('Error sharing:', err);
+                      }
+                    });
                 }
               }} 
-              className="flex flex-col items-center group"
+              className="flex flex-col items-center group text-white/90 hover:text-white"
             >
-              <div className="w-11 h-11 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-md flex items-center justify-center text-white shadow-lg transition-all">
-                <span className="material-symbols-outlined text-[24px]">share</span>
-              </div>
-              <span className="text-[11px] font-semibold mt-1 drop-shadow-md">{isAr ? 'مشاركة' : 'Share'}</span>
+              <span className="material-symbols-outlined text-[34px] drop-shadow-lg transition-transform hover:scale-110" style={{ fontVariationSettings: "'FILL' 1" }}>
+                reply
+              </span>
+              <span className="text-[12px] font-bold mt-1 drop-shadow-md">342</span>
             </button>
 
+            {/* Pinterest/Save Button */}
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsSaved(!isSaved);
+              }} 
+              className="flex flex-col items-center group text-white/90 hover:text-white"
+            >
+              <div className="w-8 h-8 rounded-full bg-[#d00000] flex items-center justify-center text-white shadow-lg font-serif font-black text-lg leading-none pt-0.5">
+                P
+              </div>
+            </button>
+            
             {/* Spinning Music Disc */}
-            <div className="w-9 h-9 rounded-full bg-slate-900 border-2 border-white/60 flex items-center justify-center shadow-lg animate-spin" style={{ animationDuration: '4s' }}>
-              <span className="material-symbols-outlined text-[16px] text-white">music_note</span>
+            <div className="w-[34px] h-[34px] mt-1 rounded-full bg-slate-900 border-[6px] border-white/20 flex items-center justify-center shadow-lg animate-spin" style={{ animationDuration: '4s' }}>
+              <img src={reel.avatar} className="w-full h-full rounded-full object-cover" />
             </div>
           </div>
 
-          {/* Bottom Left / Start Info (Creator Handle & Caption) */}
-          <div className={`pr-16 space-y-1.5 ${isAr ? 'text-right' : 'text-left'}`}>
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-sm text-white drop-shadow-sm">{reel.creatorHandle}</span>
-              <span className="text-[10px] bg-[#d00000] text-white px-1.5 py-0.5 rounded-full font-bold shadow-xs">
-                {isAr ? 'صانع محتوى' : 'Creator'}
-              </span>
-            </div>
-            <p className="text-xs text-white/95 leading-relaxed line-clamp-2 drop-shadow-sm">
-              {reel.caption}
-            </p>
-          </div>
-
-          {/* Shoppable Product Card Banner */}
-          <div 
-            onClick={(e) => {
-              e.stopPropagation();
-              openProductDetail(reel.product);
-            }}
-            className="flex items-center justify-between p-2.5 rounded-2xl bg-black/60 backdrop-blur-md border border-white/20 cursor-pointer hover:bg-black/75 transition-all shadow-xl"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-14 rounded-xl overflow-hidden bg-gray-800 shrink-0 border border-white/20">
-                <img 
-                  src={reel.product.image} 
-                  alt={reel.product.title} 
-                  className="w-full h-full object-cover"
-                />
+          <div className="w-full pr-[60px] flex flex-col justify-end space-y-3 mt-auto">
+            {/* Floating Product Pill */}
+            <div 
+              onClick={(e) => {
+                e.stopPropagation();
+                openProductDetail(reel.product);
+              }}
+              className="inline-flex w-fit items-center gap-2 bg-white rounded-xl py-1.5 px-1.5 pr-4 shadow-lg cursor-pointer hover:bg-gray-50 active:scale-95 transition-transform"
+            >
+              <img src={reel.product.image} className="w-8 h-8 rounded-lg object-cover" />
+              <div className="flex flex-col">
+                <span className="text-[11px] font-bold text-slate-900 leading-tight">{reel.product.title}</span>
+                <span className="text-[10px] font-bold text-[#d00000] leading-tight">EGP {reel.product.price}</span>
               </div>
-              <div className={isAr ? "text-right" : "text-left"}>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-bold text-white line-clamp-1">{reel.product.title}</span>
-                  <span className="text-[10px] bg-[#d00000] text-white px-1.5 py-0.2 rounded font-bold">{reel.product.discount}</span>
-                </div>
-                <div className="flex items-center gap-2 mt-0.5">
-                  <span className="text-sm font-black text-white">{reel.product.price} {isAr ? 'ج.م' : 'EGP'}</span>
-                  <span className="text-[10px] text-gray-300 line-through">{reel.product.originalPrice} {isAr ? 'ج.م' : 'EGP'}</span>
-                </div>
-              </div>
+              <span className="material-symbols-outlined text-[14px] text-gray-400 ml-1">chevron_right</span>
             </div>
 
+            {/* Creator Info */}
+            <div className={`space-y-1 ${isAr ? 'text-right' : 'text-left'}`}>
+              <div className="flex items-center gap-1.5">
+                <span className="font-bold text-[15px] text-white drop-shadow-md">@{reel.creatorHandle}</span>
+                <span className="material-symbols-outlined text-[16px] text-blue-500 bg-white rounded-full">check_circle</span>
+              </div>
+              <p className="text-[13px] text-white drop-shadow-md leading-snug">
+                {reel.caption}
+              </p>
+              <p className="text-[13px] font-bold text-white drop-shadow-md">
+                #EgyptianFashion #OOTD #Style
+              </p>
+            </div>
+            
+            {/* Shop Now Full Width Button */}
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 openQuickBuy(reel.product);
               }}
-              className="px-3.5 py-2 rounded-xl bg-[#d00000] text-white text-xs font-bold shadow-lg hover:brightness-110 active:scale-95 transition-all flex items-center gap-1 shrink-0"
+              className="w-full py-3 mt-1 rounded-xl bg-[#cc0000] text-white text-[15px] font-bold shadow-lg hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2"
             >
-              <span>{isAr ? 'شراء فوري' : 'Shop Now'}</span>
-              <span className="material-symbols-outlined text-[15px]">{isAr ? 'arrow_back' : 'arrow_forward'}</span>
+              <span className="material-symbols-outlined text-[20px]">shopping_bag</span>
+              <span>{isAr ? 'تسوق الآن' : 'Shop Now'}</span>
             </button>
           </div>
         </div>
@@ -451,9 +447,9 @@ export default function DiscoverReels() {
   };
 
   return (
-    <div className="w-full flex-1 flex flex-col items-center justify-center relative bg-[#121212] min-h-[calc(100vh-64px)]">
+    <div className="w-full h-full flex flex-col items-center justify-center relative bg-black md:bg-[#121212]">
       {/* Top Desktop Controls Bar (Switch View & Swiping Hint) */}
-      <div className="hidden lg:flex w-full max-w-[1780px] px-8 py-3 items-center justify-between text-white/80 z-20">
+      <div className="hidden md:flex w-full max-w-[1780px] px-8 py-3 items-center justify-between text-white/80 z-20">
         <div className="flex items-center gap-3">
           <button
             onClick={() => setDesktopViewMode('player')}
@@ -493,14 +489,14 @@ export default function DiscoverReels() {
 
       {/* 1. DESKTOP GRID VIEW (when toggled to Grid) */}
       {desktopViewMode === 'grid' ? (
-        <div className="hidden lg:block w-full max-w-[1780px] mx-auto px-8 py-4">
+        <div className="hidden md:block w-full max-w-[1780px] mx-auto px-8 py-4 overflow-y-auto flex-1 min-h-0">
           <div className="rounded-3xl border border-gray-800 bg-white shadow-xl overflow-hidden">
             <DesktopFeed />
           </div>
         </div>
       ) : (
         /* 2. DESKTOP INTERACTIVE REELS CONTAINER (Center 9:16 Aspect with Vertical Swiping) */
-        <div className="hidden lg:flex items-center justify-center w-full py-4 relative">
+        <div className="hidden md:flex items-center justify-center w-full py-4 relative flex-1 min-h-0">
           {/* Ambient blurred backdrop of current reel */}
           <div 
             className="absolute inset-0 opacity-20 filter blur-3xl bg-cover bg-center pointer-events-none transition-all duration-700"
@@ -527,7 +523,7 @@ export default function DiscoverReels() {
 
           {/* Centered Phone Frame for Vertical Reels */}
           <div 
-            className="w-[420px] h-[780px] rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-white/10 bg-black relative flex flex-col z-10 cursor-grab active:cursor-grabbing"
+            className="w-full max-w-[420px] aspect-[9/16] max-h-[85vh] rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-white/10 bg-black relative flex flex-col z-10 cursor-grab active:cursor-grabbing"
             onWheel={handleWheel}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
@@ -563,25 +559,60 @@ export default function DiscoverReels() {
 
       {/* 3. MOBILE FULL-SCREEN VIEW (Native Vertical Swipe Experience) */}
       <div 
-        className="lg:hidden relative w-full h-[calc(100vh-64px)] max-h-[920px] bg-black text-white flex flex-col justify-between overflow-hidden select-none font-sans mx-auto max-w-[440px]"
-        onWheel={handleWheel}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={() => { setIsDragging(false); setDragOffset(0); }}
+        className="md:hidden relative w-full h-full pb-14 bg-black text-white flex flex-col overflow-hidden select-none font-sans mx-auto max-w-[440px]"
       >
-        {/* Smooth Sliding Reels Container */}
-        <div 
-          className="w-full h-full transition-transform duration-300 ease-out"
-          style={{
-            transform: `translateY(calc(-${currentReelIndex * 100}% + ${dragOffset}px))`,
-          }}
-        >
-          {reelsList.map((reel, idx) => renderReelItem(reel, idx))}
+        {/* Custom Mobile Header (Solid White with Tabs) */}
+        <div className="w-full bg-white text-slate-900 pt-safe z-40 relative shadow-sm shrink-0">
+          <div className="flex items-center justify-between px-4 py-2">
+            <div className="flex items-center gap-2">
+              <EgLogo className="w-7 h-7" color="#d00000" />
+            </div>
+            <button className="p-1 hover:bg-gray-100 rounded-full transition-colors text-slate-900">
+              <span className="material-symbols-outlined text-[24px]">search</span>
+            </button>
+          </div>
+          
+          <div className="flex items-center gap-6 px-4 pb-0 overflow-x-auto no-scrollbar">
+            <button className="pb-3 text-[14px] font-bold text-slate-900 border-b-2 border-[#d00000] whitespace-nowrap">
+              {isAr ? 'لك' : 'For You'}
+            </button>
+            <button className="pb-3 text-[14px] font-medium text-gray-400 whitespace-nowrap">
+              {isAr ? 'متابعة' : 'Following'}
+            </button>
+            <button className="pb-3 text-[14px] font-medium text-gray-400 whitespace-nowrap">
+              {isAr ? 'الموضة' : 'Fashion'}
+            </button>
+            <button className="pb-3 text-[14px] font-medium text-gray-400 whitespace-nowrap">
+              {isAr ? 'مصر' : 'Egypt'}
+            </button>
+          </div>
         </div>
+
+        {/* Swipeable Video Area */}
+        <div 
+          className="relative flex-1 w-full overflow-hidden"
+          onWheel={handleWheel}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={() => { setIsDragging(false); setDragOffset(0); }}
+        >
+          {/* Smooth Sliding Reels Container */}
+          <div 
+            className="w-full h-full transition-transform duration-300 ease-out flex flex-col"
+            style={{
+              transform: `translateY(calc(-${currentReelIndex * 100}% + ${dragOffset}px))`,
+            }}
+          >
+            {reelsList.map((reel, idx) => (
+              <div key={reel.id} className="w-full h-full shrink-0">
+                {renderReelItem(reel, idx)}
+              </div>
+            ))}
+          </div>
 
         {/* Floating Arrow Indicators for Mobile */}
         <div className="absolute left-3 top-1/2 -translate-y-1/2 z-30 flex flex-col gap-2">
@@ -608,6 +639,7 @@ export default function DiscoverReels() {
             <span>{isAr ? 'اسحب للأعلى للفيديو التالي' : 'Swipe up for next'}</span>
           </div>
         )}
+        </div>
       </div>
 
       {/* Interactive Comments Drawer */}

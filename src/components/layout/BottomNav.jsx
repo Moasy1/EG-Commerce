@@ -4,9 +4,11 @@ import { useApp } from '../../context/AppContext';
 export default function BottomNav() {
   const { activeTab, setActiveTab } = useApp();
 
+  const isReels = activeTab === 'reels';
+
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-50 bg-white/95 backdrop-blur-xl border-t border-gray-200 shadow-sm max-w-[390px] mx-auto md:relative md:max-w-none">
-      <div className="flex items-center justify-between h-14 px-6">
+    <nav className="fixed bottom-0 inset-x-0 z-50 bg-white border-t border-gray-200 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] w-full mx-auto md:relative transition-colors duration-300 text-slate-900">
+      <div className="flex items-center justify-between h-14 px-6 pb-safe">
         {/* 1. Home */}
         <button
           onClick={() => setActiveTab('reels')}
@@ -28,7 +30,9 @@ export default function BottomNav() {
         <button
           onClick={() => setActiveTab('shop')}
           className={`flex flex-col items-center justify-center transition-all ${
-            activeTab === 'shop' || activeTab === 'product' ? 'text-[#d00000]' : 'text-gray-400 hover:text-gray-600'
+            activeTab === 'shop' || activeTab === 'product' 
+              ? 'text-[#d00000]'
+              : 'text-gray-400 hover:text-gray-600'
           }`}
           title="Explore (Shop)"
         >
@@ -54,7 +58,9 @@ export default function BottomNav() {
         <button
           onClick={() => setActiveTab('cart')}
           className={`flex flex-col items-center justify-center relative transition-all ${
-            activeTab === 'cart' || activeTab === 'checkout' ? 'text-[#d00000]' : 'text-gray-400 hover:text-gray-600'
+            activeTab === 'cart' || activeTab === 'checkout' 
+              ? 'text-[#d00000]'
+              : 'text-gray-400 hover:text-gray-600'
           }`}
           title="Inbox / Cart"
         >
@@ -71,7 +77,9 @@ export default function BottomNav() {
         <button
           onClick={() => setActiveTab('profile')}
           className={`flex flex-col items-center justify-center transition-all ${
-            activeTab === 'profile' ? 'text-[#d00000]' : 'text-gray-400 hover:text-gray-600'
+            activeTab === 'profile' 
+              ? 'text-[#d00000]'
+              : 'text-gray-400 hover:text-gray-600'
           }`}
           title="Profile"
         >

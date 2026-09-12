@@ -62,20 +62,22 @@ function MainContent() {
   return (
     <div 
       dir={language === 'ar' ? 'rtl' : 'ltr'} 
-      className={`min-h-screen bg-[#fcfbfa] flex flex-col relative text-slate-900 ${
+      className={`${activeTab === 'reels' ? 'h-dvh overflow-hidden' : 'min-h-screen'} bg-[#fcfbfa] flex flex-col relative text-slate-900 ${
         language === 'ar' ? 'font-sans' : 'font-sans'
       }`}
     >
-      <Header />
+      <div className={activeTab === 'reels' ? 'hidden md:block' : 'block'}>
+        <Header />
+      </div>
       
-      <main className="flex-1 flex flex-col w-full">
+      <main className={`flex-1 flex flex-col w-full min-h-0 ${activeTab === 'reels' ? 'overflow-hidden' : ''}`}>
         {renderActiveScreen()}
       </main>
 
       <QuickBuyDrawer />
       
       {/* Mobile-only bottom navigation bar */}
-      <div className="lg:hidden">
+      <div className="md:hidden">
         <BottomNav />
       </div>
     </div>

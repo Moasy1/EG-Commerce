@@ -73,15 +73,6 @@ export default function Marketplace() {
 
       {/* 2. MOBILE VIEW (Screen 2: Search & Discovery) */}
       <div className="lg:hidden w-full min-h-[calc(100vh-64px)] bg-[#fcfbfa] text-slate-900 pb-24 font-sans select-none max-w-[430px] mx-auto">
-        {/* iOS Status Bar */}
-        <div className="w-full flex items-center justify-between px-6 pt-3 pb-2 text-[13px] font-semibold text-slate-800">
-          <span>9:41</span>
-          <div className="flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-[15px]">signal_cellular_alt</span>
-            <span className="material-symbols-outlined text-[15px]">wifi</span>
-            <span className="material-symbols-outlined text-[18px]">battery_full</span>
-          </div>
-        </div>
 
         {/* Top Header with Red Logo & Icons */}
         <div className="px-4 py-2 flex items-center justify-between">

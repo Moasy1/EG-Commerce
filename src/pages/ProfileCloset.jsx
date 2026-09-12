@@ -19,15 +19,6 @@ export default function ProfileCloset() {
 
   return (
     <div className="w-full min-h-[844px] bg-white text-slate-900 flex flex-col font-sans select-none pb-20">
-      {/* 1. iOS Status Bar */}
-      <div className="w-full flex items-center justify-between px-6 pt-3 pb-1 text-[13px] font-semibold text-slate-800">
-        <span>9:41</span>
-        <div className="flex items-center gap-1.5">
-          <span className="material-symbols-outlined text-[15px]">signal_cellular_alt</span>
-          <span className="material-symbols-outlined text-[15px]">wifi</span>
-          <span className="material-symbols-outlined text-[18px]">battery_full</span>
-        </div>
-      </div>
 
       {/* 2. Top Bar: Center Red Arch Logo & Right "..." Menu */}
       <div className="w-full px-5 py-2 flex items-center justify-between">

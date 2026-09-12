@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import ProductFormModal from '../components/merchant/ProductFormModal';
 import StorefrontThemeCustomizer from '../components/merchant/StorefrontThemeCustomizer';
+import DesktopSellerDashboard from '../components/desktop/DesktopSellerDashboard';
 
 export default function MerchantDashboard() {
   const { 
@@ -24,6 +25,7 @@ export default function MerchantDashboard() {
 
   // Subtab navigation: overview, products, orders, theme, campaigns
   const [activeSubTab, setActiveSubTab] = useState('overview');
+  const [overviewViewMode, setOverviewViewMode] = useState('desktop_screen'); // 'desktop_screen' | 'saas_analytics'
   const [selectedTimeframe, setSelectedTimeframe] = useState('7d'); // 'today' | '7d' | '30d'
 
   // Product Form Modal state
@@ -212,6 +214,41 @@ export default function MerchantDashboard() {
         {/* ========================================================================= */}
         {activeSubTab === 'overview' && (
           <div className="space-y-6 animate-fade-in">
+            {/* View Mode Switcher on Desktop */}
+            <div className="hidden lg:flex items-center justify-between pb-3 border-b border-surface-container-high">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-on-surface-variant">واجهة لوحة التاجر:</span>
+                <div className="flex items-center p-1 rounded-xl bg-surface-container-low border border-surface-container-high text-xs font-bold">
+                  <button
+                    onClick={() => setOverviewViewMode('desktop_screen')}
+                    className={`px-3.5 py-1.5 rounded-lg transition-all ${
+                      overviewViewMode === 'desktop_screen'
+                        ? 'bg-[#d00000] text-white shadow-xs'
+                        : 'text-on-surface-variant hover:text-on-surface'
+                    }`}
+                  >
+                    <span>📊 لوحة البائع الرسمية (Desktop Seller Dashboard 100%)</span>
+                  </button>
+                  <button
+                    onClick={() => setOverviewViewMode('saas_analytics')}
+                    className={`px-3.5 py-1.5 rounded-lg transition-all ${
+                      overviewViewMode === 'saas_analytics'
+                        ? 'bg-primary text-on-primary shadow-xs'
+                        : 'text-on-surface-variant hover:text-on-surface'
+                    }`}
+                  >
+                    <span>📈 تحليلات تفصيلية وأدوات SaaS</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {overviewViewMode === 'desktop_screen' ? (
+              <div className="rounded-3xl border border-gray-200/90 bg-white shadow-sm overflow-hidden mb-6">
+                <DesktopSellerDashboard />
+              </div>
+            ) : (
+              <div className="space-y-6">
             {/* Filter Timeframe Bar */}
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-on-surface-variant">مؤشرات الأداء المباشرة:</span>
@@ -371,6 +408,8 @@ export default function MerchantDashboard() {
             </div>
           </div>
         )}
+      </div>
+    )}
 
         {/* ========================================================================= */}
         {/* SUBTAB 2: PRODUCTS & CATALOG MANAGEMENT                                    */}

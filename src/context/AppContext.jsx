@@ -390,7 +390,7 @@ export const INITIAL_PRODUCTS = [
 ];
 
 export function AppProvider({ children }) {
-  const [activeTab, setActiveTab] = useState('showcase');
+  const [activeTab, setActiveTab] = useState('reels');
   const [products, setProducts] = useState(INITIAL_PRODUCTS);
   const [selectedProduct, setSelectedProduct] = useState(INITIAL_PRODUCTS[0]);
   const [merchants, setMerchants] = useState(MERCHANTS_DATA);

@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import EgLogo from '../components/common/EgLogo';
+import DesktopMarketplace from '../components/desktop/DesktopMarketplace';
 
 export default function Marketplace() {
   const { openProductDetail, totalCartCount, setActiveTab, addToCart } = useApp();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
-  // Categories corresponding to the exact 6 cards in Screen 2
+  // Categories corresponding to the exact 6 cards in Screen 2 mobile
   const categories = [
     { id: 'new', label: 'New Arrivals', isRedCard: true },
     { id: 'women', label: 'Women', image: '/images/products/silk_dress.jpg' },
@@ -17,7 +18,7 @@ export default function Marketplace() {
     { id: 'accessories', label: 'Accessories', image: '/images/products/copper_lantern.jpg' },
   ];
 
-  // Exact 4 Featured Products shown on Screen 2
+  // Featured Products shown on mobile Screen 2
   const featuredProducts = [
     {
       id: 'p-linen-coord',
@@ -62,132 +63,135 @@ export default function Marketplace() {
   ];
 
   return (
-    <div className="w-full min-h-[844px] bg-white text-slate-900 flex flex-col font-sans select-none pb-20">
-      {/* 1. iOS Status Bar */}
-      <div className="w-full flex items-center justify-between px-6 pt-3 pb-1 text-[13px] font-semibold text-slate-800">
-        <span>9:41</span>
-        <div className="flex items-center gap-1.5">
-          <span className="material-symbols-outlined text-[15px]">signal_cellular_alt</span>
-          <span className="material-symbols-outlined text-[15px]">wifi</span>
-          <span className="material-symbols-outlined text-[18px]">battery_full</span>
+    <div className="w-full flex-1">
+      {/* 1. DESKTOP VIEW (Screen 2: Explore Marketplace with full filters & 4-col grid) */}
+      <div className="hidden lg:block w-full max-w-[1780px] mx-auto px-4 md:px-8 py-6">
+        <div className="rounded-3xl border border-gray-200/90 bg-white shadow-sm overflow-hidden">
+          <DesktopMarketplace />
         </div>
       </div>
 
-      {/* 2. Top Bar: Red Arch Logo & Cart Icon with Badge */}
-      <div className="w-full px-5 py-2 flex items-center justify-between">
-        <div className="cursor-pointer" onClick={() => setActiveTab('reels')}>
-          <EgLogo className="w-7 h-7" color="#d00000" />
+      {/* 2. MOBILE VIEW (Screen 2: Search & Discovery) */}
+      <div className="lg:hidden w-full min-h-[calc(100vh-64px)] bg-[#fcfbfa] text-slate-900 pb-24 font-sans select-none max-w-[430px] mx-auto">
+        {/* iOS Status Bar */}
+        <div className="w-full flex items-center justify-between px-6 pt-3 pb-2 text-[13px] font-semibold text-slate-800">
+          <span>9:41</span>
+          <div className="flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-[15px]">signal_cellular_alt</span>
+            <span className="material-symbols-outlined text-[15px]">wifi</span>
+            <span className="material-symbols-outlined text-[18px]">battery_full</span>
+          </div>
         </div>
-        <button 
-          onClick={() => setActiveTab('cart')}
-          className="relative p-1.5 text-slate-800 hover:text-[#d00000] transition-colors"
-        >
-          <span className="material-symbols-outlined text-[24px]">shopping_cart</span>
-          {totalCartCount > 0 && (
-            <span className="absolute top-0 right-0 w-4 h-4 rounded-full bg-[#d00000] text-white text-[10px] font-bold flex items-center justify-center">
-              {totalCartCount}
-            </span>
-          )}
-        </button>
-      </div>
 
-      {/* 3. Search Bar */}
-      <div className="px-5 py-2">
-        <div className="w-full flex items-center gap-2 px-3.5 py-2.5 bg-gray-100/90 rounded-full text-slate-600 border border-gray-200 focus-within:border-gray-300">
-          <span className="material-symbols-outlined text-[20px] text-gray-400">search</span>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search for outfits, brands, creators..."
-            className="w-full bg-transparent text-xs text-slate-900 focus:outline-none placeholder:text-gray-400 font-normal"
-          />
-        </div>
-      </div>
-
-      {/* 4. Categories Grid (6 Cards: Red New Arrivals + 5 Photo Cards) */}
-      <div className="px-5 py-3">
-        <div className="grid grid-cols-3 gap-2.5">
-          {categories.map((cat) => (
-            <div
-              key={cat.id}
-              onClick={() => setSelectedCategory(cat.id)}
-              className="group aspect-[4/3] rounded-2xl overflow-hidden relative cursor-pointer shadow-xs transition-transform active:scale-95"
-            >
-              {cat.isRedCard ? (
-                /* Card 1: Solid Red Card with White Star */
-                <div className="w-full h-full bg-[#d00000] flex flex-col items-center justify-center text-white p-2">
-                  <span className="material-symbols-outlined text-[24px] mb-1">star</span>
-                  <span className="text-[11px] font-bold text-center leading-tight">
-                    {cat.label}
-                  </span>
-                </div>
-              ) : (
-                /* Cards 2-6: Photo Cards */
-                <div className="w-full h-full relative">
-                  <img 
-                    src={cat.image} 
-                    alt={cat.label}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent flex items-end justify-center pb-2">
-                    <span className="text-[11px] font-bold text-white text-center leading-tight drop-shadow-sm px-1">
-                      {cat.label}
-                    </span>
-                  </div>
-                </div>
-              )}
+        {/* Top Header with Red Logo & Icons */}
+        <div className="px-4 py-2 flex items-center justify-between">
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => setActiveTab('reels')}>
+            <EgLogo className="w-8 h-8" color="#d00000" />
+            <div className="text-left">
+              <span className="text-sm font-black tracking-tight text-slate-900 leading-none block">
+                EG-Commerce
+              </span>
+              <span className="text-[10px] text-gray-500 font-medium">Explore & Shop</span>
             </div>
-          ))}
+          </div>
+
+          <div className="flex items-center gap-2 text-slate-700">
+            <button className="p-1.5 rounded-full hover:bg-gray-100"><span className="material-symbols-outlined text-[20px]">favorite</span></button>
+            <button onClick={() => setActiveTab('cart')} className="p-1.5 rounded-full hover:bg-gray-100 relative">
+              <span className="material-symbols-outlined text-[20px]">shopping_bag</span>
+              {totalCartCount > 0 && (
+                <span className="absolute top-0 right-0 w-4 h-4 rounded-full bg-[#d00000] text-white text-[9px] font-bold flex items-center justify-center">
+                  {totalCartCount}
+                </span>
+              )}
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* 5. Featured Products Section Header */}
-      <div className="px-5 pt-3 pb-2 flex items-center justify-between">
-        <h3 className="text-sm font-bold text-slate-900">Featured Products</h3>
-        <button 
-          onClick={() => setSelectedCategory('all')} 
-          className="text-xs font-semibold text-gray-500 hover:text-[#d00000] flex items-center gap-0.5"
-        >
-          <span>See All</span>
-          <span className="material-symbols-outlined text-[15px]">chevron_right</span>
-        </button>
-      </div>
+        {/* Search Bar with Camera Visual Search */}
+        <div className="px-4 py-2">
+          <div className="w-full flex items-center justify-between px-3.5 py-2.5 bg-gray-100 rounded-2xl border border-gray-200/70 focus-within:border-[#d00000] transition-colors">
+            <div className="flex items-center gap-2.5 flex-1">
+              <span className="material-symbols-outlined text-[18px] text-gray-400">search</span>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search outfits, linen, abayas, brands..."
+                className="w-full bg-transparent focus:outline-none text-xs text-slate-800 placeholder:text-gray-400 font-medium"
+              />
+            </div>
+            <span className="material-symbols-outlined text-[18px] text-gray-400 cursor-pointer hover:text-slate-700">photo_camera</span>
+          </div>
+        </div>
 
-      {/* 6. 2-Column Products Grid */}
-      <div className="px-5 pb-6">
-        <div className="grid grid-cols-2 gap-3.5">
-          {featuredProducts.map((prod) => (
+        {/* Category Visual Cards */}
+        <div className="px-4 py-3">
+          <div className="grid grid-cols-3 gap-2.5">
+            {categories.map((cat) => (
+              <div
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.id)}
+                className={`h-28 rounded-2xl relative overflow-hidden cursor-pointer shadow-xs active:scale-95 transition-all flex flex-col justify-end p-2.5 ${
+                  cat.isRedCard ? 'bg-[#d00000] text-white' : 'bg-gray-900 text-white'
+                }`}
+              >
+                {!cat.isRedCard && (
+                  <>
+                    <img src={cat.image} alt={cat.label} className="absolute inset-0 w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+                  </>
+                )}
+                <div className="relative z-10 text-left">
+                  {cat.isRedCard && <span className="material-symbols-outlined text-[20px] mb-1">local_fire_department</span>}
+                  <span className="text-[11px] font-black leading-tight block">{cat.label}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Featured Products Header */}
+        <div className="px-4 pt-3 pb-2 flex items-center justify-between">
+          <h3 className="text-sm font-black text-slate-900">Featured Egyptian Products</h3>
+          <span className="text-xs font-bold text-[#d00000] cursor-pointer">View All</span>
+        </div>
+
+        {/* 2-Column Product Grid */}
+        <div className="px-4 grid grid-cols-2 gap-3">
+          {featuredProducts.map((product) => (
             <div
-              key={prod.id}
-              onClick={() => openProductDetail(prod)}
-              className="group flex flex-col cursor-pointer"
+              key={product.id}
+              onClick={() => {
+                openProductDetail(product);
+                setActiveTab('product');
+              }}
+              className="bg-white rounded-2xl border border-gray-200/80 overflow-hidden shadow-xs cursor-pointer hover:shadow-md transition-all flex flex-col justify-between"
             >
-              {/* Image Container with Heart Favorite Icon */}
-              <div className="aspect-[3/4] w-full rounded-2xl overflow-hidden relative bg-gray-100 border border-gray-100 shadow-xs">
-                <img 
-                  src={prod.image} 
-                  alt={prod.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
+              <div className="relative w-full aspect-[4/5] bg-gray-100 overflow-hidden">
+                <img src={product.image} alt={product.title} className="w-full h-full object-cover" />
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
+                    addToCart(product, 1);
                   }}
-                  className="absolute top-2.5 right-2.5 w-7 h-7 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-slate-700 hover:text-[#d00000] transition-colors"
+                  className="absolute bottom-2 right-2 w-7 h-7 rounded-full bg-white/90 backdrop-blur-md shadow-md text-slate-800 flex items-center justify-center hover:bg-[#d00000] hover:text-white transition-all"
                 >
-                  <span className="material-symbols-outlined text-[16px]">favorite</span>
+                  <span className="material-symbols-outlined text-[16px]">add_shopping_cart</span>
                 </button>
               </div>
 
-              {/* Product Info */}
-              <div className="pt-2 text-left">
-                <h4 className="text-xs font-semibold text-slate-900 truncate">
-                  {prod.title}
-                </h4>
-                <span className="text-xs font-bold text-slate-900 block mt-0.5">
-                  EGP {prod.price.toLocaleString()}
-                </span>
+              <div className="p-2.5 text-left space-y-1">
+                <div className="flex items-center gap-1 text-[10px] text-amber-500 font-bold">
+                  <span className="material-symbols-outlined text-[12px]">star</span>
+                  <span>{product.rating}</span>
+                  <span className="text-gray-400 font-normal">({product.reviewsCount})</span>
+                </div>
+                <h4 className="text-xs font-bold text-slate-900 line-clamp-1 leading-tight">{product.title}</h4>
+                <div className="flex items-baseline justify-between pt-0.5">
+                  <span className="text-xs font-black text-[#d00000]">EGP {product.price}</span>
+                  <span className="text-[10px] text-gray-400">{product.category}</span>
+                </div>
               </div>
             </div>
           ))}

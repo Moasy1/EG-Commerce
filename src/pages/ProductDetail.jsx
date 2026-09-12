@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import EgLogo from '../components/common/EgLogo';
+import DesktopProductDetail from '../components/desktop/DesktopProductDetail';
 
 export default function ProductDetail() {
   const { selectedProduct, addToCart, setActiveTab } = useApp();
@@ -28,170 +29,161 @@ export default function ProductDetail() {
   };
 
   return (
-    <div className="w-full min-h-[844px] bg-white text-slate-900 flex flex-col font-sans select-none pb-24 relative">
-      {/* 1. iOS Status Bar */}
-      <div className="w-full flex items-center justify-between px-6 pt-3 pb-1 text-[13px] font-semibold text-slate-800">
-        <span>9:41</span>
-        <div className="flex items-center gap-1.5">
-          <span className="material-symbols-outlined text-[15px]">signal_cellular_alt</span>
-          <span className="material-symbols-outlined text-[15px]">wifi</span>
-          <span className="material-symbols-outlined text-[18px]">battery_full</span>
+    <div className="w-full flex-1">
+      {/* 1. DESKTOP VIEW (Screen 3: Desktop Product Detail with 4-thumbnail strip) */}
+      <div className="hidden lg:block w-full max-w-[1780px] mx-auto px-4 md:px-8 py-6">
+        <div className="rounded-3xl border border-gray-200/90 bg-white shadow-sm overflow-hidden">
+          <DesktopProductDetail />
         </div>
       </div>
 
-      {/* 2. Top Navigation Bar: Back Arrow, Center Red Logo, Heart & Share */}
-      <div className="w-full px-4 py-2 flex items-center justify-between">
-        <button 
-          onClick={() => setActiveTab('shop')} 
-          className="p-1.5 text-slate-800 hover:text-[#d00000] transition-colors"
-        >
-          <span className="material-symbols-outlined text-[24px]">chevron_left</span>
-        </button>
-
-        <div className="cursor-pointer" onClick={() => setActiveTab('reels')}>
-          <EgLogo className="w-7 h-7" color="#d00000" />
+      {/* 2. MOBILE VIEW (Screen 3: Product Detail) */}
+      <div className="lg:hidden w-full min-h-[calc(100vh-64px)] bg-white text-slate-900 flex flex-col font-sans select-none pb-24 relative max-w-[430px] mx-auto">
+        {/* iOS Status Bar */}
+        <div className="w-full flex items-center justify-between px-6 pt-3 pb-1 text-[13px] font-semibold text-slate-800">
+          <span>9:41</span>
+          <div className="flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-[15px]">signal_cellular_alt</span>
+            <span className="material-symbols-outlined text-[15px]">wifi</span>
+            <span className="material-symbols-outlined text-[18px]">battery_full</span>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2 text-slate-700">
+        {/* Top Navigation Bar: Back Arrow, Center Red Logo, Heart & Share */}
+        <div className="w-full px-4 py-2 flex items-center justify-between">
           <button 
-            onClick={() => setIsFavorited(!isFavorited)}
-            className="p-1.5 hover:text-[#d00000] transition-colors"
+            onClick={() => setActiveTab('shop')} 
+            className="p-1.5 text-slate-800 hover:text-[#d00000] transition-colors"
           >
-            <span 
-              className={`material-symbols-outlined text-[22px] ${isFavorited ? 'text-[#d00000] fill-current' : ''}`}
-            >
-              favorite
-            </span>
+            <span className="material-symbols-outlined text-[24px]">chevron_left</span>
           </button>
-          <button className="p-1.5 hover:text-[#d00000] transition-colors">
-            <span className="material-symbols-outlined text-[22px]">ios_share</span>
-          </button>
-        </div>
-      </div>
 
-      {/* 3. Product Hero Image with 1/5 Badge */}
-      <div className="w-full px-5 py-2">
-        <div className="aspect-[4/5] w-full rounded-3xl overflow-hidden relative bg-gray-100 shadow-sm">
+          <div className="cursor-pointer" onClick={() => setActiveTab('reels')}>
+            <EgLogo className="w-7 h-7" color="#d00000" />
+          </div>
+
+          <div className="flex items-center gap-2 text-slate-700">
+            <button 
+              onClick={() => setIsFavorited(!isFavorited)}
+              className="p-1.5 hover:text-[#d00000] transition-colors"
+            >
+              <span 
+                className="material-symbols-outlined text-[22px]"
+                style={{ color: isFavorited ? '#d00000' : 'inherit', fontVariationSettings: isFavorited ? "'FILL' 1" : "'FILL' 0" }}
+              >
+                favorite
+              </span>
+            </button>
+            <button className="p-1.5 hover:text-[#d00000] transition-colors">
+              <span className="material-symbols-outlined text-[22px]">share</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Big Product Image with Slider Dots */}
+        <div className="relative w-full aspect-[4/5] bg-gray-100 overflow-hidden">
           <img 
-            src={product.image || '/images/reels/reel_1.jpg'} 
-            alt={product.title}
+            src={product.image} 
+            alt={product.title} 
             className="w-full h-full object-cover"
           />
-          {/* 1/5 Carousel Count Pill */}
-          <div className="absolute bottom-3 right-3 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-white text-[11px] font-semibold">
-            1/5
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-black/30 backdrop-blur-md px-2 py-1 rounded-full">
+            <span className="w-2 h-2 rounded-full bg-[#d00000]" />
+            <span className="w-1.5 h-1.5 rounded-full bg-white/70" />
+            <span className="w-1.5 h-1.5 rounded-full bg-white/70" />
+            <span className="w-1.5 h-1.5 rounded-full bg-white/70" />
           </div>
         </div>
-      </div>
 
-      {/* 4. Product Title, Price & Reviews */}
-      <div className="px-5 pt-3 space-y-1 text-left">
-        <h1 className="text-lg font-bold text-slate-900 leading-tight">
-          {product.title}
-        </h1>
-        <div className="text-lg font-black text-[#d00000]">
-          EGP {product.price.toLocaleString()}
-        </div>
-
-        {/* Rating Stars */}
-        <div className="flex items-center gap-1 text-xs pt-1">
-          <div className="flex items-center text-[#d00000]">
-            {[...Array(5)].map((_, i) => (
-              <span key={i} className="material-symbols-outlined text-[15px] fill-current">star</span>
-            ))}
-          </div>
-          <span className="font-bold text-slate-800 ml-1">4.8</span>
-          <span className="text-gray-400 font-medium">(124 reviews)</span>
-        </div>
-      </div>
-
-      {/* 5. Size Selector */}
-      <div className="px-5 pt-4 space-y-2 text-left">
-        <span className="text-xs font-bold text-slate-900 block">Size</span>
-        <div className="flex items-center gap-2.5">
-          {['XS', 'S', 'M', 'L', 'XL'].map((size) => (
-            <button
-              key={size}
-              onClick={() => setSelectedSize(size)}
-              className={`w-10 h-10 rounded-xl text-xs font-bold transition-all flex items-center justify-center ${
-                selectedSize === size
-                  ? 'bg-[#d00000] text-white shadow-md'
-                  : 'bg-gray-100 text-slate-700 hover:bg-gray-200'
-              }`}
-            >
-              {size}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* 6. Seller Info Card (By Nada Fashion) */}
-      <div className="px-5 pt-4">
-        <div 
-          onClick={() => setActiveTab('profile')}
-          className="p-3 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors"
-        >
-          <div className="flex items-center gap-3">
-            <img 
-              src="/images/reels/reel_2.jpg" 
-              alt="Nada Fashion"
-              className="w-10 h-10 rounded-full object-cover"
-            />
-            <div className="text-left">
-              <div className="flex items-center gap-1">
-                <span className="text-xs font-bold text-slate-900">By Nada Fashion</span>
-                <span className="material-symbols-outlined text-[14px] text-sky-500 fill-current">verified</span>
+        {/* Product Details Section */}
+        <div className="p-4 text-left space-y-4">
+          <div className="space-y-1">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold text-[#d00000] uppercase tracking-wider">Egyptian Heritage Linen</span>
+              <div className="flex items-center gap-1 text-xs text-amber-500 font-bold">
+                <span className="material-symbols-outlined text-[14px]">star</span>
+                <span>{product.rating || 4.8}</span>
+                <span className="text-gray-400 font-normal">({product.reviewsCount || 124} reviews)</span>
               </div>
-              <span className="text-[11px] text-gray-500 block">Egypt · Cairo</span>
+            </div>
+            <h1 className="text-xl font-black text-slate-900 leading-snug">{product.title}</h1>
+            <div className="flex items-baseline gap-2 pt-1">
+              <span className="text-2xl font-black text-[#d00000]">EGP {product.price}</span>
+              <span className="text-sm text-gray-400 line-through">EGP {Math.round(product.price * 1.25)}</span>
+              <span className="text-[10px] font-bold bg-red-100 text-[#d00000] px-1.5 py-0.5 rounded">20% OFF</span>
             </div>
           </div>
-          <span className="text-xs font-bold text-slate-700 hover:text-[#d00000] flex items-center gap-0.5">
-            <span>View Store</span>
-            <span className="material-symbols-outlined text-[15px]">chevron_right</span>
-          </span>
-        </div>
-      </div>
 
-      {/* 7. Delivery Info Card */}
-      <div className="px-5 pt-3">
-        <div className="p-3 rounded-2xl bg-gray-50 border border-gray-100 flex items-center gap-3 text-left">
-          <div className="w-9 h-9 rounded-xl bg-gray-200/70 text-slate-700 flex items-center justify-center">
-            <span className="material-symbols-outlined text-[20px]">local_shipping</span>
+          {/* Size Selector */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs font-bold text-slate-800">
+              <span>Select Size</span>
+              <span className="text-gray-500 underline cursor-pointer">Size Guide</span>
+            </div>
+            <div className="flex items-center gap-2">
+              {['XS', 'S', 'M', 'L', 'XL'].map((size) => (
+                <button
+                  key={size}
+                  onClick={() => setSelectedSize(size)}
+                  className={`w-11 h-11 rounded-xl font-bold text-xs transition-all border ${
+                    selectedSize === size
+                      ? 'border-[#d00000] bg-[#d00000] text-white shadow-sm'
+                      : 'border-gray-200 text-slate-700 hover:border-gray-300'
+                  }`}
+                >
+                  {size}
+                </button>
+              ))}
+            </div>
           </div>
-          <div>
-            <div className="text-xs font-bold text-slate-900">Delivery in 2-5 days</div>
-            <div className="text-[11px] text-gray-500">Cash on delivery available</div>
+
+          {/* Merchant Profile Card */}
+          <div 
+            onClick={() => setActiveTab('storefront')}
+            className="flex items-center justify-between p-3 rounded-2xl bg-gray-50 border border-gray-200/80 cursor-pointer hover:bg-gray-100 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 border border-gray-300">
+                <img src="/images/brands/talieska_logo.jpg" alt="Merchant" className="w-full h-full object-cover" />
+              </div>
+              <div className="text-left">
+                <div className="flex items-center gap-1">
+                  <span className="text-xs font-bold text-slate-900">Talieska Studio</span>
+                  <span className="material-symbols-outlined text-[14px] text-blue-500">verified</span>
+                </div>
+                <span className="text-[10px] text-gray-500">Cairo, Egypt • 4.9 ★ (180 orders)</span>
+              </div>
+            </div>
+            <button className="px-3 py-1 rounded-full border border-gray-300 text-xs font-bold text-slate-800 hover:border-[#d00000] hover:text-[#d00000]">
+              Visit
+            </button>
           </div>
         </div>
-      </div>
 
-      {/* 8. Reviews Preview Card */}
-      <div className="px-5 pt-3">
-        <div className="p-3 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors">
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-[18px] text-gray-600">star</span>
-            <span className="text-xs font-bold text-slate-900">Reviews (124)</span>
+        {/* Fixed Bottom Action Bar */}
+        <div className="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-gray-200 p-3 px-4 flex items-center gap-3 z-40 max-w-[430px] mx-auto">
+          <button
+            onClick={() => setActiveTab('cart')}
+            className="w-12 h-12 rounded-2xl border border-gray-200 flex items-center justify-center text-slate-700 hover:text-[#d00000] hover:border-[#d00000] transition-colors"
+          >
+            <span className="material-symbols-outlined text-[22px]">shopping_bag</span>
+          </button>
+          <button
+            onClick={handleAddToCart}
+            className="flex-1 h-12 rounded-2xl bg-[#d00000] text-white font-bold text-sm shadow-md hover:brightness-110 active:scale-98 transition-all flex items-center justify-center gap-2"
+          >
+            <span className="material-symbols-outlined text-[18px]">add_shopping_cart</span>
+            <span>Add to Cart • EGP {product.price}</span>
+          </button>
+        </div>
+
+        {/* Added to Cart Toast */}
+        {addedToast && (
+          <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-4 py-2 rounded-full text-xs font-bold shadow-xl flex items-center gap-1.5 animate-bounce">
+            <span className="material-symbols-outlined text-[16px] text-emerald-400">check_circle</span>
+            <span>Added to Cart! تم الإضافة للسلة</span>
           </div>
-          <span className="material-symbols-outlined text-[16px] text-gray-400">chevron_right</span>
-        </div>
-      </div>
-
-      {/* Added Toast */}
-      {addedToast && (
-        <div className="fixed top-16 inset-x-8 z-50 bg-[#d00000] text-white py-2 px-4 rounded-xl text-xs font-bold text-center shadow-xl animate-fade-in">
-          Added to cart successfully! 🛍️
-        </div>
-      )}
-
-      {/* 9. Fixed Bottom Add to Cart CTA */}
-      <div className="fixed bottom-0 inset-x-0 z-40 p-4 bg-white/95 backdrop-blur-md border-t border-gray-100 max-w-[390px] mx-auto md:relative md:max-w-none">
-        <button
-          onClick={handleAddToCart}
-          className="w-full py-3.5 rounded-2xl bg-[#d00000] hover:bg-[#b00000] text-white text-xs font-bold shadow-lg flex items-center justify-center gap-2 active:scale-98 transition-all"
-        >
-          <span className="material-symbols-outlined text-[18px]">shopping_bag</span>
-          <span>Add to Cart</span>
-        </button>
+        )}
       </div>
     </div>
   );

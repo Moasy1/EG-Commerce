@@ -2,7 +2,6 @@ import React from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import Header from './components/layout/Header';
 import BottomNav from './components/layout/BottomNav';
-import DeviceFrame from './components/layout/DeviceFrame';
 import QuickBuyDrawer from './components/common/QuickBuyDrawer';
 
 import DiscoverReels from './pages/DiscoverReels';
@@ -22,63 +21,56 @@ import ScreenShowcase from './pages/ScreenShowcase';
 function MainContent() {
   const { activeTab } = useApp();
 
-  // If user requests the 5-Screen Mockup Showcase view, render it edge-to-edge
-  if (activeTab === 'showcase') {
-    return (
-      <div className="min-h-screen bg-[#fcfbfa] flex flex-col relative text-slate-900">
-        <Header />
-        <main className="flex-1">
-          <ScreenShowcase />
-        </main>
-      </div>
-    );
-  }
-
   const renderActiveScreen = () => {
     switch (activeTab) {
       case 'reels':
         return <DiscoverReels />;
       case 'shop':
         return <Marketplace />;
-      case 'storefront':
-        return <MerchantStorefront />;
-      case 'dashboard':
-      case 'merchant':
-        return <MerchantDashboard />;
-      case 'merchant_campaign':
-        return <MerchantCampaign />;
       case 'product':
         return <ProductDetail />;
       case 'cart':
         return <UnifiedCart />;
       case 'checkout':
         return <Checkout />;
+      case 'dashboard':
+      case 'merchant':
+        return <MerchantDashboard />;
+      case 'studio':
+      case 'creator':
+        return <CreatorStudio />;
+      case 'storefront':
+        return <MerchantStorefront />;
+      case 'merchant_campaign':
+        return <MerchantCampaign />;
       case 'tracking':
         return <OrderTracking />;
       case 'rewards':
         return <RewardsHub />;
-      case 'studio':
-        return <CreatorStudio />;
       case 'profile':
         return <ProfileCloset />;
+      case 'showcase':
+        return <ScreenShowcase />;
       default:
         return <DiscoverReels />;
     }
   };
 
   return (
-    <DeviceFrame>
-      <div className="min-h-screen bg-surface flex flex-col relative text-on-surface">
-        <Header />
-        
-        <main className="flex-1 flex flex-col">
-          {renderActiveScreen()}
-        </main>
+    <div className="min-h-screen bg-[#fcfbfa] flex flex-col relative text-slate-900 font-sans">
+      <Header />
+      
+      <main className="flex-1 flex flex-col w-full">
+        {renderActiveScreen()}
+      </main>
 
-        <QuickBuyDrawer />
+      <QuickBuyDrawer />
+      
+      {/* Mobile-only bottom navigation bar */}
+      <div className="lg:hidden">
         <BottomNav />
       </div>
-    </DeviceFrame>
+    </div>
   );
 }
 

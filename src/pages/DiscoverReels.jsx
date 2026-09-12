@@ -25,7 +25,52 @@ export default function DiscoverReels() {
   const isAr = language === 'ar';
 
   const reelsList = [
+
     {
+      id: 'reel-sheglam-1',
+      creatorHandle: '@beauty.by.nada',
+      creatorName: 'ندى بيوتي • Nada Beauty',
+      avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=150&q=80',
+      videoBg: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+      caption: isAr 
+        ? 'ريفيو جديد لماسكارا شيجلام! رهيبة بتطول وتكثف الرموش، ومعاها مزيل خاص بيها بيشيلها في ثواني! ✨👀 #Sheglam #ماسكارا #تجميل' 
+        : 'Testing the new SHEGLAM Ultra Lash Lift Mascara & Easy Lash Removal! Amazing results! ✨👀 #Sheglam #Makeup',
+      music: isAr ? 'تريند بيوتي • تيك توك' : 'Trending Beauty Sound',
+      likes: 45200,
+      comments: 1240,
+      saves: 8900,
+      product: {
+        id: 'p-sheglam-mascara',
+        title: isAr ? 'مجموعة شيجلام ماسكارا ومزيل' : 'SHEGLAM Lash Lift & Remover',
+        price: 450,
+        originalPrice: 550,
+        discount: '18% OFF',
+        image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=800&q=80'
+      }
+    },
+    {
+      id: 'reel-sheglam-2',
+      creatorHandle: '@makeup.with.sara',
+      creatorName: 'سارة ميكأب • Sara Makeup',
+      avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&q=80',
+      videoBg: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+      caption: isAr 
+        ? 'سواتش لدرجات مرطب الشفاه من شيجلام 🍒 درجات تجنن (Cherry Bark, Plum Sauce, Bare Blush) ثبات وترطيب خيالي! 💋 #مكياج #شيجلام' 
+        : 'SHEGLAM Jelly Lip Tint swatches 🍒 Gorgeous shades (Cherry Bark, Plum Sauce) and amazing hydration! 💋 #LipTint #Sheglam',
+      music: isAr ? 'موسيقى ريلز هادية' : 'Chill Aesthetic Vibes',
+      likes: 89100,
+      comments: 3420,
+      saves: 15400,
+      product: {
+        id: 'p-sheglam-liptint',
+        title: isAr ? 'ملمع ومورد شفاه شيجلام' : 'SHEGLAM Jelly Lip Tint',
+        price: 280,
+        originalPrice: 350,
+        discount: '20% OFF',
+        image: 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?auto=format&fit=crop&w=800&q=80'
+      }
+    },
+{
       id: 'reel-1',
       creatorHandle: '@mayca.fashion',
       creatorName: 'مايا حسن • Maya Hassan',
@@ -235,12 +280,23 @@ export default function DiscoverReels() {
       >
         {/* Full-Screen Background Image with Cinematic Scrim */}
         <div className="absolute inset-0 w-full h-full z-0">
-          <img 
-            src={reel.videoBg} 
-            alt={reel.creatorHandle}
-            className="w-full h-full object-cover object-center pointer-events-none"
-            loading="eager"
-          />
+          {reel.videoBg.includes('.mp4') ? (
+            <video 
+              src={reel.videoBg}
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-full object-cover object-center pointer-events-none"
+            />
+          ) : (
+            <img 
+              src={reel.videoBg} 
+              alt={reel.creatorHandle}
+              className="w-full h-full object-cover object-center pointer-events-none"
+              loading="eager"
+            />
+          )}
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/95 pointer-events-none" />
         </div>
 

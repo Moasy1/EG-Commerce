@@ -3,61 +3,21 @@ import { useApp } from '../../context/AppContext';
 import EgLogo from '../common/EgLogo';
 
 export default function DesktopProductDetail() {
-  const { 
-    selectedProduct, 
-    products, 
-    merchants, 
-    addToCart, 
-    setActiveTab, 
-    language 
-  } = useApp();
-
-  const isAr = language === 'ar';
-
-  const product = selectedProduct || products[0] || {
-    id: 'p-1',
-    title: 'جلابية مصرية مطرزة',
-    price: 850,
-    originalPrice: 1100,
-    category: 'أزياء مصرية',
-    image: '/images/products/linen_abaya.jpg',
-    description: 'جلابية مصرية فاخرة مصنوعة بحب وبأيادٍ مصرية أصيلة من أجود خامات الكتان الطبيعي والقطن طويل التيلة.',
-    sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
-    merchantId: 'm-01'
-  };
-
-  const merchant = merchants.find(m => m.id === product.merchantId) || merchants[0] || {
-    name: 'Nile Threads • نيل ثريدز',
-    rating: 4.9,
-    reviewsCount: 180,
-    subdomain: 'nilethreads.eg-commerce.com'
-  };
-
+  const { addToCart, setActiveTab } = useApp();
   const [selectedThumb, setSelectedThumb] = useState(0);
-  const [selectedSize, setSelectedSize] = useState(product.sizes?.[1] || 'M');
+  const [selectedSize, setSelectedSize] = useState('S');
   const [quantity, setQuantity] = useState(1);
   const [activeTabSub, setActiveTabSub] = useState('reviews');
-  const [addedToast, setAddedToast] = useState(false);
 
   const galleryThumbs = [
-    product.image || '/images/products/linen_abaya.jpg',
+    '/images/products/linen_abaya.jpg',
     '/images/products/silk_dress.jpg',
     '/images/reels/reel_1.jpg',
     '/images/products/wool_blazer.jpg'
   ];
 
-  const handleAddToCart = () => {
-    addToCart({ ...product, selectedSize, quantity });
-    setAddedToast(true);
-    setTimeout(() => setAddedToast(false), 2200);
-  };
-
-  const availableSizes = product.sizes && product.sizes.length > 0 
-    ? product.sizes 
-    : ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
-
   return (
-    <div className="w-full bg-white text-slate-900 flex flex-col font-sans min-h-[580px] overflow-hidden select-none relative" dir={isAr ? 'rtl' : 'ltr'}>
+    <div className="w-full bg-white text-slate-900 flex flex-col font-sans min-h-[580px] overflow-hidden select-none text-left">
       {/* 1. Top Bar */}
       <div className="px-5 py-2.5 border-b border-gray-100 flex items-center justify-between gap-4">
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => setActiveTab('reels')}>
@@ -69,9 +29,8 @@ export default function DesktopProductDetail() {
           <span className="material-symbols-outlined text-[17px] text-gray-400">search</span>
           <input
             type="text"
-            placeholder={isAr ? "ابحث عن منتجات، علامات تجارية، طلبات..." : "Search products, brands, orders..."}
+            placeholder="Search products, brands, orders..."
             className="w-full bg-transparent focus:outline-none text-xs text-slate-800 placeholder:text-gray-400"
-            onKeyDown={(e) => { if (e.key === 'Enter') setActiveTab('shop'); }}
           />
         </div>
 
@@ -84,9 +43,9 @@ export default function DesktopProductDetail() {
       </div>
 
       {/* 2. Main Product Content (Split Two Columns) */}
-      <div className="p-6 grid grid-cols-12 gap-8 flex-1 overflow-y-auto">
+      <div className="p-6 grid grid-cols-12 gap-6 flex-1 overflow-y-auto">
         {/* Left Column: Vertical Thumbnails + Main Large Photo */}
-        <div className="col-span-12 lg:col-span-6 flex gap-3.5">
+        <div className="col-span-6 flex gap-3">
           {/* 4 Thumbnails Column */}
           <div className="flex flex-col gap-2 shrink-0">
             {galleryThumbs.map((img, i) => (
@@ -94,7 +53,7 @@ export default function DesktopProductDetail() {
                 key={i}
                 onClick={() => setSelectedThumb(i)}
                 className={`w-14 h-16 rounded-xl overflow-hidden cursor-pointer border-2 transition-all ${
-                  selectedThumb === i ? 'border-[#d00000] shadow-xs scale-105' : 'border-gray-200 hover:border-gray-300'
+                  selectedThumb === i ? 'border-[#d00000] shadow-xs' : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
                 <img src={img} alt="Thumb" className="w-full h-full object-cover" />
@@ -103,153 +62,175 @@ export default function DesktopProductDetail() {
           </div>
 
           {/* Main Large Product Photo */}
-          <div className="flex-1 aspect-[4/5] rounded-3xl overflow-hidden bg-gray-100 border border-gray-200 relative shadow-sm">
+          <div className="flex-1 aspect-[4/5] rounded-2xl overflow-hidden bg-gray-100 border border-gray-200 relative">
             <img 
               src={galleryThumbs[selectedThumb]} 
-              alt={product.title} 
+              alt="Main Product" 
               className="w-full h-full object-cover"
             />
-            <div className="absolute top-3.5 end-3.5 w-9 h-9 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-gray-600 hover:text-[#d00000] shadow-md cursor-pointer">
-              <span className="material-symbols-outlined text-[20px]">favorite</span>
+            <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-gray-600 hover:text-[#d00000] shadow-sm cursor-pointer">
+              <span className="material-symbols-outlined text-[18px]">favorite</span>
             </div>
-            {product.category && (
-              <span className="absolute bottom-3 start-3 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-white text-[10px] font-bold">
-                {product.category}
-              </span>
-            )}
           </div>
         </div>
 
         {/* Right Column: Details, Pricing, Size, Actions, Vendor */}
-        <div className="col-span-12 lg:col-span-6 flex flex-col justify-between space-y-5 text-start">
-          <div className="space-y-4">
+        <div className="col-span-6 flex flex-col justify-between space-y-4">
+          <div className="space-y-3">
             {/* Title & Reviews */}
             <div>
-              <div className="flex items-center gap-1.5 text-amber-500 text-xs font-bold mb-1">
-                <span className="material-symbols-outlined text-[15px] fill-current">star</span>
-                <span>{product.rating || 4.9}</span>
-                <span className="text-gray-400 font-normal">({product.reviewsCount || 124} {isAr ? 'تقييم موثق' : 'reviews'})</span>
+              <h2 className="text-xl font-bold text-slate-900 leading-tight">
+                Embroidered Egyptian Galabeya
+              </h2>
+              <div className="flex items-center gap-1.5 mt-1 text-xs">
+                <div className="flex items-center text-[#d00000]">
+                  {[...Array(5)].map((_, i) => (
+                    <span key={i} className="material-symbols-outlined text-[15px] fill-current">star</span>
+                  ))}
+                </div>
+                <span className="font-bold text-slate-800">4.8</span>
+                <span className="text-gray-400 font-medium">(124 reviews)</span>
               </div>
-              <h1 className="text-2xl font-black text-slate-900 leading-snug">{product.title}</h1>
             </div>
 
-            {/* Price & Discount */}
-            <div className="flex items-baseline gap-3">
-              <span className="text-3xl font-black text-[#d00000]">EGP {product.price.toLocaleString()}</span>
-              {product.originalPrice && (
-                <span className="text-base text-gray-400 line-through">EGP {product.originalPrice.toLocaleString()}</span>
-              )}
-              <span className="px-2 py-0.5 rounded-md bg-red-100 text-[#d00000] text-xs font-bold">
-                22% OFF
+            {/* Price Row */}
+            <div className="flex items-baseline gap-2.5">
+              <span className="text-xl font-black text-[#d00000]">EGP 850</span>
+              <span className="text-xs text-gray-400 line-through">EGP 1,100</span>
+              <span className="px-2 py-0.5 rounded-full bg-red-100 text-[#d00000] text-[10px] font-bold">
+                23% OFF
               </span>
             </div>
 
+            {/* Description */}
             <p className="text-xs text-gray-600 leading-relaxed">
-              {product.description || 'قطعة أزياء مصرية أصيلة منسوجة بأجود خامات الكتان الطبيعي والتطريز اليدوي الفاخر، صممت لتمنحك إطلالة راقية في كافة المناسبات.'}
+              Traditional Egyptian galabeya with beautiful hand embroidery, perfect for everyday elegance or special occasions.
             </p>
 
             {/* Size Selector */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-xs font-bold text-slate-800">
-                <span>{isAr ? 'المقاس:' : 'Size:'}</span>
-                <span className="text-gray-500 underline cursor-pointer text-[11px]">{isAr ? 'دليل المقاسات' : 'Size Guide'}</span>
-              </div>
+            <div className="space-y-1.5">
+              <span className="text-xs font-bold text-slate-800">Size:</span>
               <div className="flex items-center gap-2">
-                {availableSizes.map((s) => (
+                {['XS', 'S', 'M', 'L', 'XL', 'XXL'].map((sz) => (
                   <button
-                    key={s}
-                    onClick={() => setSelectedSize(s)}
-                    className={`w-9 h-9 rounded-xl font-bold text-xs border cursor-pointer transition-all ${
-                      selectedSize === s
-                        ? 'border-[#d00000] bg-[#d00000] text-white shadow-xs'
-                        : 'border-gray-200 text-slate-700 hover:border-gray-300'
+                    key={sz}
+                    onClick={() => setSelectedSize(sz)}
+                    className={`w-9 h-9 rounded-xl text-xs font-bold border transition-all ${
+                      selectedSize === sz
+                        ? 'bg-[#d00000] text-white border-[#d00000] shadow-xs'
+                        : 'bg-white text-slate-700 border-gray-200 hover:bg-gray-50'
                     }`}
                   >
-                    {s}
+                    {sz}
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Quantity Stepper & Add to Cart Action */}
-            <div className="flex items-center gap-3 pt-2">
-              <div className="flex items-center border border-gray-200 rounded-xl bg-gray-50 px-2 py-1.5 shrink-0">
-                <button
-                  onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
-                  className="w-7 h-7 rounded-lg hover:bg-gray-200 flex items-center justify-center font-bold text-gray-600"
+            {/* Quantity Stepper & Add to Cart */}
+            <div className="flex items-center gap-3 pt-1">
+              <div className="flex items-center border border-gray-200 rounded-xl bg-white px-2 py-1.5">
+                <button 
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  className="px-2 text-xs font-bold text-gray-500 hover:text-slate-900"
                 >
                   -
                 </button>
-                <span className="w-8 text-center font-mono font-bold text-xs">{quantity}</span>
-                <button
-                  onClick={() => setQuantity(prev => prev + 1)}
-                  className="w-7 h-7 rounded-lg hover:bg-gray-200 flex items-center justify-center font-bold text-gray-600"
+                <span className="px-3 text-xs font-bold text-slate-900">{quantity}</span>
+                <button 
+                  onClick={() => setQuantity(quantity + 1)}
+                  className="px-2 text-xs font-bold text-gray-500 hover:text-slate-900"
                 >
                   +
                 </button>
               </div>
 
               <button
-                onClick={handleAddToCart}
-                className="flex-1 py-3 rounded-2xl bg-[#d00000] text-white font-black text-xs shadow-md hover:brightness-110 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                onClick={() => {
+                  addToCart({
+                    id: 'p-embroidered-galabeya',
+                    title: 'Embroidered Egyptian Galabeya',
+                    price: 850,
+                    image: galleryThumbs[0],
+                    size: selectedSize
+                  });
+                  setActiveTab('cart');
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-[#d00000] text-white text-xs font-bold hover:bg-[#b00000] transition-colors flex items-center justify-center gap-1.5 shadow-md active:scale-98"
               >
-                <span className="material-symbols-outlined text-[17px]">add_shopping_cart</span>
-                <span>{isAr ? `أضف إلى السلة • EGP ${(product.price * quantity).toLocaleString()}` : `Add to Cart • EGP ${(product.price * quantity).toLocaleString()}`}</span>
+                <span className="material-symbols-outlined text-[17px]">shopping_bag</span>
+                <span>Add to Cart</span>
               </button>
             </div>
+          </div>
 
-            {/* Seller Info Card */}
-            <div 
-              onClick={() => setActiveTab('storefront')}
-              className="p-3.5 rounded-2xl bg-gray-50 border border-gray-200 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 border border-gray-300 shrink-0">
-                  <img src="/images/brands/talieska_logo.jpg" alt="Vendor" className="w-full h-full object-cover" />
+          {/* Seller Card (Nile Threads) */}
+          <div className="p-3 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <img src="/images/brands/talieska_logo.jpg" alt="Seller" className="w-9 h-9 rounded-full object-cover" />
+              <div>
+                <div className="flex items-center gap-1">
+                  <span className="text-xs font-bold text-slate-900">Nile Threads</span>
+                  <span className="material-symbols-outlined text-[14px] text-sky-500 fill-current">verified</span>
                 </div>
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-bold text-slate-900">{merchant.name}</span>
-                    <span className="material-symbols-outlined text-[15px] text-blue-500">verified</span>
-                  </div>
-                  <span className="text-[10px] text-gray-500 block">القاهرة، مصر • 4.9 ★ (180+ طلب ناجح)</span>
-                </div>
-              </div>
-              <button className="px-3.5 py-1.5 rounded-xl border border-gray-300 text-xs font-bold text-slate-800 hover:border-[#d00000] hover:text-[#d00000] transition-colors">
-                {isAr ? 'زيارة المتجر' : 'Visit Store'}
-              </button>
-            </div>
-
-            {/* 4 Trust Value Props */}
-            <div className="grid grid-cols-2 gap-2.5 pt-1 text-[11px] text-gray-600 font-medium">
-              <div className="flex items-center gap-2 p-2 rounded-xl bg-gray-50/80 border border-gray-100">
-                <span className="material-symbols-outlined text-[18px] text-[#d00000]">verified</span>
-                <span>{isAr ? 'أزياء مصرية أصيلة 100%' : 'Authentic Egyptian Fashion'}</span>
-              </div>
-              <div className="flex items-center gap-2 p-2 rounded-xl bg-gray-50/80 border border-gray-100">
-                <span className="material-symbols-outlined text-[18px] text-[#d00000]">local_shipping</span>
-                <span>{isAr ? 'شحن سريع خلال 1-3 أيام' : 'Ships within 1-3 days'}</span>
-              </div>
-              <div className="flex items-center gap-2 p-2 rounded-xl bg-gray-50/80 border border-gray-100">
-                <span className="material-symbols-outlined text-[18px] text-[#d00000]">payments</span>
-                <span>{isAr ? 'دفع عند الاستلام وإنستاباي' : 'Cash on Delivery & InstaPay'}</span>
-              </div>
-              <div className="flex items-center gap-2 p-2 rounded-xl bg-gray-50/80 border border-gray-100">
-                <span className="material-symbols-outlined text-[18px] text-[#d00000]">assignment_return</span>
-                <span>{isAr ? 'استبدال ومعاينة خلال 14 يوم' : '14-day Easy Returns'}</span>
+                <div className="text-[10px] text-gray-500">Cairo, Egypt • ★ 4.7 (1.2K sales)</div>
               </div>
             </div>
+            <button className="px-3 py-1 rounded-lg border border-gray-300 text-slate-700 text-xs font-bold hover:bg-gray-100">
+              Contact
+            </button>
+          </div>
+
+          {/* 4 Trust Value Pillars */}
+          <div className="grid grid-cols-2 gap-2 text-[11px] text-gray-600 font-medium pt-1">
+            <div className="flex items-center gap-1.5"><span className="material-symbols-outlined text-[15px] text-emerald-600">verified</span><span>Authentic Egyptian Fashion</span></div>
+            <div className="flex items-center gap-1.5"><span className="material-symbols-outlined text-[15px] text-emerald-600">local_shipping</span><span>Ships within 1-3 days</span></div>
+            <div className="flex items-center gap-1.5"><span className="material-symbols-outlined text-[15px] text-emerald-600">redeem</span><span>Free shipping over 1,000 EGP</span></div>
+            <div className="flex items-center gap-1.5"><span className="material-symbols-outlined text-[15px] text-emerald-600">restart_alt</span><span>Easy returns (7 days)</span></div>
           </div>
         </div>
       </div>
 
-      {/* Added Toast */}
-      {addedToast && (
-        <div className="fixed bottom-6 end-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-2xl text-xs font-bold shadow-2xl flex items-center gap-2 border border-white/20 animate-bounce">
-          <span className="material-symbols-outlined text-[18px] text-emerald-400">check_circle</span>
-          <span>{isAr ? `تمت إضافة القطعة إلى سلتك بنجاح! 🛍️` : `Product added to your cart successfully! 🛍️`}</span>
+      {/* 3. Bottom Tabs: Reviews, Shipping, Q&A */}
+      <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50">
+        <div className="flex items-center gap-6 border-b border-gray-200 pb-2 mb-3 text-xs font-bold text-gray-500">
+          <button 
+            onClick={() => setActiveTabSub('reviews')} 
+            className={`${activeTabSub === 'reviews' ? 'text-[#d00000] border-b-2 border-[#d00000] pb-2 -mb-2' : ''}`}
+          >
+            Reviews (124)
+          </button>
+          <button 
+            onClick={() => setActiveTabSub('shipping')} 
+            className={`${activeTabSub === 'shipping' ? 'text-[#d00000] border-b-2 border-[#d00000] pb-2 -mb-2' : ''}`}
+          >
+            Shipping & Returns
+          </button>
+          <button 
+            onClick={() => setActiveTabSub('qa')} 
+            className={`${activeTabSub === 'qa' ? 'text-[#d00000] border-b-2 border-[#d00000] pb-2 -mb-2' : ''}`}
+          >
+            Q&A
+          </button>
         </div>
-      )}
+
+        {/* Review Item Preview */}
+        <div className="flex items-start gap-3 text-left">
+          <img src="/images/reels/reel_2.jpg" alt="Reviewer" className="w-7 h-7 rounded-full object-cover" />
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-slate-900">Hana M.</span>
+              <span className="px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-700 text-[9px] font-bold">Verified</span>
+              <div className="flex items-center text-amber-400">
+                {[...Array(5)].map((_, i) => <span key={i} className="material-symbols-outlined text-[12px] fill-current">star</span>)}
+              </div>
+            </div>
+            <p className="text-[11px] text-gray-600">
+              Beautiful quality and fits perfectly! The embroidery is amazing and the cotton is exactly as shown.
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

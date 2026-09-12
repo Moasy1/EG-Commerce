@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import ProductFormModal from '../components/merchant/ProductFormModal';
 import StorefrontThemeCustomizer from '../components/merchant/StorefrontThemeCustomizer';
 import DesktopSellerDashboard from '../components/desktop/DesktopSellerDashboard';
+import AddProductStudio from './AddProductStudio';
 
 export default function MerchantDashboard() {
   const { 
@@ -163,11 +164,19 @@ export default function MerchantDashboard() {
             </button>
 
             <button
+              onClick={() => setActiveSubTab('add_product_tab')}
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-[#d00000] text-white text-xs font-bold hover:brightness-110 transition-all shadow-xs"
+            >
+              <span className="material-symbols-outlined text-[16px]">video_call</span>
+              <span>رفع فيديو ومعاينة 9:16</span>
+            </button>
+
+            <button
               onClick={handleOpenAddProduct}
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-primary text-on-primary text-xs font-bold hover:brightness-110 transition-all shadow-xs"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface border border-surface-container-high text-xs font-bold transition-all shadow-xs"
             >
               <span className="material-symbols-outlined text-[16px]">add_box</span>
-              <span>إضافة قطعة جديدة (Add Product)</span>
+              <span>نموذج سريع</span>
             </button>
           </div>
         </div>
@@ -177,10 +186,11 @@ export default function MerchantDashboard() {
       <div className="w-full bg-surface-container-low border-b border-surface-container-high px-4 md:px-8">
         <div className="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto py-2 scrollbar-none">
           {[
-            { id: 'overview', label: 'نظرة عامة والتحليلات', icon: 'analytics' },
+            { id: 'overview', label: 'لوحة التاجر والتحليلات (Dashboard)', icon: 'analytics' },
+            { id: 'add_product_tab', label: 'استوديو رفع فيديو لقطعة جديدة (9:16 Studio)', icon: 'video_call' },
             { id: 'products', label: `المنتجات والكتالوج (${merchantProducts.length})`, icon: 'inventory_2' },
-            { id: 'orders', label: `الطلبات والشحن (${merchantOrders.length})`, icon: 'local_shipping' },
-            { id: 'theme', label: 'مظهر المتجر والنطاق', icon: 'palette' },
+            { id: 'orders', label: `الطلبات والشحن بوسطة (${merchantOrders.length})`, icon: 'local_shipping' },
+            { id: 'theme', label: 'مظهر وهوية المتجر المستقل', icon: 'palette' },
             { id: 'campaigns', label: 'حملات صناع المحتوى (UGC)', icon: 'video_camera_front' },
           ].map((tab) => (
             <button
@@ -410,6 +420,15 @@ export default function MerchantDashboard() {
         )}
       </div>
     )}
+
+        {/* ========================================================================= */}
+        {/* SUBTAB: ADD PRODUCT STUDIO (9:16 LIVE VIDEO PREVIEW & DROPZONE)          */}
+        {/* ========================================================================= */}
+        {activeSubTab === 'add_product_tab' && (
+          <div className="animate-fade-in">
+            <AddProductStudio />
+          </div>
+        )}
 
         {/* ========================================================================= */}
         {/* SUBTAB 2: PRODUCTS & CATALOG MANAGEMENT                                    */}

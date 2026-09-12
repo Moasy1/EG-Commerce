@@ -1,57 +1,65 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import EgLogo from '../common/EgLogo';
 
 export default function DesktopSellerDashboard() {
-  const { 
-    products: appProducts, 
-    orders: appOrders, 
-    deleteProduct, 
-    updateProduct, 
-    setActiveTab, 
-    language 
-  } = useApp();
-
-  const isAr = language === 'ar';
-
+  const { setActiveTab } = useApp();
   const [activeNav, setActiveNav] = useState('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
   const [timeframe, setTimeframe] = useState('الأسبوع الماضي');
-  const [actionToast, setActionToast] = useState(null);
 
-  // Dynamic Computed Metrics from AppContext state
-  const totalSales = useMemo(() => {
-    const sum = appOrders.reduce((acc, o) => acc + (o.total || 0), 0);
-    return sum > 0 ? sum : 284750;
-  }, [appOrders]);
-
-  const totalOrders = appOrders.length > 0 ? appOrders.length : 1248;
-  const totalViews = 96420 + (appProducts.length * 4200);
-
-  // Filtered Products from live AppContext
-  const filteredProducts = useMemo(() => {
-    return appProducts.filter(p => {
-      if (!searchQuery.trim()) return true;
-      const q = searchQuery.toLowerCase();
-      return (p.title || '').toLowerCase().includes(q) || (p.category || '').toLowerCase().includes(q);
-    });
-  }, [appProducts, searchQuery]);
-
-  const handleStockDelta = (product, delta) => {
-    const currentStock = product.stock !== undefined ? product.stock : 20;
-    const newStock = Math.max(0, currentStock + delta);
-    updateProduct({ ...product, stock: newStock });
-    setActionToast(`تم تعديل مخزون "${product.title}" إلى ${newStock} قطعة`);
-    setTimeout(() => setActionToast(null), 2500);
-  };
-
-  const handleDelete = (productId, productTitle) => {
-    if (window.confirm(`هل أنت متأكد من حذف "${productTitle}"؟`)) {
-      deleteProduct(productId);
-      setActionToast(`تم حذف "${productTitle}" من المخزون`);
-      setTimeout(() => setActionToast(null), 2500);
-    }
-  };
+  const productsData = [
+    { 
+      id: 1, 
+      name: 'جلابية بتطريز يدوي', 
+      category: 'ملابس نسائية • جلابيات', 
+      price: '850 ج.م', 
+      stock: 56, 
+      status: 'متاح', 
+      statusColor: 'bg-emerald-50 text-emerald-600 border-emerald-200', 
+      img: '/images/products/linen_abaya.jpg' 
+    },
+    { 
+      id: 2, 
+      name: 'بلوزة قطن مطرزة', 
+      category: 'ملابس نسائية • بلوز', 
+      price: '650 ج.م', 
+      stock: 120, 
+      status: 'متاح', 
+      statusColor: 'bg-emerald-50 text-emerald-600 border-emerald-200', 
+      img: '/images/products/silk_dress.jpg' 
+    },
+    { 
+      id: 3, 
+      name: 'قميص كتان رجالي', 
+      category: 'ملابس رجالية • قمصان', 
+      price: '1,200 ج.م', 
+      stock: 8, 
+      status: 'مخزون منخفض', 
+      statusColor: 'bg-amber-50 text-amber-600 border-amber-200', 
+      img: '/images/products/linen_shirt.jpg' 
+    },
+    { 
+      id: 4, 
+      name: 'عباية كلاسيك', 
+      category: 'ملابس نسائية • عبايات', 
+      price: '980 ج.م', 
+      stock: 34, 
+      status: 'متاح', 
+      statusColor: 'bg-emerald-50 text-emerald-600 border-emerald-200', 
+      img: '/images/products/wool_blazer.jpg' 
+    },
+    { 
+      id: 5, 
+      name: 'جلابية رجالية', 
+      category: 'ملابس رجالية • جلابيات', 
+      price: '1,450 ج.م', 
+      stock: 0, 
+      status: 'غير متاح', 
+      statusColor: 'bg-red-50 text-red-600 border-red-200', 
+      img: '/images/banners/talieska_hero.jpg' 
+    },
+  ];
 
   const topVideos = [
     {
@@ -92,10 +100,14 @@ export default function DesktopSellerDashboard() {
     }
   ];
 
+  const filteredProducts = productsData.filter(p => 
+    p.name.includes(searchQuery) || p.category.includes(searchQuery)
+  );
+
   return (
-    <div className="w-full bg-white text-slate-900 flex font-sans min-h-[640px] overflow-hidden select-none text-right relative" dir={isAr ? 'rtl' : 'ltr'}>
+    <div className="w-full bg-white text-slate-900 flex font-sans min-h-[640px] overflow-hidden select-none text-right" dir="rtl">
       {/* 1. RIGHT SIDEBAR (RTL - Matching Image 2) */}
-      <aside className="w-48 bg-gray-50/80 border-e border-gray-200/80 p-3.5 flex flex-col justify-between shrink-0 text-start">
+      <aside className="w-48 bg-gray-50/80 border-l border-gray-200/80 p-3.5 flex flex-col justify-between shrink-0">
         <div className="space-y-4">
           <div className="flex items-center gap-2 px-2 py-1 cursor-pointer" onClick={() => setActiveTab('reels')}>
             <EgLogo className="w-7 h-7" color="#d00000" />
@@ -104,36 +116,33 @@ export default function DesktopSellerDashboard() {
 
           <nav className="space-y-1 text-xs font-bold">
             {[
-              { id: 'dashboard', labelAr: 'لوحة التحكم', labelEn: 'Dashboard', icon: 'dashboard' },
-              { id: 'products', labelAr: 'المنتجات', labelEn: 'Products', icon: 'inventory_2' },
-              { id: 'orders', labelAr: 'الطلبات', labelEn: 'Orders', icon: 'receipt_long' },
-              { id: 'customers', labelAr: 'العملاء', labelEn: 'Customers', icon: 'group' },
-              { id: 'content', labelAr: 'المحتوى', labelEn: 'Content', icon: 'smart_display' },
-              { id: 'analytics', labelAr: 'التحليلات', labelEn: 'Analytics', icon: 'trending_up' },
-              { id: 'marketing', labelAr: 'التسويق', labelEn: 'Marketing', icon: 'campaign' },
-              { id: 'settings', labelAr: 'الإعدادات', labelEn: 'Settings', icon: 'settings' },
+              { id: 'dashboard', label: 'لوحة التحكم', icon: 'dashboard' },
+              { id: 'products', label: 'المنتجات', icon: 'inventory_2' },
+              { id: 'orders', label: 'الطلبات', icon: 'receipt_long' },
+              { id: 'customers', label: 'العملاء', icon: 'group' },
+              { id: 'content', label: 'المحتوى', icon: 'smart_display' },
+              { id: 'analytics', label: 'التحليلات', icon: 'trending_up' },
+              { id: 'marketing', label: 'التسويق', icon: 'campaign' },
+              { id: 'settings', label: 'الإعدادات', icon: 'settings' },
             ].map((item) => (
               <button
                 key={item.id}
-                onClick={() => {
-                  setActiveNav(item.id);
-                  if (item.id === 'products') setActiveTab('shop');
-                }}
-                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all cursor-pointer ${
+                onClick={() => setActiveNav(item.id)}
+                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all ${
                   activeNav === item.id
                     ? 'bg-[#d00000] text-white font-bold shadow-xs'
                     : 'text-gray-600 hover:bg-gray-200/60 hover:text-slate-900'
                 }`}
               >
                 <span className="material-symbols-outlined text-[17px]">{item.icon}</span>
-                <span>{isAr ? item.labelAr : item.labelEn}</span>
+                <span>{item.label}</span>
               </button>
             ))}
           </nav>
         </div>
 
-        <div className="p-2.5 rounded-xl bg-gray-100/80 border border-gray-200 text-start">
-          <span className="text-[10px] text-gray-500 block">{isAr ? 'المتجر الحالي:' : 'Current Store:'}</span>
+        <div className="p-2.5 rounded-xl bg-gray-100/80 border border-gray-200 text-right">
+          <span className="text-[10px] text-gray-500 block">المتجر الحالي:</span>
           <span className="text-xs font-bold text-slate-800">نيل ثريدز • Nile Threads</span>
         </div>
       </aside>
@@ -143,10 +152,8 @@ export default function DesktopSellerDashboard() {
         {/* Top Header Bar */}
         <div className="px-6 py-3 border-b border-gray-100 flex items-center justify-between gap-4">
           <div>
-            <h1 className="text-lg font-black text-slate-900">{isAr ? 'لوحة التاجر' : 'Seller Dashboard'}</h1>
-            <p className="text-xs text-gray-500">
-              {isAr ? 'تابع أداء متجرك، وأدر منتجاتك، وحقق المزيد من المبيعات' : 'Manage your store performance, inventory and orders'}
-            </p>
+            <h1 className="text-lg font-black text-slate-900">لوحة التاجر</h1>
+            <p className="text-xs text-gray-500">تابع أداء متجرك، وأدر منتجاتك، وحقق المزيد من المبيعات</p>
           </div>
 
           <div className="flex items-center gap-4">
@@ -185,24 +192,24 @@ export default function DesktopSellerDashboard() {
 
         {/* Dashboard Workspace */}
         <div className="p-6 space-y-6">
-          {/* 4 KPI Cards (Dynamic Metrics) */}
+          {/* 4 KPI Cards (Matching Image 2) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
             {/* KPI 1: إجمالي المبيعات */}
             <div className="p-4 rounded-2xl bg-white border border-gray-200/90 shadow-xs space-y-2 relative overflow-hidden">
               <div className="flex items-center justify-between text-xs text-gray-500">
-                <span className="font-bold">{isAr ? 'إجمالي المبيعات' : 'Total Sales'}</span>
+                <span className="font-bold">إجمالي المبيعات</span>
                 <span className="w-7 h-7 rounded-lg bg-red-50 text-[#d00000] flex items-center justify-center">
                   <span className="material-symbols-outlined text-[16px]">payments</span>
                 </span>
               </div>
               <div className="text-2xl font-black text-slate-900">
-                {totalSales.toLocaleString()} <span className="text-xs font-bold text-gray-500">ج.م</span>
+                284,750 <span className="text-xs font-bold text-gray-500">ج.م</span>
               </div>
               {/* Sparkline & Growth */}
               <div className="flex items-center justify-between pt-1">
                 <span className="text-[10px] text-emerald-600 font-bold flex items-center gap-0.5">
                   <span>18.5% ↑</span>
-                  <span className="text-gray-400 font-normal">{isAr ? 'مقارنة بالأسبوع الماضي' : 'vs last week'}</span>
+                  <span className="text-gray-400 font-normal">مقارنة بالأسبوع الماضي</span>
                 </span>
                 <svg className="w-16 h-5 text-[#d00000]" viewBox="0 0 60 20" fill="none">
                   <path d="M2 14 L15 16 L30 8 L45 11 L58 3" stroke="#d00000" strokeWidth="2" strokeLinecap="round" />
@@ -213,18 +220,18 @@ export default function DesktopSellerDashboard() {
             {/* KPI 2: إجمالي الطلبات */}
             <div className="p-4 rounded-2xl bg-white border border-gray-200/90 shadow-xs space-y-2 relative overflow-hidden">
               <div className="flex items-center justify-between text-xs text-gray-500">
-                <span className="font-bold">{isAr ? 'إجمالي الطلبات' : 'Total Orders'}</span>
+                <span className="font-bold">إجمالي الطلبات</span>
                 <span className="w-7 h-7 rounded-lg bg-red-50 text-[#d00000] flex items-center justify-center">
                   <span className="material-symbols-outlined text-[16px]">shopping_cart</span>
                 </span>
               </div>
-              <div className="text-2xl font-black text-slate-900 font-mono">
-                {totalOrders.toLocaleString()}
+              <div className="text-2xl font-black text-slate-900">
+                1,248
               </div>
               <div className="flex items-center justify-between pt-1">
                 <span className="text-[10px] text-emerald-600 font-bold flex items-center gap-0.5">
                   <span>22.3% ↑</span>
-                  <span className="text-gray-400 font-normal">{isAr ? 'مقارنة بالأسبوع الماضي' : 'vs last week'}</span>
+                  <span className="text-gray-400 font-normal">مقارنة بالأسبوع الماضي</span>
                 </span>
                 <svg className="w-16 h-5 text-[#d00000]" viewBox="0 0 60 20" fill="none">
                   <path d="M2 16 L15 12 L30 14 L45 6 L58 2" stroke="#d00000" strokeWidth="2" strokeLinecap="round" />
@@ -235,18 +242,18 @@ export default function DesktopSellerDashboard() {
             {/* KPI 3: إجمالي المشاهدات */}
             <div className="p-4 rounded-2xl bg-white border border-gray-200/90 shadow-xs space-y-2 relative overflow-hidden">
               <div className="flex items-center justify-between text-xs text-gray-500">
-                <span className="font-bold">{isAr ? 'إجمالي المشاهدات' : 'Total Views'}</span>
+                <span className="font-bold">إجمالي المشاهدات</span>
                 <span className="w-7 h-7 rounded-lg bg-red-50 text-[#d00000] flex items-center justify-center">
                   <span className="material-symbols-outlined text-[16px]">visibility</span>
                 </span>
               </div>
-              <div className="text-2xl font-black text-slate-900 font-mono">
-                {totalViews.toLocaleString()}
+              <div className="text-2xl font-black text-slate-900">
+                96,420
               </div>
               <div className="flex items-center justify-between pt-1">
                 <span className="text-[10px] text-emerald-600 font-bold flex items-center gap-0.5">
                   <span>37.8% ↑</span>
-                  <span className="text-gray-400 font-normal">{isAr ? 'مقارنة بالأسبوع الماضي' : 'vs last week'}</span>
+                  <span className="text-gray-400 font-normal">مقارنة بالأسبوع الماضي</span>
                 </span>
                 <svg className="w-16 h-5 text-[#d00000]" viewBox="0 0 60 20" fill="none">
                   <path d="M2 17 L15 13 L30 11 L45 5 L58 2" stroke="#d00000" strokeWidth="2" strokeLinecap="round" />
@@ -257,18 +264,18 @@ export default function DesktopSellerDashboard() {
             {/* KPI 4: معدل التحويل */}
             <div className="p-4 rounded-2xl bg-white border border-gray-200/90 shadow-xs space-y-2 relative overflow-hidden">
               <div className="flex items-center justify-between text-xs text-gray-500">
-                <span className="font-bold">{isAr ? 'معدل التحويل' : 'Conversion Rate'}</span>
+                <span className="font-bold">معدل التحويل</span>
                 <span className="w-7 h-7 rounded-lg bg-red-50 text-[#d00000] flex items-center justify-center">
                   <span className="material-symbols-outlined text-[16px]">percent</span>
                 </span>
               </div>
-              <div className="text-2xl font-black text-slate-900 font-mono">
+              <div className="text-2xl font-black text-slate-900">
                 2.4%
               </div>
               <div className="flex items-center justify-between pt-1">
                 <span className="text-[10px] text-emerald-600 font-bold flex items-center gap-0.5">
                   <span>0.8% ↑</span>
-                  <span className="text-gray-400 font-normal">{isAr ? 'مقارنة بالأسبوع الماضي' : 'vs last week'}</span>
+                  <span className="text-gray-400 font-normal">مقارنة بالأسبوع الماضي</span>
                 </span>
                 <svg className="w-16 h-5 text-[#d00000]" viewBox="0 0 60 20" fill="none">
                   <path d="M2 15 L15 14 L30 9 L45 8 L58 4" stroke="#d00000" strokeWidth="2" strokeLinecap="round" />
@@ -284,19 +291,17 @@ export default function DesktopSellerDashboard() {
             <div className="lg:col-span-7 bg-white rounded-3xl border border-gray-200 p-5 shadow-xs space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                  <h3 className="text-sm font-black text-slate-900">{isAr ? 'إدارة المنتجات والمخزون' : 'Product Management'}</h3>
-                  <p className="text-xs text-gray-500">
-                    {isAr ? `إجمالي ${filteredProducts.length} منتجات في كتالوج متجرك` : `Total ${filteredProducts.length} items in store catalog`}
-                  </p>
+                  <h3 className="text-sm font-black text-slate-900">إدارة المنتجات</h3>
+                  <p className="text-xs text-gray-500">أضف وأدر منتجاتك بسهولة</p>
                 </div>
 
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setActiveTab('add_product')}
-                    className="px-3.5 py-2 rounded-xl bg-[#d00000] text-white text-xs font-bold shadow-xs hover:brightness-110 transition-all flex items-center gap-1.5 cursor-pointer"
+                    className="px-3.5 py-2 rounded-xl bg-[#d00000] text-white text-xs font-bold shadow-xs hover:brightness-110 transition-all flex items-center gap-1.5"
                   >
                     <span className="material-symbols-outlined text-[16px]">video_call</span>
-                    <span>{isAr ? 'رفع فيديو منتج' : 'Upload Product Video'}</span>
+                    <span>رفع فيديو منتج</span>
                   </button>
                 </div>
               </div>
@@ -308,124 +313,65 @@ export default function DesktopSellerDashboard() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={isAr ? "ابحث في المنتجات بالاسم أو التصنيف..." : "Search products by name or category..."}
+                  placeholder="ابحث في المنتجات..."
                   className="w-full bg-transparent focus:outline-none text-xs text-slate-800"
                 />
-                {searchQuery && (
-                  <button onClick={() => setSearchQuery('')} className="text-gray-400 hover:text-gray-600 text-xs">✕</button>
-                )}
               </div>
 
-              {/* Products Table (Connected to AppContext) */}
+              {/* Products Table */}
               <div className="overflow-x-auto">
-                <table className="w-full text-start text-xs">
+                <table className="w-full text-right text-xs">
                   <thead>
                     <tr className="border-b border-gray-100 text-gray-400 text-[11px] font-bold">
-                      <th className="pb-2.5">{isAr ? 'المنتج' : 'Product'}</th>
-                      <th className="pb-2.5">{isAr ? 'السعر' : 'Price'}</th>
-                      <th className="pb-2.5">{isAr ? 'المخزون' : 'Stock'}</th>
-                      <th className="pb-2.5">{isAr ? 'الحالة' : 'Status'}</th>
-                      <th className="pb-2.5 text-center">{isAr ? 'الإجراءات' : 'Actions'}</th>
+                      <th className="pb-2.5">المنتج</th>
+                      <th className="pb-2.5">السعر</th>
+                      <th className="pb-2.5">المخزون</th>
+                      <th className="pb-2.5">الحالة</th>
+                      <th className="pb-2.5 text-center">الإجراءات</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
-                    {filteredProducts.map((p) => {
-                      const stockCount = p.stock !== undefined ? p.stock : 20;
-                      const isAvailable = stockCount > 5;
-                      const isLow = stockCount > 0 && stockCount <= 5;
-                      const isOutOfStock = stockCount === 0;
-
-                      return (
-                        <tr key={p.id} className="hover:bg-gray-50/80 transition-colors">
-                          <td className="py-3">
-                            <div className="flex items-center gap-2.5">
-                              <img src={p.image} alt={p.title} className="w-10 h-10 rounded-xl object-cover border border-gray-200" />
-                              <div className="truncate max-w-[170px]">
-                                <span className="font-bold text-slate-900 block truncate leading-tight">{p.title}</span>
-                                <span className="text-[10px] text-gray-400 block truncate">{p.category || 'أزياء مصرية'}</span>
-                              </div>
+                    {filteredProducts.map((p) => (
+                      <tr key={p.id} className="hover:bg-gray-50/80 transition-colors">
+                        <td className="py-3">
+                          <div className="flex items-center gap-2.5">
+                            <img src={p.img} alt={p.name} className="w-10 h-10 rounded-xl object-cover border border-gray-200" />
+                            <div>
+                              <span className="font-bold text-slate-900 block leading-tight">{p.name}</span>
+                              <span className="text-[10px] text-gray-400 block">{p.category}</span>
                             </div>
-                          </td>
-                          <td className="py-3 font-bold text-slate-900 font-mono">EGP {p.price.toLocaleString()}</td>
-                          
-                          {/* Stock Stepper */}
-                          <td className="py-3">
-                            <div className="flex items-center gap-1.5">
-                              <button
-                                onClick={() => handleStockDelta(p, -1)}
-                                className="w-5 h-5 rounded-md bg-gray-100 hover:bg-gray-200 flex items-center justify-center font-bold text-gray-600"
-                              >
-                                -
-                              </button>
-                              <span className="font-mono font-bold text-gray-700 min-w-[20px] text-center">{stockCount}</span>
-                              <button
-                                onClick={() => handleStockDelta(p, 1)}
-                                className="w-5 h-5 rounded-md bg-gray-100 hover:bg-gray-200 flex items-center justify-center font-bold text-gray-600"
-                              >
-                                +
-                              </button>
-                            </div>
-                          </td>
-
-                          {/* Status Badge */}
-                          <td className="py-3">
-                            {isAvailable && (
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold border bg-emerald-50 text-emerald-600 border-emerald-200">
-                                {isAr ? 'متاح' : 'Available'}
-                              </span>
-                            )}
-                            {isLow && (
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold border bg-amber-50 text-amber-600 border-amber-200">
-                                {isAr ? 'مخزون منخفض' : 'Low Stock'}
-                              </span>
-                            )}
-                            {isOutOfStock && (
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold border bg-red-50 text-red-600 border-red-200">
-                                {isAr ? 'غير متاح' : 'Out of Stock'}
-                              </span>
-                            )}
-                          </td>
-
-                          {/* Actions */}
-                          <td className="py-3 text-center">
-                            <div className="flex items-center justify-center gap-1 text-gray-400">
-                              <button 
-                                onClick={() => {
-                                  setActiveTab('product');
-                                }}
-                                className="p-1 hover:text-slate-700 cursor-pointer"
-                                title="عرض في المتجر"
-                              >
-                                <span className="material-symbols-outlined text-[16px]">visibility</span>
-                              </button>
-                              <button 
-                                onClick={() => handleDelete(p.id, p.title)}
-                                className="p-1 hover:text-[#d00000] cursor-pointer"
-                                title="حذف القطعة"
-                              >
-                                <span className="material-symbols-outlined text-[16px]">delete</span>
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
+                          </div>
+                        </td>
+                        <td className="py-3 font-bold text-slate-900">{p.price}</td>
+                        <td className="py-3 font-mono font-bold text-gray-600">{p.stock}</td>
+                        <td className="py-3">
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${p.statusColor}`}>
+                            {p.status}
+                          </span>
+                        </td>
+                        <td className="py-3 text-center">
+                          <div className="flex items-center justify-center gap-1 text-gray-400">
+                            <button className="p-1 hover:text-slate-700"><span className="material-symbols-outlined text-[15px]">edit</span></button>
+                            <button className="p-1 hover:text-[#d00000]"><span className="material-symbols-outlined text-[15px]">delete</span></button>
+                            <button className="p-1 hover:text-slate-700"><span className="material-symbols-outlined text-[15px]">more_horiz</span></button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
             </div>
 
             {/* CONTENT PERFORMANCE WIDGET (5 Cols - Matching Image 2) */}
-            <div className="lg:col-span-5 bg-white rounded-3xl border border-gray-200 p-5 shadow-xs space-y-4 text-start">
+            <div className="lg:col-span-5 bg-white rounded-3xl border border-gray-200 p-5 shadow-xs space-y-4">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-sm font-black text-slate-900 flex items-center gap-1.5">
                     <span className="material-symbols-outlined text-[17px] text-[#d00000]">leaderboard</span>
-                    <span>{isAr ? 'أداء المحتوى والفيديوهات' : 'Content Performance'}</span>
+                    <span>أداء المحتوى</span>
                   </h3>
-                  <p className="text-xs text-gray-500">
-                    {isAr ? 'أفضل الفيديوهات أداءً ومبيعات خلال 7 أيام' : 'Top performing videos over last 7 days'}
-                  </p>
+                  <p className="text-xs text-gray-500">أفضل الفيديوهات أداءً خلال 7 أيام</p>
                 </div>
               </div>
 
@@ -434,7 +380,6 @@ export default function DesktopSellerDashboard() {
                 {topVideos.map((video) => (
                   <div 
                     key={video.id}
-                    onClick={() => setActiveTab('reels')}
                     className="flex items-center justify-between p-2.5 rounded-2xl border border-gray-100 hover:border-gray-200 hover:bg-gray-50/60 transition-all cursor-pointer"
                   >
                     <div className="flex items-center gap-3">
@@ -444,16 +389,16 @@ export default function DesktopSellerDashboard() {
                           {video.duration}
                         </span>
                       </div>
-                      <div className="text-start">
+                      <div className="text-right">
                         <h4 className="text-xs font-bold text-slate-900 leading-tight">{video.title}</h4>
                         <div className="flex items-center gap-3 mt-1 text-[10px] text-gray-500">
                           <span className="flex items-center gap-0.5">
                             <span className="material-symbols-outlined text-[12px]">visibility</span>
-                            <span>{video.views} {isAr ? 'مشاهدة' : 'views'}</span>
+                            <span>{video.views} مشاهدة</span>
                           </span>
                           <span className="flex items-center gap-0.5">
                             <span className="material-symbols-outlined text-[12px]">shopping_cart</span>
-                            <span>{video.orders} {isAr ? 'طلب' : 'orders'}</span>
+                            <span>{video.orders} طلب</span>
                           </span>
                         </div>
                       </div>
@@ -471,10 +416,10 @@ export default function DesktopSellerDashboard() {
               <div className="pt-2">
                 <button 
                   onClick={() => setActiveTab('reels')}
-                  className="w-full py-2.5 rounded-xl bg-red-50 text-[#d00000] text-xs font-bold hover:bg-red-100 transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                  className="w-full py-2.5 rounded-xl bg-red-50 text-[#d00000] text-xs font-bold hover:bg-red-100 transition-colors flex items-center justify-center gap-1"
                 >
-                  <span className="material-symbols-outlined text-[16px]">play_circle</span>
-                  <span>{isAr ? 'استعراض جميع الفيديوهات الحية' : 'View All Live Videos'}</span>
+                  <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+                  <span>عرض جميع الفيديوهات</span>
                 </button>
               </div>
             </div>
@@ -482,14 +427,6 @@ export default function DesktopSellerDashboard() {
           </div>
         </div>
       </main>
-
-      {/* Action Toast Feedback */}
-      {actionToast && (
-        <div className="fixed bottom-6 start-6 z-50 bg-slate-900 text-white px-4 py-2.5 rounded-2xl text-xs font-bold shadow-2xl flex items-center gap-2 border border-white/20 animate-bounce">
-          <span className="material-symbols-outlined text-[16px] text-emerald-400">check_circle</span>
-          <span>{actionToast}</span>
-        </div>
-      )}
     </div>
   );
 }

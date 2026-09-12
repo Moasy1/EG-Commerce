@@ -1,230 +1,192 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
+import EgLogo from '../components/common/EgLogo';
 
 export default function UnifiedCart() {
-  const {
-    cartItems,
-    updateQuantity,
-    removeFromCart,
-    subtotal,
-    discountFromPoints,
-    shippingTotal,
-    grandTotal,
-    rewardPoints,
-    pointsRedeemed,
-    setPointsRedeemed,
-    setActiveTab
-  } = useApp();
+  const { setActiveTab } = useApp();
+  const [orderPlaced, setOrderPlaced] = useState(false);
 
-  const groupedByMerchant = cartItems.reduce((acc, item) => {
-    if (!acc[item.merchant]) {
-      acc[item.merchant] = [];
+  // Exact 2 cart items from Screen 4
+  const [cartItems, setCartItems] = useState([
+    {
+      id: 'c1',
+      title: 'Linen Co-ord Set',
+      price: 1250,
+      size: 'M',
+      qty: 1,
+      image: '/images/reels/reel_1.jpg'
+    },
+    {
+      id: 'c2',
+      title: 'Oversized Hoodie',
+      price: 950,
+      size: 'L',
+      qty: 1,
+      image: '/images/products/wool_blazer.jpg'
     }
-    acc[item.merchant].push(item);
-    return acc;
-  }, {});
+  ]);
 
-  if (cartItems.length === 0) {
-    return (
-      <div className="w-full flex-1 max-w-3xl mx-auto px-4 py-16 text-center text-on-surface">
-        <div className="w-16 h-16 rounded-full bg-surface-container-low flex items-center justify-center mx-auto mb-3 text-on-surface-variant">
-          <span className="material-symbols-outlined text-[32px]">shopping_bag</span>
-        </div>
-        <h2 className="font-serif text-xl font-bold mb-1">Your Cart is Empty • الـ Cart فاضية</h2>
-        <p className="text-xs text-on-surface-variant mb-5">
-          استكشفي أحدث إطلالات الـ Linen والموضة المصرية وضيفي قطعك المفضلة
-        </p>
-        <button
-          onClick={() => setActiveTab('shop')}
-          className="px-5 py-2.5 rounded-xl bg-primary text-on-primary font-bold text-xs shadow-sm"
-        >
-          Explore Shop • تصفحي المعروضات
-        </button>
-      </div>
-    );
-  }
+  const updateQty = (id, delta) => {
+    setCartItems(prev => prev.map(item => {
+      if (item.id === id) {
+        const newQty = Math.max(1, item.qty + delta);
+        return { ...item, qty: newQty };
+      }
+      return item;
+    }));
+  };
+
+  const removeItem = (id) => {
+    setCartItems(prev => prev.filter(item => item.id !== id));
+  };
+
+  const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.qty, 0);
+  const deliveryFee = 50;
+  const total = subtotal > 0 ? subtotal + deliveryFee : 0;
+
+  const handlePlaceOrder = () => {
+    setOrderPlaced(true);
+    setTimeout(() => {
+      setOrderPlaced(false);
+      setActiveTab('reels');
+    }, 3000);
+  };
 
   return (
-    <div className="w-full flex-1 max-w-4xl mx-auto px-4 md:px-6 py-4 pb-28 md:pb-12 text-on-surface text-right">
-      {/* Cart Hero Meta Ribbon */}
-      <div className="py-2 flex flex-col gap-1 mb-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-baseline gap-2">
-            <h1 className="font-serif text-xl md:text-2xl font-bold text-on-surface">Unified Cart • السلة الموحدة</h1>
-            <span className="text-xs text-on-surface-variant font-medium">({cartItems.length} Items)</span>
-          </div>
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface-variant">
-            <span className="w-1.5 h-1.5 rounded-full bg-secondary" />
-            <span className="text-[11px] tracking-wide font-medium">Independent Egyptian Brands</span>
-          </div>
-        </div>
-        <p className="text-xs text-on-surface-variant">
-          تم تجميع اختياراتك من البراندات المصرية في شحن موحد (Consolidated Shipping).
-        </p>
-      </div>
-
-      {/* Consolidated Logistics Banner */}
-      <div className="relative overflow-hidden rounded-xl bg-surface-container-low p-3.5 mb-6 border border-surface-container-high shadow-sm">
-        <div className="flex items-start gap-3">
-          <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center text-secondary shrink-0 mt-0.5">
-            <span className="material-symbols-outlined text-[18px]">local_shipping</span>
-          </div>
-          <div className="flex flex-col">
-            <span className="font-serif text-xs font-bold text-on-surface">Consolidated Shipping • شحن موحد لكل الأوردر</span>
-            <p className="text-[11px] text-on-surface-variant leading-relaxed mt-0.5">
-              هنجمع كل القطع من الأتيليهات والبراندات ونوصلهالك في شحنة واحدة بسرعة وأقل تكلفة شحن.
-            </p>
-          </div>
+    <div className="w-full min-h-[844px] bg-white text-slate-900 flex flex-col font-sans select-none pb-20">
+      {/* 1. iOS Status Bar */}
+      <div className="w-full flex items-center justify-between px-6 pt-3 pb-1 text-[13px] font-semibold text-slate-800">
+        <span>9:41</span>
+        <div className="flex items-center gap-1.5">
+          <span className="material-symbols-outlined text-[15px]">signal_cellular_alt</span>
+          <span className="material-symbols-outlined text-[15px]">wifi</span>
+          <span className="material-symbols-outlined text-[18px]">battery_full</span>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Cart Items List */}
-        <div className="lg:col-span-2 space-y-4">
-          {Object.entries(groupedByMerchant).map(([merchantName, items]) => (
-            <div
-              key={merchantName}
-              className="rounded-xl bg-surface-container-lowest border border-surface-container-high p-4 shadow-sm"
-            >
-              <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-surface-container-high">
-                <div className="flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-secondary text-[16px]">storefront</span>
-                  <span className="text-xs font-bold text-on-surface">{merchantName}</span>
-                </div>
-                <span className="text-[10px] text-secondary font-medium">Direct from Atelier • شحن مباشر من الأتيليه</span>
-              </div>
-
-              <div className="space-y-3">
-                {items.map((item) => (
-                  <div key={item.id} className="flex gap-3 items-center">
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="w-14 h-18 rounded-lg object-cover bg-surface-container-low border border-surface-container-high shrink-0"
-                    />
-
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-xs font-semibold text-on-surface truncate">{item.title}</h4>
-                      <div className="flex items-center gap-2 text-[10px] text-on-surface-variant mt-0.5">
-                        <span>Size: <b className="text-on-surface">{item.size}</b></span>
-                        <span>•</span>
-                        <span>Color: <b className="text-on-surface">{item.color}</b></span>
-                      </div>
-                      <div className="font-serif text-xs font-bold text-on-surface mt-1">
-                        {item.price.toLocaleString()} EGP
-                      </div>
-                    </div>
-
-                    {/* Quantity & Delete */}
-                    <div className="flex flex-col items-end gap-2">
-                      <button
-                        onClick={() => removeFromCart(item.id)}
-                        className="text-on-surface-variant hover:text-secondary p-0.5 transition-colors"
-                        title="Delete • حذف"
-                      >
-                        <span className="material-symbols-outlined text-[16px]">delete</span>
-                      </button>
-
-                      <div className="flex items-center gap-1.5 bg-surface-container-low px-2 py-0.5 rounded-lg border border-surface-container-high">
-                        <button
-                          onClick={() => updateQuantity(item.id, -1)}
-                          className="w-4 h-4 flex items-center justify-center text-xs text-on-surface"
-                        >
-                          -
-                        </button>
-                        <span className="text-xs font-bold w-3 text-center">{item.quantity}</span>
-                        <button
-                          onClick={() => updateQuantity(item.id, 1)}
-                          className="w-4 h-4 flex items-center justify-center text-xs text-on-surface"
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-
-          {/* Points Redemption Card */}
-          <div className="rounded-xl bg-surface-container-low border border-surface-container-high p-4">
-            <div className="flex items-center justify-between mb-1.5">
-              <div className="flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-secondary text-[18px]">stars</span>
-                <span className="text-xs font-bold text-on-surface">Redeem Points • استبدال نقاط الولاء</span>
-              </div>
-              <span className="text-xs font-bold text-secondary">
-                Balance: {rewardPoints.toLocaleString()} Points
-              </span>
-            </div>
-
-            <p className="text-[11px] text-on-surface-variant mb-3">
-              كل 10 Points = 1 EGP خصم فوري على الـ Cart
-            </p>
-
-            <div className="space-y-1.5">
-              <input
-                type="range"
-                min="0"
-                max={Math.min(rewardPoints, 2000)}
-                step="100"
-                value={pointsRedeemed}
-                onChange={(e) => setPointsRedeemed(Number(e.target.value))}
-                className="w-full accent-secondary cursor-pointer"
-              />
-              <div className="flex justify-between text-[11px]">
-                <span className="text-on-surface-variant">النقاط المستخدمة: {pointsRedeemed} Points</span>
-                <span className="text-secondary font-bold">خصم: -{discountFromPoints} EGP</span>
-              </div>
-            </div>
-          </div>
+      {/* 2. Top Bar: Center Red Arch Logo */}
+      <div className="w-full px-5 py-2 flex items-center justify-center relative">
+        <div className="cursor-pointer" onClick={() => setActiveTab('reels')}>
+          <EgLogo className="w-7 h-7" color="#d00000" />
         </div>
+      </div>
 
-        {/* Order Summary */}
-        <div className="lg:col-span-1">
-          <div className="sticky top-20 rounded-xl bg-surface-container-lowest border border-surface-container-high p-4 shadow-sm">
-            <h3 className="font-serif text-sm font-bold text-on-surface mb-3 pb-2 border-b border-surface-container-high">
-              Order Summary • ملخص الطلب
-            </h3>
+      {/* 3. Title: Your Cart (2) */}
+      <div className="px-5 pt-3 pb-2 text-left">
+        <h1 className="text-base font-bold text-slate-900">
+          Your Cart ({cartItems.length})
+        </h1>
+      </div>
 
-            <div className="space-y-2 text-xs mb-3">
-              <div className="flex justify-between text-on-surface-variant">
-                <span>Subtotal • المجموع</span>
-                <span className="text-on-surface font-semibold">{subtotal.toLocaleString()} EGP</span>
+      {/* 4. Cart Items List */}
+      <div className="px-5 space-y-3">
+        {cartItems.map((item, idx) => (
+          <div 
+            key={item.id}
+            className="p-3 rounded-2xl bg-gray-50/90 border border-gray-100 flex items-center justify-between gap-3 text-left"
+          >
+            {/* Thumbnail */}
+            <div className="w-16 h-16 rounded-xl overflow-hidden bg-gray-200 shrink-0">
+              <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+            </div>
+
+            {/* Info & Quantity Stepper */}
+            <div className="flex-1 min-w-0">
+              <h4 className="text-xs font-bold text-slate-900 truncate">{item.title}</h4>
+              <div className="text-xs font-black text-slate-900 mt-0.5">
+                EGP {item.price.toLocaleString()}
               </div>
-              {discountFromPoints > 0 && (
-                <div className="flex justify-between text-secondary font-semibold">
-                  <span>Points Discount • خصم النقاط</span>
-                  <span>-{discountFromPoints} EGP</span>
-                </div>
+              <span className="text-[11px] text-gray-400 block mt-0.5">Size: {item.size}</span>
+
+              {/* Stepper */}
+              <div className="inline-flex items-center gap-2 mt-2 bg-white px-2 py-0.5 rounded-lg border border-gray-200">
+                <button 
+                  onClick={() => updateQty(item.id, -1)}
+                  className="text-xs font-bold text-gray-600 px-1 hover:text-slate-900"
+                >
+                  -
+                </button>
+                <span className="text-xs font-bold text-slate-900 min-w-[12px] text-center">
+                  {item.qty}
+                </span>
+                <button 
+                  onClick={() => updateQty(item.id, 1)}
+                  className="text-xs font-bold text-gray-600 px-1 hover:text-slate-900"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            {/* Actions: Heart + Trash */}
+            <div className="flex flex-col items-center justify-between h-16 py-1">
+              {idx === 0 && (
+                <button className="text-gray-400 hover:text-[#d00000] transition-colors">
+                  <span className="material-symbols-outlined text-[18px]">favorite</span>
+                </button>
               )}
-              <div className="flex justify-between text-on-surface-variant">
-                <span>Shipping • الشحن الموحد</span>
-                <span className="text-on-surface font-semibold">{shippingTotal} EGP</span>
-              </div>
-            </div>
-
-            <div className="pt-2.5 border-t border-surface-container-high flex justify-between items-baseline mb-4">
-              <span className="text-xs font-bold text-on-surface">Total • الإجمالي النهائي</span>
-              <span className="font-serif text-xl font-bold text-on-surface">{grandTotal.toLocaleString()} EGP</span>
-            </div>
-
-            <button
-              onClick={() => setActiveTab('checkout')}
-              className="w-full py-3 rounded-xl bg-primary text-on-primary font-bold text-xs hover:bg-secondary transition-all flex items-center justify-center gap-1.5 active:scale-95 shadow-sm"
-            >
-              <span>Proceed to Checkout • متابعة الدفع</span>
-              <span className="material-symbols-outlined text-[16px] rtl:rotate-180">arrow_forward</span>
-            </button>
-
-            <div className="flex items-center justify-center gap-1 text-[10px] text-on-surface-variant mt-3">
-              <span className="material-symbols-outlined text-[13px] text-secondary">lock</span>
-              <span>100% Secure Checkout • دفع آمن ومحمي</span>
+              <button 
+                onClick={() => removeItem(item.id)}
+                className="text-gray-400 hover:text-red-500 transition-colors mt-auto"
+              >
+                <span className="material-symbols-outlined text-[18px]">delete</span>
+              </button>
             </div>
           </div>
+        ))}
+      </div>
+
+      {/* 5. Delivery Address Card */}
+      <div className="px-5 pt-4">
+        <div className="p-3.5 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-between text-left cursor-pointer hover:bg-gray-100 transition-colors">
+          <div className="flex items-start gap-2.5">
+            <span className="material-symbols-outlined text-[20px] text-gray-700 mt-0.5">
+              location_on
+            </span>
+            <div>
+              <div className="text-xs font-bold text-slate-900">Delivery Address</div>
+              <div className="text-[11px] font-semibold text-slate-800 mt-0.5">Cairo, Maadi</div>
+              <div className="text-[11px] text-gray-500">12 Street 206, Cairo, Egypt</div>
+            </div>
+          </div>
+          <span className="material-symbols-outlined text-[18px] text-gray-400">chevron_right</span>
         </div>
       </div>
+
+      {/* 6. Order Summary Breakdown */}
+      <div className="px-5 pt-4 space-y-2 text-left">
+        <div className="flex items-center justify-between text-xs text-gray-600">
+          <span>Subtotal</span>
+          <span className="font-semibold text-slate-800">EGP {subtotal.toLocaleString()}</span>
+        </div>
+        <div className="flex items-center justify-between text-xs text-gray-600">
+          <span>Delivery Fee</span>
+          <span className="font-semibold text-slate-800">EGP {deliveryFee}</span>
+        </div>
+        <div className="flex items-center justify-between text-sm font-bold pt-2 border-t border-gray-100">
+          <span className="text-slate-900">Total</span>
+          <span className="text-[#d00000] font-black text-base">EGP {total.toLocaleString()}</span>
+        </div>
+      </div>
+
+      {/* 7. Big Red [ 🔒 Place Order ] CTA */}
+      <div className="px-5 pt-5">
+        <button
+          onClick={handlePlaceOrder}
+          disabled={cartItems.length === 0}
+          className="w-full py-3.5 rounded-2xl bg-[#d00000] hover:bg-[#b00000] text-white text-xs font-bold shadow-lg flex items-center justify-center gap-2 active:scale-98 transition-all disabled:opacity-50"
+        >
+          <span className="material-symbols-outlined text-[17px]">lock</span>
+          <span>Place Order</span>
+        </button>
+      </div>
+
+      {/* Order Success Toast */}
+      {orderPlaced && (
+        <div className="fixed top-16 inset-x-8 z-50 bg-emerald-600 text-white py-2.5 px-4 rounded-xl text-xs font-bold text-center shadow-xl animate-fade-in">
+          Order placed successfully! Bosta Express AWB assigned ✨
+        </div>
+      )}
     </div>
   );
 }

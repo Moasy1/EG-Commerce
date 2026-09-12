@@ -1,0 +1,243 @@
+import React, { useState } from 'react';
+import { useApp } from '../../context/AppContext';
+import EgLogo from '../common/EgLogo';
+
+export default function DesktopMarketplace() {
+  const { openProductDetail, addToCart, setActiveTab } = useApp();
+  const [selectedCat, setSelectedCat] = useState('All');
+  const [selectedSize, setSelectedSize] = useState('M');
+
+  const topCategoryIcons = [
+    { label: 'All', icon: 'apps' },
+    { label: 'Women', icon: 'woman' },
+    { label: 'Men', icon: 'man' },
+    { label: 'Abayas', icon: 'dry_cleaning' },
+    { label: 'Accessories', icon: 'handbag' },
+    { label: 'Shoes', icon: 'footprint' },
+  ];
+
+  const products = [
+    {
+      id: 'dm-1',
+      title: 'Embroidered Galabeya',
+      price: 850,
+      rating: 4.8,
+      reviews: 124,
+      image: '/images/products/linen_abaya.jpg',
+      category: 'Abayas'
+    },
+    {
+      id: 'dm-2',
+      title: 'Linen Dress',
+      price: 650,
+      rating: 4.9,
+      reviews: 95,
+      image: '/images/products/silk_dress.jpg',
+      category: 'Dresses'
+    },
+    {
+      id: 'dm-3',
+      title: "Men's Linen Shirt",
+      price: 490,
+      rating: 4.6,
+      reviews: 78,
+      image: '/images/products/linen_shirt.jpg',
+      category: "Men's Wear"
+    },
+    {
+      id: 'dm-4',
+      title: 'Classic Abaya',
+      price: 1200,
+      rating: 4.9,
+      reviews: 142,
+      image: '/images/products/wool_blazer.jpg',
+      category: 'Abayas'
+    },
+    {
+      id: 'dm-5',
+      title: 'Boho Sunset Kimono',
+      price: 780,
+      rating: 4.7,
+      reviews: 63,
+      image: '/images/reels/reel_2.jpg',
+      category: 'Women'
+    },
+    {
+      id: 'dm-6',
+      title: 'Casual Summer Set',
+      price: 990,
+      rating: 4.8,
+      reviews: 84,
+      image: '/images/banners/talieska_hero.jpg',
+      category: 'Men'
+    },
+    {
+      id: 'dm-7',
+      title: 'Linen Vacation Co-ord',
+      price: 1250,
+      rating: 4.9,
+      reviews: 110,
+      image: '/images/reels/reel_1.jpg',
+      category: 'Women'
+    },
+    {
+      id: 'dm-8',
+      title: 'Woven Kilim Bag',
+      price: 420,
+      rating: 4.7,
+      reviews: 49,
+      image: '/images/products/copper_lantern.jpg',
+      category: 'Accessories'
+    },
+  ];
+
+  return (
+    <div className="w-full bg-white text-slate-900 flex flex-col font-sans min-h-[580px] overflow-hidden select-none text-left">
+      {/* 1. Top Bar */}
+      <div className="px-5 py-2.5 border-b border-gray-100 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-2 cursor-pointer" onClick={() => setActiveTab('reels')}>
+          <EgLogo className="w-6 h-6" color="#d00000" />
+          <span className="font-black text-xs tracking-tight">EG-Commerce</span>
+        </div>
+
+        <div className="flex-1 max-w-md flex items-center gap-2 px-3 py-1.5 bg-gray-100/90 rounded-full text-xs text-gray-500">
+          <span className="material-symbols-outlined text-[17px] text-gray-400">search</span>
+          <input
+            type="text"
+            placeholder="Search products, categories, brands..."
+            className="w-full bg-transparent focus:outline-none text-xs text-slate-800 placeholder:text-gray-400"
+          />
+        </div>
+
+        <div className="flex items-center gap-3 text-gray-600 text-xs font-semibold">
+          <button className="flex items-center gap-1 hover:text-[#d00000]"><span className="material-symbols-outlined text-[18px]">tune</span><span>Filters</span></button>
+          <span className="text-gray-300">|</span>
+          <button className="flex items-center gap-1 hover:text-[#d00000]"><span className="text-gray-500">Sort by:</span><span className="text-slate-900 font-bold">Most Popular</span></button>
+          <div className="flex items-center gap-2 ml-2">
+            <button onClick={() => setActiveTab('cart')} className="p-1 hover:text-[#d00000]"><span className="material-symbols-outlined text-[19px]">shopping_cart</span></button>
+            <img src="/images/reels/reel_2.jpg" alt="User" className="w-6 h-6 rounded-full object-cover ring-1 ring-gray-300" />
+          </div>
+        </div>
+      </div>
+
+      {/* 2. Top Category Icons Bar */}
+      <div className="px-5 py-2 border-b border-gray-100 flex items-center gap-6 overflow-x-auto scrollbar-none">
+        {topCategoryIcons.map((cat) => (
+          <button
+            key={cat.label}
+            onClick={() => setSelectedCat(cat.label)}
+            className={`flex items-center gap-1.5 py-1 px-3 rounded-full text-xs font-semibold transition-all ${
+              selectedCat === cat.label
+                ? 'bg-[#d00000]/10 text-[#d00000] font-bold'
+                : 'text-gray-600 hover:text-slate-900'
+            }`}
+          >
+            <span className="material-symbols-outlined text-[17px]">{cat.icon}</span>
+            <span>{cat.label}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* 3. Main Content: Left Filters + 4-Column Product Grid */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left Filter Column */}
+        <aside className="w-48 p-4 border-r border-gray-100 space-y-4 text-left shrink-0 bg-gray-50/50">
+          <div>
+            <h4 className="text-xs font-bold text-slate-900 mb-2">Category</h4>
+            <div className="space-y-1.5 text-[11px] text-gray-600 font-medium">
+              {['Dresses', 'Tops & Blouses', 'Bottoms', 'Abayas & Galabeyas', "Men's Wear", 'Accessories'].map((c, i) => (
+                <label key={c} className="flex items-center gap-2 cursor-pointer hover:text-slate-900">
+                  <input type="checkbox" defaultChecked={i === 0 || i === 3} className="accent-[#d00000] rounded" />
+                  <span>{c}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className="pt-2 border-t border-gray-200/60">
+            <h4 className="text-xs font-bold text-slate-900 mb-2">Price Range</h4>
+            <div className="space-y-1.5 text-[11px] text-gray-600 font-medium">
+              {['Under 300 EGP', '300 - 600 EGP', '600 - 1,000 EGP', '1,000+ EGP'].map((p, i) => (
+                <label key={p} className="flex items-center gap-2 cursor-pointer hover:text-slate-900">
+                  <input type="checkbox" defaultChecked={i === 2} className="accent-[#d00000] rounded" />
+                  <span>{p}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className="pt-2 border-t border-gray-200/60">
+            <h4 className="text-xs font-bold text-slate-900 mb-2">Size</h4>
+            <div className="flex flex-wrap gap-1.5">
+              {['XS', 'S', 'M', 'L', 'XL', 'XXL'].map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setSelectedSize(s)}
+                  className={`w-7 h-7 rounded-lg text-[10px] font-bold border ${
+                    selectedSize === s
+                      ? 'bg-[#d00000] text-white border-[#d00000]'
+                      : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-100'
+                  }`}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+        </aside>
+
+        {/* 4-Column Product Cards Grid */}
+        <main className="flex-1 p-4 overflow-y-auto">
+          <div className="mb-2">
+            <h3 className="text-sm font-bold text-slate-900">Explore Marketplace</h3>
+            <p className="text-[11px] text-gray-500">Shop the latest Egyptian fashion from local sellers</p>
+          </div>
+
+          <div className="grid grid-cols-4 gap-3">
+            {products.map((prod) => (
+              <div
+                key={prod.id}
+                onClick={() => openProductDetail(prod)}
+                className="group rounded-xl border border-gray-200 overflow-hidden bg-white hover:shadow-md transition-all flex flex-col justify-between cursor-pointer"
+              >
+                {/* Image */}
+                <div className="aspect-[4/5] relative overflow-hidden bg-gray-100">
+                  <img src={prod.image} alt={prod.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  <button className="absolute top-2 right-2 w-6 h-6 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-gray-600 hover:text-[#d00000]">
+                    <span className="material-symbols-outlined text-[14px]">favorite</span>
+                  </button>
+                </div>
+
+                {/* Info */}
+                <div className="p-2.5 space-y-1.5">
+                  <div>
+                    <h5 className="text-[11px] font-bold text-slate-900 truncate">{prod.title}</h5>
+                    <div className="flex items-center justify-between mt-0.5">
+                      <span className="text-xs font-black text-slate-900">EGP {prod.price}</span>
+                      <div className="flex items-center gap-0.5 text-[10px] text-amber-500">
+                        <span className="material-symbols-outlined text-[12px] fill-current">star</span>
+                        <span className="font-bold text-slate-700">{prod.rating}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Red [ Add to Cart ] Button */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      addToCart(prod);
+                    }}
+                    className="w-full py-1.5 rounded-lg bg-[#d00000] text-white text-[10px] font-bold hover:bg-[#b00000] transition-colors flex items-center justify-center gap-1 shadow-xs"
+                  >
+                    <span className="material-symbols-outlined text-[13px]">shopping_cart</span>
+                    <span>Add to Cart</span>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}

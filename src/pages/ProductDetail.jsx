@@ -1,226 +1,198 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
+import EgLogo from '../components/common/EgLogo';
 
 export default function ProductDetail() {
   const { selectedProduct, addToCart, setActiveTab } = useApp();
-  const [selectedSize, setSelectedSize] = useState('M');
-  const [selectedColor, setSelectedColor] = useState(selectedProduct?.colors?.[0] || 'تيراكوتا (طوبي)');
-  const [notification, setNotification] = useState('');
+  const [selectedSize, setSelectedSize] = useState('S');
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [addedToast, setAddedToast] = useState(false);
 
-  if (!selectedProduct) return null;
-
-  const handleAddToCart = () => {
-    addToCart(selectedProduct, { size: selectedSize, color: selectedColor });
-    setNotification('تمت إضافة القطعة إلى الـ Cart بنجاح! ✨');
-    setTimeout(() => setNotification(''), 3000);
+  // Fallback to Linen Co-ord Set if no product selected
+  const product = selectedProduct || {
+    id: 'p-linen-coord',
+    title: 'Linen Co-ord Set',
+    price: 1250,
+    image: '/images/reels/reel_1.jpg',
+    category: 'Women',
+    rating: 4.8,
+    reviewsCount: 124,
+    sizes: ['XS', 'S', 'M', 'L', 'XL'],
+    merchantId: 'm-1'
   };
 
-  const handleBuyNow = () => {
-    addToCart(selectedProduct, { size: selectedSize, color: selectedColor });
-    setActiveTab('checkout');
+  const handleAddToCart = () => {
+    addToCart({ ...product, selectedSize });
+    setAddedToast(true);
+    setTimeout(() => setAddedToast(false), 2000);
   };
 
   return (
-    <div className="w-full flex-1 max-w-5xl mx-auto px-4 md:px-6 py-4 pb-28 md:pb-16 text-on-surface">
-      {/* Back Button */}
-      <button
-        onClick={() => setActiveTab('shop')}
-        className="inline-flex items-center gap-1.5 text-xs font-semibold text-on-surface-variant hover:text-primary mb-4 transition-colors"
-      >
-        <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-        <span>Back to Shop • العودة للتسوق</span>
-      </button>
-
-      {/* Toast */}
-      {notification && (
-        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-secondary text-on-secondary px-5 py-2.5 rounded-full font-bold text-xs shadow-lg flex items-center gap-2 animate-fade-in">
-          <span className="material-symbols-outlined text-[18px]">check_circle</span>
-          <span>{notification}</span>
+    <div className="w-full min-h-[844px] bg-white text-slate-900 flex flex-col font-sans select-none pb-24 relative">
+      {/* 1. iOS Status Bar */}
+      <div className="w-full flex items-center justify-between px-6 pt-3 pb-1 text-[13px] font-semibold text-slate-800">
+        <span>9:41</span>
+        <div className="flex items-center gap-1.5">
+          <span className="material-symbols-outlined text-[15px]">signal_cellular_alt</span>
+          <span className="material-symbols-outlined text-[15px]">wifi</span>
+          <span className="material-symbols-outlined text-[18px]">battery_full</span>
         </div>
-      )}
+      </div>
 
-      {/* Product Hero Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-10">
-        {/* Product Media */}
-        <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-surface-container-low border border-surface-container-high shadow-sm">
-          <img
-            src={selectedProduct.image}
-            alt={selectedProduct.title}
+      {/* 2. Top Navigation Bar: Back Arrow, Center Red Logo, Heart & Share */}
+      <div className="w-full px-4 py-2 flex items-center justify-between">
+        <button 
+          onClick={() => setActiveTab('shop')} 
+          className="p-1.5 text-slate-800 hover:text-[#d00000] transition-colors"
+        >
+          <span className="material-symbols-outlined text-[24px]">chevron_left</span>
+        </button>
+
+        <div className="cursor-pointer" onClick={() => setActiveTab('reels')}>
+          <EgLogo className="w-7 h-7" color="#d00000" />
+        </div>
+
+        <div className="flex items-center gap-2 text-slate-700">
+          <button 
+            onClick={() => setIsFavorited(!isFavorited)}
+            className="p-1.5 hover:text-[#d00000] transition-colors"
+          >
+            <span 
+              className={`material-symbols-outlined text-[22px] ${isFavorited ? 'text-[#d00000] fill-current' : ''}`}
+            >
+              favorite
+            </span>
+          </button>
+          <button className="p-1.5 hover:text-[#d00000] transition-colors">
+            <span className="material-symbols-outlined text-[22px]">ios_share</span>
+          </button>
+        </div>
+      </div>
+
+      {/* 3. Product Hero Image with 1/5 Badge */}
+      <div className="w-full px-5 py-2">
+        <div className="aspect-[4/5] w-full rounded-3xl overflow-hidden relative bg-gray-100 shadow-sm">
+          <img 
+            src={product.image || '/images/reels/reel_1.jpg'} 
+            alt={product.title}
             className="w-full h-full object-cover"
           />
-          <div className="absolute top-3 right-3 bg-surface/90 backdrop-blur-md px-2.5 py-1 rounded text-[11px] font-semibold text-secondary flex items-center gap-1 shadow-sm">
-            <span className="material-symbols-outlined text-[13px]">stars</span>
-            <span>+{selectedProduct.pointsEarned} Points مكافأة</span>
-          </div>
-        </div>
-
-        {/* Specs & Ordering Details */}
-        <div className="flex flex-col justify-between text-right">
-          <div>
-            {/* Merchant Badge */}
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-xs font-semibold text-secondary">
-                {selectedProduct.merchant}
-              </span>
-              {selectedProduct.merchantVerified && (
-                <span className="flex items-center gap-0.5 text-[11px] text-on-surface-variant font-medium">
-                  <span className="material-symbols-outlined text-secondary text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                    verified
-                  </span>
-                  Verified Brand • براند موثق
-                </span>
-              )}
-            </div>
-
-            <h1 className="font-serif text-2xl md:text-3xl font-bold text-on-surface leading-snug mb-3">
-              {selectedProduct.title}
-            </h1>
-
-            {/* Price & Rating */}
-            <div className="flex items-baseline justify-between pb-3 mb-4 border-b border-surface-container-high">
-              <div className="flex items-baseline gap-2">
-                <span className="font-serif text-2xl md:text-3xl font-bold text-on-surface">{selectedProduct.price.toLocaleString()}</span>
-                <span className="text-xs text-on-surface-variant font-semibold">EGP</span>
-                {selectedProduct.originalPrice && (
-                  <span className="text-xs text-outline line-through">{selectedProduct.originalPrice.toLocaleString()} EGP</span>
-                )}
-              </div>
-              <div className="flex items-center gap-1 text-xs bg-surface-container-low px-2.5 py-1 rounded-lg">
-                <span className="material-symbols-outlined text-secondary text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                <span className="font-bold text-on-surface">{selectedProduct.rating}</span>
-                <span className="text-[10px] text-on-surface-variant">({selectedProduct.reviewsCount} تقييم)</span>
-              </div>
-            </div>
-
-            <p className="text-xs text-on-surface-variant leading-relaxed mb-5">
-              {selectedProduct.description}
-            </p>
-
-            {/* Size Options */}
-            <div className="mb-4">
-              <div className="flex justify-between items-center mb-1.5">
-                <label className="text-xs font-semibold text-on-surface">Size • المقاس</label>
-                <button className="text-[11px] text-secondary hover:underline">Size Guide • دليل المقاسات</button>
-              </div>
-              <div className="flex gap-2 flex-wrap">
-                {selectedProduct.sizes?.map((size) => (
-                  <button
-                    key={size}
-                    onClick={() => setSelectedSize(size)}
-                    className={`min-w-[42px] py-1.5 px-3 rounded-lg text-xs font-semibold border transition-all ${
-                      selectedSize === size
-                        ? 'border-primary bg-primary text-on-primary'
-                        : 'border-surface-container-high bg-surface-container-lowest text-on-surface hover:border-outline'
-                    }`}
-                  >
-                    {size}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Color Options */}
-            <div className="mb-6">
-              <label className="block text-xs font-semibold text-on-surface mb-1.5">Color • اللون</label>
-              <div className="flex gap-2 flex-wrap">
-                {selectedProduct.colors?.map((col) => (
-                  <button
-                    key={col}
-                    onClick={() => setSelectedColor(col)}
-                    className={`py-1.5 px-3 rounded-lg text-xs font-semibold border transition-all ${
-                      selectedColor === col
-                        ? 'border-secondary bg-secondary/10 text-secondary font-bold'
-                        : 'border-surface-container-high bg-surface-container-lowest text-on-surface hover:border-outline'
-                    }`}
-                  >
-                    {col}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Action CTAs */}
-          <div className="flex gap-3 pt-4 border-t border-surface-container-high">
-            <button
-              onClick={handleAddToCart}
-              className="flex-1 py-3 px-4 rounded-xl font-bold text-xs border border-primary text-primary hover:bg-surface-container-low transition-all flex items-center justify-center gap-1.5 active:scale-95"
-            >
-              <span className="material-symbols-outlined text-[18px]">shopping_bag</span>
-              <span>Add to Cart • أضف للـ Cart</span>
-            </button>
-            <button
-              onClick={handleBuyNow}
-              className="flex-1 py-3 px-4 rounded-xl font-bold text-xs bg-primary text-on-primary hover:bg-secondary transition-all flex items-center justify-center gap-1.5 active:scale-95 shadow-sm"
-            >
-              <span className="material-symbols-outlined text-[18px]">flash_on</span>
-              <span>Instant Buy • شراء فوري</span>
-            </button>
+          {/* 1/5 Carousel Count Pill */}
+          <div className="absolute bottom-3 right-3 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-white text-[11px] font-semibold">
+            1/5
           </div>
         </div>
       </div>
 
-      {/* UGC Showcase Section: Reels & Styling */}
-      <section className="mt-8 pt-6 border-t border-surface-container-high">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="font-serif text-base font-bold text-on-surface">Reels & Outfits • فيديوهات التنسيق</h2>
-            <p className="text-[11px] text-on-surface-variant mt-0.5">
-              تنسيقات وستايلينج حقيقية للقطعة من فاشون بلوجرز وصناع محتوى في مصر
-            </p>
-          </div>
-          <button 
-            onClick={() => setActiveTab('reels')}
-            className="text-xs font-semibold text-secondary hover:underline flex items-center gap-0.5"
-          >
-            <span>Watch Reels • شاهد في الريلز</span>
-            <span className="material-symbols-outlined text-[16px]">play_circle</span>
-          </button>
+      {/* 4. Product Title, Price & Reviews */}
+      <div className="px-5 pt-3 space-y-1 text-left">
+        <h1 className="text-lg font-bold text-slate-900 leading-tight">
+          {product.title}
+        </h1>
+        <div className="text-lg font-black text-[#d00000]">
+          EGP {product.price.toLocaleString()}
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          {[
-            {
-              creator: '@layla_style',
-              caption: 'تنسيق أزياء الكتان الفاخر في شوارع المعز',
-              image: '/images/reels/reel_1.jpg'
-            },
-            {
-              creator: '@nour_style',
-              caption: 'كيمونو صيفي بالرووف لاونج مع مجوهرات ذهبية',
-              image: '/images/reels/reel_2.jpg'
-            },
-            {
-              creator: '@cairo.modest',
-              caption: 'كواليس الحياكة والتطريز اليدوي بالقاهرة',
-              image: '/images/reels/reel_3.jpg'
-            }
-          ].map((video, idx) => (
-            <div
-              key={idx}
-              onClick={() => setActiveTab('reels')}
-              className="relative aspect-[9/13] rounded-xl overflow-hidden bg-surface-container group cursor-pointer border border-surface-container-high hover:border-secondary transition-all"
+        {/* Rating Stars */}
+        <div className="flex items-center gap-1 text-xs pt-1">
+          <div className="flex items-center text-[#d00000]">
+            {[...Array(5)].map((_, i) => (
+              <span key={i} className="material-symbols-outlined text-[15px] fill-current">star</span>
+            ))}
+          </div>
+          <span className="font-bold text-slate-800 ml-1">4.8</span>
+          <span className="text-gray-400 font-medium">(124 reviews)</span>
+        </div>
+      </div>
+
+      {/* 5. Size Selector */}
+      <div className="px-5 pt-4 space-y-2 text-left">
+        <span className="text-xs font-bold text-slate-900 block">Size</span>
+        <div className="flex items-center gap-2.5">
+          {['XS', 'S', 'M', 'L', 'XL'].map((size) => (
+            <button
+              key={size}
+              onClick={() => setSelectedSize(size)}
+              className={`w-10 h-10 rounded-xl text-xs font-bold transition-all flex items-center justify-center ${
+                selectedSize === size
+                  ? 'bg-[#d00000] text-white shadow-md'
+                  : 'bg-gray-100 text-slate-700 hover:bg-gray-200'
+              }`}
             >
-              <img
-                src={video.image}
-                alt={video.caption}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/20 to-transparent flex flex-col justify-between p-3 text-on-primary">
-                <span className="w-7 h-7 rounded-full bg-surface/30 backdrop-blur-sm flex items-center justify-center self-end">
-                  <span className="material-symbols-outlined text-[16px]">play_arrow</span>
-                </span>
-                <div>
-                  <span className="font-serif text-xs font-bold block">{video.creator}</span>
-                  <p className="text-[10px] text-on-primary/90 line-clamp-2 mt-0.5 leading-snug">
-                    {video.caption}
-                  </p>
-                </div>
-              </div>
-            </div>
+              {size}
+            </button>
           ))}
         </div>
-      </section>
+      </div>
+
+      {/* 6. Seller Info Card (By Nada Fashion) */}
+      <div className="px-5 pt-4">
+        <div 
+          onClick={() => setActiveTab('profile')}
+          className="p-3 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <img 
+              src="/images/reels/reel_2.jpg" 
+              alt="Nada Fashion"
+              className="w-10 h-10 rounded-full object-cover"
+            />
+            <div className="text-left">
+              <div className="flex items-center gap-1">
+                <span className="text-xs font-bold text-slate-900">By Nada Fashion</span>
+                <span className="material-symbols-outlined text-[14px] text-sky-500 fill-current">verified</span>
+              </div>
+              <span className="text-[11px] text-gray-500 block">Egypt · Cairo</span>
+            </div>
+          </div>
+          <span className="text-xs font-bold text-slate-700 hover:text-[#d00000] flex items-center gap-0.5">
+            <span>View Store</span>
+            <span className="material-symbols-outlined text-[15px]">chevron_right</span>
+          </span>
+        </div>
+      </div>
+
+      {/* 7. Delivery Info Card */}
+      <div className="px-5 pt-3">
+        <div className="p-3 rounded-2xl bg-gray-50 border border-gray-100 flex items-center gap-3 text-left">
+          <div className="w-9 h-9 rounded-xl bg-gray-200/70 text-slate-700 flex items-center justify-center">
+            <span className="material-symbols-outlined text-[20px]">local_shipping</span>
+          </div>
+          <div>
+            <div className="text-xs font-bold text-slate-900">Delivery in 2-5 days</div>
+            <div className="text-[11px] text-gray-500">Cash on delivery available</div>
+          </div>
+        </div>
+      </div>
+
+      {/* 8. Reviews Preview Card */}
+      <div className="px-5 pt-3">
+        <div className="p-3 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-[18px] text-gray-600">star</span>
+            <span className="text-xs font-bold text-slate-900">Reviews (124)</span>
+          </div>
+          <span className="material-symbols-outlined text-[16px] text-gray-400">chevron_right</span>
+        </div>
+      </div>
+
+      {/* Added Toast */}
+      {addedToast && (
+        <div className="fixed top-16 inset-x-8 z-50 bg-[#d00000] text-white py-2 px-4 rounded-xl text-xs font-bold text-center shadow-xl animate-fade-in">
+          Added to cart successfully! 🛍️
+        </div>
+      )}
+
+      {/* 9. Fixed Bottom Add to Cart CTA */}
+      <div className="fixed bottom-0 inset-x-0 z-40 p-4 bg-white/95 backdrop-blur-md border-t border-gray-100 max-w-[390px] mx-auto md:relative md:max-w-none">
+        <button
+          onClick={handleAddToCart}
+          className="w-full py-3.5 rounded-2xl bg-[#d00000] hover:bg-[#b00000] text-white text-xs font-bold shadow-lg flex items-center justify-center gap-2 active:scale-98 transition-all"
+        >
+          <span className="material-symbols-outlined text-[18px]">shopping_bag</span>
+          <span>Add to Cart</span>
+        </button>
+      </div>
     </div>
   );
 }

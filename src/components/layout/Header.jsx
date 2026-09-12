@@ -1,5 +1,6 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
+import EgLogo from '../common/EgLogo';
 
 export default function Header() {
   const { 
@@ -15,6 +16,7 @@ export default function Header() {
 
   const getSubTitle = () => {
     switch (activeTab) {
+      case 'showcase': return '5-Screens Showcase • المعرض الموحد';
       case 'reels': return 'Reels • ريلز';
       case 'shop':
       case 'product': return 'Shop • السوق الموحد';
@@ -36,49 +38,87 @@ export default function Header() {
       <div className="max-w-7xl mx-auto h-16 px-4 md:px-6 flex items-center justify-between gap-3">
         {/* Brand Logo & Title */}
         <div 
-          onClick={() => setActiveTab('reels')}
+          onClick={() => setActiveTab('showcase')}
           className="flex items-center gap-3 cursor-pointer group"
         >
-          <img 
-            src="/images/brands/talieska_logo.jpg" 
-            alt="EG Fashion Logo" 
-            className="h-9 w-9 rounded-xl object-cover border border-secondary/30 shadow-sm"
-          />
-          <div className="flex flex-col">
-            <span className="text-sm font-bold text-on-surface leading-none tracking-tight">
-              EG COMMERCE
+          <EgLogo className="w-9 h-9 group-hover:scale-105 transition-transform" color="#d00000" />
+          <div className="flex flex-col text-left">
+            <span className="text-sm font-black text-on-surface leading-none tracking-tight">
+              EG-COMMERCE
             </span>
-            <span className="text-[11px] text-secondary font-medium leading-none mt-1">
+            <span className="text-[11px] text-[#d00000] font-bold leading-none mt-1">
               {getSubTitle()}
             </span>
           </div>
         </div>
 
-        {/* Desktop Navigation Tabs (Egyptian mixed style) */}
+        {/* Desktop Navigation Tabs */}
         <nav className="hidden md:flex items-center gap-1 bg-surface-container-low px-2 py-1 rounded-full border border-surface-container-high">
+          {/* Showcase Tab (Matching Reference Image) */}
+          <button
+            onClick={() => setActiveTab('showcase')}
+            className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 ${
+              activeTab === 'showcase'
+                ? 'bg-[#d00000] text-white shadow-md'
+                : 'text-[#d00000] hover:bg-[#d00000]/10'
+            }`}
+          >
+            <span>📱 الشاشات الـ 5 (Showcase)</span>
+          </button>
+
           <button
             onClick={() => setActiveTab('reels')}
-            className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all ${
+            className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
               activeTab === 'reels'
                 ? 'bg-primary text-on-primary shadow-sm'
                 : 'text-on-surface-variant hover:text-on-surface'
             }`}
           >
-            Reels
+            1. Reels
           </button>
           <button
             onClick={() => setActiveTab('shop')}
-            className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all ${
-              activeTab === 'shop' || activeTab === 'product'
+            className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+              activeTab === 'shop'
                 ? 'bg-primary text-on-primary shadow-sm'
                 : 'text-on-surface-variant hover:text-on-surface'
             }`}
           >
-            Shop
+            2. Shop
+          </button>
+          <button
+            onClick={() => setActiveTab('product')}
+            className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+              activeTab === 'product'
+                ? 'bg-primary text-on-primary shadow-sm'
+                : 'text-on-surface-variant hover:text-on-surface'
+            }`}
+          >
+            3. Product
+          </button>
+          <button
+            onClick={() => setActiveTab('cart')}
+            className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+              activeTab === 'cart' || activeTab === 'checkout'
+                ? 'bg-primary text-on-primary shadow-sm'
+                : 'text-on-surface-variant hover:text-on-surface'
+            }`}
+          >
+            4. Cart
+          </button>
+          <button
+            onClick={() => setActiveTab('profile')}
+            className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+              activeTab === 'profile'
+                ? 'bg-primary text-on-primary shadow-sm'
+                : 'text-on-surface-variant hover:text-on-surface'
+            }`}
+          >
+            5. Profile
           </button>
           <button
             onClick={() => setActiveTab('storefront')}
-            className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1 ${
+            className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1 ${
               activeTab === 'storefront'
                 ? 'bg-primary text-on-primary shadow-sm'
                 : 'text-on-surface-variant hover:text-on-surface'
@@ -88,38 +128,18 @@ export default function Header() {
           </button>
           <button
             onClick={() => setActiveTab('dashboard')}
-            className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1 ${
+            className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1 ${
               activeTab === 'dashboard' || activeTab === 'merchant'
                 ? 'bg-secondary text-on-secondary shadow-sm'
                 : 'text-on-surface-variant hover:text-on-surface'
             }`}
           >
-            <span>⚙️ لوحة التاجر (SaaS)</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('studio')}
-            className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all ${
-              activeTab === 'studio'
-                ? 'bg-primary text-on-primary shadow-sm'
-                : 'text-on-surface-variant hover:text-on-surface'
-            }`}
-          >
-            Creator Studio
-          </button>
-          <button
-            onClick={() => setActiveTab('rewards')}
-            className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all ${
-              activeTab === 'rewards'
-                ? 'bg-secondary text-on-secondary shadow-sm'
-                : 'text-on-surface-variant hover:text-on-surface'
-            }`}
-          >
-            Rewards
+            <span>⚙️ لوحة التاجر</span>
           </button>
         </nav>
 
         {/* Action Controls */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
           {/* Mobile vs Web toggle */}
           <button
             onClick={() => setDeviceMode(prev => prev === 'responsive' ? 'mobile-frame' : 'responsive')}
@@ -129,7 +149,7 @@ export default function Header() {
             <span className="material-symbols-outlined text-[17px]">
               {deviceMode === 'mobile-frame' ? 'desktop_windows' : 'smartphone'}
             </span>
-            <span>{deviceMode === 'mobile-frame' ? 'Web View' : 'App View'}</span>
+            <span>{deviceMode === 'mobile-frame' ? 'Web View' : 'App Frame'}</span>
           </button>
 
           {/* Role Switcher */}
@@ -139,7 +159,7 @@ export default function Header() {
               onChange={(e) => {
                 const newRole = e.target.value;
                 setRole(newRole);
-                if (newRole === 'creator') setActiveTab('studio');
+                if (newRole === 'creator') setActiveTab('profile');
                 else if (newRole === 'merchant_admin') setActiveTab('dashboard');
                 else if (newRole === 'merchant_store') setActiveTab('storefront');
                 else setActiveTab('reels');
@@ -157,32 +177,20 @@ export default function Header() {
           <button 
             onClick={() => setActiveTab('shop')}
             aria-label="Search"
-            className="w-10 h-10 flex items-center justify-center text-on-surface hover:text-primary transition-colors"
+            className="w-9 h-9 flex items-center justify-center text-on-surface hover:text-[#d00000] transition-colors"
           >
-            <span className="material-symbols-outlined text-[22px]">search</span>
-          </button>
-
-          {/* Notifications */}
-          <button 
-            onClick={() => setActiveTab('profile')}
-            aria-label="Notifications"
-            className="w-10 h-10 flex items-center justify-center text-on-surface hover:text-primary relative transition-colors"
-          >
-            <span className="material-symbols-outlined text-[22px]">notifications</span>
-            {unreadNotifications > 0 && (
-              <span className="absolute top-2.5 left-2.5 w-1.5 h-1.5 rounded-full bg-secondary" />
-            )}
+            <span className="material-symbols-outlined text-[20px]">search</span>
           </button>
 
           {/* Cart Icon & Counter */}
           <button 
             onClick={() => setActiveTab('cart')}
             aria-label="Cart"
-            className="w-10 h-10 flex items-center justify-center text-on-surface hover:text-primary relative transition-colors"
+            className="w-9 h-9 flex items-center justify-center text-on-surface hover:text-[#d00000] relative transition-colors"
           >
-            <span className="material-symbols-outlined text-[22px]">shopping_bag</span>
+            <span className="material-symbols-outlined text-[20px]">shopping_bag</span>
             {totalCartCount > 0 && (
-              <span className="absolute top-2 left-2 min-w-[16px] h-4 px-1 rounded-full bg-primary text-on-primary text-[9px] font-bold flex items-center justify-center leading-none">
+              <span className="absolute top-1 left-1 min-w-[15px] h-[15px] px-1 rounded-full bg-[#d00000] text-white text-[9px] font-bold flex items-center justify-center leading-none">
                 {totalCartCount}
               </span>
             )}
@@ -194,9 +202,9 @@ export default function Header() {
             className="pr-1 flex items-center cursor-pointer"
           >
             <img 
-              src="/images/reels/reel_2.jpg"
+              src="/images/reels/reel_2.jpg" 
               alt="Profile" 
-              className="w-8 h-8 rounded-full object-cover ring-1 ring-secondary/40"
+              className="w-8 h-8 rounded-full object-cover ring-1 ring-[#d00000]/40"
             />
           </div>
         </div>

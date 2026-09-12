@@ -1,222 +1,193 @@
 import React, { useState } from 'react';
-import { useApp, INITIAL_PRODUCTS } from '../context/AppContext';
+import { useApp } from '../context/AppContext';
+import EgLogo from '../components/common/EgLogo';
 
 export default function Marketplace() {
-  const { openProductDetail, addToCart, setActiveTab, products } = useApp();
-  const [selectedCategory, setSelectedCategory] = useState('All • الكل');
+  const { openProductDetail, totalCartCount, setActiveTab, addToCart } = useApp();
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
 
+  // Categories corresponding to the exact 6 cards in Screen 2
   const categories = [
-    'All • الكل',
-    'Dresses فساتين',
-    'Abayas عبايات',
-    'Linen كتان كاجوال',
-    'Bags شنط جلد',
-    'Jewelry إكسسوارات'
+    { id: 'new', label: 'New Arrivals', isRedCard: true },
+    { id: 'women', label: 'Women', image: '/images/products/silk_dress.jpg' },
+    { id: 'men', label: 'Men', image: '/images/products/linen_shirt.jpg' },
+    { id: 'modest', label: 'Modest Fashion', image: '/images/products/linen_abaya.jpg' },
+    { id: 'streetwear', label: 'Streetwear', image: '/images/products/wool_blazer.jpg' },
+    { id: 'accessories', label: 'Accessories', image: '/images/products/copper_lantern.jpg' },
   ];
 
-  const creatorStories = [
+  // Exact 4 Featured Products shown on Screen 2
+  const featuredProducts = [
     {
-      creator: '@layla_style',
-      role: 'Fashion Designer • ستايليست',
-      caption: 'تنسيق أزياء الكتان الفاخر في شوارع المعز',
-      image: '/images/reels/reel_1.jpg'
+      id: 'p-linen-coord',
+      title: 'Linen Co-ord Set',
+      price: 1250,
+      image: '/images/reels/reel_1.jpg',
+      category: 'Women',
+      rating: 4.8,
+      reviewsCount: 124,
+      merchantId: 'm-1'
     },
     {
-      creator: '@farah.cairo',
-      role: 'Stylist • فاشون بلوجر',
-      caption: 'تفاصيل كيمونو صيفي بالرووف لاونج بالزمالك',
-      image: '/images/reels/reel_2.jpg'
+      id: 'p-oversized-hoodie',
+      title: 'Oversized Hoodie',
+      price: 950,
+      image: '/images/products/wool_blazer.jpg',
+      category: 'Men',
+      rating: 4.9,
+      reviewsCount: 86,
+      merchantId: 'm-1'
     },
     {
-      creator: '@yara_linen',
-      role: 'Content Creator • صانعة محتوى',
-      caption: 'كواليس التطريز اليدوي في مشاغل القاهرة',
-      image: '/images/reels/reel_3.jpg'
+      id: 'p-chic-jacket',
+      title: 'Chic Linen Jacket',
+      price: 890,
+      image: '/images/products/linen_shirt.jpg',
+      category: 'Women',
+      rating: 4.7,
+      reviewsCount: 52,
+      merchantId: 'm-1'
+    },
+    {
+      id: 'p-utility-jacket',
+      title: 'Olive Utility Jacket',
+      price: 1100,
+      image: '/images/products/linen_abaya.jpg',
+      category: 'Men',
+      rating: 4.8,
+      reviewsCount: 68,
+      merchantId: 'm-1'
     }
   ];
 
-  const filteredProducts = (products || []).filter(item => {
-    const matchesCat = selectedCategory === 'All • الكل' || 
-      (selectedCategory.includes('Dresses') && item.category.includes('عبايات')) ||
-      (selectedCategory.includes('Abayas') && item.category.includes('عبايات')) ||
-      (selectedCategory.includes('Linen') && item.category.includes('كتان')) ||
-      (selectedCategory.includes('Bags') && item.category.includes('حقائب')) ||
-      (selectedCategory.includes('Jewelry') && item.category.includes('إكسسوارات')) ||
-      item.category === selectedCategory;
-    const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      item.merchant.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCat && matchesSearch;
-  });
-
   return (
-    <div className="w-full flex-1 max-w-7xl mx-auto px-4 md:px-6 py-4 pb-28 md:pb-12 text-on-surface">
-      {/* Smart Search & Visual Lens */}
-      <div className="relative w-full mb-4">
-        <div className="w-full bg-surface-container-low rounded-xl px-4 py-2.5 flex items-center justify-between shadow-sm border border-surface-container-high transition-all focus-within:bg-surface-container-lowest focus-within:shadow-md">
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            <span className="material-symbols-outlined text-on-surface-variant text-[20px]">search</span>
-            <input
-              type="text"
-              placeholder="Search فساتين، Bags، براندات مصرية محلية..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-transparent w-full text-on-surface placeholder:text-on-surface-variant text-xs md:text-sm focus:outline-none"
-            />
-          </div>
-          <button 
-            type="button"
-            aria-label="Visual Lens Search"
-            title="Visual Search • بحث بالصور"
-            className="flex items-center justify-center p-1.5 rounded-lg bg-surface-container text-on-surface hover:text-secondary transition-colors"
-          >
-            <span className="material-symbols-outlined text-[19px]">photo_camera</span>
-          </button>
+    <div className="w-full min-h-[844px] bg-white text-slate-900 flex flex-col font-sans select-none pb-20">
+      {/* 1. iOS Status Bar */}
+      <div className="w-full flex items-center justify-between px-6 pt-3 pb-1 text-[13px] font-semibold text-slate-800">
+        <span>9:41</span>
+        <div className="flex items-center gap-1.5">
+          <span className="material-symbols-outlined text-[15px]">signal_cellular_alt</span>
+          <span className="material-symbols-outlined text-[15px]">wifi</span>
+          <span className="material-symbols-outlined text-[18px]">battery_full</span>
         </div>
       </div>
 
-      {/* Fashion Taxonomy Chips */}
-      <div className="w-full overflow-x-auto no-scrollbar mb-6">
-        <div className="flex items-center gap-2 whitespace-nowrap py-1">
+      {/* 2. Top Bar: Red Arch Logo & Cart Icon with Badge */}
+      <div className="w-full px-5 py-2 flex items-center justify-between">
+        <div className="cursor-pointer" onClick={() => setActiveTab('reels')}>
+          <EgLogo className="w-7 h-7" color="#d00000" />
+        </div>
+        <button 
+          onClick={() => setActiveTab('cart')}
+          className="relative p-1.5 text-slate-800 hover:text-[#d00000] transition-colors"
+        >
+          <span className="material-symbols-outlined text-[24px]">shopping_cart</span>
+          {totalCartCount > 0 && (
+            <span className="absolute top-0 right-0 w-4 h-4 rounded-full bg-[#d00000] text-white text-[10px] font-bold flex items-center justify-center">
+              {totalCartCount}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* 3. Search Bar */}
+      <div className="px-5 py-2">
+        <div className="w-full flex items-center gap-2 px-3.5 py-2.5 bg-gray-100/90 rounded-full text-slate-600 border border-gray-200 focus-within:border-gray-300">
+          <span className="material-symbols-outlined text-[20px] text-gray-400">search</span>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search for outfits, brands, creators..."
+            className="w-full bg-transparent text-xs text-slate-900 focus:outline-none placeholder:text-gray-400 font-normal"
+          />
+        </div>
+      </div>
+
+      {/* 4. Categories Grid (6 Cards: Red New Arrivals + 5 Photo Cards) */}
+      <div className="px-5 py-3">
+        <div className="grid grid-cols-3 gap-2.5">
           {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95 ${
-                selectedCategory === cat
-                  ? 'bg-primary text-on-primary shadow-sm'
-                  : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Editorial Section: Creator Picks */}
-      <div className="w-full mb-8">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex flex-col">
-            <h2 className="font-serif text-lg font-bold text-on-surface">Creator Picks • اختيارات صناع الموضة</h2>
-            <span className="text-xs text-on-surface-variant">Outfits وتنسيقات حصرية من فاشون بلوجرز القاهرة والجونة</span>
-          </div>
-          <button 
-            onClick={() => setActiveTab('reels')}
-            className="flex items-center gap-1 text-secondary text-xs font-semibold hover:opacity-80 transition-opacity"
-          >
-            <span>See All • عرض الكل</span>
-            <span className="material-symbols-outlined text-[16px] rtl:rotate-180">arrow_forward</span>
-          </button>
-        </div>
-
-        {/* Creator Story Strips */}
-        <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
-          {creatorStories.map((story, idx) => (
             <div
-              key={idx}
-              onClick={() => setActiveTab('reels')}
-              className="flex-shrink-0 w-40 relative group rounded-xl overflow-hidden shadow-sm bg-surface-container cursor-pointer aspect-[9/13]"
+              key={cat.id}
+              onClick={() => setSelectedCategory(cat.id)}
+              className="group aspect-[4/3] rounded-2xl overflow-hidden relative cursor-pointer shadow-xs transition-transform active:scale-95"
             >
-              <img
-                src={story.image}
-                alt={story.caption}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/20 to-transparent flex flex-col justify-between p-3 text-on-primary">
-                <div className="flex items-center justify-between">
-                  <span className="px-2 py-0.5 rounded-full bg-surface/25 backdrop-blur-md text-[9px] text-on-primary">
-                    {story.role}
+              {cat.isRedCard ? (
+                /* Card 1: Solid Red Card with White Star */
+                <div className="w-full h-full bg-[#d00000] flex flex-col items-center justify-center text-white p-2">
+                  <span className="material-symbols-outlined text-[24px] mb-1">star</span>
+                  <span className="text-[11px] font-bold text-center leading-tight">
+                    {cat.label}
                   </span>
-                  <span className="material-symbols-outlined text-[16px] text-on-primary">play_circle</span>
                 </div>
-                <div>
-                  <span className="font-serif text-xs font-bold text-on-primary block">{story.creator}</span>
-                  <p className="text-[10px] text-on-primary/90 line-clamp-2 mt-0.5 leading-snug">
-                    {story.caption}
-                  </p>
+              ) : (
+                /* Cards 2-6: Photo Cards */
+                <div className="w-full h-full relative">
+                  <img 
+                    src={cat.image} 
+                    alt={cat.label}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent flex items-end justify-center pb-2">
+                    <span className="text-[11px] font-bold text-white text-center leading-tight drop-shadow-sm px-1">
+                      {cat.label}
+                    </span>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           ))}
         </div>
       </div>
 
-      {/* Catalog Grid Section: Latest Drops */}
-      <div className="w-full">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-baseline gap-2">
-            <h2 className="font-serif text-lg font-bold text-on-surface">Latest Drops • أحدث التشكيلات</h2>
-            <span className="text-xs text-on-surface-variant">({filteredProducts.length} Items)</span>
-          </div>
-          <button className="flex items-center gap-1 px-3 py-1 rounded-lg bg-surface-container-low text-xs font-semibold text-on-surface-variant hover:text-on-surface border border-surface-container-high">
-            <span className="material-symbols-outlined text-[16px]">tune</span>
-            <span>Filter • تصفية</span>
-          </button>
-        </div>
+      {/* 5. Featured Products Section Header */}
+      <div className="px-5 pt-3 pb-2 flex items-center justify-between">
+        <h3 className="text-sm font-bold text-slate-900">Featured Products</h3>
+        <button 
+          onClick={() => setSelectedCategory('all')} 
+          className="text-xs font-semibold text-gray-500 hover:text-[#d00000] flex items-center gap-0.5"
+        >
+          <span>See All</span>
+          <span className="material-symbols-outlined text-[15px]">chevron_right</span>
+        </button>
+      </div>
 
-        {/* Product Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-          {filteredProducts.map((product) => (
+      {/* 6. 2-Column Products Grid */}
+      <div className="px-5 pb-6">
+        <div className="grid grid-cols-2 gap-3.5">
+          {featuredProducts.map((prod) => (
             <div
-              key={product.id}
-              className="group relative flex flex-col rounded-xl bg-surface-container-lowest border border-surface-container-high hover:shadow-md transition-all duration-300 overflow-hidden"
+              key={prod.id}
+              onClick={() => openProductDetail(prod)}
+              className="group flex flex-col cursor-pointer"
             >
-              {/* Image & Quick Add */}
-              <div 
-                onClick={() => openProductDetail(product)}
-                className="relative aspect-[3/4] w-full bg-surface-container-low overflow-hidden cursor-pointer"
-              >
-                <img
-                  src={product.image}
-                  alt={product.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              {/* Image Container with Heart Favorite Icon */}
+              <div className="aspect-[3/4] w-full rounded-2xl overflow-hidden relative bg-gray-100 border border-gray-100 shadow-xs">
+                <img 
+                  src={prod.image} 
+                  alt={prod.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
-                <div className="absolute top-2 right-2">
-                  <span className="px-2 py-0.5 rounded bg-surface/90 backdrop-blur-md text-secondary text-[9px] font-semibold flex items-center gap-0.5 shadow-sm">
-                    <span className="material-symbols-outlined text-[11px]">stars</span>
-                    +{product.pointsEarned} Points
-                  </span>
-                </div>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    addToCart(product);
                   }}
-                  title="Add to Cart • أضف للـ Cart"
-                  className="absolute bottom-2 left-2 w-8 h-8 rounded-full bg-primary hover:bg-secondary text-on-primary flex items-center justify-center shadow-md transition-all active:scale-90"
+                  className="absolute top-2.5 right-2.5 w-7 h-7 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-slate-700 hover:text-[#d00000] transition-colors"
                 >
-                  <span className="material-symbols-outlined text-[17px]">shopping_bag</span>
+                  <span className="material-symbols-outlined text-[16px]">favorite</span>
                 </button>
               </div>
 
-              {/* Product Meta */}
-              <div 
-                onClick={() => openProductDetail(product)}
-                className="p-3 flex flex-col flex-1 cursor-pointer text-right"
-              >
-                <div className="flex items-center justify-between text-[11px] text-secondary font-semibold mb-0.5">
-                  <span>{product.merchant}</span>
-                  {product.merchantVerified && (
-                    <span className="material-symbols-outlined text-secondary text-[13px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                      verified
-                    </span>
-                  )}
-                </div>
-
-                <h3 className="text-xs font-semibold text-on-surface line-clamp-1 leading-snug">
-                  {product.title}
-                </h3>
-
-                <div className="flex items-baseline justify-between mt-2 pt-2 border-t border-surface-container-high/60">
-                  <div className="flex items-baseline gap-1">
-                    <span className="font-serif text-sm font-bold text-on-surface">{product.price.toLocaleString()}</span>
-                    <span className="text-[10px] text-on-surface-variant font-semibold">EGP</span>
-                  </div>
-                  {product.originalPrice && (
-                    <span className="text-[10px] text-outline line-through">{product.originalPrice.toLocaleString()} EGP</span>
-                  )}
-                </div>
+              {/* Product Info */}
+              <div className="pt-2 text-left">
+                <h4 className="text-xs font-semibold text-slate-900 truncate">
+                  {prod.title}
+                </h4>
+                <span className="text-xs font-bold text-slate-900 block mt-0.5">
+                  EGP {prod.price.toLocaleString()}
+                </span>
               </div>
             </div>
           ))}

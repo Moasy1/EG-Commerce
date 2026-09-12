@@ -17,9 +17,22 @@ import MerchantCampaign from './pages/MerchantCampaign';
 import ProfileCloset from './pages/ProfileCloset';
 import MerchantStorefront from './pages/MerchantStorefront';
 import MerchantDashboard from './pages/MerchantDashboard';
+import ScreenShowcase from './pages/ScreenShowcase';
 
 function MainContent() {
   const { activeTab } = useApp();
+
+  // If user requests the 5-Screen Mockup Showcase view, render it edge-to-edge
+  if (activeTab === 'showcase') {
+    return (
+      <div className="min-h-screen bg-[#fcfbfa] flex flex-col relative text-slate-900">
+        <Header />
+        <main className="flex-1">
+          <ScreenShowcase />
+        </main>
+      </div>
+    );
+  }
 
   const renderActiveScreen = () => {
     switch (activeTab) {

@@ -18,18 +18,7 @@ export default function ProfileCloset() {
   ];
 
   return (
-    <div className="w-full min-h-[844px] bg-white text-slate-900 flex flex-col font-sans select-none pb-20">
-
-      {/* 2. Top Bar: Center Red Arch Logo & Right "..." Menu */}
-      <div className="w-full px-5 py-2 flex items-center justify-between">
-        <div className="w-6" /> {/* Spacer */}
-        <div className="cursor-pointer" onClick={() => setActiveTab('reels')}>
-          <EgLogo className="w-7 h-7" color="#d00000" />
-        </div>
-        <button className="p-1 text-slate-700 hover:text-slate-900">
-          <span className="material-symbols-outlined text-[24px]">more_horiz</span>
-        </button>
-      </div>
+    <div className="w-full min-h-[844px] bg-white text-slate-900 flex flex-col font-sans select-none pb-20 pt-4">
 
       {/* 3. Profile Header Info */}
       <div className="px-5 pt-3 pb-4 flex flex-col items-center text-center space-y-3">

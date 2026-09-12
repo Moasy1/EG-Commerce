@@ -308,7 +308,7 @@ export default function DiscoverReels() {
               className="relative cursor-pointer group mb-2" 
               onClick={(e) => {
                 e.stopPropagation();
-                setIsFollowed(!isFollowed);
+                setActiveTab('profile');
               }}
             >
               <img 
@@ -316,9 +316,15 @@ export default function DiscoverReels() {
                 alt={reel.creatorHandle} 
                 className="w-[42px] h-[42px] rounded-full border-2 border-white object-cover shadow-xl group-hover:scale-105 transition-transform"
               />
-              <div className={`absolute -bottom-2 left-1/2 -translate-x-1/2 w-5 h-5 rounded-full flex items-center justify-center text-[14px] shadow-md transition-all ${
-                isFollowed ? 'bg-emerald-500 text-white' : 'bg-[#d00000] text-white'
-              }`}>
+              <div 
+                className={`absolute -bottom-2 left-1/2 -translate-x-1/2 w-5 h-5 rounded-full flex items-center justify-center text-[14px] shadow-md transition-all ${
+                  isFollowed ? 'bg-emerald-500 text-white' : 'bg-[#d00000] text-white'
+                }`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsFollowed(!isFollowed);
+                }}
+              >
                 <span className="material-symbols-outlined text-[14px] font-bold">
                   {isFollowed ? 'check' : 'add'}
                 </span>
@@ -417,8 +423,14 @@ export default function DiscoverReels() {
 
             {/* Creator Info */}
             <div className={`space-y-1 ${isAr ? 'text-right' : 'text-left'}`}>
-              <div className="flex items-center gap-1.5">
-                <span className="font-bold text-[15px] text-white drop-shadow-md">@{reel.creatorHandle}</span>
+              <div 
+                className="flex items-center gap-1.5 cursor-pointer w-fit"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveTab('profile');
+                }}
+              >
+                <span className="font-bold text-[15px] text-white drop-shadow-md hover:underline">@{reel.creatorHandle}</span>
                 <span className="material-symbols-outlined text-[16px] text-blue-500 bg-white rounded-full">check_circle</span>
               </div>
               <p className="text-[13px] text-white drop-shadow-md leading-snug">

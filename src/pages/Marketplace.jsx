@@ -90,32 +90,7 @@ export default function Marketplace() {
       </div>
 
       {/* 2. MOBILE VIEW (Screen 2: Search & Discovery) */}
-      <div className="md:hidden w-full min-h-[calc(100vh-64px)] bg-[#fcfbfa] text-slate-900 pb-24 font-sans select-none max-w-[430px] mx-auto">
-
-        {/* Top Header with Red Logo & Icons */}
-        <div className="px-4 py-2 flex items-center justify-between">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => setActiveTab('reels')}>
-            <EgLogo className="w-8 h-8" color="#d00000" />
-            <div className="text-left">
-              <span className="text-sm font-black tracking-tight text-slate-900 leading-none block">
-                EG-Commerce
-              </span>
-              <span className="text-[10px] text-gray-500 font-medium">Explore & Shop</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 text-slate-700">
-            <button className="p-1.5 rounded-full hover:bg-gray-100"><span className="material-symbols-outlined text-[20px]">favorite</span></button>
-            <button onClick={() => setActiveTab('cart')} className="p-1.5 rounded-full hover:bg-gray-100 relative">
-              <span className="material-symbols-outlined text-[20px]">shopping_bag</span>
-              {totalCartCount > 0 && (
-                <span className="absolute top-0 right-0 w-4 h-4 rounded-full bg-[#d00000] text-white text-[9px] font-bold flex items-center justify-center">
-                  {totalCartCount}
-                </span>
-              )}
-            </button>
-          </div>
-        </div>
+      <div className="md:hidden w-full min-h-[calc(100vh-64px)] bg-[#fcfbfa] text-slate-900 pb-24 font-sans select-none max-w-[430px] mx-auto pt-2">
 
         {/* Search Bar with Camera Visual Search */}
         <div className="px-4 py-2">

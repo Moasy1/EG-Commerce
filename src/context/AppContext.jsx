@@ -398,6 +398,7 @@ export function AppProvider({ children }) {
   const [orders, setOrders] = useState(INITIAL_ORDERS);
   const [role, setRole] = useState('buyer');
   const [deviceMode, setDeviceMode] = useState('responsive');
+  const [language, setLanguage] = useState('ar'); // 'ar' | 'en'
 
   const updateProductSyndication = (productId) => {
     setProducts(prev => prev.map(p => 
@@ -539,6 +540,8 @@ export function AppProvider({ children }) {
       setRole,
       deviceMode,
       setDeviceMode,
+      language,
+      setLanguage,
       cartItems,
       addToCart,
       removeFromCart,

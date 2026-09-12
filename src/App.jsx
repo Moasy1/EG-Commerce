@@ -17,9 +17,10 @@ import ProfileCloset from './pages/ProfileCloset';
 import MerchantStorefront from './pages/MerchantStorefront';
 import MerchantDashboard from './pages/MerchantDashboard';
 import ScreenShowcase from './pages/ScreenShowcase';
+import AddProductStudio from './pages/AddProductStudio';
 
 function MainContent() {
-  const { activeTab } = useApp();
+  const { activeTab, language } = useApp();
 
   const renderActiveScreen = () => {
     switch (activeTab) {
@@ -36,6 +37,8 @@ function MainContent() {
       case 'dashboard':
       case 'merchant':
         return <MerchantDashboard />;
+      case 'add_product':
+        return <AddProductStudio />;
       case 'studio':
       case 'creator':
         return <CreatorStudio />;
@@ -57,7 +60,12 @@ function MainContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fcfbfa] flex flex-col relative text-slate-900 font-sans">
+    <div 
+      dir={language === 'ar' ? 'rtl' : 'ltr'} 
+      className={`min-h-screen bg-[#fcfbfa] flex flex-col relative text-slate-900 ${
+        language === 'ar' ? 'font-sans' : 'font-sans'
+      }`}
+    >
       <Header />
       
       <main className="flex-1 flex flex-col w-full">

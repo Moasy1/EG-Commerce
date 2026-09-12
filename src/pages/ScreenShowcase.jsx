@@ -17,10 +17,48 @@ import DesktopSellerDashboard from '../components/desktop/DesktopSellerDashboard
 import DesktopCreatorAnalytics from '../components/desktop/DesktopCreatorAnalytics';
 
 export default function ScreenShowcase() {
-  const { setActiveTab } = useApp();
+  const { setActiveTab, language, setLanguage } = useApp();
   const [platformView, setPlatformView] = useState('desktop'); // 'desktop' | 'mobile'
 
-  const mobileScreens = [
+  const isAr = language === 'ar';
+
+  const mobileScreens = isAr ? [
+    {
+      num: 1,
+      title: 'تغذية اكتشاف الفيديوهات',
+      desc: 'فيديوهات قصيرة من صناع محتوى مصريين مع منتجات قابلة للشراء.',
+      tabId: 'reels',
+      component: <DiscoverReels />
+    },
+    {
+      num: 2,
+      title: 'البحث والاكتشاف',
+      desc: 'ابحث عن ما تحبه مع الفئات، والعلامات التجارية، وصناع المحتوى.',
+      tabId: 'shop',
+      component: <Marketplace />
+    },
+    {
+      num: 3,
+      title: 'تفاصيل المنتج',
+      desc: 'كل ما تحتاج معرفته عن المقاسات، البائع، التوصيل، والتقييمات.',
+      tabId: 'product',
+      component: <ProductDetail />
+    },
+    {
+      num: 4,
+      title: 'سلة التسوق والدفع',
+      desc: 'تسوق بسهولة وأمان مع خيارات دفع متعددة وتوصيل لجميع أنحاء مصر.',
+      tabId: 'cart',
+      component: <UnifiedCart />
+    },
+    {
+      num: 5,
+      title: 'ملف صانع المحتوى / البائع',
+      desc: 'تابع صناع المحتوى المفضلين لديك، واكشف منتجاتهم ومفضلاتهم.',
+      tabId: 'profile',
+      component: <ProfileCloset />
+    }
+  ] : [
     {
       num: 1,
       title: 'Video Discovery Feed',
@@ -59,26 +97,26 @@ export default function ScreenShowcase() {
   ];
 
   return (
-    <div className="w-full min-h-screen bg-[#fcfbfa] text-slate-900 flex flex-col font-sans select-none overflow-x-auto pb-20">
+    <div className="w-full min-h-screen bg-[#fcfbfa] text-slate-900 flex flex-col font-sans select-none overflow-x-auto pb-20" dir={isAr ? 'rtl' : 'ltr'}>
       {/* ========================================================================= */}
-      {/* 1. MASTER HEADER                                                          */}
+      {/* 1. MASTER HEADER (Matching Image 3 & Image 4)                             */}
       {/* ========================================================================= */}
-      <header className="w-full bg-white border-b border-gray-100 py-5 px-4 md:px-8 shadow-xs">
+      <header className="w-full bg-white border-b border-gray-100 py-4 px-4 md:px-8 shadow-xs">
         <div className="max-w-[1780px] mx-auto flex flex-col lg:flex-row items-center justify-between gap-4">
           {/* Brand Logo & Subtitle */}
           <div className="flex items-center gap-3.5">
             <EgLogo className="w-10 h-10" color="#d00000" />
-            <div className="text-left">
+            <div className={isAr ? "text-right" : "text-left"}>
               <div className="flex items-baseline gap-2">
                 <h1 className="text-2xl font-black tracking-tight text-slate-900 leading-none">
                   EG-Commerce
                 </h1>
                 <span className="hidden sm:inline text-xs font-bold text-slate-700">
-                  Social Commerce for Egyptian Fashion
+                  {isAr ? 'منصة التجارة الاجتماعية للأزياء المصرية' : 'Social Commerce for Egyptian Fashion'}
                 </span>
               </div>
               <p className="text-xs text-gray-500 font-medium mt-1">
-                Discover · Shop · Support Local Creators
+                {isAr ? 'اكتشف · تسوق · ادعم المبدعين المحليين' : 'Discover · Shop · Support Local Creators'}
               </p>
             </div>
           </div>
@@ -94,7 +132,7 @@ export default function ScreenShowcase() {
               }`}
             >
               <span className="material-symbols-outlined text-[16px]">desktop_windows</span>
-              <span>💻 Desktop Version (نسخة الديسكتوب 100%)</span>
+              <span>{isAr ? '💻 شاشات الديسكتوب (5 Screens)' : '💻 Desktop Version (5 Screens)'}</span>
             </button>
 
             <button
@@ -106,22 +144,31 @@ export default function ScreenShowcase() {
               }`}
             >
               <span className="material-symbols-outlined text-[16px]">smartphone</span>
-              <span>📱 Mobile App (شاشات الجوال الـ 5)</span>
+              <span>{isAr ? '📱 شاشات الجوال (5 Phones)' : '📱 Mobile App (5 Phones)'}</span>
             </button>
           </div>
 
-          {/* Right Slogan */}
-          <div className="text-right hidden xl:flex flex-col items-end">
-            <div className="text-[11px] font-mono font-bold tracking-widest text-gray-500 uppercase">
-              REAL PEOPLE / REAL STYLE / EGYPT
+          {/* Right: Language toggle & Slogan */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setLanguage(l => l === 'ar' ? 'en' : 'ar')}
+              className="px-3 py-1 rounded-full border border-gray-200 text-xs font-bold bg-gray-50 hover:bg-gray-100 transition-colors shadow-xs"
+            >
+              <span>{isAr ? '🇬🇧 English' : '🇪🇬 العربية'}</span>
+            </button>
+
+            <div className={`hidden xl:flex flex-col ${isAr ? 'items-start text-left' : 'items-end text-right'}`}>
+              <div className="text-[11px] font-mono font-bold tracking-widest text-gray-500 uppercase">
+                {isAr ? 'أشخاص حقيقيون / أسلوب حقيقي / مصر' : 'REAL PEOPLE / REAL STYLE / EGYPT'}
+              </div>
+              <div className="w-8 h-1 bg-[#d00000] rounded-full mt-1" />
             </div>
-            <div className="w-8 h-1 bg-[#d00000] rounded-full mt-1" />
           </div>
         </div>
       </header>
 
       {/* ========================================================================= */}
-      {/* 2. DESKTOP VERSION (100% MATCHING 2ND REFERENCE IMAGE IN 2-2-1 GRID)       */}
+      {/* 2. DESKTOP VERSION (Matching Image 3 in 2-2-1 Grid)                        */}
       {/* ========================================================================= */}
       {platformView === 'desktop' && (
         <main className="max-w-[1780px] mx-auto w-full px-4 md:px-8 py-8 space-y-8 animate-fade-in">
@@ -129,7 +176,6 @@ export default function ScreenShowcase() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 xl:gap-8">
             {/* Desktop Screen 1: Feed */}
             <div className="rounded-3xl border border-gray-200/90 bg-white shadow-lg overflow-hidden flex flex-col group hover:shadow-xl transition-all">
-              {/* Browser Window Bar */}
               <div className="px-4 py-2.5 bg-gray-100/90 border-b border-gray-200/80 flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
                   <span className="w-3 h-3 rounded-full bg-red-500/80 inline-block" />
@@ -139,15 +185,13 @@ export default function ScreenShowcase() {
                 <span className="text-[11px] font-mono text-gray-400">eg-commerce.vercel.app/feed</span>
                 <span className="material-symbols-outlined text-[15px] text-gray-400">lock</span>
               </div>
-              {/* Screen Body */}
-              <div className="h-[520px] overflow-y-auto">
+              <div className="h-[530px] overflow-y-auto">
                 <DesktopFeed />
               </div>
             </div>
 
             {/* Desktop Screen 2: Explore Marketplace */}
             <div className="rounded-3xl border border-gray-200/90 bg-white shadow-lg overflow-hidden flex flex-col group hover:shadow-xl transition-all">
-              {/* Browser Window Bar */}
               <div className="px-4 py-2.5 bg-gray-100/90 border-b border-gray-200/80 flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
                   <span className="w-3 h-3 rounded-full bg-red-500/80 inline-block" />
@@ -157,8 +201,7 @@ export default function ScreenShowcase() {
                 <span className="text-[11px] font-mono text-gray-400">eg-commerce.vercel.app/marketplace</span>
                 <span className="material-symbols-outlined text-[15px] text-gray-400">lock</span>
               </div>
-              {/* Screen Body */}
-              <div className="h-[520px] overflow-y-auto">
+              <div className="h-[530px] overflow-y-auto">
                 <DesktopMarketplace />
               </div>
             </div>
@@ -168,7 +211,6 @@ export default function ScreenShowcase() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 xl:gap-8">
             {/* Desktop Screen 3: Product Detail */}
             <div className="rounded-3xl border border-gray-200/90 bg-white shadow-lg overflow-hidden flex flex-col group hover:shadow-xl transition-all">
-              {/* Browser Window Bar */}
               <div className="px-4 py-2.5 bg-gray-100/90 border-b border-gray-200/80 flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
                   <span className="w-3 h-3 rounded-full bg-red-500/80 inline-block" />
@@ -178,15 +220,13 @@ export default function ScreenShowcase() {
                 <span className="text-[11px] font-mono text-gray-400">eg-commerce.vercel.app/product/galabeya</span>
                 <span className="material-symbols-outlined text-[15px] text-gray-400">lock</span>
               </div>
-              {/* Screen Body */}
-              <div className="h-[520px] overflow-y-auto">
+              <div className="h-[530px] overflow-y-auto">
                 <DesktopProductDetail />
               </div>
             </div>
 
             {/* Desktop Screen 4: Seller Dashboard */}
             <div className="rounded-3xl border border-gray-200/90 bg-white shadow-lg overflow-hidden flex flex-col group hover:shadow-xl transition-all">
-              {/* Browser Window Bar */}
               <div className="px-4 py-2.5 bg-gray-100/90 border-b border-gray-200/80 flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
                   <span className="w-3 h-3 rounded-full bg-red-500/80 inline-block" />
@@ -196,16 +236,14 @@ export default function ScreenShowcase() {
                 <span className="text-[11px] font-mono text-gray-400">eg-commerce.vercel.app/seller/dashboard</span>
                 <span className="material-symbols-outlined text-[15px] text-gray-400">lock</span>
               </div>
-              {/* Screen Body */}
-              <div className="h-[520px] overflow-y-auto">
+              <div className="h-[530px] overflow-y-auto">
                 <DesktopSellerDashboard />
               </div>
             </div>
           </div>
 
-          {/* Row 3: Full Width Desktop Creator Analytics & Campaigns (Screen 5) */}
-          <div className="w-full rounded-3xl border border-gray-200/90 bg-white shadow-lg overflow-hidden flex flex-col group hover:shadow-xl transition-all">
-            {/* Browser Window Bar */}
+          {/* Row 3: Desktop Creator Analytics & Campaigns (Screen 5) */}
+          <div className="rounded-3xl border border-gray-200/90 bg-white shadow-lg overflow-hidden flex flex-col group hover:shadow-xl transition-all">
             <div className="px-4 py-2.5 bg-gray-100/90 border-b border-gray-200/80 flex items-center justify-between">
               <div className="flex items-center gap-1.5">
                 <span className="w-3 h-3 rounded-full bg-red-500/80 inline-block" />
@@ -215,7 +253,6 @@ export default function ScreenShowcase() {
               <span className="text-[11px] font-mono text-gray-400">eg-commerce.vercel.app/creator/analytics</span>
               <span className="material-symbols-outlined text-[15px] text-gray-400">lock</span>
             </div>
-            {/* Screen Body */}
             <div className="h-[560px] overflow-y-auto">
               <DesktopCreatorAnalytics />
             </div>
@@ -224,10 +261,56 @@ export default function ScreenShowcase() {
       )}
 
       {/* ========================================================================= */}
-      {/* 3. MOBILE VERSION (100% MATCHING 1ST REFERENCE IMAGE IN 5 PHONES)          */}
+      {/* 3. MOBILE VERSION (Matching Image 4: 4 Value Props & 5 iPhones)            */}
       {/* ========================================================================= */}
       {platformView === 'mobile' && (
-        <main className="max-w-[1780px] mx-auto w-full px-4 md:px-8 py-8 animate-fade-in">
+        <main className="max-w-[1780px] mx-auto w-full px-4 md:px-8 py-6 animate-fade-in space-y-8">
+          {/* Top 4 Value Props (Matching Image 4 header) */}
+          {isAr && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pb-2">
+              <div className="p-3.5 rounded-2xl bg-white border border-gray-200 shadow-xs flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-red-50 text-[#d00000] flex items-center justify-center shrink-0">
+                  <span className="material-symbols-outlined text-[20px]">favorite</span>
+                </div>
+                <div className="text-right">
+                  <h4 className="text-xs font-bold text-slate-900">أزياء مصرية</h4>
+                  <p className="text-[10px] text-gray-500">محلية، أصيلة، ملهمة، الطموح</p>
+                </div>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-white border border-gray-200 shadow-xs flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-red-50 text-[#d00000] flex items-center justify-center shrink-0">
+                  <span className="material-symbols-outlined text-[20px]">group</span>
+                </div>
+                <div className="text-right">
+                  <h4 className="text-xs font-bold text-slate-900">صناع محتوى داعمين</h4>
+                  <p className="text-[10px] text-gray-500">مواهب محلية، تأثير حقيقي</p>
+                </div>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-white border border-gray-200 shadow-xs flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-red-50 text-[#d00000] flex items-center justify-center shrink-0">
+                  <span className="material-symbols-outlined text-[20px]">shopping_bag</span>
+                </div>
+                <div className="text-right">
+                  <h4 className="text-xs font-bold text-slate-900">تسوق مباشر</h4>
+                  <p className="text-[10px] text-gray-500">من الفيديو إلى سلة المشتريات</p>
+                </div>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-white border border-gray-200 shadow-xs flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-red-50 text-[#d00000] flex items-center justify-center shrink-0">
+                  <span className="material-symbols-outlined text-[20px]">play_circle</span>
+                </div>
+                <div className="text-right">
+                  <h4 className="text-xs font-bold text-slate-900">فيديوهات قصيرة</h4>
+                  <p className="text-[10px] text-gray-500">أسلوب حقيقي، غير تقليدي</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 5 iPhone Devices in Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 xl:gap-8 items-start">
             {mobileScreens.map((item) => (
               <div key={item.num} className="flex flex-col items-center group">
@@ -253,13 +336,13 @@ export default function ScreenShowcase() {
                   >
                     <button className="px-4 py-2 rounded-full bg-[#d00000] text-white text-xs font-bold shadow-xl flex items-center gap-1.5 hover:scale-105 transition-transform">
                       <span className="material-symbols-outlined text-[16px]">touch_app</span>
-                      <span>فتح الشاشة تفاعلياً</span>
+                      <span>{isAr ? 'فتح الشاشة تفاعلياً' : 'Open Screen Live'}</span>
                     </button>
                   </div>
                 </div>
 
-                {/* Numbered Red Badge & Title / Subtitle Underneath */}
-                <div className="mt-5 text-left w-full max-w-[320px] px-2 flex items-start gap-2.5">
+                {/* Numbered Red Badge & Title / Subtitle Underneath (Matching Image 4) */}
+                <div className="mt-5 text-right w-full max-w-[320px] px-2 flex items-start gap-2.5">
                   <span className="w-6 h-6 rounded-full bg-[#d00000] text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
                     {item.num}
                   </span>

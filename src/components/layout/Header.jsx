@@ -7,30 +7,32 @@ export default function Header() {
     activeTab, 
     setActiveTab, 
     totalCartCount, 
-    role, 
-    setRole
+    language,
+    setLanguage
   } = useApp();
+
+  const isAr = language === 'ar';
 
   return (
     <header className="sticky top-0 w-full z-40 bg-white/95 backdrop-blur-md border-b border-gray-200/80 shadow-xs">
       <div className="max-w-[1780px] mx-auto px-4 md:px-8 py-3 flex items-center justify-between gap-4">
-        {/* 1. Left: Brand Logo & Title */}
+        {/* 1. Brand Logo & Title */}
         <div 
           onClick={() => setActiveTab('reels')}
           className="flex items-center gap-3.5 cursor-pointer shrink-0 group"
         >
           <EgLogo className="w-9 h-9 group-hover:scale-105 transition-transform" color="#d00000" />
-          <div className="flex flex-col text-left">
+          <div className="flex flex-col text-right">
             <div className="flex items-baseline gap-2">
               <span className="text-xl font-black tracking-tight text-slate-900 leading-none">
                 EG-Commerce
               </span>
               <span className="hidden xl:inline text-xs font-bold text-slate-600">
-                Social Commerce for Egyptian Fashion
+                {isAr ? 'منصة التجارة الاجتماعية للأزياء المصرية' : 'Social Commerce for Egyptian Fashion'}
               </span>
             </div>
             <span className="text-[11px] text-gray-500 font-medium hidden sm:inline mt-0.5">
-              Discover · Shop · Support Local Creators
+              {isAr ? 'اكتشف · تسوق · ادعم المبدعين المحليين' : 'Discover · Shop · Support Local Creators'}
             </span>
           </div>
         </div>
@@ -41,7 +43,7 @@ export default function Header() {
             <span className="material-symbols-outlined text-[18px] text-gray-400">search</span>
             <input
               type="text"
-              placeholder="Search for outfits, creators, brands, galabeyas..."
+              placeholder={isAr ? "ابحث عن منتجات، أزياء، جلابيات، مصممين..." : "Search for outfits, creators, brands, galabeyas..."}
               className="w-full bg-transparent focus:outline-none text-xs text-slate-800 placeholder:text-gray-400"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') setActiveTab('shop');
@@ -60,8 +62,9 @@ export default function Header() {
                 : 'text-gray-600 hover:text-slate-900 hover:bg-gray-100'
             }`}
           >
-            Feed
+            {isAr ? 'الرئيسية' : 'Feed'}
           </button>
+          
           <button
             onClick={() => setActiveTab('shop')}
             className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
@@ -70,8 +73,22 @@ export default function Header() {
                 : 'text-gray-600 hover:text-slate-900 hover:bg-gray-100'
             }`}
           >
-            Marketplace
+            {isAr ? 'السوق' : 'Marketplace'}
           </button>
+
+          {/* New Add Product Studio Tab (Image 1) */}
+          <button
+            onClick={() => setActiveTab('add_product')}
+            className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1 ${
+              activeTab === 'add_product'
+                ? 'bg-[#d00000] text-white shadow-xs'
+                : 'text-[#d00000] hover:bg-red-50 bg-red-50/50 border border-red-200/80'
+            }`}
+          >
+            <span className="material-symbols-outlined text-[15px]">add_circle</span>
+            <span>{isAr ? 'إضافة منتج' : '+ Add Product'}</span>
+          </button>
+
           <button
             onClick={() => setActiveTab('product')}
             className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
@@ -80,8 +97,9 @@ export default function Header() {
                 : 'text-gray-600 hover:text-slate-900 hover:bg-gray-100'
             }`}
           >
-            Product
+            {isAr ? 'المنتج' : 'Product'}
           </button>
+
           <button
             onClick={() => setActiveTab('dashboard')}
             className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
@@ -90,8 +108,9 @@ export default function Header() {
                 : 'text-gray-600 hover:text-slate-900 hover:bg-gray-100'
             }`}
           >
-            Seller Hub
+            {isAr ? 'لوحة التاجر' : 'Seller Hub'}
           </button>
+
           <button
             onClick={() => setActiveTab('studio')}
             className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
@@ -100,8 +119,9 @@ export default function Header() {
                 : 'text-gray-600 hover:text-slate-900 hover:bg-gray-100'
             }`}
           >
-            Creator Studio
+            {isAr ? 'استوديو المبدعين' : 'Creator Studio'}
           </button>
+
           <button
             onClick={() => setActiveTab('storefront')}
             className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
@@ -110,17 +130,26 @@ export default function Header() {
                 : 'text-gray-600 hover:text-slate-900 hover:bg-gray-100'
             }`}
           >
-            Brand Store
+            {isAr ? 'متجر البراند' : 'Brand Store'}
           </button>
         </nav>
 
-        {/* 4. Right: Action Icons + Slogan */}
-        <div className="flex items-center gap-3 shrink-0">
+        {/* 4. Right: Language Switcher, Action Icons & Slogan */}
+        <div className="flex items-center gap-2.5 shrink-0">
+          {/* Language Toggle Button */}
+          <button
+            onClick={() => setLanguage(l => l === 'ar' ? 'en' : 'ar')}
+            className="px-2.5 py-1 rounded-full border border-gray-200 text-[11px] font-bold bg-gray-50 hover:bg-gray-100 transition-colors flex items-center gap-1 shadow-xs"
+            title="تبديل اللغة / Switch Language"
+          >
+            <span>{isAr ? '🇬🇧 English' : '🇪🇬 العربية'}</span>
+          </button>
+
           {/* Wishlist */}
           <button 
             onClick={() => setActiveTab('shop')}
             className="w-8 h-8 rounded-full flex items-center justify-center text-gray-600 hover:text-[#d00000] hover:bg-red-50 transition-colors"
-            title="Wishlist"
+            title={isAr ? "المفضلة" : "Wishlist"}
           >
             <span className="material-symbols-outlined text-[20px]">favorite</span>
           </button>
@@ -129,7 +158,7 @@ export default function Header() {
           <button 
             onClick={() => setActiveTab('cart')}
             className="w-8 h-8 rounded-full flex items-center justify-center text-gray-600 hover:text-[#d00000] hover:bg-red-50 relative transition-colors"
-            title="Cart"
+            title={isAr ? "السلة" : "Cart"}
           >
             <span className="material-symbols-outlined text-[20px]">shopping_bag</span>
             {totalCartCount > 0 && (
@@ -143,7 +172,7 @@ export default function Header() {
           <div 
             onClick={() => setActiveTab('profile')}
             className="cursor-pointer group flex items-center gap-2 pl-1"
-            title="Profile"
+            title={isAr ? "الملف الشخصي" : "Profile"}
           >
             <img 
               src="/images/reels/reel_2.jpg" 
@@ -152,10 +181,10 @@ export default function Header() {
             />
           </div>
 
-          {/* Slogan pill (Matching reference design) */}
-          <div className="hidden 2xl:flex flex-col items-end border-l border-gray-200 pl-4 ml-1">
-            <span className="text-[10px] font-mono font-bold tracking-widest text-gray-400 uppercase leading-none">
-              REAL PEOPLE / REAL STYLE / EGYPT
+          {/* Slogan pill (Matching Image 3 & 4) */}
+          <div className="hidden 2xl:flex flex-col items-end border-r border-gray-200 pr-4 mr-1 text-right">
+            <span className="text-[10px] font-bold tracking-wider text-gray-400 uppercase leading-none">
+              {isAr ? 'أشخاص حقيقيون / أسلوب حقيقي / مصر' : 'REAL PEOPLE / REAL STYLE / EGYPT'}
             </span>
             <div className="w-8 h-0.5 bg-[#d00000] rounded-full mt-1" />
           </div>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
+import { AuthService } from '../../services/AuthService';
 import EgLogo from '../common/EgLogo';
 
 export default function Header() {
@@ -250,10 +251,10 @@ export default function Header() {
             {isProfileMenuOpen && (
               <div className={`absolute ${isAr ? 'left-0' : 'right-0'} top-full mt-1 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden text-slate-900 z-50 flex flex-col py-1 animate-fade-in`}>
                 <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-3">
-                  <img src="/images/reels/reel_2.jpg" className="w-10 h-10 rounded-full" />
+                  <img src={user?.profile?.avatar_url || "/images/reels/reel_2.jpg"} className="w-10 h-10 rounded-full" />
                   <div className="flex flex-col text-left">
-                    <span className="text-sm font-bold">Ahmed Fits</span>
-                    <span className="text-[10px] text-gray-500">@ahmed_fits</span>
+                    <span className="text-sm font-bold">{user?.profile?.name || (isAr ? 'ضيف' : 'Guest')}</span>
+                    <span className="text-[10px] text-gray-500">{user?.email || ''}</span>
                   </div>
                 </div>
 
@@ -275,6 +276,15 @@ export default function Header() {
                 <button onClick={() => { setActiveTab('showcase'); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-left text-blue-600 mt-1 border-t border-gray-50 pt-3">
                   <span className="material-symbols-outlined text-[18px]">visibility</span> {isAr ? 'عرض الشاشات (Dev)' : 'Screen Index (Dev)'}
                 </button>
+                {user ? (
+                  <button onClick={async () => { await AuthService.signOut(); setUser(null); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-left text-red-600 mt-1 border-t border-gray-50 pt-3">
+                    <span className="material-symbols-outlined text-[18px]">logout</span> {isAr ? 'تسجيل الخروج' : 'Sign Out'}
+                  </button>
+                ) : (
+                  <button onClick={() => { setIsAuthModalOpen(true); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-left text-[#d00000] mt-1 border-t border-gray-50 pt-3">
+                    <span className="material-symbols-outlined text-[18px]">login</span> {isAr ? 'تسجيل الدخول' : 'Sign In'}
+                  </button>
+                )}
               </div>
             )}
           </div>

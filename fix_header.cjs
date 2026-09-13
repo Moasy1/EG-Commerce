@@ -1,53 +1,44 @@
 const fs = require('fs');
 let content = fs.readFileSync('src/components/layout/Header.jsx', 'utf8');
 
-// 1. Shrink main container padding and gaps on mobile
+// Add user and auth modal states
 content = content.replace(
-  'px-4 md:px-8 py-3 flex items-center justify-between gap-4',
-  'px-2 sm:px-4 md:px-8 py-2 sm:py-3 flex items-center justify-between gap-1 sm:gap-4'
+  "const { activeTab, setActiveTab, totalCartCount, language, setLanguage, unreadNotifications } = useApp();",
+  "const { activeTab, setActiveTab, totalCartCount, language, setLanguage, unreadNotifications, user, setUser, setIsAuthModalOpen } = useApp();"
 );
 
-// 2. Shrink logo and gaps on mobile
+// Add AuthService
 content = content.replace(
-  'gap-3.5 cursor-pointer shrink-0 group',
-  'gap-1.5 sm:gap-3.5 cursor-pointer shrink-0 group'
-);
-content = content.replace(
-  'w-9 h-9 group-hover:scale-105',
-  'w-7 h-7 sm:w-9 sm:h-9 group-hover:scale-105'
+  "import { useApp } from '../../context/AppContext';",
+  "import { useApp } from '../../context/AppContext';\nimport { AuthService } from '../../services/AuthService';"
 );
 
-// 3. Shrink text "EG-Commerce"
-content = content.replace(
-  'text-xl font-black tracking-tight leading-none',
-  'text-base sm:text-xl font-black tracking-tight leading-none'
+// Update profile menu to handle login/logout
+const profileMenuMatch = /<div className="px-4 py-3 border-b border-gray-100 flex items-center gap-3">[\s\S]*?<\/div>\n                <\/div>/;
+content = content.replace(profileMenuMatch, 
+  `<div className="px-4 py-3 border-b border-gray-100 flex items-center gap-3">
+                  <img src={user?.profile?.avatar_url || "/images/reels/reel_2.jpg"} className="w-10 h-10 rounded-full" />
+                  <div className="flex flex-col text-left">
+                    <span className="text-sm font-bold">{user?.profile?.name || (isAr ? 'ضيف' : 'Guest')}</span>
+                    <span className="text-[10px] text-gray-500">{user?.email || ''}</span>
+                  </div>
+                </div>`
 );
 
-// 4. Action Icons: Shrink gap and hide language button on mobile
+// Add sign in / sign out buttons
 content = content.replace(
-  'flex items-center gap-2 shrink-0',
-  'flex items-center gap-1 sm:gap-2 shrink-0'
-);
-
-// Find the language button and add `hidden sm:flex`
-content = content.replace(
-  'className={`px-2.5 py-1 rounded-full border text-[11px] font-bold transition-colors flex items-center gap-1 shadow-xs ${',
-  'className={`hidden sm:flex px-2.5 py-1 rounded-full border text-[11px] font-bold transition-colors items-center gap-1 shadow-xs ${'
-);
-
-// 5. Add language toggle inside the profile menu dropdown
-const profileMenuInsertion = `
-                <button onClick={() => { setActiveTab('profile'); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-left mt-1">
-                  <span className="material-symbols-outlined text-[18px]">person</span> {isAr ? 'الملف الشخصي' : 'My Profile'}
-                </button>
-                <button onClick={() => { setLanguage(l => l === 'ar' ? 'en' : 'ar'); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex sm:hidden items-center gap-2 text-left">
-                  <span className="material-symbols-outlined text-[18px]">language</span> {isAr ? 'Switch to English' : 'التبديل للعربية'}
-                </button>`;
-
-content = content.replace(
-  `                <button onClick={() => { setActiveTab('profile'); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-left mt-1">\n                  <span className="material-symbols-outlined text-[18px]">person</span> {isAr ? 'الملف الشخصي' : 'My Profile'}\n                </button>`,
-  profileMenuInsertion
+  /<button onClick=\{\(\) => \{ setActiveTab\('showcase'\);[\s\S]*?<\/button>/,
+  `$&
+                {user ? (
+                  <button onClick={async () => { await AuthService.signOut(); setUser(null); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-left text-red-600 mt-1 border-t border-gray-50 pt-3">
+                    <span className="material-symbols-outlined text-[18px]">logout</span> {isAr ? 'تسجيل الخروج' : 'Sign Out'}
+                  </button>
+                ) : (
+                  <button onClick={() => { setIsAuthModalOpen(true); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-left text-[#d00000] mt-1 border-t border-gray-50 pt-3">
+                    <span className="material-symbols-outlined text-[18px]">login</span> {isAr ? 'تسجيل الدخول' : 'Sign In'}
+                  </button>
+                )}`
 );
 
 fs.writeFileSync('src/components/layout/Header.jsx', content);
-console.log("Header fixed!");
+console.log("Header auth fixed!");

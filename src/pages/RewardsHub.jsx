@@ -1,9 +1,20 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
+import { RewardService } from '../services/RewardService';
+import { useEffect } from 'react';
 
 export default function RewardsHub() {
-  const { rewardPoints, setRewardPoints } = useApp();
+  const { rewardPoints, setRewardPoints, user } = useApp();
   const [redeemSuccess, setRedeemSuccess] = useState('');
+  const [history, setHistory] = useState([]);
+
+  useEffect(() => {
+    const loadHistory = async () => {
+      const hist = await RewardService.getHistory(user?.id);
+      setHistory(hist);
+    };
+    loadHistory();
+  }, [user]);
 
   const vouchers = [
     { id: 'v-1', title: '100 EGP Discount Voucher • قسيمة خصم', points: 1000, desc: 'صالحة على جميع البراندات بحد أدنى للطلب 500 EGP' },
@@ -11,22 +22,22 @@ export default function RewardsHub() {
     { id: 'v-3', title: '250 EGP Discount Voucher • قسيمة خصم', points: 2500, desc: 'صالحة لقسم الفساتين، العبايات، وقطع الكتان' },
   ];
 
-  const handleRedeemVoucher = (voucher) => {
-    if (rewardPoints >= voucher.points) {
-      setRewardPoints(prev => prev - voucher.points);
+  const handleRedeemVoucher = async (voucher) => {
+    const result = await RewardService.redeemPoints(user?.id, voucher.points, `Redeemed: ${voucher.title}`);
+    if (result.success) {
+      setRewardPoints(result.newBalance);
       setRedeemSuccess(`تم استبدال فوتشر "${voucher.title}" بنجاح! تم حفظ الكود في محفظتك.`);
       setTimeout(() => setRedeemSuccess(''), 4000);
+      
+      // refresh history
+      const hist = await RewardService.getHistory(user?.id);
+      setHistory(hist);
     } else {
-      alert('عفواً، رصيد الـ Points غير كافٍ لهذا الفوتشر.');
+      alert(result.message || 'عفواً، رصيد الـ Points غير كافٍ لهذا الفوتشر.');
     }
   };
 
-  const history = [
-    { title: 'Order Purchase • شراء: فستان كتان صيفي بوهيمي', points: '+140 Points', date: 'Today • اليوم', type: 'earn' },
-    { title: 'Daily Reels Watch • مشاهدة وتفاعل ريلز', points: '+50 Points', date: 'Yesterday • أمس', type: 'earn' },
-    { title: 'Redeemed in Cart • خصم فوري بالسلة', points: '-500 Points', date: '3 days ago', type: 'redeem' },
-    { title: 'Friend Referral • مكافأة دعوة صديقة', points: '+200 Points', date: '5 days ago', type: 'earn' },
-  ];
+  
 
   return (
     <div className="w-full flex-1 max-w-4xl mx-auto px-4 md:px-6 py-4 pb-28 md:pb-12 text-on-surface text-right">

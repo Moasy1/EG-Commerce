@@ -1,73 +1,60 @@
-const DB_NAME = 'EgCommerceReelsDB';
-const STORE_NAME = 'reels';
-const DB_VERSION = 1;
+import { supabase } from '../lib/supabase';
 
-export class ReelsService {
-  static async initDB() {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open(DB_NAME, DB_VERSION);
+// Fallback logic uses localStorage for now to avoid IndexedDB complexity while migrating
+export const ReelsService = {
+  async getReels() {
+    try {
+      const { data, error } = await supabase.from('reels').select('*, creators(*), merchants(*)');
+      if (error) throw error;
+      return data || [];
+    } catch (err) {
+      console.warn('DB Reels fetch failed, using local mock data:', err.message);
       
-      request.onerror = () => reject(request.error);
+      const local = localStorage.getItem('eg_reels_mock');
+      if (local) return JSON.parse(local);
       
-      request.onsuccess = () => resolve(request.result);
-      
-      request.onupgradeneeded = (event) => {
-        const db = event.target.result;
-        if (!db.objectStoreNames.contains(STORE_NAME)) {
-          db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+      // Seed some initial Reels if none exist
+      const mockReels = [
+        {
+          id: 'mock-1',
+          video_url: '/images/reels/fashion_kaizen_dress.mp4',
+          thumbnail_url: '/images/reels/fashion_kaizen_dress_thumb.jpg',
+          caption: 'فستان بوهيمي أنيق للمحجبات #fashion #محجبات',
+          likes_count: 1450,
+          views_count: 5600,
+          shares_count: 230,
+          comments: 45
+        },
+        {
+          id: 'mock-2',
+          video_url: '/images/reels/fashion_oversized_shirt.mp4',
+          thumbnail_url: '/images/reels/fashion_oversized_shirt_thumb.jpg',
+          caption: 'أوفرسايز شيرت كتان مريح جداً للصيف 🔥',
+          likes_count: 890,
+          views_count: 3200,
+          shares_count: 120,
+          comments: 22
         }
-      };
-    });
-  }
+      ];
+      return mockReels;
+    }
+  },
 
-  static async getReels() {
-    const db = await this.initDB();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(STORE_NAME, 'readonly');
-      const store = transaction.objectStore(STORE_NAME);
-      const request = store.getAll();
+  async saveReel(reelData) {
+    try {
+      const { data, error } = await supabase.from('reels').insert(reelData).select();
+      if (error) throw error;
+      return data[0];
+    } catch (err) {
+      console.warn('DB Save Reel failed, saving to local storage:', err.message);
+      let local = [];
+      const localStr = localStorage.getItem('eg_reels_mock');
+      if (localStr) local = JSON.parse(localStr);
       
-      request.onsuccess = () => {
-        // Sort by some logic if needed, but for now just return
-        resolve(request.result || []);
-      };
-      request.onerror = () => reject(request.error);
-    });
+      const newReel = { ...reelData, id: `mock-${Date.now()}` };
+      local.unshift(newReel);
+      localStorage.setItem('eg_reels_mock', JSON.stringify(local));
+      return newReel;
+    }
   }
-
-  static async saveReel(reel) {
-    const db = await this.initDB();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(STORE_NAME, 'readwrite');
-      const store = transaction.objectStore(STORE_NAME);
-      const request = store.put(reel);
-      
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    });
-  }
-
-  static async deleteReel(id) {
-    const db = await this.initDB();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(STORE_NAME, 'readwrite');
-      const store = transaction.objectStore(STORE_NAME);
-      const request = store.delete(id);
-      
-      request.onsuccess = () => resolve();
-      request.onerror = () => reject(request.error);
-    });
-  }
-
-  static async clearAll() {
-    const db = await this.initDB();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(STORE_NAME, 'readwrite');
-      const store = transaction.objectStore(STORE_NAME);
-      const request = store.clear();
-      
-      request.onsuccess = () => resolve();
-      request.onerror = () => reject(request.error);
-    });
-  }
-}
+};

@@ -18,6 +18,7 @@ import MerchantStorefront from './pages/MerchantStorefront';
 import MerchantDashboard from './pages/MerchantDashboard';
 import ScreenShowcase from './pages/ScreenShowcase';
 import AddProductStudio from './pages/AddProductStudio';
+import AuthModal from './components/AuthModal';
 
 function MainContent() {
   const { activeTab, language } = useApp();

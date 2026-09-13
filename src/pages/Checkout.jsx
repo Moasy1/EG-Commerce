@@ -1,18 +1,35 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
+import { OrderService } from '../services/OrderService';
 
 export default function Checkout() {
-  const { grandTotal, discountFromPoints, shippingTotal, subtotal, setActiveTab } = useApp();
+  const { cartItems, grandTotal, discountFromPoints, shippingTotal, subtotal, setActiveTab, setOrders } = useApp();
   const [paymentMethod, setPaymentMethod] = useState('instapay');
   const [address, setAddress] = useState('القاهرة، مصر الجديدة، شارع الثورة عمارة 14');
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     setIsProcessing(true);
-    setTimeout(() => {
+    try {
+      const order = await OrderService.createOrder(
+        cartItems,
+        subtotal,
+        discountFromPoints,
+        shippingTotal,
+        grandTotal,
+        null // We'd pass current user ID here when auth is integrated
+      );
+      
+      // Update local orders list conceptually
+      setOrders(prev => [order, ...prev]);
+      
       setIsProcessing(false);
       setActiveTab('tracking');
-    }, 1000);
+    } catch (err) {
+      console.error(err);
+      setIsProcessing(false);
+      alert('Failed to place order.');
+    }
   };
 
   return (

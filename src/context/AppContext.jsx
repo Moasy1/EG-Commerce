@@ -1,4 +1,8 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { ProductService } from '../services/ProductService';
+import { CartService } from '../services/CartService';
+import { AuthService } from '../services/AuthService';
+import { RewardService } from '../services/RewardService';
 
 const AppContext = createContext();
 
@@ -652,6 +656,31 @@ export function AppProvider({ children }) {
   const [role, setRole] = useState('buyer');
   const [deviceMode, setDeviceMode] = useState('responsive');
   const [language, setLanguage] = useState('ar'); // 'ar' | 'en'
+  const [user, setUser] = useState(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
+  useEffect(() => {
+    const loadData = async () => {
+      const currentUser = await AuthService.getCurrentUser();
+      if (currentUser) {
+        const balance = await RewardService.getBalance(currentUser.id);
+        setRewardPoints(balance);
+      }
+      if (currentUser) {
+        setUser(currentUser);
+      }
+      
+      const fetchedProducts = await ProductService.getProducts();
+      setProducts(fetchedProducts);
+      
+      const fetchedMerchants = await ProductService.getMerchants();
+      setMerchants(fetchedMerchants);
+
+      const fetchedCart = await CartService.getCartItems();
+      setCartItems(fetchedCart);
+    };
+    loadData();
+  }, []);
 
   const updateProductSyndication = (productId) => {
     setProducts(prev => prev.map(p => 
@@ -692,30 +721,7 @@ export function AppProvider({ children }) {
     }));
   };
 
-  const [cartItems, setCartItems] = useState([
-    {
-      id: 'c-1',
-      productId: 'p-01',
-      title: 'فستان كتان كايزن بوهيمي • Linen Dress',
-      merchant: 'Talieska Studio • تاليسكا',
-      price: 1450,
-      quantity: 1,
-      size: 'M',
-      color: 'Terracotta تيراكوتا',
-      image: INITIAL_PRODUCTS[0].image
-    },
-    {
-      id: 'c-2',
-      productId: 'p-02',
-      title: 'شنطة كانفاس وجلد طبيعي • Canvas Tote',
-      merchant: 'Khan El Khalili Craft • خان الخليلي',
-      price: 920,
-      quantity: 1,
-      size: 'One Size',
-      color: 'Beige & Brown بيج وبني',
-      image: INITIAL_PRODUCTS[1].image
-    }
-  ]);
+  const [cartItems, setCartItems] = useState([]);
 
   const [isQuickBuyOpen, setIsQuickBuyOpen] = useState(false);
   const [quickBuyProduct, setQuickBuyProduct] = useState(INITIAL_PRODUCTS[0]);
@@ -738,29 +744,17 @@ export function AppProvider({ children }) {
     setIsQuickBuyOpen(false);
   };
 
-  const addToCart = (product, selectedVariant = {}) => {
-    setCartItems(prev => {
-      const existing = prev.find(item => item.productId === product.id && item.size === (selectedVariant.size || 'M'));
-      if (existing) {
-        return prev.map(item =>
-          item === existing ? { ...item, quantity: item.quantity + 1 } : item
-        );
-      }
-      return [
-        ...prev,
-        {
-          id: `c-${Date.now()}`,
-          productId: product.id,
-          title: product.title,
-          merchant: product.merchant,
-          price: product.price,
-          quantity: 1,
-          size: selectedVariant.size || 'M',
-          color: selectedVariant.color || 'Default',
-          image: product.image
-        }
-      ];
-    });
+  const addToCart = async (product, selectedVariant = {}) => {
+    const size = selectedVariant.size || 'M';
+    const color = selectedVariant.color || 'Default';
+    
+    // Optimistic UI update could go here, but we will wait for service
+    const updatedCart = await CartService.addToCart(product.id, product.merchantId, product.price, 1, size, color);
+    
+    // In our fallback we get an array back, in real DB we get item. 
+    // Just refetch cart for simplicity for this prototype transition
+    const fetchedCart = await CartService.getCartItems();
+    setCartItems(fetchedCart);
   };
 
   const updateQuantity = (cartItemId, delta) => {
@@ -795,6 +789,10 @@ export function AppProvider({ children }) {
       setDeviceMode,
       language,
       setLanguage,
+      user,
+      setUser,
+      isAuthModalOpen,
+      setIsAuthModalOpen,
       cartItems,
       addToCart,
       removeFromCart,

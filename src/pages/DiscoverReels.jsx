@@ -583,32 +583,7 @@ export default function DiscoverReels() {
             <EgLogo className="w-8 h-8 drop-shadow-md" color="#d00000" />
           </div>
 
-          {/* Feed Tabs */}
-          <div className="flex items-center gap-3 text-xs font-semibold">
-            {[
-              { id: 'foryou', label: isAr ? 'لك' : 'For You' },
-              { id: 'following', label: isAr ? 'المتابعة' : 'Following' },
-              { id: 'fashion', label: isAr ? 'الموضة' : 'Fashion' },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setActiveTabSub(tab.id);
-                }}
-                className={`relative py-1 transition-all ${
-                  activeTabSub === tab.id
-                    ? 'text-white font-bold text-sm'
-                    : 'text-white/60 hover:text-white'
-                }`}
-              >
-                <span>{tab.label}</span>
-                {activeTabSub === tab.id && (
-                  <span className="absolute -bottom-0.5 inset-x-0 h-0.5 bg-[#d00000] rounded-full shadow-sm" />
-                )}
-              </button>
-            ))}
-          </div>
+
 
           {/* Right Action Icons */}
           <div className="flex items-center gap-2 text-white">
@@ -924,20 +899,7 @@ export default function DiscoverReels() {
             </div>
           </div>
           
-          <div className="flex items-center gap-6 px-4 pb-0 overflow-x-auto no-scrollbar w-full" style={{ direction: isAr ? 'rtl' : 'ltr' }}>
-            <button className="pb-2 text-[15px] font-bold text-white border-b-[3px] border-white whitespace-nowrap drop-shadow-md">
-              {isAr ? 'لك' : 'For You'}
-            </button>
-            <button className="pb-2 text-[15px] font-medium text-white/80 whitespace-nowrap drop-shadow-md">
-              {isAr ? 'متابعة' : 'Following'}
-            </button>
-            <button className="pb-2 text-[15px] font-medium text-white/80 whitespace-nowrap drop-shadow-md">
-              {isAr ? 'الموضة' : 'Fashion'}
-            </button>
-            <button className="pb-2 text-[15px] font-medium text-white/80 whitespace-nowrap drop-shadow-md">
-              {isAr ? 'مصر' : 'Egypt'}
-            </button>
-          </div>
+
         </div>
 
         {/* Swipeable Video Area */}

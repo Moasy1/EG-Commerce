@@ -4,80 +4,65 @@ import EgLogo from '../components/common/EgLogo';
 import DesktopMarketplace from '../components/desktop/DesktopMarketplace';
 
 export default function Marketplace() {
-  const { openProductDetail, totalCartCount, setActiveTab, addToCart } = useApp();
+  const { products: contextProducts, openProductDetail, totalCartCount, setActiveTab, addToCart } = useApp();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
   // Categories corresponding to the exact 6 cards in Screen 2 mobile
   const categories = [
     { id: 'new', label: 'New Arrivals', isRedCard: true },
-    { id: 'women', label: 'Women', image: '/images/products/silk_dress.jpg' },
-    { id: 'men', label: 'Men', image: '/images/products/linen_shirt.jpg' },
+    { id: 'women', label: 'Women', image: '/images/reels/fashion_citrine_blazer_thumb.jpg' },
+    { id: 'men', label: 'Men', image: '/images/reels/fashion_suede_jacket_thumb.jpg' },
     { id: 'modest', label: 'Modest Fashion', image: '/images/products/linen_abaya.jpg' },
-    { id: 'streetwear', label: 'Streetwear', image: '/images/products/wool_blazer.jpg' },
-    { id: 'accessories', label: 'Accessories', image: '/images/products/copper_lantern.jpg' },
+    { id: 'streetwear', label: 'Streetwear', image: '/images/reels/fashion_oversized_shirt_thumb.jpg' },
+    { id: 'accessories', label: 'Accessories', image: '/images/reels/fashion_shoulder_bags_thumb.jpg' },
   ];
 
-  // Featured Products shown on mobile Screen 2
-  const featuredProducts = [
+  // Fallback products if context not ready
+  const fallbackProducts = [
     {
-      id: 'p-linen-coord',
-      title: 'Linen Co-ord Set',
-      price: 1250,
-      image: '/images/reels/reel_1.jpg',
+      id: 'p-fashion-blazer',
+      title: 'Citrine Yellow Oversized Blazer',
+      price: 1850,
+      image: '/images/reels/fashion_citrine_blazer_thumb.jpg',
+      video: '/images/reels/fashion_citrine_blazer.mp4',
       category: 'Women',
-      rating: 4.8,
-      reviewsCount: 124,
-      merchantId: 'm-1'
-    },
-    {
-      id: 'p-oversized-hoodie',
-      title: 'Oversized Hoodie',
-      price: 950,
-      image: '/images/products/wool_blazer.jpg',
-      category: 'Men',
       rating: 4.9,
-      reviewsCount: 86,
-      merchantId: 'm-1'
+      reviewsCount: 142,
+      merchantId: 'm-01'
     },
     {
-      id: 'p-chic-jacket',
-      title: 'Chic Linen Jacket',
-      price: 890,
-      image: '/images/products/linen_shirt.jpg',
-      category: 'Women',
-      rating: 4.7,
-      reviewsCount: 52,
-      merchantId: 'm-1'
-    },
-    {
-      id: 'p-utility-jacket',
-      title: 'Olive Utility Jacket',
-      price: 1100,
-      image: '/images/products/linen_abaya.jpg',
-      category: 'Men',
+      id: 'p-fashion-oversized-shirt',
+      title: 'Sky Blue Linen Oversized Shirt',
+      price: 980,
+      image: '/images/reels/fashion_oversized_shirt_thumb.jpg',
+      video: '/images/reels/fashion_oversized_shirt.mp4',
+      category: 'Streetwear',
       rating: 4.8,
-      reviewsCount: 68,
-      merchantId: 'm-1'
+      reviewsCount: 96,
+      merchantId: 'm-01'
     }
   ];
 
+  const featuredProducts = (contextProducts && contextProducts.length > 0) ? contextProducts : fallbackProducts;
+
   // Top Stores & Brands
   const topStores = [
-    { id: 'store-1', name: 'Talieska', image: '/images/brands/talieska_logo.jpg' },
-    { id: 'store-2', name: 'ZAY Fashion', image: '/images/products/linen_abaya.jpg' },
-    { id: 'store-3', name: 'Khan', image: '/images/banners/khan_hero.jpg' },
-    { id: 'store-4', name: 'Khat', image: '/images/products/copper_lantern.jpg' },
-    { id: 'store-5', name: 'Dokan', image: '/images/products/kilim_rug.jpg' },
+    { id: 'store-1', name: 'Talieska Studio', image: '/images/brands/talieska_logo.jpg' },
+    { id: 'store-2', name: 'ورشة خان الخليلي', image: '/images/banners/khan_hero.jpg' },
+    { id: 'store-3', name: 'مجوهرات طيبة', image: '/images/reels/fashion_vintage_watch_thumb.jpg' },
+    { id: 'store-4', name: 'ZAY Fashion', image: '/images/products/linen_abaya.jpg' },
+    { id: 'store-5', name: 'Dokan Cairo', image: '/images/products/kilim_rug.jpg' },
   ];
 
   // Featured Creators
   const featuredCreators = [
-    { id: 'c-1', handle: 'mariam.style', avatar: '/images/reels/reel_1.jpg' },
-    { id: 'c-2', handle: 'ahmed_fits', avatar: '/images/reels/reel_2.jpg' },
-    { id: 'c-3', handle: 'sara.fashion', avatar: '/images/reels/reel_3.jpg' },
-    { id: 'c-4', handle: 'omar.daily', avatar: '/images/reels/reel_4.jpg' },
-    { id: 'c-5', handle: 'cairo.chic', avatar: '/images/products/silk_dress.jpg' },
+    { id: 'c-1', handle: 'cairo_chic', avatar: '/images/reels/fashion_citrine_blazer_thumb.jpg' },
+    { id: 'c-2', handle: 'salma.styles', avatar: '/images/reels/fashion_oversized_shirt_thumb.jpg' },
+    { id: 'c-3', handle: 'karim.editorial', avatar: '/images/reels/fashion_vintage_watch_thumb.jpg' },
+    { id: 'c-4', handle: 'zeina_ootd', avatar: '/images/reels/fashion_oneshoulder_top_thumb.jpg' },
+    { id: 'c-5', handle: 'maya_accessories', avatar: '/images/reels/fashion_shoulder_bags_thumb.jpg' },
+    { id: 'c-6', handle: 'layla_fashion', avatar: '/images/reels/fashion_knit_sweater_thumb.jpg' },
   ];
 
   return (
@@ -197,6 +182,12 @@ export default function Marketplace() {
             >
               <div className="relative w-full aspect-[4/5] bg-gray-100 overflow-hidden">
                 <img src={product.image} alt={product.title} className="w-full h-full object-cover" />
+                {product.video && (
+                  <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-black/70 backdrop-blur-md text-white text-[9px] font-bold flex items-center gap-1 shadow-md border border-white/20">
+                    <span className="material-symbols-outlined text-[12px] text-[#ff3b5c]">play_arrow</span>
+                    <span>Reel</span>
+                  </div>
+                )}
                 <button
                   onClick={(e) => {
                     e.stopPropagation();

@@ -156,47 +156,140 @@ export default function MerchantStorefront() {
     }
   ];
 
-  // Community Reels Data
-  const communityReels = [
+  // Community Reels Data - Dynamic per Merchant
+  const communityReels = currentMerchant.id === 'm-02' ? [
     { 
-      id: 'r1', 
-      creator: '@nour_style', 
-      creatorName: 'نور ستايل',
-      caption: 'تنسيق فستان الكتان للعمل والمساء ✨ أقمشة مصرية 100%', 
-      views: '34.2K', 
-      likes: '2.8K',
-      image: '/images/reels/reel_1.jpg',
-      taggedProduct: merchantProducts[0]
+      id: 'cr-m2-1', 
+      creator: '@maya_accessories', 
+      creatorName: 'مايا إكسسوارات',
+      caption: 'كولكشن الشنط الكلاسيك الجلد بجميع الألوان 😍 فخامة الصناعة المصرية', 
+      views: '48.5K', 
+      likes: '4.2K',
+      image: '/images/reels/fashion_shoulder_bags_thumb.jpg',
+      video: '/images/reels/fashion_shoulder_bags.mp4',
+      taggedProduct: products.find(p => p.id === 'p-fashion-shoulder-bags') || merchantProducts[0]
     },
     { 
-      id: 'r2', 
+      id: 'cr-m2-2', 
+      creator: '@farida.atelier', 
+      creatorName: 'فريدة أتيليه',
+      caption: 'شنطة الجلد المنسوجة يدوياً مع المقبض المضفر ✨ تفاصيل تخطف القلب', 
+      views: '32.1K', 
+      likes: '2.9K',
+      image: '/images/reels/fashion_woven_bag_thumb.jpg',
+      video: '/images/reels/fashion_woven_bag.mp4',
+      taggedProduct: products.find(p => p.id === 'p-fashion-woven-bag') || merchantProducts[1] || merchantProducts[0]
+    },
+    { 
+      id: 'cr-m2-3', 
+      creator: '@huda_leather', 
+      creatorName: 'هدى ليذر',
+      caption: 'شنطة البولينج الأسطوانية الجلد الطبيعي كروكو وبني وسويد 🤎', 
+      views: '29.7K', 
+      likes: '2.4K',
+      image: '/images/reels/fashion_barrel_bag_thumb.jpg',
+      video: '/images/reels/fashion_barrel_bag.mp4',
+      taggedProduct: products.find(p => p.id === 'p-fashion-barrel-bag') || merchantProducts[2] || merchantProducts[0]
+    },
+    { 
+      id: 'cr-m2-4', 
+      creator: '@khan_masters', 
+      creatorName: 'ورش خان الخليلي',
+      caption: 'نقش وتخريم الفوانيس النحاسية الفاطمية يدوياً 🏮 فن أصيل', 
+      views: '21.4K', 
+      likes: '1.8K',
+      image: '/images/products/copper_lantern.jpg',
+      taggedProduct: products.find(p => p.id === 'p-05') || merchantProducts[0]
+    }
+  ] : currentMerchant.id === 'm-03' ? [
+    { 
+      id: 'cr-m3-1', 
+      creator: '@karim.editorial', 
+      creatorName: 'كريم إيديتوريال',
+      caption: 'ساعة يد كلاسيكية بتصميم برميلي وذهب وردي مع إطلالة الصوف الهادية ⌚✨', 
+      views: '54.2K', 
+      likes: '5.1K',
+      image: '/images/reels/fashion_vintage_watch_thumb.jpg',
+      video: '/images/reels/fashion_vintage_watch.mp4',
+      taggedProduct: products.find(p => p.id === 'p-fashion-vintage-watch') || merchantProducts[0]
+    },
+    { 
+      id: 'cr-m3-2', 
       creator: '@salma_egypt', 
       creatorName: 'سلمى الأحمدي',
-      caption: 'ريفيو الكيمونو الرملي على الطبيعة 😍 تطريز يدوي فاخر', 
-      views: '28.6K', 
-      likes: '1.9K',
-      image: '/images/reels/reel_2.jpg',
-      taggedProduct: merchantProducts[1] || merchantProducts[0]
+      caption: 'تنسيق الحلي المستوحاة من زهرة اللوتس مع إطلالة أنيقة 👑', 
+      views: '36.8K', 
+      likes: '3.1K',
+      image: '/images/reels/fashion_oneshoulder_top_thumb.jpg',
+      video: '/images/reels/fashion_oneshoulder_top.mp4',
+      taggedProduct: products.find(p => p.id === 'p-fashion-oneshoulder-top') || merchantProducts[0]
     },
     { 
-      id: 'r3', 
+      id: 'cr-m3-3', 
       creator: '@farida_fashion', 
       creatorName: 'فريدة كمال',
-      caption: 'إطلالة صيفية هادية وأنيقة بلمسات مينيمال راقية 🏖️', 
-      views: '41.5K', 
-      likes: '3.4K',
-      image: '/images/reels/reel_3.jpg',
-      taggedProduct: merchantProducts[2] || merchantProducts[0]
+      caption: 'بريق الذهب عيار 18 والفضة 925 بصياغة يدوية دقيقة 💎', 
+      views: '28.4K', 
+      likes: '2.5K',
+      image: '/images/reels/fashion_citrine_blazer_thumb.jpg',
+      video: '/images/reels/fashion_citrine_blazer.mp4',
+      taggedProduct: products.find(p => p.id === 'p-fashion-blazer') || merchantProducts[0]
     },
     { 
-      id: 'r4', 
+      id: 'cr-m3-4', 
       creator: '@cairo_looks', 
       creatorName: 'كايرو لوكس',
-      caption: 'تفاصيل الخياطة من مشاغل تاليسكا بالقاهرة 🪡 فخر الصناعة المصرية', 
+      caption: 'لمسات الفخامة الملكية في التفاصيل اليومية ✨', 
       views: '19.8K', 
       likes: '1.5K',
-      image: '/images/reels/reel_4.jpg',
-      taggedProduct: merchantProducts[3] || merchantProducts[0]
+      image: '/images/reels/fashion_oversized_shirt_thumb.jpg',
+      video: '/images/reels/fashion_oversized_shirt.mp4',
+      taggedProduct: products.find(p => p.id === 'p-fashion-oversized-shirt') || merchantProducts[0]
+    }
+  ] : [
+    { 
+      id: 'cr-m1-1', 
+      creator: '@cairo_chic', 
+      creatorName: 'كايرو شيك',
+      caption: 'تنسيق بليزر السيترين الأوفرسايز مع الجينز ونظارة شمسية 💛 فخامة الصيف', 
+      views: '62.4K', 
+      likes: '5.8K',
+      image: '/images/reels/fashion_citrine_blazer_thumb.jpg',
+      video: '/images/reels/fashion_citrine_blazer.mp4',
+      taggedProduct: products.find(p => p.id === 'p-fashion-blazer') || merchantProducts[0]
+    },
+    { 
+      id: 'cr-m1-2', 
+      creator: '@salma.styles', 
+      creatorName: 'سلمى ستايلز',
+      caption: 'قميص كتان مصري سماوي أوفرسايز مع بنطلون واسع ومريح 🩵', 
+      views: '45.1K', 
+      likes: '3.9K',
+      image: '/images/reels/fashion_oversized_shirt_thumb.jpg',
+      video: '/images/reels/fashion_oversized_shirt.mp4',
+      taggedProduct: products.find(p => p.id === 'p-fashion-oversized-shirt') || merchantProducts[1] || merchantProducts[0]
+    },
+    { 
+      id: 'cr-m1-3', 
+      creator: '@zeina_ootd', 
+      creatorName: 'زينة أوفت',
+      caption: 'توب بكتف واحد عاجي ناعم مع جينز كلاسيك عالي الخصر 🤍✨', 
+      views: '38.9K', 
+      likes: '3.4K',
+      image: '/images/reels/fashion_oneshoulder_top_thumb.jpg',
+      video: '/images/reels/fashion_oneshoulder_top.mp4',
+      taggedProduct: products.find(p => p.id === 'p-fashion-oneshoulder-top') || merchantProducts[2] || merchantProducts[0]
+    },
+    { 
+      id: 'cr-m1-4', 
+      creator: '@omar_looks', 
+      creatorName: 'عمر لوكس',
+      caption: 'جاكيت الشمواه البني الهارنجتون مع بنطلون زيتي وحذاء سويد 🤎 رجالي أنيق', 
+      views: '31.2K', 
+      likes: '2.7K',
+      image: '/images/reels/fashion_suede_jacket_thumb.jpg',
+      video: '/images/reels/fashion_suede_jacket.mp4',
+      taggedProduct: products.find(p => p.id === 'p-fashion-suede-jacket') || merchantProducts[3] || merchantProducts[0]
     }
   ];
 
@@ -1242,18 +1335,29 @@ export default function MerchantStorefront() {
         {activeReel && (
           <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in">
             <div className={`relative w-full max-w-sm ${borderRadius} overflow-hidden border shadow-2xl ${cardBgClass}`}>
-              <div className="aspect-[9/16] w-full relative">
-                <img 
-                  src={activeReel.image} 
-                  alt={activeReel.creator} 
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-black/30 flex flex-col justify-between p-4 text-white">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-xs bg-black/50 px-2.5 py-1 rounded-full">{activeReel.creator}</span>
+              <div className="aspect-[9/16] w-full relative bg-black">
+                {activeReel.video ? (
+                  <video 
+                    src={activeReel.video} 
+                    autoPlay 
+                    loop 
+                    playsInline 
+                    className="w-full h-full object-cover"
+                    controls
+                  />
+                ) : (
+                  <img 
+                    src={activeReel.image} 
+                    alt={activeReel.creator} 
+                    className="w-full h-full object-cover"
+                  />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/10 to-black/30 pointer-events-none flex flex-col justify-between p-4 text-white">
+                  <div className="flex items-center justify-between pointer-events-auto">
+                    <span className="font-bold text-xs bg-black/50 backdrop-blur-md px-2.5 py-1 rounded-full">{activeReel.creator}</span>
                     <button 
                       onClick={() => setActiveReel(null)}
-                      className="w-8 h-8 rounded-full bg-black/60 flex items-center justify-center text-white hover:bg-black/80"
+                      className="w-8 h-8 rounded-full bg-black/60 backdrop-blur-md flex items-center justify-center text-white hover:bg-black/80"
                     >
                       <span className="material-symbols-outlined text-[18px]">close</span>
                     </button>

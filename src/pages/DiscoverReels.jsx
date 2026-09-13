@@ -105,7 +105,17 @@ export default function DiscoverReels() {
       try {
         const storedReels = await ReelsService.getReels();
         if (storedReels && storedReels.length > 0) {
-          const processedReels = await Promise.all(storedReels.map(async (r) => {
+          // Identify any new default reels not yet in storedReels
+          const existingIds = new Set(storedReels.map(r => r.id));
+          const missingDefaults = DEFAULT_REELS.filter(d => !existingIds.has(d.id));
+          
+          for (const m of missingDefaults) {
+            await ReelsService.saveReel(m);
+          }
+
+          const combined = [...storedReels, ...missingDefaults];
+
+          const processedReels = await Promise.all(combined.map(async (r) => {
             let item = { ...r };
             // Auto-migrate placeholders to high quality local video assets
             if (item.id === 'reel-sheglam-1' && (!item.videoBg.includes('sheglam_mascara') || item.videoBg.includes('w3.org'))) {
@@ -161,7 +171,236 @@ export default function DiscoverReels() {
   const isAr = language === 'ar';
 
   const DEFAULT_REELS = [
-
+    {
+      id: 'reel-fashion-blazer',
+      creatorHandle: '@cairo_chic',
+      creatorName: 'كايرو شيك • Cairo Chic',
+      avatar: '/images/reels/fashion_citrine_blazer_thumb.jpg',
+      videoBg: '/images/reels/fashion_citrine_blazer.mp4',
+      caption: isAr 
+        ? 'تنسيق بليزر السيترين الأوفرسايز مع بنطلون جينز كلاسيك ونظارة شمسية 💛 فخامة الصيف وأناقة لا تقاوم! #بليزر #موضة_القاهرة' 
+        : 'Styling the oversized Citrine Yellow Blazer with denim and sleek shades 💛 Effortless luxury! #FashionReels #OOTD',
+      music: isAr ? 'ألحان إيقاعية هادية • صيف 2026' : 'Summer Aesthetic Vibes • Instrumental',
+      likes: 62400,
+      comments: 2180,
+      saves: 11400,
+      product: {
+        id: 'p-fashion-blazer',
+        sku: 'TLK-BLZ-09',
+        title: isAr ? 'بليزر أوفرسايز أصفر ليموني راقي' : 'Citrine Tailored Oversized Blazer',
+        price: 2200,
+        originalPrice: 2750,
+        discount: '20% OFF',
+        image: '/images/reels/fashion_citrine_blazer_thumb.jpg'
+      }
+    },
+    {
+      id: 'reel-fashion-shirt',
+      creatorHandle: '@salma.styles',
+      creatorName: 'سلمى ستايلز • Salma Styles',
+      avatar: '/images/reels/fashion_oversized_shirt_thumb.jpg',
+      videoBg: '/images/reels/fashion_oversized_shirt.mp4',
+      caption: isAr 
+        ? 'قميص كتان سماوي أوفرسايز خفيف جداً ومريح مع بنطلون تشينو بيج واسع 🩵 إطلالة كاجوال أنيقة لكل يوم!' 
+        : 'Sky blue linen oversized shirt paired with relaxed wide chinos 🩵 Summer perfection! #LinenStyle',
+      music: isAr ? 'نغمات كاجوال مصرية' : 'Chill Acoustic Grooves',
+      likes: 45100,
+      comments: 1390,
+      saves: 8200,
+      product: {
+        id: 'p-fashion-oversized-shirt',
+        sku: 'TLK-SHT-05',
+        title: isAr ? 'قميص كتان سماوي بقصة أوفرسايز' : 'Oversized Sky Blue Linen Shirt',
+        price: 950,
+        originalPrice: 1200,
+        discount: '21% OFF',
+        image: '/images/reels/fashion_oversized_shirt_thumb.jpg'
+      }
+    },
+    {
+      id: 'reel-fashion-top',
+      creatorHandle: '@zeina_ootd',
+      creatorName: 'زينة أوفت • Zeina OOTD',
+      avatar: '/images/reels/fashion_oneshoulder_top_thumb.jpg',
+      videoBg: '/images/reels/fashion_oneshoulder_top.mp4',
+      caption: isAr 
+        ? 'توب بكتف واحد عاجي ناعم مع جينز كلاسيك عالي الخصر وحزام جلد 🤍 "Jeans and a cute top" هو الأساس دايماً!' 
+        : 'Asymmetric one-shoulder white bodysuit with high-waist denim 🤍 The classic "jeans and a cute top" equation! ✨',
+      music: isAr ? 'صوت تريند عالمي' : 'Trending Pop Rhythm',
+      likes: 38900,
+      comments: 1240,
+      saves: 7300,
+      product: {
+        id: 'p-fashion-oneshoulder-top',
+        sku: 'TLK-TOP-06',
+        title: isAr ? 'توب بكتف واحد عاجي ناعم' : 'Asymmetric One-Shoulder White Top',
+        price: 680,
+        originalPrice: 850,
+        discount: '20% OFF',
+        image: '/images/reels/fashion_oneshoulder_top_thumb.jpg'
+      }
+    },
+    {
+      id: 'reel-fashion-bag',
+      creatorHandle: '@maya_accessories',
+      creatorName: 'مايا إكسسوارات • Maya Accessories',
+      avatar: '/images/reels/fashion_shoulder_bags_thumb.jpg',
+      videoBg: '/images/reels/fashion_shoulder_bags.mp4',
+      caption: isAr 
+        ? 'سواتش كولكشن شنط الكتف الجلدية الكلاسيك بـ 5 ألوان تخطف العين (عاجي، بني، بوردو، رمادي، جملي) بإبزيم ذهبي فاخر! 👜✨' 
+        : 'All 5 iconic colorways of the structured leather shoulder bag with polished gold hardware! 👜✨ #Bags',
+      music: isAr ? 'إيقاع إكسسوارات راقي' : 'High Fashion Beats',
+      likes: 48500,
+      comments: 1950,
+      saves: 9800,
+      product: {
+        id: 'p-fashion-shoulder-bags',
+        sku: 'KHC-BAG-01',
+        title: isAr ? 'حقيبة كتف جلدية كلاسيك بإبزيم ذهبي' : 'Classic Structured Leather Bag',
+        price: 1850,
+        originalPrice: 2300,
+        discount: '20% OFF',
+        image: '/images/reels/fashion_shoulder_bags_thumb.jpg'
+      }
+    },
+    {
+      id: 'reel-fashion-knit',
+      creatorHandle: '@layla_fashion',
+      creatorName: 'ليلى فاشن • Layla Fashion',
+      avatar: '/images/reels/fashion_knit_sweater_thumb.jpg',
+      videoBg: '/images/reels/fashion_knit_sweater.mp4',
+      caption: isAr 
+        ? 'سويتر تريكو صوف أوفرسايز بياقة عالية مع جيبة صوف صوفية كاروهات 🖤 دفء وأناقة شتوية راقية!' 
+        : 'Chunky oversized knit turtleneck sweater paired with wool argyle skirt 🖤 Winter warmth & elegance!',
+      music: isAr ? 'موسيقى شتوية دافئة' : 'Cozy Winter Harmony',
+      likes: 33400,
+      comments: 980,
+      saves: 5600,
+      product: {
+        id: 'p-fashion-knit-sweater',
+        sku: 'TLK-SWT-07',
+        title: isAr ? 'سويتر صوف تريكو أوفرسايز بياقة عالية' : 'Chunky Knit Oversized Turtleneck',
+        price: 1650,
+        originalPrice: 2100,
+        discount: '21% OFF',
+        image: '/images/reels/fashion_knit_sweater_thumb.jpg'
+      }
+    },
+    {
+      id: 'reel-fashion-suede',
+      creatorHandle: '@omar_looks',
+      creatorName: 'عمر لوكس • Omar Looks',
+      avatar: '/images/reels/fashion_suede_jacket_thumb.jpg',
+      videoBg: '/images/reels/fashion_suede_jacket.mp4',
+      caption: isAr 
+        ? 'ستايل كلاسيكي رجالي راقي: جاكيت شمواه بني فاخر مع بنطلون زيتي وحذاء سويد مريح 🤎 قمة الفخامة الهادية!' 
+        : 'Refined menswear styling: Tobacco brown suede Harrington jacket with olive pleated trousers 🤎 #MenStyle',
+      music: isAr ? 'جاز مصري حديث' : 'Modern Lo-Fi Beats',
+      likes: 31200,
+      comments: 870,
+      saves: 6100,
+      product: {
+        id: 'p-fashion-suede-jacket',
+        sku: 'TLK-JCK-08',
+        title: isAr ? 'جاكيت شمواه كلاسيكي بني بسحاب' : 'Classic Suede Harrington Jacket',
+        price: 2600,
+        originalPrice: 3200,
+        discount: '19% OFF',
+        image: '/images/reels/fashion_suede_jacket_thumb.jpg'
+      }
+    },
+    {
+      id: 'reel-fashion-watch',
+      creatorHandle: '@karim.editorial',
+      creatorName: 'كريم إيديتوريال • Karim Editorial',
+      avatar: '/images/reels/fashion_vintage_watch_thumb.jpg',
+      videoBg: '/images/reels/fashion_vintage_watch.mp4',
+      caption: isAr 
+        ? 'تفاصيل الساعة البرميلية الكلاسيكية بطلاء الذهب الوردي وأرقام رومانية مع سويتر صوف عاجي أنيق ⌚✨ تحفة معصم!' 
+        : 'Vintage tonneau rose gold watch with roman dial & brown leather strap ⌚✨ Complete quiet luxury!',
+      music: isAr ? 'عزف بيانو كلاسيكي' : 'Classical Elegance Sound',
+      likes: 54200,
+      comments: 2310,
+      saves: 12400,
+      product: {
+        id: 'p-fashion-vintage-watch',
+        sku: 'TBA-WTC-01',
+        title: isAr ? 'ساعة يد كلاسيكية برميليّة بعقارب رومانية' : 'Vintage Tonneau Rose Gold Watch',
+        price: 3400,
+        originalPrice: 4200,
+        discount: '19% OFF',
+        image: '/images/reels/fashion_vintage_watch_thumb.jpg'
+      }
+    },
+    {
+      id: 'reel-fashion-woven',
+      creatorHandle: '@farida.atelier',
+      creatorName: 'فريدة أتيليه • Farida Atelier',
+      avatar: '/images/reels/fashion_woven_bag_thumb.jpg',
+      videoBg: '/images/reels/fashion_woven_bag.mp4',
+      caption: isAr 
+        ? 'حقيبة الجلد المنسوجة يدوياً بحزام مضفر مع بنطلون كتان جملي واسع وميولز بيضاء 🤎 فخامة الحرف اليدوية المصرية!' 
+        : 'Handcrafted woven leather bag with braided handle styled with camel linen trousers & white mules! 🤎',
+      music: isAr ? 'أنغام ريترو هادية' : 'Aesthetic Retro Beats',
+      likes: 32100,
+      comments: 940,
+      saves: 5900,
+      product: {
+        id: 'p-fashion-woven-bag',
+        sku: 'KHC-BAG-02',
+        title: isAr ? 'حقيبة جلد منسوجة يدوياً بمقبض مضفر' : 'Handcrafted Woven Leather Bag',
+        price: 1950,
+        originalPrice: 2500,
+        discount: '22% OFF',
+        image: '/images/reels/fashion_woven_bag_thumb.jpg'
+      }
+    },
+    {
+      id: 'reel-fashion-barrel',
+      creatorHandle: '@huda_leather',
+      creatorName: 'هدى ليذر • Huda Leather',
+      avatar: '/images/reels/fashion_barrel_bag_thumb.jpg',
+      videoBg: '/images/reels/fashion_barrel_bag.mp4',
+      caption: isAr 
+        ? 'حقائب البولينج الأسطوانية الجلد الطبيعي في 4 ألوان فخمة (بني كروكو، كونياك سويد، نبيذي، أسود) 👜 سعة مذهلة وخياطة دقيقة!' 
+        : 'Luxury barrel bowling leather handbags in 4 rich finishes (croc dark brown, suede tan, deep wine, black) 👜',
+      music: isAr ? 'إيقاع استوديو القاهرة' : 'Cairo Studio Lounge',
+      likes: 29700,
+      comments: 860,
+      saves: 5100,
+      product: {
+        id: 'p-fashion-barrel-bag',
+        sku: 'KHC-BAG-03',
+        title: isAr ? 'حقيبة بولينج أسطوانية من الجلد الطبيعي' : 'Luxury Barrel Leather Handbag',
+        price: 1750,
+        originalPrice: 2200,
+        discount: '20% OFF',
+        image: '/images/reels/fashion_barrel_bag_thumb.jpg'
+      }
+    },
+    {
+      id: 'reel-fashion-cuban',
+      creatorHandle: '@youssef_cairo',
+      creatorName: 'يوسف ستايل • Youssef Cairo',
+      avatar: '/images/reels/fashion_cuban_shirt_thumb.jpg',
+      videoBg: '/images/reels/fashion_cuban_shirt.mp4',
+      caption: isAr 
+        ? 'قميص أبيض بياقة كوبية ريزورت مع بنطلون واسع أسود وكاب ستريت وير 🌴 لوك صيفي شبابي مميز!' 
+        : 'Resort Cuban collar white shirt with relaxed streetwear trousers and sneakers 🌴 Summer energy!',
+      music: isAr ? 'موسيقى تريند شوارع القاهرة' : 'Urban Street Beats',
+      likes: 27800,
+      comments: 720,
+      saves: 4300,
+      product: {
+        id: 'p-fashion-cuban-shirt',
+        sku: 'TLK-SHT-09',
+        title: isAr ? 'قميص ريزورت بياقة كوبية مطرز' : 'Resort Cuban Collar White Shirt',
+        price: 880,
+        originalPrice: 1100,
+        discount: '20% OFF',
+        image: '/images/reels/fashion_cuban_shirt_thumb.jpg'
+      }
+    },
     {
       id: 'reel-sheglam-1',
       creatorHandle: '@beauty.by.nada',
@@ -206,94 +445,6 @@ export default function DiscoverReels() {
         originalPrice: 350,
         discount: '20% OFF',
         image: '/images/reels/sheglam_liptint_thumb.jpg'
-      }
-    },
-{
-      id: 'reel-1',
-      creatorHandle: '@mayca.fashion',
-      creatorName: 'مايا حسن • Maya Hassan',
-      avatar: '/images/reels/reel_1.jpg',
-      videoBg: '/images/reels/reel_1.jpg',
-      caption: isAr 
-        ? 'إطلالة كاجوال صيفية من شوارع القاهرة القديمة ✨ أناقة الكتان الطبيعي #CairoFashion #OOTD #كتان_مصري' 
-        : 'Casual summer vibes in Old Cairo ✨ Authentic Egyptian linen comfort. #CairoFashion #OOTD',
-      music: isAr ? 'ألحان مصرية أصيلة • استوديو القاهرة' : 'Original Sound • Cairo Beats',
-      likes: 14200,
-      comments: 842,
-      saves: 312,
-      product: {
-        id: 'p-screen1',
-        title: isAr ? 'جاكيت قميص كتان' : 'Oversized Shirt Jacket',
-        price: 799,
-        originalPrice: 950,
-        discount: '15% OFF',
-        image: '/images/products/linen_shirt.jpg'
-      }
-    },
-    {
-      id: 'reel-2',
-      creatorHandle: '@sara.elmahdy',
-      creatorName: 'سارة المهدي • Sara El Mahdy',
-      avatar: '/images/reels/reel_2.jpg',
-      videoBg: '/images/products/linen_abaya.jpg',
-      caption: isAr 
-        ? 'تفاصيل التطريز السيناوي اليدوي على الجلابية الملكية ❤️ فخامة التراث بأيادٍ مصرية #تطريز_يدوي #أزياء_مصرية' 
-        : 'Royal Egyptian Galabeya with handcrafted embroidery ❤️ Egyptian Heritage. #EgyptianStyle',
-      music: isAr ? 'نغمات العود المصري • دار الأوبرا' : 'Egyptian Oud Harmony',
-      likes: 21500,
-      comments: 1120,
-      saves: 850,
-      product: {
-        id: 'p-galabeya',
-        title: isAr ? 'جلابية مصرية مطرزة' : 'Embroidered Galabeya',
-        price: 850,
-        originalPrice: 1100,
-        discount: '22% OFF',
-        image: '/images/products/linen_abaya.jpg'
-      }
-    },
-    {
-      id: 'reel-3',
-      creatorHandle: '@nour.adel',
-      creatorName: 'نور عادل • Nour Adel',
-      avatar: '/images/products/silk_dress.jpg',
-      videoBg: '/images/products/silk_dress.jpg',
-      caption: isAr 
-        ? 'فستان حرير ناعم ومثالي لسهرات الإسكندرية والساحل 🌊 إطلالة تجمع البساطة والجاذبية #صيف_2026' 
-        : 'Silk evening dress perfect for coastal sunsets 🌊 #Summer2026',
-      music: isAr ? 'صوت البحر والرياح • إسكندرية' : 'Alexandria Breeze Sound',
-      likes: 18900,
-      comments: 630,
-      saves: 420,
-      product: {
-        id: 'p-silk-dress',
-        title: isAr ? 'فستان حرير ناعم' : 'Silk Summer Dress',
-        price: 650,
-        originalPrice: 850,
-        discount: '20% OFF',
-        image: '/images/products/silk_dress.jpg'
-      }
-    },
-    {
-      id: 'reel-4',
-      creatorHandle: '@omar.fathy',
-      creatorName: 'عمر فتحي • Omar Fathy',
-      avatar: '/images/products/wool_blazer.jpg',
-      videoBg: '/images/banners/khan_hero.jpg',
-      caption: isAr 
-        ? 'ستايل صيفي رجالي خفيف من أجود أنواع الكتان المصري الخالص بالقاهرة #موضة_رجالي #كتان' 
-        : 'Summer linen shirt for men. Pure Egyptian cotton and linen. #MenStyle',
-      music: isAr ? 'إيقاعات شرقية معاصرة' : 'Cairo Modern Grooves',
-      likes: 9800,
-      comments: 290,
-      saves: 180,
-      product: {
-        id: 'p-men-shirt',
-        title: isAr ? 'قميص كتان رجالي' : "Men's Linen Shirt",
-        price: 490,
-        originalPrice: 600,
-        discount: '18% OFF',
-        image: '/images/products/linen_shirt.jpg'
       }
     }
   ];

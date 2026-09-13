@@ -3,7 +3,7 @@ import { useApp } from '../../context/AppContext';
 import EgLogo from '../common/EgLogo';
 
 export default function DesktopMarketplace() {
-  const { openProductDetail, addToCart, setActiveTab } = useApp();
+  const { products: contextProducts, openProductDetail, addToCart, setActiveTab } = useApp();
   const [selectedCat, setSelectedCat] = useState('All');
   const [selectedSize, setSelectedSize] = useState('M');
 
@@ -13,98 +13,33 @@ export default function DesktopMarketplace() {
     { label: 'Men', icon: 'man' },
     { label: 'Abayas', icon: 'dry_cleaning' },
     { label: 'Accessories', icon: 'handbag' },
-    { label: 'Shoes', icon: 'footprint' },
+    { label: 'Makeup', icon: 'brush' },
   ];
 
-  const products = [
+  const products = (contextProducts && contextProducts.length > 0) ? contextProducts : [
     {
       id: 'dm-1',
       title: 'Embroidered Galabeya',
       price: 850,
       rating: 4.8,
-      reviews: 124,
+      reviewsCount: 124,
       image: '/images/products/linen_abaya.jpg',
       category: 'Abayas'
-    },
-    {
-      id: 'dm-2',
-      title: 'Linen Dress',
-      price: 650,
-      rating: 4.9,
-      reviews: 95,
-      image: '/images/products/silk_dress.jpg',
-      category: 'Dresses'
-    },
-    {
-      id: 'dm-3',
-      title: "Men's Linen Shirt",
-      price: 490,
-      rating: 4.6,
-      reviews: 78,
-      image: '/images/products/linen_shirt.jpg',
-      category: "Men's Wear"
-    },
-    {
-      id: 'dm-4',
-      title: 'Classic Abaya',
-      price: 1200,
-      rating: 4.9,
-      reviews: 142,
-      image: '/images/products/wool_blazer.jpg',
-      category: 'Abayas'
-    },
-    {
-      id: 'dm-5',
-      title: 'Boho Sunset Kimono',
-      price: 780,
-      rating: 4.7,
-      reviews: 63,
-      image: '/images/reels/reel_2.jpg',
-      category: 'Women'
-    },
-    {
-      id: 'dm-6',
-      title: 'Casual Summer Set',
-      price: 990,
-      rating: 4.8,
-      reviews: 84,
-      image: '/images/banners/talieska_hero.jpg',
-      category: 'Men'
-    },
-    {
-      id: 'dm-7',
-      title: 'Linen Vacation Co-ord',
-      price: 1250,
-      rating: 4.9,
-      reviews: 110,
-      image: '/images/reels/reel_1.jpg',
-      category: 'Women'
-    },
-    {
-      id: 'dm-8',
-      title: 'Woven Kilim Bag',
-      price: 420,
-      rating: 4.7,
-      reviews: 49,
-      image: '/images/products/copper_lantern.jpg',
-      category: 'Accessories'
-    },
+    }
   ];
 
   const topStores = [
-    { id: 'store-1', name: 'Talieska', image: '/images/brands/talieska_logo.jpg' },
-    { id: 'store-2', name: 'ZAY Fashion', image: '/images/products/linen_abaya.jpg' },
-    { id: 'store-3', name: 'Khan', image: '/images/banners/khan_hero.jpg' },
-    { id: 'store-4', name: 'Khat', image: '/images/products/copper_lantern.jpg' },
-    { id: 'store-5', name: 'Dokan', image: '/images/products/kilim_rug.jpg' },
+    { id: 'store-1', name: 'Talieska Studio', image: '/images/brands/talieska_logo.jpg' },
+    { id: 'store-2', name: 'ورشة خان الخليلي', image: '/images/banners/khan_hero.jpg' },
+    { id: 'store-3', name: 'مجوهرات طيبة', image: '/images/reels/fashion_vintage_watch_thumb.jpg' },
   ];
 
   const featuredCreators = [
-    { id: 'c-1', handle: 'mariam.style', avatar: '/images/reels/reel_1.jpg' },
-    { id: 'c-2', handle: 'ahmed_fits', avatar: '/images/reels/reel_2.jpg' },
-    { id: 'c-3', handle: 'sara.fashion', avatar: '/images/reels/reel_3.jpg' },
-    { id: 'c-4', handle: 'omar.daily', avatar: '/images/reels/reel_4.jpg' },
-    { id: 'c-5', handle: 'cairo.chic', avatar: '/images/products/silk_dress.jpg' },
+    { id: 'c-1', handle: 'cairo_chic', avatar: '/images/reels/fashion_citrine_blazer_thumb.jpg' },
+    { id: 'c-2', handle: 'salma.styles', avatar: '/images/reels/fashion_oversized_shirt_thumb.jpg' },
+    { id: 'c-3', handle: 'karim.editorial', avatar: '/images/reels/fashion_vintage_watch_thumb.jpg' },
+    { id: 'c-4', handle: 'maya_accessories', avatar: '/images/reels/fashion_shoulder_bags_thumb.jpg' },
+    { id: 'c-5', handle: 'zeina_ootd', avatar: '/images/reels/fashion_oneshoulder_top_thumb.jpg' },
   ];
 
   return (
@@ -264,6 +199,12 @@ export default function DesktopMarketplace() {
                 {/* Image */}
                 <div className="aspect-[4/5] relative overflow-hidden bg-gray-100">
                   <img src={prod.image} alt={prod.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  {prod.video && (
+                    <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-black/70 backdrop-blur-md text-white text-[9px] font-bold flex items-center gap-1 shadow-md border border-white/20">
+                      <span className="material-symbols-outlined text-[12px] text-[#ff3b5c]">play_arrow</span>
+                      <span>Watch Reel</span>
+                    </div>
+                  )}
                   <button className="absolute top-2 right-2 w-6 h-6 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-gray-600 hover:text-[#d00000]">
                     <span className="material-symbols-outlined text-[14px]">favorite</span>
                   </button>

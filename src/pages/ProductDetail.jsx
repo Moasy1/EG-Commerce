@@ -8,6 +8,7 @@ export default function ProductDetail() {
   const [selectedSize, setSelectedSize] = useState('S');
   const [isFavorited, setIsFavorited] = useState(false);
   const [addedToast, setAddedToast] = useState(false);
+  const [isPlayingVideo, setIsPlayingVideo] = useState(false);
 
   // Fallback to Linen Co-ord Set if no product selected
   const product = selectedProduct || {
@@ -71,19 +72,46 @@ export default function ProductDetail() {
           </div>
         </div>
 
-        {/* Big Product Image with Slider Dots */}
-        <div className="relative w-full aspect-[4/5] bg-gray-100 overflow-hidden">
-          <img 
-            src={product.image} 
-            alt={product.title} 
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-black/30 backdrop-blur-md px-2 py-1 rounded-full">
-            <span className="w-2 h-2 rounded-full bg-[#d00000]" />
-            <span className="w-1.5 h-1.5 rounded-full bg-white/70" />
-            <span className="w-1.5 h-1.5 rounded-full bg-white/70" />
-            <span className="w-1.5 h-1.5 rounded-full bg-white/70" />
-          </div>
+        {/* Big Product Image with Slider Dots / Video Toggle */}
+        <div className="relative w-full aspect-[4/5] bg-black overflow-hidden">
+          {isPlayingVideo && product.video ? (
+            <video 
+              src={product.video} 
+              autoPlay 
+              loop 
+              playsInline 
+              controls 
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <img 
+              src={product.image} 
+              alt={product.title} 
+              className="w-full h-full object-cover"
+            />
+          )}
+
+          {/* Watch Reel / Photo Badge */}
+          {product.video && (
+            <button 
+              onClick={() => setIsPlayingVideo(!isPlayingVideo)}
+              className="absolute top-3 left-3 px-3 py-1.5 rounded-full bg-black/65 backdrop-blur-md text-white text-[11px] font-bold flex items-center gap-1.5 shadow-lg border border-white/20 hover:bg-black/85 transition-all z-10"
+            >
+              <span className="material-symbols-outlined text-[16px] text-red-400">
+                {isPlayingVideo ? 'photo' : 'play_circle'}
+              </span>
+              <span>{isPlayingVideo ? 'عرض الصورة' : 'مشاهدة الريل • Watch Reel'}</span>
+            </button>
+          )}
+
+          {!isPlayingVideo && (
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-black/30 backdrop-blur-md px-2 py-1 rounded-full">
+              <span className="w-2 h-2 rounded-full bg-[#d00000]" />
+              <span className="w-1.5 h-1.5 rounded-full bg-white/70" />
+              <span className="w-1.5 h-1.5 rounded-full bg-white/70" />
+              <span className="w-1.5 h-1.5 rounded-full bg-white/70" />
+            </div>
+          )}
         </div>
 
         {/* Product Details Section */}

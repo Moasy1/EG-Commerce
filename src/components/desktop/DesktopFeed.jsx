@@ -10,93 +10,93 @@ export default function DesktopFeed() {
 
   const videoCards = isAr ? [
     {
-      id: 'df-1',
-      creator: 'سارة المهدي',
-      location: 'القاهرة • صانعة محتوى',
-      avatar: '/images/reels/reel_2.jpg',
-      image: '/images/products/linen_abaya.jpg',
-      views: '12.4K',
+      id: 'p-fashion-blazer',
+      creator: 'سارة المهدي (@cairo_chic)',
+      location: 'القاهرة • صانعة محتوى أزياء',
+      avatar: '/images/reels/fashion_citrine_blazer_thumb.jpg',
+      image: '/images/reels/fashion_citrine_blazer_thumb.jpg',
+      views: '34.2K',
       badge: 'تريند',
-      price: 850,
-      tags: ['#مصري', '#تطريز', '#محتشم']
+      price: 1850,
+      tags: ['#بليزر', '#موضة_القاهرة', '#أصفر_سترين']
     },
     {
-      id: 'df-2',
-      creator: 'نور عادل',
-      location: 'الإسكندرية • صانعة محتوى',
-      avatar: '/images/reels/reel_1.jpg',
-      image: '/images/products/linen_shirt.jpg',
-      views: '21.1K',
+      id: 'p-fashion-oversized-shirt',
+      creator: 'سلمى ستايل (@salma.styles)',
+      location: 'الإسكندرية • أزياء يومية',
+      avatar: '/images/reels/fashion_oversized_shirt_thumb.jpg',
+      image: '/images/reels/fashion_oversized_shirt_thumb.jpg',
+      views: '28.9K',
       badge: 'جديد',
-      price: 650,
-      tags: ['#بلوزة', '#صيف', '#القاهرة']
+      price: 980,
+      tags: ['#قميص_كتان', '#أزياء_صيفية', '#أوفرسايز']
     },
     {
-      id: 'df-3',
-      creator: 'مريم حسان',
-      location: 'القاهرة • صانعة محتوى',
-      avatar: '/images/products/silk_dress.jpg',
-      image: '/images/products/silk_dress.jpg',
-      views: '15.1K',
+      id: 'p-fashion-vintage-watch',
+      creator: 'كريم إديتوريال (@karim.editorial)',
+      location: 'القاهرة • إكسسوارات راقية',
+      avatar: '/images/reels/fashion_vintage_watch_thumb.jpg',
+      image: '/images/reels/fashion_vintage_watch_thumb.jpg',
+      views: '41.5K',
       badge: 'الأكثر مبيعاً',
-      price: 850,
-      tags: ['#فستان', '#كتان', '#أصيل']
+      price: 2400,
+      tags: ['#ساعات', '#ذهب_وردي', '#أناقة_كلاسيكية']
     },
     {
-      id: 'df-4',
-      creator: 'عمر فتحي',
-      location: 'الجيزة • صانع محتوى',
-      avatar: '/images/products/wool_blazer.jpg',
-      image: '/images/banners/khan_hero.jpg',
-      views: '18.2K',
-      badge: 'رجالي',
-      price: 490,
-      tags: ['#موضة_رجالي', '#كتان', '#صيف']
+      id: 'p-fashion-shoulder-bags',
+      creator: 'مايا أكسسوريز (@maya_accessories)',
+      location: 'الجيزة • حقائب جلدية',
+      avatar: '/images/reels/fashion_shoulder_bags_thumb.jpg',
+      image: '/images/reels/fashion_shoulder_bags_thumb.jpg',
+      views: '19.8K',
+      badge: 'حقائب',
+      price: 1250,
+      tags: ['#حقائب_جلدية', '#ألوان_الباستيل', '#ستايل']
     }
   ] : [
     {
-      id: 'df-1',
-      creator: 'Sara El Mahdy',
+      id: 'p-fashion-blazer',
+      creator: 'Cairo Chic (@cairo_chic)',
       location: 'Cairo · Fashion Creator',
-      avatar: '/images/reels/reel_2.jpg',
-      image: '/images/products/linen_abaya.jpg',
-      views: '12.4K',
+      avatar: '/images/reels/fashion_citrine_blazer_thumb.jpg',
+      image: '/images/reels/fashion_citrine_blazer_thumb.jpg',
+      views: '34.2K',
       badge: 'Trending',
-      price: 850,
-      tags: ['#Egyptian', '#Embroidery', '#Modest']
+      price: 1850,
+      tags: ['#Blazer', '#CairoFashion', '#Citrine']
     },
     {
-      id: 'df-2',
-      creator: 'Nour Adel',
+      id: 'p-fashion-oversized-shirt',
+      creator: 'Salma Styles (@salma.styles)',
       location: 'Alexandria · Creator',
-      avatar: '/images/reels/reel_1.jpg',
-      image: '/images/products/linen_shirt.jpg',
-      views: '21.1K',
+      avatar: '/images/reels/fashion_oversized_shirt_thumb.jpg',
+      image: '/images/reels/fashion_oversized_shirt_thumb.jpg',
+      views: '28.9K',
       badge: 'New',
-      price: 650,
-      tags: ['#Blouse', '#Summer', '#Cairo']
+      price: 980,
+      tags: ['#LinenShirt', '#Oversized', '#SummerVibes']
     },
     {
-      id: 'df-3',
-      creator: 'Maya Hassan',
-      location: 'Cairo · Creator',
-      avatar: '/images/products/silk_dress.jpg',
-      image: '/images/products/silk_dress.jpg',
-      views: '15.1K',
+      id: 'p-fashion-vintage-watch',
+      creator: 'Karim Editorial (@karim.editorial)',
+      location: 'Cairo · Luxury & Editorial',
+      avatar: '/images/reels/fashion_vintage_watch_thumb.jpg',
+      image: '/images/reels/fashion_vintage_watch_thumb.jpg',
+      views: '41.5K',
       badge: 'Top Seller',
-      price: 850,
-      tags: ['#Dress', '#Linen', '#Authentic']
+      price: 2400,
+      tags: ['#VintageWatch', '#RoseGold', '#Classic']
     },
     {
-      id: 'df-4',
-      creator: 'Omar Fathy',
-      location: 'Giza · Creator',
-      avatar: '/images/products/wool_blazer.jpg',
-      image: '/images/banners/khan_hero.jpg',
-      views: '18.2K',
-      badge: 'For Men',
-      price: 490,
-      tags: ['#MenFashion', '#Linen', '#Summer']
+      id: 'p-fashion-shoulder-bags',
+      creator: 'Maya Accessories (@maya_accessories)',
+      location: 'Giza · Handcrafted Leather',
+      avatar: '/images/reels/fashion_shoulder_bags_thumb.jpg',
+      image: '/images/reels/fashion_shoulder_bags_thumb.jpg',
+      views: '19.8K',
+      badge: 'Leather Goods',
+      price: 1250,
+      tags: ['#ShoulderBag', '#Leather', '#PastelPalette']
     }
   ];
 

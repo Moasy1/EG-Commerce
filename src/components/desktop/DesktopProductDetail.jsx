@@ -13,10 +13,11 @@ export default function DesktopProductDetail() {
   // Fallback to first product if none selected
   const product = selectedProduct || (products && products[0]) || {
     id: 'p-01',
-    title: 'عباية كتان مغسول فاخرة • Luxury Washed Linen Abaya',
+    title: 'عباية كتان ناعمة وتوب عصري • Asymmetric Cutout Top & Linen Style',
     price: 1450,
     originalPrice: 1850,
     image: '/images/products/linen_abaya.jpg',
+    video: '/images/products/linen_abaya.mp4',
     category: 'Linen كاجوال كتان',
     merchant: 'Talieska Studio • تاليسكا',
     rating: 4.9,

@@ -12,15 +12,16 @@ export default function ProductDetail() {
 
   // Fallback to Linen Co-ord Set if no product selected
   const product = selectedProduct || {
-    id: 'p-linen-coord',
-    title: 'Linen Co-ord Set',
-    price: 1250,
+    id: 'p-fashion-blazer',
+    title: 'Citrine Yellow Oversized Blazer',
+    price: 1850,
     image: '/images/reels/reel_1.jpg',
+    video: '/images/reels/reel_1.mp4',
     category: 'Women',
-    rating: 4.8,
-    reviewsCount: 124,
+    rating: 4.9,
+    reviewsCount: 142,
     sizes: ['XS', 'S', 'M', 'L', 'XL'],
-    merchantId: 'm-1'
+    merchantId: 'm-01'
   };
 
   const handleAddToCart = () => {

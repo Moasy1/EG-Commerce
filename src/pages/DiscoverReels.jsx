@@ -1,9 +1,133 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import EgLogo from '../components/common/EgLogo';
+import { ReelsService } from '../services/ReelsService';
 import DesktopFeed from '../components/desktop/DesktopFeed';
 
+
+const ReelVideoPlayer = ({ reel, isActive, isGlobalMuted, toggleMute }) => {
+  const videoRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  useEffect(() => {
+    if (!videoRef.current) return;
+    
+    // Play only if active
+    if (isActive) {
+      videoRef.current.play()
+        .then(() => setIsPlaying(true))
+        .catch(err => {
+          console.log("Autoplay prevented:", err);
+          setIsPlaying(false);
+        });
+      // Optionally reset time to 0: videoRef.current.currentTime = 0;
+    } else {
+      videoRef.current.pause();
+      setIsPlaying(false);
+    }
+  }, [isActive]);
+
+  // Sync mute state changes
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.muted = isGlobalMuted;
+    }
+  }, [isGlobalMuted]);
+
+  const togglePlay = (e) => {
+    e.stopPropagation();
+    if (!videoRef.current) return;
+    if (isPlaying) {
+      videoRef.current.pause();
+      setIsPlaying(false);
+    } else {
+      videoRef.current.play()
+        .then(() => setIsPlaying(true))
+        .catch(() => {});
+    }
+  };
+
+
+  return (
+    <div className="absolute inset-0 w-full h-full z-0 cursor-pointer" onClick={togglePlay}>
+      {(reel.videoBg.includes('.mp4') || reel.videoBg.startsWith('blob:')) ? (
+        <video 
+          ref={videoRef}
+          src={reel.videoBg}
+          loop
+          playsInline
+          autoPlay={isActive}
+          muted={isGlobalMuted}
+          className="w-full h-full object-cover object-center pointer-events-none"
+        />
+      ) : (
+        <img 
+          src={reel.videoBg} 
+          alt={reel.creatorHandle}
+          className="w-full h-full object-cover object-center pointer-events-none"
+          loading="eager"
+        />
+      )}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/95 pointer-events-none" />
+      
+      {/* Play Icon when Paused */}
+      {!isPlaying && (reel.videoBg.includes('.mp4') || reel.videoBg.startsWith('blob:')) && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+          <div className="w-16 h-16 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center text-white shadow-xl border border-white/10">
+            <span className="material-symbols-outlined text-[36px]" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Mute Toggle button (Desktop & Mobile) */}
+      {(reel.videoBg.includes('.mp4') || reel.videoBg.startsWith('blob:')) && (
+        <button 
+          onClick={(e) => { e.stopPropagation(); toggleMute(); }}
+          className="absolute top-16 right-4 md:top-20 md:right-4 z-40 w-10 h-10 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center text-white shadow-md border border-white/10 hover:bg-black/60 transition-colors"
+        >
+          <span className="material-symbols-outlined text-[20px]">
+            {isGlobalMuted ? 'volume_off' : 'volume_up'}
+          </span>
+        </button>
+      )}
+
+      
+    </div>
+  );
+};
 export default function DiscoverReels() {
+  const [reelsList, setReelsList] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchReels = async () => {
+      try {
+        const storedReels = await ReelsService.getReels();
+        if (storedReels && storedReels.length > 0) {
+          const processedReels = storedReels.map(r => {
+            if (r.videoBg instanceof File || r.videoBg instanceof Blob) {
+              return { ...r, videoBg: URL.createObjectURL(r.videoBg) };
+            }
+            return r;
+          });
+          setReelsList(processedReels);
+        } else {
+          for (const reel of DEFAULT_REELS) {
+            await ReelsService.saveReel(reel);
+          }
+          setReelsList(DEFAULT_REELS);
+        }
+      } catch (err) {
+        console.error("Failed to load reels", err);
+        setReelsList(DEFAULT_REELS);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchReels();
+  }, []);
+
   const { openQuickBuy, openProductDetail, products, setActiveTab, language } = useApp();
   const [activeTabSub, setActiveTabSub] = useState('foryou');
   const [currentReelIndex, setCurrentReelIndex] = useState(0);
@@ -13,6 +137,7 @@ export default function DiscoverReels() {
   const [isFollowed, setIsFollowed] = useState(false);
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
   const [desktopViewMode, setDesktopViewMode] = useState('player'); // 'player' or 'grid'
+  const [isGlobalMuted, setIsGlobalMuted] = useState(true);
   
   // Gesture & Swipe Tracking
   const [touchStartY, setTouchStartY] = useState(null);
@@ -24,14 +149,14 @@ export default function DiscoverReels() {
 
   const isAr = language === 'ar';
 
-  const reelsList = [
+  const DEFAULT_REELS = [
 
     {
       id: 'reel-sheglam-1',
       creatorHandle: '@beauty.by.nada',
       creatorName: 'ندى بيوتي • Nada Beauty',
       avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=150&q=80',
-      videoBg: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+      videoBg: 'https://media.w3.org/2010/05/sintel/trailer.mp4',
       caption: isAr 
         ? 'ريفيو جديد لماسكارا شيجلام! رهيبة بتطول وتكثف الرموش، ومعاها مزيل خاص بيها بيشيلها في ثواني! ✨👀 #Sheglam #ماسكارا #تجميل' 
         : 'Testing the new SHEGLAM Ultra Lash Lift Mascara & Easy Lash Removal! Amazing results! ✨👀 #Sheglam #Makeup',
@@ -53,7 +178,7 @@ export default function DiscoverReels() {
       creatorHandle: '@makeup.with.sara',
       creatorName: 'سارة ميكأب • Sara Makeup',
       avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&q=80',
-      videoBg: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+      videoBg: 'https://media.w3.org/2010/05/video/movie_300.mp4',
       caption: isAr 
         ? 'سواتش لدرجات مرطب الشفاه من شيجلام 🍒 درجات تجنن (Cherry Bark, Plum Sauce, Bare Blush) ثبات وترطيب خيالي! 💋 #مكياج #شيجلام' 
         : 'SHEGLAM Jelly Lip Tint swatches 🍒 Gorgeous shades (Cherry Bark, Plum Sauce) and amazing hydration! 💋 #LipTint #Sheglam',
@@ -159,6 +284,7 @@ export default function DiscoverReels() {
       }
     }
   ];
+
 
   const currentReel = reelsList[currentReelIndex];
 
@@ -279,29 +405,15 @@ export default function DiscoverReels() {
         className="w-full h-full relative flex-shrink-0 flex flex-col justify-between select-none overflow-hidden"
       >
         {/* Full-Screen Background Image with Cinematic Scrim */}
-        <div className="absolute inset-0 w-full h-full z-0">
-          {reel.videoBg.includes('.mp4') ? (
-            <video 
-              src={reel.videoBg}
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full h-full object-cover object-center pointer-events-none"
-            />
-          ) : (
-            <img 
-              src={reel.videoBg} 
-              alt={reel.creatorHandle}
-              className="w-full h-full object-cover object-center pointer-events-none"
-              loading="eager"
-            />
-          )}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/95 pointer-events-none" />
-        </div>
+                <ReelVideoPlayer 
+          reel={reel} 
+          isActive={isActive} 
+          isGlobalMuted={isGlobalMuted} 
+          toggleMute={() => setIsGlobalMuted(!isGlobalMuted)} 
+        />
 
         {/* Top Header Overlay: Feed Tabs & Quick Icons (Desktop Only) */}
-        <div className="hidden md:flex relative z-30 w-full px-4 pt-3 pb-2 items-center justify-between">
+        <div className="hidden md:flex relative z-30 w-full px-4 pt-3 pb-2 items-center justify-between pointer-events-auto">
           {/* Red Arch Logo */}
           <div className="flex items-center cursor-pointer" onClick={() => setActiveTab('reels')}>
             <EgLogo className="w-8 h-8 drop-shadow-md" color="#d00000" />
@@ -356,9 +468,9 @@ export default function DiscoverReels() {
         </div>
 
         {/* Main Content Area (Action Sidebar + Creator Info + Product Card) */}
-        <div className="relative z-30 w-full p-4 flex flex-col justify-end pb-4 h-full">
+        <div className="relative z-30 w-full p-4 flex flex-col justify-end pb-4 h-full pointer-events-none">
           {/* Action Sidebar (Anchored on Right) */}
-          <div className="absolute right-2 bottom-[90px] z-30 flex flex-col items-center gap-5 text-white drop-shadow-md">
+          <div className="absolute right-2 bottom-[90px] z-30 flex flex-col items-center gap-5 text-white drop-shadow-md pointer-events-auto">
             {/* Creator Avatar with Follow (+) */}
             <div 
               className="relative cursor-pointer group mb-2" 
@@ -460,7 +572,7 @@ export default function DiscoverReels() {
             </div>
           </div>
 
-          <div className="w-full pr-[60px] flex flex-col justify-end space-y-3 mt-auto">
+          <div className="w-full pr-[60px] flex flex-col justify-end space-y-3 mt-auto pointer-events-auto">
             {/* Floating Product Pill */}
             <div 
               onClick={(e) => {
@@ -513,6 +625,8 @@ export default function DiscoverReels() {
       </div>
     );
   };
+
+  if (isLoading || reelsList.length === 0) return <div className="w-full h-full bg-black flex items-center justify-center text-white"><span className="material-symbols-outlined animate-spin text-4xl">sync</span></div>;
 
   return (
     <div className="w-full h-full flex flex-col items-center justify-center relative bg-black md:bg-[#121212]">
@@ -629,28 +743,33 @@ export default function DiscoverReels() {
       <div 
         className="md:hidden relative w-full h-full pb-14 bg-black text-white flex flex-col overflow-hidden select-none font-sans mx-auto max-w-[440px]"
       >
-        {/* Custom Mobile Header (Solid White with Tabs) */}
-        <div className="w-full bg-white text-slate-900 pt-safe z-40 relative shadow-sm shrink-0">
+        {/* Custom Mobile Header (Transparent Overlay) */}
+        <div className="absolute top-0 left-0 w-full bg-gradient-to-b from-black/60 to-transparent text-white pt-safe z-40 pointer-events-auto">
           <div className="flex items-center justify-between px-4 py-2">
-            <div className="flex items-center gap-2">
-              <EgLogo className="w-7 h-7" color="#d00000" />
+            <div className="flex items-center gap-1">
+              <button className="p-2 hover:bg-white/20 rounded-full transition-colors text-white flex items-center justify-center">
+                <span className="material-symbols-outlined text-[26px] drop-shadow-md">search</span>
+              </button>
+              <button className="p-2 hover:bg-white/20 rounded-full transition-colors text-white flex items-center justify-center" onClick={(e) => { e.stopPropagation(); setIsEditModalOpen(true); }}>
+                <span className="material-symbols-outlined text-[26px] drop-shadow-md">more_vert</span>
+              </button>
             </div>
-            <button className="p-1 hover:bg-gray-100 rounded-full transition-colors text-slate-900">
-              <span className="material-symbols-outlined text-[24px]">search</span>
-            </button>
+            <div className="flex items-center">
+              <EgLogo className="w-8 h-8 drop-shadow-md" color="#d00000" />
+            </div>
           </div>
           
-          <div className="flex items-center gap-6 px-4 pb-0 overflow-x-auto no-scrollbar">
-            <button className="pb-3 text-[14px] font-bold text-slate-900 border-b-2 border-[#d00000] whitespace-nowrap">
+          <div className="flex items-center gap-6 px-4 pb-0 overflow-x-auto no-scrollbar w-full" style={{ direction: isAr ? 'rtl' : 'ltr' }}>
+            <button className="pb-2 text-[15px] font-bold text-white border-b-[3px] border-white whitespace-nowrap drop-shadow-md">
               {isAr ? 'لك' : 'For You'}
             </button>
-            <button className="pb-3 text-[14px] font-medium text-gray-400 whitespace-nowrap">
+            <button className="pb-2 text-[15px] font-medium text-white/80 whitespace-nowrap drop-shadow-md">
               {isAr ? 'متابعة' : 'Following'}
             </button>
-            <button className="pb-3 text-[14px] font-medium text-gray-400 whitespace-nowrap">
+            <button className="pb-2 text-[15px] font-medium text-white/80 whitespace-nowrap drop-shadow-md">
               {isAr ? 'الموضة' : 'Fashion'}
             </button>
-            <button className="pb-3 text-[14px] font-medium text-gray-400 whitespace-nowrap">
+            <button className="pb-2 text-[15px] font-medium text-white/80 whitespace-nowrap drop-shadow-md">
               {isAr ? 'مصر' : 'Egypt'}
             </button>
           </div>

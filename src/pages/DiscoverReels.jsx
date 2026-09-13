@@ -215,15 +215,26 @@ export default function DiscoverReels() {
       likes: 38900,
       comments: 1240,
       saves: 7300,
-      products: [{
-        id: 'p-fashion-oneshoulder-top',
-        sku: 'TLK-TOP-06',
-        title: isAr ? 'توب بكتف واحد عاجي ناعم' : 'Asymmetric One-Shoulder White Top',
-        price: 680,
-        originalPrice: 850,
-        discount: '20% OFF',
-        image: '/images/reels/fashion_oneshoulder_top_thumb.jpg'
-      }]
+      products: [
+        {
+          id: 'p-fashion-oneshoulder-top',
+          sku: 'TLK-TOP-06',
+          title: isAr ? 'توب بكتف واحد عاجي ناعم' : 'Asymmetric One-Shoulder White Top',
+          price: 680,
+          originalPrice: 850,
+          discount: '20% OFF',
+          image: '/images/reels/fashion_oneshoulder_top_thumb.jpg'
+        },
+        {
+          id: 'p-fashion-jeans-2',
+          sku: 'TLK-JNS-02',
+          title: isAr ? 'بنطلون جينز كلاسيك عالي الخصر' : 'Classic High-Waist Denim',
+          price: 850,
+          originalPrice: 1100,
+          discount: '22% OFF',
+          image: '/images/products/linen_abaya.jpg'
+        }
+      ]
     },
     {
       id: 'reel-fashion-bag',
@@ -238,15 +249,26 @@ export default function DiscoverReels() {
       likes: 48500,
       comments: 1950,
       saves: 9800,
-      products: [{
-        id: 'p-fashion-shoulder-bags',
-        sku: 'KHC-BAG-01',
-        title: isAr ? 'حقيبة كتف جلدية كلاسيك بإبزيم ذهبي' : 'Classic Structured Leather Bag',
-        price: 1850,
-        originalPrice: 2300,
-        discount: '20% OFF',
-        image: '/images/reels/fashion_shoulder_bags_thumb.jpg'
-      }]
+      products: [
+        {
+          id: 'p-fashion-shoulder-bags',
+          sku: 'KHC-BAG-01',
+          title: isAr ? 'حقيبة كتف جلدية كلاسيك بإبزيم ذهبي' : 'Classic Structured Leather Bag',
+          price: 1850,
+          originalPrice: 2300,
+          discount: '20% OFF',
+          image: '/images/reels/fashion_shoulder_bags_thumb.jpg'
+        },
+        {
+          id: 'p-fashion-silk-scarf',
+          sku: 'TLK-SCF-01',
+          title: isAr ? 'سكارف حرير منقوش فاخر' : 'Luxury Printed Silk Scarf',
+          price: 450,
+          originalPrice: 600,
+          discount: '25% OFF',
+          image: '/images/products/silk_scarf.jpg'
+        }
+      ]
     },
     {
       id: 'reel-fashion-knit',
@@ -261,15 +283,26 @@ export default function DiscoverReels() {
       likes: 33400,
       comments: 980,
       saves: 5600,
-      products: [{
-        id: 'p-fashion-knit-sweater',
-        sku: 'TLK-SWT-07',
-        title: isAr ? 'سويتر صوف تريكو أوفرسايز بياقة عالية' : 'Chunky Knit Oversized Turtleneck',
-        price: 1650,
-        originalPrice: 2100,
-        discount: '21% OFF',
-        image: '/images/reels/fashion_knit_sweater_thumb.jpg'
-      }]
+      products: [
+        {
+          id: 'p-fashion-knit-sweater',
+          sku: 'TLK-SWT-07',
+          title: isAr ? 'سويتر صوف تريكو أوفرسايز بياقة عالية' : 'Chunky Knit Oversized Turtleneck',
+          price: 1650,
+          originalPrice: 2100,
+          discount: '21% OFF',
+          image: '/images/reels/fashion_knit_sweater_thumb.jpg'
+        },
+        {
+          id: 'p-fashion-wool-skirt',
+          sku: 'TLK-SKT-03',
+          title: isAr ? 'تنورة صوف بكسرات كاروهات' : 'Pleated Wool Argyle Skirt',
+          price: 920,
+          originalPrice: 1150,
+          discount: '20% OFF',
+          image: '/images/products/embroidered_blouse.jpg'
+        }
+      ]
     },
     {
       id: 'reel-fashion-suede',
@@ -284,15 +317,26 @@ export default function DiscoverReels() {
       likes: 31200,
       comments: 870,
       saves: 6100,
-      products: [{
-        id: 'p-fashion-suede-jacket',
-        sku: 'TLK-JCK-08',
-        title: isAr ? 'جاكيت شمواه كلاسيكي بني بسحاب' : 'Classic Suede Harrington Jacket',
-        price: 2600,
-        originalPrice: 3200,
-        discount: '19% OFF',
-        image: '/images/reels/fashion_suede_jacket_thumb.jpg'
-      }]
+      products: [
+        {
+          id: 'p-fashion-suede-jacket',
+          sku: 'TLK-JCK-08',
+          title: isAr ? 'جاكيت شمواه كلاسيكي بني بسحاب' : 'Classic Suede Harrington Jacket',
+          price: 2600,
+          originalPrice: 3200,
+          discount: '19% OFF',
+          image: '/images/reels/fashion_suede_jacket_thumb.jpg'
+        },
+        {
+          id: 'p-fashion-olive-pants',
+          sku: 'TLK-PNT-04',
+          title: isAr ? 'بنطلون كلاسيك زيتي واسع' : 'Pleated Olive Trousers',
+          price: 980,
+          originalPrice: 1250,
+          discount: '21% OFF',
+          image: '/images/products/linen_trousers.jpg'
+        }
+      ]
     },
     {
       id: 'reel-fashion-watch',
@@ -307,15 +351,26 @@ export default function DiscoverReels() {
       likes: 54200,
       comments: 2310,
       saves: 12400,
-      products: [{
-        id: 'p-fashion-vintage-watch',
-        sku: 'TBA-WTC-01',
-        title: isAr ? 'ساعة يد كلاسيكية برميليّة بعقارب رومانية' : 'Vintage Tonneau Rose Gold Watch',
-        price: 3400,
-        originalPrice: 4200,
-        discount: '19% OFF',
-        image: '/images/reels/fashion_vintage_watch_thumb.jpg'
-      }]
+      products: [
+        {
+          id: 'p-fashion-vintage-watch',
+          sku: 'TBA-WTC-01',
+          title: isAr ? 'ساعة يد كلاسيكية برميليّة بعقارب رومانية' : 'Vintage Tonneau Rose Gold Watch',
+          price: 3400,
+          originalPrice: 4200,
+          discount: '19% OFF',
+          image: '/images/reels/fashion_vintage_watch_thumb.jpg'
+        },
+        {
+          id: 'p-fashion-leather-bracelet',
+          sku: 'TBA-BRC-02',
+          title: isAr ? 'سوار معصم جلد مضفر راقي' : 'Braided Leather Cuff Bracelet',
+          price: 520,
+          originalPrice: 650,
+          discount: '20% OFF',
+          image: '/images/brands/talieska_logo.jpg'
+        }
+      ]
     },
     {
       id: 'reel-fashion-woven',
@@ -330,15 +385,26 @@ export default function DiscoverReels() {
       likes: 32100,
       comments: 940,
       saves: 5900,
-      products: [{
-        id: 'p-fashion-woven-bag',
-        sku: 'KHC-BAG-02',
-        title: isAr ? 'حقيبة جلد منسوجة يدوياً بمقبض مضفر' : 'Handcrafted Woven Leather Bag',
-        price: 1950,
-        originalPrice: 2500,
-        discount: '22% OFF',
-        image: '/images/reels/fashion_woven_bag_thumb.jpg'
-      }]
+      products: [
+        {
+          id: 'p-fashion-woven-bag',
+          sku: 'KHC-BAG-02',
+          title: isAr ? 'حقيبة جلد منسوجة يدوياً بمقبض مضفر' : 'Handcrafted Woven Leather Bag',
+          price: 1950,
+          originalPrice: 2500,
+          discount: '22% OFF',
+          image: '/images/reels/fashion_woven_bag_thumb.jpg'
+        },
+        {
+          id: 'p-fashion-linen-pants-1',
+          sku: 'TLK-LNN-01',
+          title: isAr ? 'بنطلون كتان جملي واسع' : 'Wide Camel Linen Trousers',
+          price: 880,
+          originalPrice: 1100,
+          discount: '20% OFF',
+          image: '/images/products/linen_abaya.jpg'
+        }
+      ]
     },
     {
       id: 'reel-fashion-barrel',
@@ -353,15 +419,26 @@ export default function DiscoverReels() {
       likes: 29700,
       comments: 860,
       saves: 5100,
-      products: [{
-        id: 'p-fashion-barrel-bag',
-        sku: 'KHC-BAG-03',
-        title: isAr ? 'حقيبة بولينج أسطوانية كلاسيك' : 'Barrel Bowling Handbag',
-        price: 2100,
-        originalPrice: 2600,
-        discount: '19% OFF',
-        image: '/images/reels/fashion_barrel_bag_thumb.jpg'
-      }]
+      products: [
+        {
+          id: 'p-fashion-barrel-bag',
+          sku: 'KHC-BAG-03',
+          title: isAr ? 'حقيبة بولينج أسطوانية كلاسيك' : 'Barrel Bowling Handbag',
+          price: 2100,
+          originalPrice: 2600,
+          discount: '19% OFF',
+          image: '/images/reels/fashion_barrel_bag_thumb.jpg'
+        },
+        {
+          id: 'p-fashion-leather-wallet',
+          sku: 'KHC-WLT-01',
+          title: isAr ? 'محفظة جلد طبيعي مدمجة' : 'Compact Leather Cardholder',
+          price: 490,
+          originalPrice: 650,
+          discount: '25% OFF',
+          image: '/images/products/copper_lantern.jpg'
+        }
+      ]
     },
     {
       id: 'reel-fashion-cuban',
@@ -376,15 +453,26 @@ export default function DiscoverReels() {
       likes: 28400,
       comments: 790,
       saves: 4300,
-      products: [{
-        id: 'p-fashion-cuban-shirt',
-        sku: 'TLK-SHT-06',
-        title: isAr ? 'قميص كوبي بنقشة ريترو' : 'Retro Print Cuban Collar Shirt',
-        price: 850,
-        originalPrice: 1100,
-        discount: '22% OFF',
-        image: '/images/reels/fashion_cuban_shirt_thumb.jpg'
-      }]
+      products: [
+        {
+          id: 'p-fashion-cuban-shirt',
+          sku: 'TLK-SHT-06',
+          title: isAr ? 'قميص كوبي بنقشة ريترو' : 'Retro Print Cuban Collar Shirt',
+          price: 850,
+          originalPrice: 1100,
+          discount: '22% OFF',
+          image: '/images/reels/fashion_cuban_shirt_thumb.jpg'
+        },
+        {
+          id: 'p-fashion-black-trousers',
+          sku: 'TLK-TRS-09',
+          title: isAr ? 'بنطلون كتان أسود صيفي' : 'Black Linen Summer Trousers',
+          price: 790,
+          originalPrice: 990,
+          discount: '20% OFF',
+          image: '/images/products/linen_trousers.jpg'
+        }
+      ]
     },
     {
       id: 'reel-sheglam-1',
@@ -620,43 +708,41 @@ export default function DiscoverReels() {
 
         <div className="absolute bottom-6 left-4 right-[60px] flex flex-col justify-end space-y-3 z-20 pointer-events-auto">
             {/* Floating Product Pill(s) */}
-            {(reel.products && reel.products.length > 1) ? (
-              <div 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsShopTheLookOpen(true);
-                }}
-                className="inline-flex w-fit items-center gap-2 bg-white/95 backdrop-blur-md rounded-xl py-2 px-3 shadow-lg cursor-pointer hover:bg-white active:scale-95 transition-transform animate-fade-in"
-              >
-                <div className="flex -space-x-2">
-                  {reel.products.slice(0,3).map((p, i) => (
-                    <img key={i} src={p.image} className="w-7 h-7 rounded-full border-2 border-white object-cover" />
-                  ))}
+            {(() => {
+              const allProducts = (reel.products && reel.products.length > 0)
+                ? reel.products
+                : (reel.product ? [reel.product] : []);
+              
+              if (allProducts.length === 0) return null;
+
+              return (
+                <div 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (allProducts.length > 1) {
+                      setIsShopTheLookOpen(true);
+                    } else {
+                      const matched = products?.find(p => p.id === allProducts[0]?.id) || allProducts[0];
+                      if (matched) openProductDetail(matched);
+                    }
+                  }}
+                  className="inline-flex w-fit items-center gap-2 bg-white/95 backdrop-blur-md rounded-xl py-2 px-3 shadow-lg cursor-pointer hover:bg-white active:scale-95 transition-transform animate-fade-in"
+                >
+                  <div className="flex -space-x-2 rtl:space-x-reverse">
+                    {allProducts.slice(0, 3).map((p, i) => (
+                      <img key={i} src={p.image} alt={p.title || ''} className="w-7 h-7 rounded-full border-2 border-white object-cover shadow-xs" />
+                    ))}
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[11px] font-black text-slate-900 leading-tight">🛍️ {isAr ? 'تسوق الإطلالة' : 'Shop the Look'}</span>
+                    <span className="text-[10px] font-bold text-gray-500 leading-tight">
+                      ({allProducts.length} {allProducts.length === 1 ? (isAr ? 'عنصر' : 'item') : (isAr ? 'عناصر' : 'items')})
+                    </span>
+                  </div>
+                  <span className="material-symbols-outlined text-[16px] text-slate-900 ml-1 rtl:mr-1 rtl:ml-0">open_in_new</span>
                 </div>
-                <div className="flex flex-col">
-                  <span className="text-[11px] font-black text-slate-900 leading-tight">🛍️ {isAr ? 'تسوق الإطلالة' : 'Shop the Look'}</span>
-                  <span className="text-[10px] font-bold text-gray-500 leading-tight">({reel.products.length} {isAr ? 'عناصر' : 'items'})</span>
-                </div>
-                <span className="material-symbols-outlined text-[16px] text-slate-900 ml-1">open_in_new</span>
-              </div>
-            ) : (
-              <div 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  const singleProd = reel.products ? reel.products[0] : reel.product;
-                  const matched = products?.find(p => p.id === singleProd?.id) || singleProd;
-                  if (matched) openProductDetail(matched);
-                }}
-                className="inline-flex w-fit items-center gap-2 bg-white rounded-xl py-1.5 px-1.5 pr-4 shadow-lg cursor-pointer hover:bg-gray-50 active:scale-95 transition-transform"
-              >
-                <img src={reel.products ? reel.products[0].image : reel.product?.image} className="w-8 h-8 rounded-lg object-cover" />
-                <div className="flex flex-col">
-                  <span className="text-[11px] font-bold text-slate-900 leading-tight">{reel.products ? reel.products[0].title : reel.product?.title}</span>
-                  <span className="text-[10px] font-bold text-[#d00000] leading-tight">EGP {reel.products ? reel.products[0].price : reel.product?.price}</span>
-                </div>
-                <span className="material-symbols-outlined text-[14px] text-gray-400 ml-1">chevron_right</span>
-              </div>
-            )}
+              );
+            })()}
 
             {/* Creator Info */}
             <div className={`space-y-1 ${isAr ? 'text-right' : 'text-left'}`}>
@@ -927,7 +1013,7 @@ export default function DiscoverReels() {
           <div className="flex items-center justify-between p-4 border-b border-gray-100">
             <div>
               <h3 className="font-black text-lg">🛍️ {isAr ? 'تسوق الإطلالة' : 'Shop the Look'}</h3>
-              <p className="text-xs text-gray-500 font-medium">{currentReel?.products?.length || 0} {isAr ? 'عناصر في هذا الفيديو' : 'items featured in this reel'}</p>
+              <p className="text-xs text-gray-500 font-medium">{(currentReel?.products?.length || (currentReel?.product ? 1 : 0))} {isAr ? 'عناصر في هذا الفيديو' : 'items featured in this reel'}</p>
             </div>
             <button 
               onClick={() => setIsShopTheLookOpen(false)}
@@ -938,7 +1024,7 @@ export default function DiscoverReels() {
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {currentReel?.products?.map((prod, idx) => (
+            {(currentReel?.products && currentReel.products.length > 0 ? currentReel.products : (currentReel?.product ? [currentReel.product] : [])).map((prod, idx) => (
               <div key={idx} className="flex gap-4 p-3 bg-white border border-gray-100 rounded-2xl shadow-sm">
                 <img src={prod.image} className="w-20 h-24 rounded-xl object-cover" />
                 <div className="flex flex-col flex-1 py-1">

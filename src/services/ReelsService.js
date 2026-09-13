@@ -10,21 +10,22 @@ export const ReelsService = {
     } catch (err) {
       console.warn('DB Reels fetch failed, using local mock data:', err.message);
       
-      const local = localStorage.getItem('eg_reels_mock');
+      // Clean up legacy caches
+      localStorage.removeItem('eg_reels_mock');
+      localStorage.removeItem('eg_reels_mock_v2');
+
+      const local = localStorage.getItem('eg_reels_mock_v3');
       if (local) {
         try {
           const parsed = JSON.parse(local);
-          // If local data exists but it's the old format without creatorHandle/products, ignore it to force re-seed
-          if (parsed && parsed.length > 0 && !parsed[0].creatorHandle) {
-             return [];
+          // If local data exists and has products
+          if (parsed && parsed.length > 0 && parsed[0].products && parsed[0].products.length > 1) {
+             return parsed;
           }
-          return parsed;
-        } catch(e) {
-          return [];
-        }
+        } catch(e) {}
       }
       
-      // Return empty so DiscoverReels can seed its rich DEFAULT_REELS
+      // Return empty so DiscoverReels will populate and save fresh DEFAULT_REELS
       return [];
     }
   },
@@ -37,21 +38,17 @@ export const ReelsService = {
     } catch (err) {
       console.warn('DB Save Reel failed, saving to local storage:', err.message);
       let local = [];
-      const localStr = localStorage.getItem('eg_reels_mock');
+      const localStr = localStorage.getItem('eg_reels_mock_v3');
       if (localStr) {
         try {
           local = JSON.parse(localStr);
-          // Clean up old format if present before adding
-          if (local.length > 0 && !local[0].creatorHandle) {
-             local = [];
-          }
         } catch(e) {}
       }
       
       // Check if already exists
       if (!local.find(r => r.id === reelData.id)) {
         local.push(reelData);
-        localStorage.setItem('eg_reels_mock', JSON.stringify(local));
+        localStorage.setItem('eg_reels_mock_v3', JSON.stringify(local));
       }
       
       return reelData;

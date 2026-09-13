@@ -105,12 +105,23 @@ export default function DiscoverReels() {
       try {
         const storedReels = await ReelsService.getReels();
         if (storedReels && storedReels.length > 0) {
-          const processedReels = storedReels.map(r => {
-            if (r.videoBg instanceof File || r.videoBg instanceof Blob) {
-              return { ...r, videoBg: URL.createObjectURL(r.videoBg) };
+          const processedReels = await Promise.all(storedReels.map(async (r) => {
+            let item = { ...r };
+            // Auto-migrate placeholders to high quality local video assets
+            if (item.id === 'reel-sheglam-1' && (!item.videoBg.includes('sheglam_mascara') || item.videoBg.includes('w3.org'))) {
+              item.videoBg = '/images/reels/sheglam_mascara.mp4';
+              item.product = { ...item.product, id: 'p-sheglam-1', image: '/images/reels/sheglam_mascara_thumb.jpg' };
+              await ReelsService.saveReel(item);
+            } else if (item.id === 'reel-sheglam-2' && (!item.videoBg.includes('sheglam_liptint') || item.videoBg.includes('w3.org'))) {
+              item.videoBg = '/images/reels/sheglam_liptint.mp4';
+              item.product = { ...item.product, id: 'p-sheglam-2', image: '/images/reels/sheglam_liptint_thumb.jpg' };
+              await ReelsService.saveReel(item);
             }
-            return r;
-          });
+            if (item.videoBg instanceof File || item.videoBg instanceof Blob) {
+              return { ...item, videoBg: URL.createObjectURL(item.videoBg) };
+            }
+            return item;
+          }));
           setReelsList(processedReels);
         } else {
           for (const reel of DEFAULT_REELS) {
@@ -156,7 +167,7 @@ export default function DiscoverReels() {
       creatorHandle: '@beauty.by.nada',
       creatorName: 'ندى بيوتي • Nada Beauty',
       avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=150&q=80',
-      videoBg: 'https://media.w3.org/2010/05/sintel/trailer.mp4',
+      videoBg: '/images/reels/sheglam_mascara.mp4',
       caption: isAr 
         ? 'ريفيو جديد لماسكارا شيجلام! رهيبة بتطول وتكثف الرموش، ومعاها مزيل خاص بيها بيشيلها في ثواني! ✨👀 #Sheglam #ماسكارا #تجميل' 
         : 'Testing the new SHEGLAM Ultra Lash Lift Mascara & Easy Lash Removal! Amazing results! ✨👀 #Sheglam #Makeup',
@@ -165,12 +176,13 @@ export default function DiscoverReels() {
       comments: 1240,
       saves: 8900,
       product: {
-        id: 'p-sheglam-mascara',
+        id: 'p-sheglam-1',
+        sku: 'SHG-MASC-01',
         title: isAr ? 'مجموعة شيجلام ماسكارا ومزيل' : 'SHEGLAM Lash Lift & Remover',
         price: 450,
         originalPrice: 550,
         discount: '18% OFF',
-        image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=800&q=80'
+        image: '/images/reels/sheglam_mascara_thumb.jpg'
       }
     },
     {
@@ -178,21 +190,22 @@ export default function DiscoverReels() {
       creatorHandle: '@makeup.with.sara',
       creatorName: 'سارة ميكأب • Sara Makeup',
       avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&q=80',
-      videoBg: 'https://media.w3.org/2010/05/video/movie_300.mp4',
+      videoBg: '/images/reels/sheglam_liptint.mp4',
       caption: isAr 
-        ? 'سواتش لدرجات مرطب الشفاه من شيجلام 🍒 درجات تجنن (Cherry Bark, Plum Sauce, Bare Blush) ثبات وترطيب خيالي! 💋 #مكياج #شيجلام' 
-        : 'SHEGLAM Jelly Lip Tint swatches 🍒 Gorgeous shades (Cherry Bark, Plum Sauce) and amazing hydration! 💋 #LipTint #Sheglam',
+        ? 'سواتش لدرجات مرطب ومورد الشفاه والخدود من شيجلام 🍒 درجات تجنن (Cherry Bark, Plum Sauce, Bare Blush) ثبات وترطيب خيالي! 💋 #مكياج #شيجلام' 
+        : 'SHEGLAM Jelly Lip Tint & Blusher swatches 🍒 Gorgeous shades (Cherry Bark, Plum Sauce) and amazing hydration! 💋 #LipTint #Sheglam',
       music: isAr ? 'موسيقى ريلز هادية' : 'Chill Aesthetic Vibes',
       likes: 89100,
       comments: 3420,
       saves: 15400,
       product: {
-        id: 'p-sheglam-liptint',
-        title: isAr ? 'ملمع ومورد شفاه شيجلام' : 'SHEGLAM Jelly Lip Tint',
+        id: 'p-sheglam-2',
+        sku: 'SHG-LIP-02',
+        title: isAr ? 'ملمع ومورد شفاه وبلاشر شيجلام' : 'SHEGLAM Jelly Lip Tint & Blusher',
         price: 280,
         originalPrice: 350,
         discount: '20% OFF',
-        image: 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?auto=format&fit=crop&w=800&q=80'
+        image: '/images/reels/sheglam_liptint_thumb.jpg'
       }
     },
 {
@@ -577,7 +590,8 @@ export default function DiscoverReels() {
             <div 
               onClick={(e) => {
                 e.stopPropagation();
-                openProductDetail(reel.product);
+                const matched = products?.find(p => p.id === reel.product?.id) || reel.product;
+                openProductDetail(matched);
               }}
               className="inline-flex w-fit items-center gap-2 bg-white rounded-xl py-1.5 px-1.5 pr-4 shadow-lg cursor-pointer hover:bg-gray-50 active:scale-95 transition-transform"
             >

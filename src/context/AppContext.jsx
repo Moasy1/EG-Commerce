@@ -730,6 +730,31 @@ export function AppProvider({ children }) {
   const [pointsRedeemed, setPointsRedeemed] = useState(500);
   const [unreadNotifications, setUnreadNotifications] = useState(2);
 
+  const [selectedCategory, setSelectedCategory] = useState({
+    id: 'women',
+    slug: 'women',
+    label: 'Women',
+    labelAr: 'أزياء نسائية'
+  });
+
+  const openCategoryPage = (categoryOrSlug) => {
+    let catObj = categoryOrSlug;
+    if (typeof categoryOrSlug === 'string') {
+      catObj = ProductService.getCategoryBySlug(categoryOrSlug) || {
+        id: categoryOrSlug,
+        slug: categoryOrSlug,
+        label: categoryOrSlug.charAt(0).toUpperCase() + categoryOrSlug.slice(1),
+        labelAr: categoryOrSlug
+      };
+    } else if (categoryOrSlug?.id && !categoryOrSlug.labelAr) {
+      const found = ProductService.getCategoryBySlug(categoryOrSlug.id);
+      if (found) catObj = { ...found, ...categoryOrSlug };
+    }
+    setSelectedCategory(catObj);
+    setActiveTab('category');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const openProductDetail = (product) => {
     setSelectedProduct(product);
     setActiveTab('product');
@@ -824,6 +849,9 @@ export function AppProvider({ children }) {
       updateProduct,
       deleteProduct,
       updateMerchant,
+      selectedCategory,
+      setSelectedCategory,
+      openCategoryPage,
       unreadNotifications,
       setUnreadNotifications
     }}>

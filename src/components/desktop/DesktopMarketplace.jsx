@@ -1,20 +1,33 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import EgLogo from '../common/EgLogo';
+import { ProductService, CATEGORIES_DATA } from '../../services/ProductService';
 
 export default function DesktopMarketplace() {
-  const { products: contextProducts, openProductDetail, addToCart, setActiveTab } = useApp();
+  const { 
+    products: contextProducts, 
+    openProductDetail, 
+    addToCart, 
+    setActiveTab, 
+    openCategoryPage,
+    language 
+  } = useApp();
+  const isAr = language === 'ar';
   const [selectedCat, setSelectedCat] = useState('All');
   const [selectedSize, setSelectedSize] = useState('M');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const topCategoryIcons = [
-    { label: 'All', icon: 'apps' },
-    { label: 'Women', icon: 'woman' },
-    { label: 'Men', icon: 'man' },
-    { label: 'Abayas', icon: 'dry_cleaning' },
-    { label: 'Accessories', icon: 'handbag' },
-    { label: 'Makeup', icon: 'brush' },
+    { label: 'All', labelAr: 'الكل', icon: 'apps', slug: 'all' },
+    { label: 'Women', labelAr: 'أزياء نسائية', icon: 'woman', slug: 'women' },
+    { label: 'Men', labelAr: 'أزياء رجالية', icon: 'man', slug: 'men' },
+    { label: 'Modest Fashion', labelAr: 'عبايات ومحتشمة', icon: 'dry_cleaning', slug: 'modest' },
+    { label: 'Streetwear', labelAr: 'ستريت وير', icon: 'checkroom', slug: 'streetwear' },
+    { label: 'Accessories', labelAr: 'إكسسوارات وساعات', icon: 'handbag', slug: 'accessories' },
+    { label: 'Makeup', labelAr: 'مكياج وتجميل', icon: 'brush', slug: 'makeup' },
+    { label: 'Heritage', labelAr: 'تحف وتراث', icon: 'star', slug: 'heritage' },
   ];
+
 
   const products = (contextProducts && contextProducts.length > 0) ? contextProducts : [
     {
@@ -72,35 +85,55 @@ export default function DesktopMarketplace() {
       </div>
 
       {/* 2. Top Category Icons Bar */}
-      <div className="px-5 py-2 border-b border-gray-100 flex items-center gap-6 overflow-x-auto scrollbar-none">
-        {topCategoryIcons.map((cat) => (
-          <button
-            key={cat.label}
-            onClick={() => setSelectedCat(cat.label)}
-            className={`flex items-center gap-1.5 py-1 px-3 rounded-full text-xs font-semibold transition-all ${
-              selectedCat === cat.label
-                ? 'bg-[#d00000]/10 text-[#d00000] font-bold'
-                : 'text-gray-600 hover:text-slate-900'
-            }`}
-          >
-            <span className="material-symbols-outlined text-[17px]">{cat.icon}</span>
-            <span>{cat.label}</span>
-          </button>
-        ))}
+      <div className="px-5 py-2 border-b border-gray-100 flex items-center justify-between gap-4 overflow-x-auto scrollbar-none">
+        <div className="flex items-center gap-2">
+          {topCategoryIcons.map((cat) => (
+            <button
+              key={cat.label}
+              onClick={() => {
+                if (cat.slug === 'all') {
+                  setSelectedCat('All');
+                } else {
+                  openCategoryPage(cat.slug);
+                }
+              }}
+              className={`flex items-center gap-1.5 py-1 px-3 rounded-full text-xs font-semibold transition-all ${
+                selectedCat === cat.label
+                  ? 'bg-[#d00000] text-white font-bold shadow-xs'
+                  : 'text-gray-600 hover:text-slate-900 hover:bg-gray-100'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[17px]">{cat.icon}</span>
+              <span>{isAr ? (cat.labelAr || cat.label) : cat.label}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* 3. Main Content: Left Filters + 4-Column Product Grid */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left Filter Column */}
-        <aside className="w-48 p-4 border-r border-gray-100 space-y-4 text-left shrink-0 bg-gray-50/50">
+        <aside className="w-52 p-4 border-r border-gray-100 space-y-4 text-left shrink-0 bg-gray-50/50">
           <div>
-            <h4 className="text-xs font-bold text-slate-900 mb-2">Category</h4>
-            <div className="space-y-1.5 text-[11px] text-gray-600 font-medium">
-              {['Dresses', 'Tops & Blouses', 'Bottoms', 'Abayas & Galabeyas', "Men's Wear", 'Accessories'].map((c, i) => (
-                <label key={c} className="flex items-center gap-2 cursor-pointer hover:text-slate-900">
-                  <input type="checkbox" defaultChecked={i === 0 || i === 3} className="accent-[#d00000] rounded" />
-                  <span>{c}</span>
-                </label>
+            <h4 className="text-xs font-bold text-slate-900 mb-2">{isAr ? 'التصنيفات' : 'Categories'}</h4>
+            <div className="space-y-1 text-[11px] text-gray-600 font-medium">
+              {[
+                { name: 'Women Fashion', nameAr: 'أزياء نسائية', slug: 'women' },
+                { name: 'Men Wear', nameAr: 'أزياء رجالية', slug: 'men' },
+                { name: 'Abayas & Modest', nameAr: 'عبايات ومحتشمة', slug: 'modest' },
+                { name: 'Streetwear & Shirts', nameAr: 'ستريت وير وكاجوال', slug: 'streetwear' },
+                { name: 'Accessories & Bags', nameAr: 'إكسسوارات وشنط', slug: 'accessories' },
+                { name: 'Beauty & Makeup', nameAr: 'مكياج وتجميل', slug: 'makeup' },
+                { name: 'Heritage Crafts', nameAr: 'تحف وتراث', slug: 'heritage' },
+              ].map((c) => (
+                <div
+                  key={c.slug}
+                  onClick={() => openCategoryPage(c.slug)}
+                  className="flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-white hover:shadow-xs cursor-pointer text-slate-700 hover:text-[#d00000] transition-all"
+                >
+                  <span className="font-semibold">{isAr ? c.nameAr : c.name}</span>
+                  <span className="material-symbols-outlined text-[14px] text-gray-400">arrow_forward</span>
+                </div>
               ))}
             </div>
           </div>

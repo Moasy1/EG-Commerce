@@ -6,6 +6,7 @@ import QuickBuyDrawer from './components/common/QuickBuyDrawer';
 
 import DiscoverReels from './pages/DiscoverReels';
 import Marketplace from './pages/Marketplace';
+import CategoryPage from './pages/CategoryPage';
 import ProductDetail from './pages/ProductDetail';
 import UnifiedCart from './pages/UnifiedCart';
 import Checkout from './pages/Checkout';
@@ -32,6 +33,8 @@ function MainContent() {
         return <DiscoverReels />;
       case 'shop':
         return <Marketplace />;
+      case 'category':
+        return <CategoryPage />;
       case 'product':
         return <ProductDetail />;
       case 'cart':

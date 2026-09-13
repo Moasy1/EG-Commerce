@@ -2,21 +2,25 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import EgLogo from '../components/common/EgLogo';
 import DesktopMarketplace from '../components/desktop/DesktopMarketplace';
+import { CATEGORIES_DATA } from '../services/ProductService';
 
 export default function Marketplace() {
-  const { products: contextProducts, openProductDetail, totalCartCount, setActiveTab, addToCart } = useApp();
+  const { 
+    products: contextProducts, 
+    openProductDetail, 
+    totalCartCount, 
+    setActiveTab, 
+    addToCart,
+    openCategoryPage,
+    language
+  } = useApp();
+  
+  const isAr = language === 'ar';
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
-  // Categories corresponding to the exact 6 cards in Screen 2 mobile
-  const categories = [
-    { id: 'new', label: 'New Arrivals', isRedCard: true },
-    { id: 'women', label: 'Women', image: '/images/reels/fashion_citrine_blazer_thumb.jpg' },
-    { id: 'men', label: 'Men', image: '/images/reels/fashion_suede_jacket_thumb.jpg' },
-    { id: 'modest', label: 'Modest Fashion', image: '/images/products/linen_abaya.jpg' },
-    { id: 'streetwear', label: 'Streetwear', image: '/images/reels/fashion_oversized_shirt_thumb.jpg' },
-    { id: 'accessories', label: 'Accessories', image: '/images/reels/fashion_shoulder_bags_thumb.jpg' },
-  ];
+  // Categories corresponding to the exact cards in mobile
+  const categories = CATEGORIES_DATA;
 
   // Fallback products if context not ready
   const fallbackProducts = [
@@ -44,7 +48,16 @@ export default function Marketplace() {
     }
   ];
 
-  const featuredProducts = (contextProducts && contextProducts.length > 0) ? contextProducts : fallbackProducts;
+  const rawProducts = (contextProducts && contextProducts.length > 0) ? contextProducts : fallbackProducts;
+  
+  // Filter products by search query if typed
+  const featuredProducts = searchQuery.trim()
+    ? rawProducts.filter(p => 
+        p.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        (p.category || '').toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : rawProducts;
+
 
   // Top Stores & Brands
   const topStores = [
@@ -114,30 +127,69 @@ export default function Marketplace() {
           ))}
         </div>
 
-        {/* Category Visual Cards */}
-        <div className="px-4 py-3 mt-1">
+        {/* Category Visual Cards Header */}
+        <div className="px-4 pt-4 pb-2 flex items-center justify-between">
+          <h3 className="text-sm font-black text-slate-900">{isAr ? 'تصفح حسب التصنيف' : 'Shop by Category'}</h3>
+          <span 
+            onClick={() => openCategoryPage(categories[0])} 
+            className="text-xs font-bold text-[#d00000] cursor-pointer hover:underline"
+          >
+            {isAr ? 'عرض الكل' : 'View All'}
+          </span>
+        </div>
+
+        {/* Category Visual Cards (6-grid on mobile, opens dedicated dynamic category page) */}
+        <div className="px-4 py-1 mt-1">
           <div className="grid grid-cols-3 gap-2.5">
-            {categories.map((cat) => (
+            {categories.slice(0, 6).map((cat) => (
               <div
                 key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
-                className={`h-28 rounded-2xl relative overflow-hidden cursor-pointer shadow-xs active:scale-95 transition-all flex flex-col justify-end p-2.5 ${
-                  cat.isRedCard ? 'bg-[#d00000] text-white' : 'bg-gray-900 text-white'
+                onClick={() => openCategoryPage(cat)}
+                className={`h-28 rounded-2xl relative overflow-hidden cursor-pointer shadow-xs active:scale-95 transition-all flex flex-col justify-end p-2.5 group ${
+                  cat.isRedCard ? 'bg-[#d00000] text-white hover:brightness-105' : 'bg-gray-900 text-white'
                 }`}
               >
                 {!cat.isRedCard && (
                   <>
-                    <img src={cat.image} alt={cat.label} className="absolute inset-0 w-full h-full object-cover" />
+                    <img 
+                      src={cat.image} 
+                      alt={cat.label} 
+                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                    />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
                   </>
                 )}
                 <div className="relative z-10 text-left">
-                  {cat.isRedCard && <span className="material-symbols-outlined text-[20px] mb-1">local_fire_department</span>}
-                  <span className="text-[11px] font-black leading-tight block">{cat.label}</span>
+                  {cat.isRedCard ? (
+                    <span className="material-symbols-outlined text-[20px] mb-1 text-white">local_fire_department</span>
+                  ) : (
+                    <span className="material-symbols-outlined text-[15px] mb-0.5 text-white/80 opacity-0 group-hover:opacity-100 transition-opacity">
+                      arrow_forward
+                    </span>
+                  )}
+                  <span className="text-[11px] font-black leading-tight block drop-shadow-sm">
+                    {isAr ? (cat.labelAr || cat.label) : cat.label}
+                  </span>
                 </div>
               </div>
             ))}
           </div>
+
+          {/* Extra category pills if more than 6 categories exist */}
+          {categories.length > 6 && (
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pt-2.5">
+              {categories.slice(6).map(cat => (
+                <button
+                  key={cat.id}
+                  onClick={() => openCategoryPage(cat)}
+                  className="px-3 py-1.5 rounded-xl bg-white border border-gray-200 text-slate-800 text-[11px] font-bold shrink-0 hover:border-[#d00000] hover:text-[#d00000] transition-colors shadow-xs flex items-center gap-1.5"
+                >
+                  <span className="material-symbols-outlined text-[14px] text-[#d00000]">{cat.icon || 'sell'}</span>
+                  <span>{isAr ? (cat.labelAr || cat.label) : cat.label}</span>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Creators Horizontal Scroll */}

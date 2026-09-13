@@ -1,60 +1,214 @@
-import { supabase } from '../lib/supabase';
-import { INITIAL_PRODUCTS, MERCHANTS_DATA } from '../context/AppContext';
+import { supabase } from '../lib/supabase.js';
+import { INITIAL_PRODUCTS, MERCHANTS_DATA } from '../context/AppContext.jsx';
+
+export const CATEGORIES_DATA = [
+  {
+    id: 'women',
+    slug: 'women',
+    label: 'Women',
+    labelAr: 'أزياء نسائية',
+    description: 'Contemporary Egyptian linen, elegant dresses, tailored blazers and seasonal collections.',
+    descriptionAr: 'أحدث صيحات الموضة النسائية، فساتين أنيقة، وتصاميم كتان مصري راقية.',
+    image: '/images/reels/fashion_citrine_blazer_thumb.jpg',
+    banner: '/images/banners/talieska_hero.jpg',
+    icon: 'woman',
+    subcategories: ['All', 'Dresses', 'Tops & Blouses', 'Blazers & Jackets', 'Linen', 'Knitwear'],
+    subcategoriesAr: ['الكل', 'فساتين', 'توبات وبلوزات', 'بليزرات وجواكت', 'كتان', 'تريكو وصوف'],
+    keywords: ['women', 'dresses', 'dress', 'linen', 'knitwear', 'blazer', 'blouses', 'فستان', 'كتان', 'تريكو', 'بليزر', 'بلوزة', 'توب', 'أزياء', 'حريمي']
+  },
+  {
+    id: 'men',
+    slug: 'men',
+    label: 'Men',
+    labelAr: 'أزياء رجالية',
+    description: 'Premium linen shirts, outerwear, tailored jackets and modern casualwear for men.',
+    descriptionAr: 'قمصان كتان طبيعي، جواكت صوف وجلد، وإطلالات كاجوال ورسمية للرجال.',
+    image: '/images/reels/fashion_suede_jacket_thumb.jpg',
+    banner: '/images/reels/fashion_suede_jacket_thumb.jpg',
+    icon: 'man',
+    subcategories: ['All', 'Linen Shirts', 'Jackets', 'Casual Tops', 'Pants'],
+    subcategoriesAr: ['الكل', 'قمصان كتان', 'جواكت ومعاطف', 'توبات كاجوال', 'بناطيل'],
+    keywords: ['men', 'man', 'shirt', 'suede', 'jacket', 'wool', 'قميص', 'جاكت', 'رجالي', 'سuede', 'أوفرسايز']
+  },
+  {
+    id: 'modest',
+    slug: 'modest',
+    label: 'Modest Fashion',
+    labelAr: 'أزياء محتشمة وعبايات',
+    description: 'Chic abayas, modest dresses, galabeyas and refined Egyptian linen silhouettes.',
+    descriptionAr: 'عبايات كتان راقية، فساتين محتشمة، وجلابيات مصرية بتطريز يدوي فاخر.',
+    image: '/images/products/linen_abaya.jpg',
+    banner: '/images/products/linen_abaya.jpg',
+    icon: 'dry_cleaning',
+    subcategories: ['All', 'Abayas', 'Galabeyas', 'Maxi Dresses', 'Modest Linen'],
+    subcategoriesAr: ['الكل', 'عبايات', 'جلابيات', 'فساتين طويلة', 'كتان محتشم'],
+    keywords: ['modest', 'abaya', 'galabeya', 'linen', 'maxi', 'عباية', 'جلابية', 'محتشمة', 'كتان']
+  },
+  {
+    id: 'streetwear',
+    slug: 'streetwear',
+    label: 'Streetwear',
+    labelAr: 'ستريت وير وكاجوال',
+    description: 'Bold oversized fits, urban streetwear, creative graphics and trendsetting aesthetics.',
+    descriptionAr: 'إطلالات كاجوال جريئة، قمصان وتيشرتات أوفرسايز، وتصاميم شبابية عصرية.',
+    image: '/images/reels/fashion_oversized_shirt_thumb.jpg',
+    banner: '/images/reels/fashion_oversized_shirt_thumb.jpg',
+    icon: 'checkroom',
+    subcategories: ['All', 'Oversized Shirts', 'Jackets', 'Casual Tees', 'Urban Sets'],
+    subcategoriesAr: ['الكل', 'قمصان أوفرسايز', 'جواكت خفيفة', 'تيشرتات', 'أطقم كاجوال'],
+    keywords: ['streetwear', 'oversized', 'casual', 'shirt', 'urban', 'أوفرسايز', 'ستريت', 'كاجوال', 'قميص']
+  },
+  {
+    id: 'accessories',
+    slug: 'accessories',
+    label: 'Accessories & Watches',
+    labelAr: 'إكسسوارات وساعات',
+    description: 'Handmade genuine leather bags, heritage jewelry and luxury timepieces.',
+    descriptionAr: 'حقائب كتف جلد طبيعي، ساعات كلاسيكية فاخرة، ومجوهرات فضية مطلية بالذهب.',
+    image: '/images/reels/fashion_shoulder_bags_thumb.jpg',
+    banner: '/images/reels/fashion_vintage_watch_thumb.jpg',
+    icon: 'handbag',
+    subcategories: ['All', 'Leather Bags', 'Watches', 'Jewelry', 'Belts'],
+    subcategoriesAr: ['الكل', 'شنط جلد طبيعي', 'ساعات يد', 'حلي ومجوهرات', 'أحزمة'],
+    keywords: ['accessories', 'bag', 'bags', 'watch', 'watches', 'leather', 'jewelry', 'حقيبة', 'شنطة', 'ساعة', 'جلد', 'حلي', 'مجوهرات']
+  },
+  {
+    id: 'makeup',
+    slug: 'makeup',
+    label: 'Beauty & Makeup',
+    labelAr: 'مكياج وتجميل',
+    description: 'Trending cosmetics, viral beauty essentials, lip tints and mascaras.',
+    descriptionAr: 'مستحضرات تجميل أصلية، موردات شفاه جيلي، وماسكارا شيجلام الاحترافية.',
+    image: '/images/reels/sheglam_mascara_thumb.jpg',
+    banner: '/images/reels/sheglam_liptint_thumb.jpg',
+    icon: 'brush',
+    subcategories: ['All', 'Lips', 'Eyes', 'Face', 'Skincare'],
+    subcategoriesAr: ['الكل', 'شفاه', 'عيون', 'بشرة ووجه', 'عناية'],
+    keywords: ['makeup', 'beauty', 'sheglam', 'mascara', 'lip', 'tint', 'مكياج', 'شيجلام', 'شفاه', 'ماسكارا', 'تجميل']
+  },
+  {
+    id: 'heritage',
+    slug: 'heritage',
+    label: 'Heritage Crafts',
+    labelAr: 'تحف وتراث خان الخليلي',
+    description: 'Handmade brass lanterns, authentic kilim rugs and Egyptian cultural crafts.',
+    descriptionAr: 'فوانيس وتحف نحاسية منقوشة يدوياً، وسجاد كليم تراثي من خان الخليلي.',
+    image: '/images/products/copper_lantern.jpg',
+    banner: '/images/banners/khan_hero.jpg',
+    icon: 'sparkles',
+    subcategories: ['All', 'Brass Lanterns', 'Kilim Rugs', 'Copper Art', 'Decor'],
+    subcategoriesAr: ['الكل', 'فوانيس نحاس', 'سجاد كليم', 'تحف نحاسية', 'ديكور تراثي'],
+    keywords: ['heritage', 'crafts', 'lantern', 'copper', 'brass', 'kilim', 'carpet', 'نحاس', 'فانوس', 'كليم', 'سجاد', 'تراث']
+  },
+  {
+    id: 'new',
+    slug: 'new',
+    label: 'New Arrivals',
+    labelAr: 'وصل حديثاً',
+    description: 'Fresh drops, trending reels picks and the latest 2026 fashion releases.',
+    descriptionAr: 'أحدث القطع المضافة وإصدارات كولكشن 2026 الحصرية من أفضل المصممين المصريين.',
+    image: '/images/reels/fashion_citrine_blazer_thumb.jpg',
+    banner: '/images/banners/talieska_hero.jpg',
+    icon: 'local_fire_department',
+    isRedCard: true,
+    subcategories: ['All', 'This Week', 'Trending Reels', 'Limited Edition'],
+    subcategoriesAr: ['الكل', 'هذا الأسبوع', 'تريند الريلز', 'إصدارات محدودة'],
+    keywords: ['new', 'arrivals', 'trending', 'وصل حديثا', 'جديد', 'تريند']
+  }
+];
 
 export const ProductService = {
-  async getProducts() {
-    try {
-      const { data, error } = await supabase.from('products').select('*');
-      if (error) {
-        console.warn('Supabase fetch failed (table might not exist yet):', error.message);
-        return INITIAL_PRODUCTS;
-      }
-      if (!data || data.length === 0) {
-        // Fallback to mock data if empty
-        return INITIAL_PRODUCTS;
-      }
-      
-      // Map DB products to frontend format
-      return data.map(dbProduct => ({
-        id: dbProduct.id,
-        sku: dbProduct.slug, // Temporarily use slug for sku
-        title: dbProduct.title,
-        merchant: dbProduct.merchant_id, // We'll need to join or map this properly later
-        merchantId: dbProduct.merchant_id,
-        merchantVerified: true,
-        price: Number(dbProduct.base_price),
-        originalPrice: dbProduct.sale_price ? Number(dbProduct.base_price) : undefined, // Quick hack for mapping
-        rating: 5.0, // Mock for now
-        reviewsCount: 0,
-        stock: dbProduct.stock_quantity,
-        isSyndicated: true,
-        image: dbProduct.images && dbProduct.images.length > 0 ? dbProduct.images[0] : '/images/reels/reel_2.jpg',
-        video: null,
-        pointsEarned: Math.floor(Number(dbProduct.base_price) * 0.1),
-        category: dbProduct.category_id || 'General',
-        description: dbProduct.description,
-        sizes: ['One Size'], // Mock for now
-        colors: ['Default'] // Mock for now
-      }));
-    } catch (err) {
-      console.warn('Error fetching products:', err.message);
-      return INITIAL_PRODUCTS;
+  getCategories() {
+    return CATEGORIES_DATA;
+  },
+
+  getCategoryBySlug(slugOrId) {
+    if (!slugOrId) return null;
+    const normalized = slugOrId.toLowerCase();
+    return CATEGORIES_DATA.find(c => c.id.toLowerCase() === normalized || c.slug.toLowerCase() === normalized) || null;
+  },
+
+  filterProductsByCategory(productList, categorySlugOrId) {
+    if (!categorySlugOrId || categorySlugOrId === 'all' || categorySlugOrId === 'All') {
+      return productList;
     }
+
+    const catObj = this.getCategoryBySlug(categorySlugOrId);
+    const filterTerm = catObj ? catObj.id.toLowerCase() : categorySlugOrId.toLowerCase();
+    const keywords = catObj?.keywords || [filterTerm];
+
+    return productList.filter(prod => {
+      const prodCategory = (prod.category || '').toLowerCase();
+      const prodTitle = (prod.title || '').toLowerCase();
+      const prodDesc = (prod.description || '').toLowerCase();
+
+      // Direct match
+      if (prodCategory.includes(filterTerm)) return true;
+
+      // Check keywords
+      return keywords.some(kw => 
+        prodCategory.includes(kw.toLowerCase()) || 
+        prodTitle.includes(kw.toLowerCase()) ||
+        prodDesc.includes(kw.toLowerCase())
+      );
+    });
+  },
+
+  async getProducts(categorySlug = null) {
+    let allProducts = [];
+
+    try {
+      let query = supabase.from('products').select('*');
+      
+      const { data, error } = await query;
+      if (error || !data || data.length === 0) {
+        allProducts = INITIAL_PRODUCTS;
+      } else {
+        // Map DB products to frontend format
+        const dbMapped = data.map(dbProduct => ({
+          id: dbProduct.id,
+          sku: dbProduct.slug,
+          title: dbProduct.title,
+          merchant: dbProduct.merchant_id,
+          merchantId: dbProduct.merchant_id,
+          merchantVerified: true,
+          price: Number(dbProduct.base_price),
+          originalPrice: dbProduct.sale_price ? Number(dbProduct.base_price) : undefined,
+          rating: 4.9,
+          reviewsCount: 38,
+          stock: dbProduct.stock_quantity || 20,
+          isSyndicated: true,
+          image: dbProduct.images && dbProduct.images.length > 0 ? dbProduct.images[0] : '/images/reels/reel_2.jpg',
+          video: null,
+          pointsEarned: Math.floor(Number(dbProduct.base_price) * 0.1),
+          category: dbProduct.category_id || 'General',
+          description: dbProduct.description,
+          sizes: ['S', 'M', 'L'],
+          colors: ['Default']
+        }));
+
+        // Merge DB products with INITIAL_PRODUCTS to guarantee full fashion catalog
+        const existingIds = new Set(dbMapped.map(p => p.id));
+        allProducts = [...dbMapped, ...INITIAL_PRODUCTS.filter(p => !existingIds.has(p.id))];
+      }
+    } catch (err) {
+      console.warn('Error fetching products from backend:', err.message);
+      allProducts = INITIAL_PRODUCTS;
+    }
+
+    if (categorySlug && categorySlug !== 'all') {
+      return this.filterProductsByCategory(allProducts, categorySlug);
+    }
+
+    return allProducts;
   },
 
   async getMerchants() {
     try {
       const { data, error } = await supabase.from('merchants').select('*');
-      if (error) {
-        console.warn('Supabase fetch failed (table might not exist yet):', error.message);
+      if (error || !data || data.length === 0) {
         return MERCHANTS_DATA;
       }
-      if (!data || data.length === 0) {
-        return MERCHANTS_DATA;
-      }
-      
-      // For now, if we have DB merchants, we can use them, but we need the rich structure for UI
-      // To prevent breaking UI, we will merge or fallback to mock data until seeded properly
       return MERCHANTS_DATA; 
     } catch (err) {
       console.warn('Error fetching merchants:', err.message);
@@ -62,3 +216,4 @@ export const ProductService = {
     }
   }
 };
+

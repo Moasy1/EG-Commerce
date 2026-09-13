@@ -18,6 +18,9 @@ import MerchantStorefront from './pages/MerchantStorefront';
 import MerchantDashboard from './pages/MerchantDashboard';
 import ScreenShowcase from './pages/ScreenShowcase';
 import AddProductStudio from './pages/AddProductStudio';
+import AdminDashboard from './pages/AdminDashboard';
+import DeliveryDashboard from './pages/DeliveryDashboard';
+import Settings from './pages/Settings';
 import AuthModal from './components/AuthModal';
 
 function MainContent() {
@@ -43,6 +46,13 @@ function MainContent() {
       case 'studio':
       case 'creator':
         return <CreatorStudio />;
+
+      case 'admin':
+        return <AdminDashboard />;
+      case 'delivery':
+        return <DeliveryDashboard />;
+      case 'settings':
+        return <Settings />;
       case 'storefront':
         return <MerchantStorefront />;
       case 'merchant_campaign':

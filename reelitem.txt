@@ -1,0 +1,166 @@
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging) return;
+    const diff = e.clientY - dragStartY;
+    setDragOffset(diff);
+  };
+
+  const handleMouseUp = () => {
+    if (!isDragging) return;
+    if (dragOffset < -100) {
+      handleNextReel();
+    } else if (dragOffset > 100) {
+      handlePrevReel();
+    }
+    setIsDragging(false);
+    setDragOffset(0);
+  };
+
+  const renderReelItem = (reel, index) => {
+    const isActive = index === currentReelIndex;
+    return (
+      <div className="w-full h-full relative" key={reel.id}>
+        <ReelVideoPlayer reel={reel} isActive={isActive} isGlobalMuted={isGlobalMuted} toggleMute={() => setIsGlobalMuted(!isGlobalMuted)} />
+        
+        {/* Right Sidebar Interactions */}
+        <div className="absolute right-4 bottom-28 flex flex-col gap-6 z-20 pointer-events-none items-center">
+          <div className="flex flex-col items-center gap-1">
+            <button 
+              className="pointer-events-auto"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsLiked(!isLiked);
+                setLikesCount(prev => isLiked ? prev - 1 : prev + 1);
+              }}
+            >
+              <div className="w-[42px] h-[42px] rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center transition-transform hover:scale-110">
+                <span className={`material-symbols-outlined text-[24px] transition-colors ${isLiked ? 'text-[#d00000] drop-shadow-md' : 'text-white'}`} style={{ fontVariationSettings: isLiked ? "'FILL' 1" : "'FILL' 0" }}>favorite</span>
+              </div>
+            </button>
+            <span className="text-white text-[12px] font-bold drop-shadow-md">{(likesCount / 1000).toFixed(1)}K</span>
+          </div>
+
+          <div className="flex flex-col items-center gap-1">
+            <button className="pointer-events-auto" onClick={(e) => { e.stopPropagation(); setIsCommentsOpen(true); }}>
+              <div className="w-[42px] h-[42px] rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center transition-transform hover:scale-110">
+                <span className="material-symbols-outlined text-[24px] text-white">chat_bubble</span>
+              </div>
+            </button>
+            <span className="text-white text-[12px] font-bold drop-shadow-md">{reel.comments}</span>
+          </div>
+
+          <div className="flex flex-col items-center gap-1">
+            <button 
+              className="pointer-events-auto"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsSaved(!isSaved);
+              }}
+            >
+              <div className="w-[42px] h-[42px] rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center transition-transform hover:scale-110">
+                <span className={`material-symbols-outlined text-[24px] ${isSaved ? 'text-yellow-400' : 'text-white'}`} style={{ fontVariationSettings: isSaved ? "'FILL' 1" : "'FILL' 0" }}>bookmark</span>
+              </div>
+            </button>
+            <span className="text-white text-[12px] font-bold drop-shadow-md">{reel.saves}</span>
+          </div>
+
+          <div className="flex flex-col items-center gap-1">
+            <button className="pointer-events-auto" onClick={(e) => { e.stopPropagation(); }}>
+              <div className="w-[42px] h-[42px] rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center transition-transform hover:scale-110">
+                <span className="material-symbols-outlined text-[24px] text-white">share</span>
+              </div>
+            </button>
+            <span className="text-white text-[12px] font-bold drop-shadow-md">{isAr ? 'مشاركة' : 'Share'}</span>
+          </div>
+          
+          <div className="w-[34px] h-[34px] mt-1 rounded-full bg-slate-900 border-[6px] border-white/20 flex items-center justify-center shadow-lg animate-spin" style={{ animationDuration: '4s' }}>
+            <img src={reel.avatar} className="w-full h-full rounded-full object-cover" />
+          </div>
+        </div>
+
+        <div className="w-full pr-[60px] flex flex-col justify-end space-y-3 mt-auto pointer-events-auto">
+            {/* Floating Product Pill(s) */}
+            {(reel.products && reel.products.length > 1) ? (
+              <div 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsShopTheLookOpen(true);
+                }}
+                className="inline-flex w-fit items-center gap-2 bg-white/95 backdrop-blur-md rounded-xl py-2 px-3 shadow-lg cursor-pointer hover:bg-white active:scale-95 transition-transform animate-fade-in"
+              >
+                <div className="flex -space-x-2">
+                  {reel.products.slice(0,3).map((p, i) => (
+                    <img key={i} src={p.image} className="w-7 h-7 rounded-full border-2 border-white object-cover" />
+                  ))}
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[11px] font-black text-slate-900 leading-tight">🛍️ {isAr ? 'تسوق الإطلالة' : 'Shop the Look'}</span>
+                  <span className="text-[10px] font-bold text-gray-500 leading-tight">({reel.products.length} {isAr ? 'عناصر' : 'items'})</span>
+                </div>
+                <span className="material-symbols-outlined text-[16px] text-slate-900 ml-1">open_in_new</span>
+              </div>
+            ) : (
+              <div 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const singleProd = reel.products ? reel.products[0] : reel.product;
+                  const matched = products?.find(p => p.id === singleProd?.id) || singleProd;
+                  if (matched) openProductDetail(matched);
+                }}
+                className="inline-flex w-fit items-center gap-2 bg-white rounded-xl py-1.5 px-1.5 pr-4 shadow-lg cursor-pointer hover:bg-gray-50 active:scale-95 transition-transform"
+              >
+                <img src={reel.products ? reel.products[0].image : reel.product?.image} className="w-8 h-8 rounded-lg object-cover" />
+                <div className="flex flex-col">
+                  <span className="text-[11px] font-bold text-slate-900 leading-tight">{reel.products ? reel.products[0].title : reel.product?.title}</span>
+                  <span className="text-[10px] font-bold text-[#d00000] leading-tight">EGP {reel.products ? reel.products[0].price : reel.product?.price}</span>
+                </div>
+                <span className="material-symbols-outlined text-[14px] text-gray-400 ml-1">chevron_right</span>
+              </div>
+            )}
+
+            {/* Creator Info */}
+            <div className={`space-y-1 ${isAr ? 'text-right' : 'text-left'}`}>
+              <div 
+                className="flex items-center gap-1.5 cursor-pointer w-fit"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveTab('profile');
+                }}
+              >
+                <span className="font-bold text-[15px] text-white drop-shadow-md hover:underline">@{reel.creatorHandle}</span>
+                <span className="material-symbols-outlined text-[16px] text-blue-500 bg-white rounded-full">check_circle</span>
+              </div>
+              <p className="text-[13px] text-white drop-shadow-md leading-snug">
+                {reel.caption}
+              </p>
+              <p className="text-[13px] font-bold text-white drop-shadow-md">
+                #EgyptianFashion #OOTD #Style
+              </p>
+            </div>
+            
+            {/* Shop Now Full Width Button */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                if (reel.products && reel.products.length > 1) {
+                  setIsShopTheLookOpen(true);
+                } else {
+                  const singleProd = reel.products ? reel.products[0] : reel.product;
+                  if (singleProd) openQuickBuy(singleProd);
+                }
+              }}
+              className="w-full py-3 mt-1 rounded-xl bg-[#cc0000] text-white text-[15px] font-bold shadow-lg hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2"
+            >
+              <span className="material-symbols-outlined text-[20px]">shopping_bag</span>
+              <span>{isAr ? 'تسوق الآن' : 'Shop Now'}</span>
+            </button>
+          </div>
+        </div>
+    );
+  };
+
+  if (isLoading || reelsList.length === 0) return <div className="w-full h-full bg-black flex items-center justify-center text-white"><span className="material-symbols-outlined animate-spin text-4xl">sync</span></div>;
+
+  return (
+    <div className="w-full h-full flex flex-col items-center justify-center relative bg-black md:bg-[#121212]">

@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
+import { MerchantService } from '../../services/MerchantService';
+import { useEffect } from 'react';
 import EgLogo from '../common/EgLogo';
 
 export default function DesktopSellerDashboard() {
@@ -8,9 +10,16 @@ export default function DesktopSellerDashboard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [timeframe, setTimeframe] = useState('الأسبوع الماضي');
   const [orderFilter, setOrderFilter] = useState('all');
+  const [stats, setStats] = useState({ revenue: 0, orders: 0, reach: 0, engagement: 0 });
 
   const currentMerchant = merchants?.find(m => m.id === selectedMerchantId) || merchants?.[0];
   const merchantOrders = orders?.filter(o => o.merchantId === currentMerchant?.id) || [];
+
+  useEffect(() => {
+    if (currentMerchant?.id) {
+      MerchantService.getDashboardStats(currentMerchant.id).then(setStats);
+    }
+  }, [currentMerchant?.id]);
 
   const productsData = [
     { 

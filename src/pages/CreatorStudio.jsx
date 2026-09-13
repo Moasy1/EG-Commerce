@@ -1,45 +1,38 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
+import { UgcService } from '../services/UgcService';
+import { useEffect } from 'react';
 import DesktopCreatorAnalytics from '../components/desktop/DesktopCreatorAnalytics';
 
 export default function CreatorStudio() {
-  const { setActiveTab } = useApp();
-  const [appliedIds, setAppliedIds] = useState(['camp-1']);
+  const { setActiveTab, user } = useApp();
+  const [campaignsList, setCampaignsList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [appliedIds, setAppliedIds] = useState([]);
+  
+  useEffect(() => {
+    const loadCampaigns = async () => {
+      setLoading(true);
+      const data = await UgcService.getCampaigns();
+      setCampaignsList(data);
+      // In a real app we would also fetch user applications to populate appliedIds
+      setAppliedIds(data.filter(c => c.status === 'applied').map(c => c.id));
+      setLoading(false);
+    };
+    loadCampaigns();
+  }, []);
   const [submissionUrl, setSubmissionUrl] = useState('');
   const [submittedMessage, setSubmittedMessage] = useState('');
 
-  const campaigns = [
-    {
-      id: 'camp-1',
-      brand: 'Talieska Studio • تاليسكا ستوديو',
-      title: 'حملة استعراض كولكشن الكتان الصيفي 2026',
-      product: 'فستان كتان صيفي بوهيمي أصيل',
-      rewardType: 'Free Product + 800 EGP + 10% Commission',
-      slots: 'باقي 3 مقاعد من 10 (Slots)',
-      status: 'Approved • مطلوب تسليم الـ Draft'
-    },
-    {
-      id: 'camp-2',
-      brand: 'Theba Jewelry • مجوهرات طيبة',
-      title: 'ريلز تنسيق عقد اللوتس مع أزياء العمل والـ Outfits اليومية',
-      product: 'عقد ذهبي مستوحى من اللوتس الفرعوني',
-      rewardType: 'Free Gift + 15% Sales Commission',
-      slots: 'باقي 5 مقاعد من 8 (Slots)',
-      status: 'Open for Application • متاح للتقديم'
-    },
-    {
-      id: 'camp-3',
-      brand: 'Khan El Khalili Workshop • ورشة خان الخليلي',
-      title: 'فيديو ريفيو وتفاصيل صناعة شنط الجلد الطبيعي يدوياً',
-      product: 'حقيبة كانفاس يدوية أصلية',
-      rewardType: 'Free Bag + 500 EGP',
-      slots: 'باقي مقعدين فقط (2 Slots)',
-      status: 'Open for Application • متاح للتقديم'
-    }
-  ];
+  
 
-  const handleApply = (id) => {
+  const handleApply = async (id) => {
+    if (!user) {
+      alert("Please sign in to apply");
+      return;
+    }
     if (!appliedIds.includes(id)) {
+      await UgcService.applyForCampaign(id, user.id);
       setAppliedIds(prev => [...prev, id]);
     }
   };
@@ -112,18 +105,18 @@ export default function CreatorStudio() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {campaigns.map((camp) => (
+            {campaignsList.map((camp) => (
               <div key={camp.id} className="bg-white rounded-2xl border border-gray-200 p-4 space-y-3 shadow-xs">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-[#d00000]">{camp.brand}</span>
+                  <span className="text-xs font-bold text-[#d00000]">{camp.merchants?.name || camp.merchant_name || 'Brand'}</span>
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 font-medium">
-                    {camp.slots}
+                    {(camp.slots_available || 0) + ' Slots left'}
                   </span>
                 </div>
                 <h4 className="text-sm font-bold text-slate-900 leading-snug">{camp.title}</h4>
                 <div className="text-xs text-gray-500 space-y-1 bg-gray-50 p-2.5 rounded-xl border border-gray-100">
-                  <p><span className="font-bold text-slate-700">المنتج:</span> {camp.product}</p>
-                  <p><span className="font-bold text-slate-700">المكافأة:</span> {camp.rewardType}</p>
+                  <p><span className="font-bold text-slate-700">المنتج:</span> {camp.products?.title || 'Product Name'}</p>
+                  <p><span className="font-bold text-slate-700">المكافأة:</span> {camp.reward_type === 'free_product' ? 'Free Product' : (camp.reward_type || 'Reward')}</p>
                 </div>
                 <div className="pt-1">
                   {appliedIds.includes(camp.id) ? (

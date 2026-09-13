@@ -3,13 +3,21 @@ import { useApp } from '../context/AppContext';
 import { OrderService } from '../services/OrderService';
 
 export default function Checkout() {
-  const { cartItems, grandTotal, discountFromPoints, shippingTotal, subtotal, setActiveTab, setOrders } = useApp();
+  const { cartItems, grandTotal, discountFromPoints, shippingTotal, subtotal, setActiveTab, setOrders, user } = useApp();
   const [paymentMethod, setPaymentMethod] = useState('instapay');
   const [address, setAddress] = useState('القاهرة، مصر الجديدة، شارع الثورة عمارة 14');
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handlePlaceOrder = async () => {
     setIsProcessing(true);
+    
+    // Simulate Paymob / Stripe Gateway redirection & processing delay
+    if (paymentMethod === 'card') {
+      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulating 3D secure
+    } else if (paymentMethod === 'instapay') {
+      await new Promise(resolve => setTimeout(resolve, 800)); // Simulating Instapay deep link verification
+    }
+    
     try {
       const order = await OrderService.createOrder(
         cartItems,
@@ -17,7 +25,7 @@ export default function Checkout() {
         discountFromPoints,
         shippingTotal,
         grandTotal,
-        null // We'd pass current user ID here when auth is integrated
+        user?.id || null
       );
       
       // Update local orders list conceptually
@@ -28,7 +36,7 @@ export default function Checkout() {
     } catch (err) {
       console.error(err);
       setIsProcessing(false);
-      alert('Failed to place order.');
+      alert('Failed to place order. Payment gateway declined.');
     }
   };
 

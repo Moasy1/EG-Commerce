@@ -1,8 +1,23 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
+import { useEffect, useState } from 'react';
+import { OrderService } from '../services/OrderService';
 
 export default function OrderTracking() {
-  const { setActiveTab } = useApp();
+  const { setActiveTab, user } = useApp();
+  const [orders, setOrders] = useState([]);
+
+  useEffect(() => {
+    const loadOrders = async () => {
+      if (user) {
+        const data = await OrderService.getOrders(user.id);
+        setOrders(data);
+      }
+    };
+    loadOrders();
+  }, [user]);
+
+  const latestOrder = orders.length > 0 ? orders[0] : null;
 
   return (
     <div className="w-full flex-1 max-w-3xl mx-auto px-4 md:px-6 py-4 pb-28 md:pb-12 text-on-surface text-right">
@@ -11,9 +26,9 @@ export default function OrderTracking() {
         <div>
           <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-secondary/10 text-secondary text-xs font-semibold mb-1.5">
             <span className="material-symbols-outlined text-[15px]">check_circle</span>
-            <span>Order Confirmed • تم تأكيد الأوردر بنجاح! 🎉</span>
+            <span>{latestOrder?.status === 'pending' ? 'Order Pending • جاري تأكيد الطلب ⏳' : 'Order Confirmed • تم تأكيد الأوردر بنجاح! 🎉'}</span>
           </div>
-          <h1 className="font-serif text-lg md:text-xl font-bold text-on-surface">Tracking #EG-984201 • رقم الشحنة</h1>
+          <h1 className="font-serif text-lg md:text-xl font-bold text-on-surface">Tracking #{latestOrder ? latestOrder.id.substring(0,8).toUpperCase() : 'EG-984201'} • رقم الشحنة</h1>
           <p className="text-xs text-on-surface-variant mt-0.5">
             البراندات بدأت تجهيز طلبك دلوقتي في مسار الشحن الموحد
           </p>

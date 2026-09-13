@@ -9,10 +9,14 @@ export default function Header() {
     setActiveTab, 
     totalCartCount, 
     language,
-    setLanguage
+    setLanguage,
+    user,
+    setUser,
+    setIsAuthModalOpen
   } = useApp();
 
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false);
 
   const isAr = language === 'ar';
@@ -238,7 +242,7 @@ export default function Header() {
           <div className="relative" onMouseLeave={() => setIsProfileMenuOpen(false)}>
             <div 
               onMouseEnter={() => setIsProfileMenuOpen(true)}
-              onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+              onClick={() => { setIsProfileMenuOpen(!isProfileMenuOpen); setIsNotifOpen(false); }}
               className="cursor-pointer flex items-center gap-2 pl-1 ml-1"
             >
               <img 
@@ -273,6 +277,16 @@ export default function Header() {
                 <button onClick={() => { setActiveTab('dashboard'); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-left">
                   <span className="material-symbols-outlined text-[18px]">storefront</span> {isAr ? 'مركز التجار' : 'Merchant Centre'}
                 </button>
+                <button onClick={() => { setActiveTab('delivery'); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-left">
+                  <span className="material-symbols-outlined text-[18px]">two_wheeler</span> {isAr ? 'بوابة المناديب' : 'Rider Portal'}
+                </button>
+                <button onClick={() => { setActiveTab('admin'); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-left">
+                  <span className="material-symbols-outlined text-[18px]">admin_panel_settings</span> {isAr ? 'لوحة الإدارة' : 'Admin Dashboard'}
+                </button>
+                <button onClick={() => { setActiveTab('settings'); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-left">
+                  <span className="material-symbols-outlined text-[18px]">settings</span> {isAr ? 'الإعدادات' : 'Settings'}
+                </button>
+
                 <button onClick={() => { setActiveTab('showcase'); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-left text-blue-600 mt-1 border-t border-gray-50 pt-3">
                   <span className="material-symbols-outlined text-[18px]">visibility</span> {isAr ? 'عرض الشاشات (Dev)' : 'Screen Index (Dev)'}
                 </button>

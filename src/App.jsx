@@ -85,6 +85,7 @@ function MainContent() {
         {renderActiveScreen()}
       </main>
 
+      <AuthModal />
       <QuickBuyDrawer />
       
       {/* Mobile-only bottom navigation bar */}

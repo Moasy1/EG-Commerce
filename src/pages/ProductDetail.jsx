@@ -9,6 +9,7 @@ export default function ProductDetail() {
   const [isFavorited, setIsFavorited] = useState(false);
   const [addedToast, setAddedToast] = useState(false);
   const [isPlayingVideo, setIsPlayingVideo] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   // Fallback to Linen Co-ord Set if no product selected
   const product = selectedProduct || {
@@ -22,6 +23,19 @@ export default function ProductDetail() {
     reviewsCount: 142,
     sizes: ['XS', 'S', 'M', 'L', 'XL'],
     merchantId: 'm-01'
+  };
+  const productImages = product.images && product.images.length > 0 ? product.images : [
+    product.image,
+    product.image.replace('.jpg', '_2.jpg').replace('.webp', '_2.webp').replace('.png', '_2.png'),
+    product.image.replace('.jpg', '_3.jpg').replace('.webp', '_3.webp').replace('.png', '_3.png'),
+    product.image.replace('.jpg', '_4.jpg').replace('.webp', '_4.webp').replace('.png', '_4.png'),
+  ];
+
+  const handleScroll = (e) => {
+    const scrollLeft = e.target.scrollLeft;
+    const width = e.target.clientWidth;
+    const index = Math.round(scrollLeft / width);
+    setCurrentImageIndex(index);
   };
 
   const handleAddToCart = () => {
@@ -85,11 +99,25 @@ export default function ProductDetail() {
               className="w-full h-full object-cover"
             />
           ) : (
-            <img 
-              src={product.image} 
-              alt={product.title} 
-              className="w-full h-full object-cover"
-            />
+            <div 
+              className="w-full h-full flex overflow-x-auto snap-x snap-mandatory hide-scrollbar"
+              onScroll={handleScroll}
+            >
+              {productImages.map((imgSrc, i) => (
+                <img 
+                  key={i}
+                  src={imgSrc} 
+                  alt={`${product.title} - Image ${i+1}`}
+                  className="w-full h-full object-cover shrink-0 snap-center"
+                  onError={(e) => {
+                    // Fallback to main image if the mock numbered images don't exist
+                    if (e.target.src !== product.image) {
+                      e.target.src = product.image;
+                    }
+                  }}
+                />
+              ))}
+            </div>
           )}
 
           {/* Watch Reel / Photo Badge */}
@@ -107,10 +135,14 @@ export default function ProductDetail() {
 
           {!isPlayingVideo && (
             <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-black/30 backdrop-blur-md px-2 py-1 rounded-full">
-              <span className="w-2 h-2 rounded-full bg-[#d00000]" />
-              <span className="w-1.5 h-1.5 rounded-full bg-white/70" />
-              <span className="w-1.5 h-1.5 rounded-full bg-white/70" />
-              <span className="w-1.5 h-1.5 rounded-full bg-white/70" />
+              {productImages.map((_, i) => (
+                <span 
+                  key={i} 
+                  className={`rounded-full transition-all duration-300 ${
+                    i === currentImageIndex ? 'w-2 h-2 bg-[#d00000]' : 'w-1.5 h-1.5 bg-white/70'
+                  }`} 
+                />
+              ))}
             </div>
           )}
         </div>

@@ -269,6 +269,9 @@ export default function Header() {
                 <button onClick={() => { setActiveTab('rewards'); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-left">
                   <span className="material-symbols-outlined text-[18px]">workspace_premium</span> {isAr ? 'المكافآت' : 'Rewards Hub'}
                 </button>
+                <button onClick={() => { setActiveTab('dashboard'); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-left">
+                  <span className="material-symbols-outlined text-[18px]">storefront</span> {isAr ? 'مركز التجار' : 'Merchant Centre'}
+                </button>
                 <button onClick={() => { setActiveTab('showcase'); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-left text-blue-600 mt-1 border-t border-gray-50 pt-3">
                   <span className="material-symbols-outlined text-[18px]">visibility</span> {isAr ? 'عرض الشاشات (Dev)' : 'Screen Index (Dev)'}
                 </button>

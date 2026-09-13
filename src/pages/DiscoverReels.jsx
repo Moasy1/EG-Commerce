@@ -4,7 +4,7 @@ import EgLogo from '../components/common/EgLogo';
 import { ReelsService } from '../services/ReelsService';
 import DesktopFeed from '../components/desktop/DesktopFeed';
 
-const ReelVideoPlayer = ({ reel, isActive, isGlobalMuted, toggleMute }) => {
+const ReelVideoPlayer = ({ reel, isActive, isAdjacent, isGlobalMuted, toggleMute }) => {
   const videoRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -50,10 +50,12 @@ const ReelVideoPlayer = ({ reel, isActive, isGlobalMuted, toggleMute }) => {
       <video
         ref={videoRef}
         src={reel.videoBg}
+        poster={reel.avatar}
         className="w-full h-full object-cover"
         loop
         playsInline
         muted={isGlobalMuted}
+        preload={isActive ? "auto" : isAdjacent ? "metadata" : "none"}
       />
       {/* Mute Button */}
       <button 
@@ -500,15 +502,19 @@ export default function DiscoverReels() {
   const handleTouchMove = (e) => {
     if (!touchStartY || !isDragging) return;
     const currentY = e.touches[0].clientY;
-    const diff = currentY - touchStartY;
+    let diff = currentY - touchStartY;
+    // Rubber-band resistance at list boundaries
+    if ((currentReelIndex === 0 && diff > 0) || (currentReelIndex === reelsList.length - 1 && diff < 0)) {
+      diff = diff * 0.35;
+    }
     setDragOffset(diff);
   };
 
   const handleTouchEnd = () => {
     if (!touchStartY) return;
-    if (dragOffset < -80) {
+    if (dragOffset < -60) {
       handleNextReel();
-    } else if (dragOffset > 80) {
+    } else if (dragOffset > 60) {
       handlePrevReel();
     }
     setTouchStartY(null);
@@ -524,15 +530,19 @@ export default function DiscoverReels() {
 
   const handleMouseMove = (e) => {
     if (!isDragging) return;
-    const diff = e.clientY - dragStartY;
+    let diff = e.clientY - dragStartY;
+    // Rubber-band resistance at list boundaries
+    if ((currentReelIndex === 0 && diff > 0) || (currentReelIndex === reelsList.length - 1 && diff < 0)) {
+      diff = diff * 0.35;
+    }
     setDragOffset(diff);
   };
 
   const handleMouseUp = () => {
     if (!isDragging) return;
-    if (dragOffset < -100) {
+    if (dragOffset < -70) {
       handleNextReel();
-    } else if (dragOffset > 100) {
+    } else if (dragOffset > 70) {
       handlePrevReel();
     }
     setIsDragging(false);
@@ -541,9 +551,16 @@ export default function DiscoverReels() {
 
   const renderReelItem = (reel, index) => {
     const isActive = index === currentReelIndex;
+    const isAdjacent = Math.abs(index - currentReelIndex) <= 1;
     return (
       <div className="w-full h-full relative" key={reel.id}>
-        <ReelVideoPlayer reel={reel} isActive={isActive} isGlobalMuted={isGlobalMuted} toggleMute={() => setIsGlobalMuted(!isGlobalMuted)} />
+        <ReelVideoPlayer 
+          reel={reel} 
+          isActive={isActive} 
+          isAdjacent={isAdjacent}
+          isGlobalMuted={isGlobalMuted} 
+          toggleMute={() => setIsGlobalMuted(!isGlobalMuted)} 
+        />
         
         {/* Right Sidebar Interactions */}
         <div className="absolute right-4 bottom-6 flex flex-col gap-6 z-20 pointer-events-none items-center">
@@ -782,9 +799,13 @@ export default function DiscoverReels() {
             onMouseUp={handleMouseUp}
             onMouseLeave={() => { setIsDragging(false); setDragOffset(0); }}
           >
-            {/* Smooth Sliding Reel Container */}
+            {/* Smooth Sliding Reel Container with Zero-Lag Dragging */}
             <div 
-              className="w-full h-full transition-transform duration-500 ease-out"
+              className={`w-full h-full gpu-layer ${
+                isDragging 
+                  ? 'transition-none' 
+                  : 'transition-transform duration-400 ease-[cubic-bezier(0.22,1,0.36,1)]'
+              }`}
               style={{
                 transform: `translateY(calc(-${currentReelIndex * 100}% + ${dragOffset}px))`,
               }}
@@ -847,9 +868,13 @@ export default function DiscoverReels() {
           onMouseUp={handleMouseUp}
           onMouseLeave={() => { setIsDragging(false); setDragOffset(0); }}
         >
-          {/* Smooth Sliding Reels Container */}
+          {/* Smooth Sliding Reels Container with Zero-Lag Dragging */}
           <div 
-            className="w-full h-full transition-transform duration-300 ease-out flex flex-col"
+            className={`w-full h-full gpu-layer flex flex-col ${
+              isDragging 
+                ? 'transition-none' 
+                : 'transition-transform duration-400 ease-[cubic-bezier(0.22,1,0.36,1)]'
+            }`}
             style={{
               transform: `translateY(calc(-${currentReelIndex * 100}% + ${dragOffset}px))`,
             }}

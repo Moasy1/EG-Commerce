@@ -1,25 +1,12 @@
 import { supabase } from '../lib/supabase';
 
-const SUPER_ADMIN_MOCK = {
-  id: 'sa-01',
-  email: 'admin',
-  role: 'superadmin',
-  name: 'Super Admin',
-  profile: { role: 'superadmin' }
-};
-
 export const AuthService = {
   async getCurrentUser() {
-    // Check if we have the mock super admin stored locally to maintain session
-    if (localStorage.getItem('eg_super_admin')) {
-      return SUPER_ADMIN_MOCK;
-    }
-
     try {
       const { data: { user }, error } = await supabase.auth.getUser();
       if (error || !user) return null;
       
-      // Fetch profile safely
+      // Fetch user profile securely
       let profile = null;
       try {
         const { data } = await supabase
@@ -32,7 +19,7 @@ export const AuthService = {
         console.warn('Could not fetch profile:', err);
       }
         
-      // Default to metadata role if profile doesn't have it yet
+      // Default to profile role, then metadata role, fallback to 'user'
       const role = profile?.role || user.user_metadata?.role || 'user';
         
       return { ...user, role, profile: { ...profile, role } };
@@ -42,15 +29,6 @@ export const AuthService = {
   },
 
   async signInWithEmail(email, password) {
-    // Hardcoded super admin
-    if (email.toLowerCase() === 'admin' && password === 'admin') {
-      localStorage.setItem('eg_super_admin', 'true');
-      return { user: SUPER_ADMIN_MOCK };
-    }
-    
-    // Clear super admin mock just in case
-    localStorage.removeItem('eg_super_admin');
-
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password
@@ -60,10 +38,10 @@ export const AuthService = {
     return data;
   },
 
-  async signUpWithEmail(email, password, role = 'user', name = '') {
-    if (email.toLowerCase() === 'admin') {
-      throw new Error('Admin username is reserved');
-    }
+  async signUpWithEmail(email, password, requestedRole = 'user', name = '') {
+    // Prevent privilege escalation: only allow standard buyer/creator/merchant requests
+    // superadmin and admin roles must be explicitly provisioned in the database
+    const sanitizedRole = ['creator', 'merchant'].includes(requestedRole) ? requestedRole : 'user';
 
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -71,21 +49,21 @@ export const AuthService = {
       options: {
         data: {
           name,
-          role
+          role: sanitizedRole
         }
       }
     });
     
     if (error) throw error;
     
-    // Auto-create profile entry since Supabase triggers might not be set up in the preview
+    // Auto-create profile entry with sanitized role if DB trigger is not active
     if (data?.user) {
       try {
         await supabase.from('profiles').insert([
-          { id: data.user.id, name, role, email }
+          { id: data.user.id, name, role: sanitizedRole, email }
         ]);
       } catch (err) {
-        console.warn('Could not auto-create profile, might be handled by DB trigger:', err);
+        console.warn('Could not auto-create profile (handled by trigger or exists):', err);
       }
     }
     
@@ -93,7 +71,6 @@ export const AuthService = {
   },
 
   async signOut() {
-    localStorage.removeItem('eg_super_admin');
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
   }

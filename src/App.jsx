@@ -82,7 +82,12 @@ function MainContent() {
       </div>
       
       <main className={`flex-1 flex flex-col w-full min-h-0 ${activeTab === 'reels' ? 'overflow-hidden' : ''}`}>
-        {renderActiveScreen()}
+        <div 
+          key={activeTab} 
+          className={`w-full flex-1 flex flex-col ${activeTab === 'reels' ? 'h-full' : 'animate-page-enter'}`}
+        >
+          {renderActiveScreen()}
+        </div>
       </main>
 
       <AuthModal />

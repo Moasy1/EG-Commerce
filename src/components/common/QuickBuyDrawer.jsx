@@ -26,16 +26,16 @@ export default function QuickBuyDrawer() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 text-right">
-      {/* Backdrop */}
+      {/* Backdrop with smooth blur */}
       <div 
         onClick={closeQuickBuy}
-        className="absolute inset-0 bg-black/40 backdrop-blur-xs transition-opacity animate-fade-in"
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity animate-backdrop"
       />
 
-      {/* Sheet Container in warm ivory */}
-      <div className="relative w-full max-w-lg bg-surface-container-lowest rounded-t-2xl sm:rounded-2xl border border-surface-container-high shadow-2xl p-5 pb-8 sm:pb-6 z-10 animate-fade-in text-on-surface">
+      {/* Sheet Container with Spring Physics */}
+      <div className="relative w-full max-w-lg bg-surface-container-lowest rounded-t-3xl sm:rounded-2xl border border-surface-container-high shadow-2xl p-5 pb-8 sm:pb-6 z-10 animate-sheet-slide-up text-on-surface gpu-layer">
         {/* Drag handle */}
-        <div className="w-10 h-1 bg-surface-container-highest rounded-full mx-auto mb-3" />
+        <div className="w-12 h-1.5 bg-surface-container-highest rounded-full mx-auto mb-3 opacity-80" />
 
         {/* Header */}
         <div className="flex items-start justify-between gap-3 mb-4">

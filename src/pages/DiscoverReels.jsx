@@ -99,6 +99,13 @@ export default function DiscoverReels() {
   const [reelsList, setReelsList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
 
   useEffect(() => {
     const fetchReels = async () => {
@@ -809,7 +816,9 @@ export default function DiscoverReels() {
         </div>
       </div>
 
-      {/* 1. DESKTOP GRID VIEW (when toggled to Grid) */}
+      {!isMobile && (
+        <>
+        {/* 1. DESKTOP GRID VIEW (when toggled to Grid) */}
       {desktopViewMode === 'grid' ? (
         <div className="hidden md:block w-full max-w-[1780px] mx-auto px-8 py-4 overflow-y-auto flex-1 min-h-0">
           <div className="rounded-3xl border border-gray-800 bg-white shadow-xl overflow-hidden">
@@ -879,7 +888,10 @@ export default function DiscoverReels() {
         </div>
       )}
 
+        </>
+      )}
       {/* 3. MOBILE FULL-SCREEN VIEW (Native Vertical Swipe Experience) */}
+      {isMobile && (
       <div 
         className="md:hidden relative w-full h-full pb-14 bg-black text-white flex flex-col overflow-hidden select-none font-sans mx-auto max-w-[440px]"
       >
@@ -956,6 +968,7 @@ export default function DiscoverReels() {
         </div>
       </div>
 
+      )}
       {/* Interactive Comments Drawer */}
       {isCommentsOpen && (
         <div 

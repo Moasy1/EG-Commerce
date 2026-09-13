@@ -248,7 +248,7 @@ export default function Header() {
             </div>
             
             {isProfileMenuOpen && (
-              <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden text-slate-900 z-50 flex flex-col py-1 animate-fade-in">
+              <div className={`absolute ${isAr ? 'left-0' : 'right-0'} top-full mt-1 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden text-slate-900 z-50 flex flex-col py-1 animate-fade-in`}>
                 <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-3">
                   <img src="/images/reels/reel_2.jpg" className="w-10 h-10 rounded-full" />
                   <div className="flex flex-col text-left">

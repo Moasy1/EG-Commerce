@@ -11,32 +11,21 @@ export const ReelsService = {
       console.warn('DB Reels fetch failed, using local mock data:', err.message);
       
       const local = localStorage.getItem('eg_reels_mock');
-      if (local) return JSON.parse(local);
-      
-      // Seed some initial Reels if none exist
-      const mockReels = [
-        {
-          id: 'mock-1',
-          video_url: '/images/reels/fashion_kaizen_dress.mp4',
-          thumbnail_url: '/images/reels/fashion_kaizen_dress_thumb.jpg',
-          caption: 'فستان بوهيمي أنيق للمحجبات #fashion #محجبات',
-          likes_count: 1450,
-          views_count: 5600,
-          shares_count: 230,
-          comments: 45
-        },
-        {
-          id: 'mock-2',
-          video_url: '/images/reels/fashion_oversized_shirt.mp4',
-          thumbnail_url: '/images/reels/fashion_oversized_shirt_thumb.jpg',
-          caption: 'أوفرسايز شيرت كتان مريح جداً للصيف 🔥',
-          likes_count: 890,
-          views_count: 3200,
-          shares_count: 120,
-          comments: 22
+      if (local) {
+        try {
+          const parsed = JSON.parse(local);
+          // If local data exists but it's the old format without creatorHandle/products, ignore it to force re-seed
+          if (parsed && parsed.length > 0 && !parsed[0].creatorHandle) {
+             return [];
+          }
+          return parsed;
+        } catch(e) {
+          return [];
         }
-      ];
-      return mockReels;
+      }
+      
+      // Return empty so DiscoverReels can seed its rich DEFAULT_REELS
+      return [];
     }
   },
 
@@ -49,12 +38,23 @@ export const ReelsService = {
       console.warn('DB Save Reel failed, saving to local storage:', err.message);
       let local = [];
       const localStr = localStorage.getItem('eg_reels_mock');
-      if (localStr) local = JSON.parse(localStr);
+      if (localStr) {
+        try {
+          local = JSON.parse(localStr);
+          // Clean up old format if present before adding
+          if (local.length > 0 && !local[0].creatorHandle) {
+             local = [];
+          }
+        } catch(e) {}
+      }
       
-      const newReel = { ...reelData, id: `mock-${Date.now()}` };
-      local.unshift(newReel);
-      localStorage.setItem('eg_reels_mock', JSON.stringify(local));
-      return newReel;
+      // Check if already exists
+      if (!local.find(r => r.id === reelData.id)) {
+        local.push(reelData);
+        localStorage.setItem('eg_reels_mock', JSON.stringify(local));
+      }
+      
+      return reelData;
     }
   }
 };

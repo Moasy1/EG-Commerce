@@ -23,14 +23,14 @@ export default function Header() {
   if (isCheckout) {
     return (
       <header className="sticky top-0 w-full z-40 bg-white/95 backdrop-blur-md border-b border-gray-200/80 text-slate-900 shadow-xs">
-        <div className="max-w-[1780px] mx-auto px-4 md:px-8 py-3 flex items-center justify-between gap-4">
+        <div className="max-w-[1780px] mx-auto px-2 sm:px-4 md:px-8 py-2 sm:py-3 flex items-center justify-between gap-1 sm:gap-4">
           <div 
             onClick={() => setActiveTab('shop')}
-            className="flex items-center gap-3.5 cursor-pointer shrink-0 group"
+            className="flex items-center gap-1.5 sm:gap-3.5 cursor-pointer shrink-0 group"
           >
-            <EgLogo className="w-9 h-9 group-hover:scale-105 transition-transform" color="#d00000" />
+            <EgLogo className="w-7 h-7 sm:w-9 sm:h-9 group-hover:scale-105 transition-transform" color="#d00000" />
             <div className="flex flex-col text-left">
-              <span className="text-xl font-black tracking-tight leading-none text-slate-900">
+              <span className="text-base sm:text-xl font-black tracking-tight leading-none text-slate-900">
                 EG-Commerce
               </span>
               <span className="text-[11px] font-bold text-gray-400 mt-0.5">
@@ -200,10 +200,10 @@ export default function Header() {
         </nav>
 
         {/* 4. Right: Action Icons & Profile */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
           <button
             onClick={() => setLanguage(l => l === 'ar' ? 'en' : 'ar')}
-            className={`px-2.5 py-1 rounded-full border text-[11px] font-bold transition-colors flex items-center gap-1 shadow-xs ${
+            className={`hidden sm:flex px-2.5 py-1 rounded-full border text-[11px] font-bold transition-colors items-center gap-1 shadow-xs ${
               isReels ? 'bg-white/10 hover:bg-white/20 border-white/20 text-white' : 'bg-gray-50 hover:bg-gray-100 border-gray-200 text-slate-900'
             }`}
           >
@@ -256,8 +256,12 @@ export default function Header() {
                     <span className="text-[10px] text-gray-500">@ahmed_fits</span>
                   </div>
                 </div>
+
                 <button onClick={() => { setActiveTab('profile'); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-left mt-1">
                   <span className="material-symbols-outlined text-[18px]">person</span> {isAr ? 'الملف الشخصي' : 'My Profile'}
+                </button>
+                <button onClick={() => { setLanguage(l => l === 'ar' ? 'en' : 'ar'); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex sm:hidden items-center gap-2 text-left">
+                  <span className="material-symbols-outlined text-[18px]">language</span> {isAr ? 'Switch to English' : 'التبديل للعربية'}
                 </button>
                 <button onClick={() => { setActiveTab('tracking'); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-left">
                   <span className="material-symbols-outlined text-[18px]">local_shipping</span> {isAr ? 'الطلبات' : 'Orders'}

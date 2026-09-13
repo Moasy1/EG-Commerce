@@ -668,6 +668,7 @@ export function AppProvider({ children }) {
       }
       if (currentUser) {
         setUser(currentUser);
+        if (currentUser.role) setRole(currentUser.role);
       }
       
       const fetchedProducts = await ProductService.getProducts();

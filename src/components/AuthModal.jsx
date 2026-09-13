@@ -3,12 +3,12 @@ import { useApp } from '../context/AppContext';
 import { AuthService } from '../services/AuthService';
 
 export default function AuthModal() {
-  const { isAuthModalOpen, setIsAuthModalOpen, setUser, isAr } = useApp();
+  const { isAuthModalOpen, setIsAuthModalOpen, setUser, setRole, isAr } = useApp();
   const [mode, setMode] = useState('login'); // 'login' or 'register'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [role, setRole] = useState('buyer');
+  const [selectedRole, setSelectedRole] = useState('user');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -23,11 +23,12 @@ export default function AuthModal() {
       if (mode === 'login') {
         await AuthService.signInWithEmail(email, password);
       } else {
-        await AuthService.signUpWithEmail(email, password, role, name);
+        await AuthService.signUpWithEmail(email, password, selectedRole, name);
       }
       
       const currentUser = await AuthService.getCurrentUser();
       setUser(currentUser);
+      if (currentUser?.role) setRole(currentUser.role);
       setIsAuthModalOpen(false);
     } catch (err) {
       setError(err.message || 'Authentication failed');
@@ -82,13 +83,13 @@ export default function AuthModal() {
                   {isAr ? 'نوع الحساب' : 'Account Type'}
                 </label>
                 <select 
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
+                  value={selectedRole}
+                  onChange={(e) => setSelectedRole(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#d00000] focus:bg-white transition-all"
                 >
-                  <option value="buyer">{isAr ? 'مشتري' : 'Buyer'}</option>
-                  <option value="creator">{isAr ? 'صانع محتوى' : 'Creator'}</option>
+                  <option value="user">{isAr ? 'مستخدم' : 'User'}</option>
                   <option value="merchant">{isAr ? 'تاجر' : 'Merchant'}</option>
+                  <option value="driver">{isAr ? 'سائق' : 'Driver'}</option>
                 </select>
               </div>
             </>
@@ -96,15 +97,15 @@ export default function AuthModal() {
 
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1">
-              {isAr ? 'البريد الإلكتروني' : 'Email Address'}
+              {isAr ? 'البريد الإلكتروني أو اسم المستخدم' : 'Username or Email'}
             </label>
             <input 
-              type="email" 
+              type="text" 
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#d00000] focus:bg-white transition-all"
-              placeholder="name@example.com"
+              placeholder={isAr ? 'اسم المستخدم أو البريد' : 'admin or name@example.com'}
             />
           </div>
 

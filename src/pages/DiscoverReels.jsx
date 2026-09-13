@@ -118,6 +118,7 @@ export default function DiscoverReels() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartY, setDragStartY] = useState(0);
   const [dragOffset, setDragOffset] = useState(0);
+  const [isCaptionExpanded, setIsCaptionExpanded] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const lastScrollTime = useRef(0);
 
@@ -462,6 +463,7 @@ export default function DiscoverReels() {
     setCurrentReelIndex((prev) => (prev + 1) % reelsList.length);
     setIsLiked(false);
     setIsSaved(false);
+    setIsCaptionExpanded(false);
     setTimeout(() => setIsTransitioning(false), 300);
   };
 
@@ -471,6 +473,7 @@ export default function DiscoverReels() {
     setCurrentReelIndex((prev) => (prev - 1 + reelsList.length) % reelsList.length);
     setIsLiked(false);
     setIsSaved(false);
+    setIsCaptionExpanded(false);
     setTimeout(() => setIsTransitioning(false), 300);
   };
 
@@ -543,7 +546,7 @@ export default function DiscoverReels() {
         <ReelVideoPlayer reel={reel} isActive={isActive} isGlobalMuted={isGlobalMuted} toggleMute={() => setIsGlobalMuted(!isGlobalMuted)} />
         
         {/* Right Sidebar Interactions */}
-        <div className="absolute right-4 bottom-28 flex flex-col gap-6 z-20 pointer-events-none items-center">
+        <div className="absolute right-4 bottom-6 flex flex-col gap-6 z-20 pointer-events-none items-center">
           <div className="flex flex-col items-center gap-1">
             <button 
               className="pointer-events-auto"
@@ -598,7 +601,7 @@ export default function DiscoverReels() {
           </div>
         </div>
 
-        <div className="absolute bottom-24 left-4 right-[60px] flex flex-col justify-end space-y-3 z-20 pointer-events-auto">
+        <div className="absolute bottom-6 left-4 right-[60px] flex flex-col justify-end space-y-3 z-20 pointer-events-auto">
             {/* Floating Product Pill(s) */}
             {(reel.products && reel.products.length > 1) ? (
               <div 
@@ -650,12 +653,24 @@ export default function DiscoverReels() {
                 <span className="font-bold text-[15px] text-white drop-shadow-md hover:underline">{reel.creatorHandle}</span>
                 <span className="material-symbols-outlined text-[16px] text-blue-500 bg-white rounded-full">check_circle</span>
               </div>
-              <p className="text-[13px] text-white drop-shadow-md leading-snug">
-                {reel.caption}
-              </p>
-              <p className="text-[13px] font-bold text-white drop-shadow-md">
-                #EgyptianFashion #OOTD #Style
-              </p>
+              
+              <div 
+                className="cursor-pointer space-y-1"
+                onClick={(e) => { e.stopPropagation(); setIsCaptionExpanded(!isCaptionExpanded); }}
+              >
+                <div className={`text-[13px] text-white drop-shadow-md leading-snug transition-all ${isCaptionExpanded ? '' : 'line-clamp-1'}`}>
+                  {reel.caption}
+                </div>
+                {!isCaptionExpanded && (
+                  <div className="font-bold text-white/90 text-[12px] drop-shadow-md hover:underline">{isAr ? 'عرض المزيد' : 'more'}</div>
+                )}
+                {isCaptionExpanded && (
+                  <p className="text-[13px] font-bold text-white drop-shadow-md animate-fade-in">
+                    #EgyptianFashion #OOTD #Style
+                  </p>
+                )}
+              </div>
+
             </div>
             
             {/* Shop Now Full Width Button */}

@@ -82,5 +82,110 @@ export const ReelsService = {
     }
 
     return formattedReel;
+  },
+
+  async deleteReel(reelId) {
+    // 1. Delete from Supabase
+    try {
+      await supabase.from('reels').delete().eq('id', reelId);
+    } catch (err) {
+      console.warn('DB delete reel skipped/failed:', err.message);
+    }
+
+    // 2. Remove from local storage
+    try {
+      const localStr = localStorage.getItem('eg_reels_mock_v3');
+      if (localStr) {
+        const list = JSON.parse(localStr);
+        const filtered = list.filter(r => r.id !== reelId);
+        localStorage.setItem('eg_reels_mock_v3', JSON.stringify(filtered));
+      }
+    } catch (e) {
+      console.warn('Local storage delete reel failed:', e);
+    }
+    return true;
+  },
+
+  async updateReel(reelId, updates) {
+    // 1. Update in Supabase
+    try {
+      await supabase.from('reels').update(updates).eq('id', reelId);
+    } catch (err) {
+      console.warn('DB update reel skipped/failed:', err.message);
+    }
+
+    // 2. Update in local storage
+    try {
+      const localStr = localStorage.getItem('eg_reels_mock_v3');
+      if (localStr) {
+        const list = JSON.parse(localStr);
+        const updated = list.map(r => r.id === reelId ? { ...r, ...updates } : r);
+        localStorage.setItem('eg_reels_mock_v3', JSON.stringify(updated));
+      }
+    } catch (e) {
+      console.warn('Local storage update reel failed:', e);
+    }
+    return true;
+  },
+
+  async reportReel(reelId, reason, details = '') {
+    const reportItem = {
+      id: `report-${Date.now()}`,
+      reelId,
+      reason,
+      details,
+      createdAt: new Date().toISOString()
+    };
+
+    // 1. Persist to Supabase reel_reports table if available
+    try {
+      await supabase.from('reel_reports').insert({
+        reel_id: reelId,
+        reason,
+        details
+      });
+    } catch (err) {
+      console.warn('DB report insert skipped/failed:', err.message);
+    }
+
+    // 2. Persist to local storage
+    try {
+      const existingStr = localStorage.getItem('eg_reel_reports');
+      const list = existingStr ? JSON.parse(existingStr) : [];
+      list.push(reportItem);
+      localStorage.setItem('eg_reel_reports', JSON.stringify(list));
+    } catch (e) {
+      console.warn('Failed saving reel report locally:', e);
+    }
+    return reportItem;
+  },
+
+  async hideReel(reelId) {
+    try {
+      const hiddenStr = localStorage.getItem('eg_hidden_reels');
+      const list = hiddenStr ? JSON.parse(hiddenStr) : [];
+      if (!list.includes(reelId)) {
+        list.push(reelId);
+        localStorage.setItem('eg_hidden_reels', JSON.stringify(list));
+      }
+    } catch (e) {}
+    return true;
+  },
+
+  async toggleSaveReel(reelId) {
+    let isSaved = false;
+    try {
+      const savedStr = localStorage.getItem('eg_saved_reels');
+      let list = savedStr ? JSON.parse(savedStr) : [];
+      if (list.includes(reelId)) {
+        list = list.filter(id => id !== reelId);
+        isSaved = false;
+      } else {
+        list.push(reelId);
+        isSaved = true;
+      }
+      localStorage.setItem('eg_saved_reels', JSON.stringify(list));
+    } catch (e) {}
+    return isSaved;
   }
 };

@@ -211,6 +211,91 @@ export default function DiscoverReels() {
     }
   };
 
+  // Three Dots Options Menu & Backend States
+  const [isOptionsMenuOpen, setIsOptionsMenuOpen] = useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [reportReason, setReportReason] = useState('inappropriate');
+  const [reportDetails, setReportDetails] = useState('');
+  const [isEditReelModalOpen, setIsEditReelModalOpen] = useState(false);
+  const [editCaption, setEditCaption] = useState('');
+  const [toastMessage, setToastMessage] = useState(null);
+
+  const showToast = (msg) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 3000);
+  };
+
+  const handleShareLink = async () => {
+    const url = `${window.location.origin}${window.location.pathname}?reel=${currentReel?.id || ''}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      showToast(isAr ? 'تم نسخ رابط الفيديو إلى الحافظة 📋' : 'Reel link copied to clipboard! 📋');
+    } catch (err) {
+      showToast(isAr ? 'تم نسخ الرابط بنجاح' : 'Link copied');
+    }
+    setIsOptionsMenuOpen(false);
+  };
+
+  const handleToggleSaveReel = async () => {
+    if (!currentReel) return;
+    const newSaved = await ReelsService.toggleSaveReel(currentReel.id);
+    setIsSaved(newSaved);
+    showToast(
+      newSaved 
+        ? (isAr ? 'تم حفظ الفيديو في المفضلة بنجاح 📌' : 'Saved to favorites! 📌')
+        : (isAr ? 'تمت إزالة الفيديو من المفضلة' : 'Removed from favorites')
+    );
+    setIsOptionsMenuOpen(false);
+  };
+
+  const handleHideReel = async () => {
+    if (!currentReel) return;
+    await ReelsService.hideReel(currentReel.id);
+    const updated = reelsList.filter(r => r.id !== currentReel.id);
+    setReelsList(updated);
+    if (currentReelIndex >= updated.length) {
+      setCurrentReelIndex(Math.max(0, updated.length - 1));
+    }
+    showToast(isAr ? 'تم إخفاء هذا المحتوى من خلاصتك 👍' : 'Video hidden from your feed 👍');
+    setIsOptionsMenuOpen(false);
+  };
+
+  const handleSubmitReport = async (e) => {
+    if (e) e.preventDefault();
+    if (!currentReel) return;
+    await ReelsService.reportReel(currentReel.id, reportReason, reportDetails);
+    setIsReportModalOpen(false);
+    setIsOptionsMenuOpen(false);
+    setReportDetails('');
+    showToast(isAr ? 'شكراً لك، تم إرسال البلاغ وسيقوم فريق المراجعة بفحصه فوراً 🛡️' : 'Report submitted successfully. We will review it shortly. 🛡️');
+  };
+
+  const handleSaveEditReel = async (e) => {
+    if (e) e.preventDefault();
+    if (!currentReel) return;
+    await ReelsService.updateReel(currentReel.id, { caption: editCaption });
+    setReelsList(prev => prev.map(r => r.id === currentReel.id ? { ...r, caption: editCaption } : r));
+    setIsEditReelModalOpen(false);
+    setIsOptionsMenuOpen(false);
+    showToast(isAr ? 'تم حفظ تعديلات الفيديو بنجاح ✅' : 'Reel updated successfully ✅');
+  };
+
+  const handleDeleteReel = async () => {
+    if (!currentReel) return;
+    if (window.confirm(isAr ? 'هل أنت متأكد من حذف هذا الفيديو نهائياً؟' : 'Are you sure you want to delete this reel?')) {
+      await ReelsService.deleteReel(currentReel.id);
+      const updated = reelsList.filter(r => r.id !== currentReel.id);
+      setReelsList(updated);
+      if (currentReelIndex >= updated.length) {
+        setCurrentReelIndex(Math.max(0, updated.length - 1));
+      }
+      setIsOptionsMenuOpen(false);
+      showToast(isAr ? 'تم حذف الفيديو بنجاح 🗑️' : 'Reel deleted successfully 🗑️');
+    }
+  };
+
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -950,24 +1035,6 @@ export default function DiscoverReels() {
             style={{ backgroundImage: `url(${currentReel.videoBg})` }}
           />
 
-          {/* Up & Down Side Navigation Arrows */}
-          <div className="flex flex-col gap-3 mr-6 z-20">
-            <button 
-              onClick={handlePrevReel}
-              className="w-12 h-12 rounded-full bg-white/10 hover:bg-[#d00000] backdrop-blur-md text-white transition-all flex items-center justify-center shadow-xl hover:scale-110 active:scale-95 border border-white/20"
-              title="Previous Reel (↑)"
-            >
-              <span className="material-symbols-outlined text-[28px]">arrow_upward</span>
-            </button>
-            <button 
-              onClick={handleNextReel}
-              className="w-12 h-12 rounded-full bg-white/10 hover:bg-[#d00000] backdrop-blur-md text-white transition-all flex items-center justify-center shadow-xl hover:scale-110 active:scale-95 border border-white/20"
-              title="Next Reel (↓)"
-            >
-              <span className="material-symbols-outlined text-[28px]">arrow_downward</span>
-            </button>
-          </div>
-
           {/* Centered Phone Frame for Vertical Reels */}
           <div 
             className="w-full max-w-[420px] aspect-[9/16] max-h-[85vh] rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-white/10 bg-black relative flex flex-col z-10 cursor-grab active:cursor-grabbing"
@@ -977,6 +1044,45 @@ export default function DiscoverReels() {
             onMouseUp={handleMouseUp}
             onMouseLeave={() => { setIsDragging(false); setDragOffset(0); }}
           >
+            {/* Top Floating Action Bar for Desktop Frame (Brand, Search, Three Dots Options) */}
+            <div className="absolute top-0 left-0 w-full bg-gradient-to-b from-black/70 via-black/25 to-transparent text-white pt-3 pb-6 px-4 z-40 pointer-events-auto flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveTab('shop');
+                  }}
+                  className="w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-md transition-all text-white flex items-center justify-center border border-white/10 active:scale-95 cursor-pointer"
+                  title={isAr ? 'البحث والتسوق' : 'Search & Shop'}
+                >
+                  <span className="material-symbols-outlined text-[20px] drop-shadow-md">search</span>
+                </button>
+                
+                {/* Three Dots Button */}
+                <button 
+                  onClick={(e) => { 
+                    e.stopPropagation(); 
+                    setEditCaption(currentReel?.caption || '');
+                    setIsOptionsMenuOpen(true); 
+                  }}
+                  className="w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-md transition-all text-white flex items-center justify-center border border-white/10 active:scale-95 cursor-pointer"
+                  title={isAr ? 'خيارات الفيديو' : 'More options'}
+                >
+                  <span className="material-symbols-outlined text-[22px] drop-shadow-md">more_vert</span>
+                </button>
+              </div>
+
+              <div 
+                className="flex items-center cursor-pointer hover:opacity-90 transition-opacity"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveTab('shop');
+                }}
+              >
+                <EgLogo className="w-8 h-8 drop-shadow-md" color="#d00000" />
+              </div>
+            </div>
+
             {/* Smooth Sliding Reel Container with Zero-Lag Dragging */}
             <div 
               className={`w-full h-full gpu-layer ${
@@ -990,20 +1096,6 @@ export default function DiscoverReels() {
             >
               {reelsList.map((reel, idx) => renderReelItem(reel, idx))}
             </div>
-
-            {/* Reel Counter Dots Indicator */}
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 z-30 flex flex-col gap-1.5 pointer-events-none">
-              {reelsList.map((_, idx) => (
-                <div 
-                  key={idx}
-                  className={`w-1.5 rounded-full transition-all ${
-                    idx === currentReelIndex 
-                      ? 'h-6 bg-[#d00000]' 
-                      : 'h-1.5 bg-white/40'
-                  }`}
-                />
-              ))}
-            </div>
           </div>
         </div>
       )}
@@ -1016,22 +1108,41 @@ export default function DiscoverReels() {
         className="md:hidden relative w-full h-full pb-14 bg-black text-white flex flex-col overflow-hidden select-none font-sans mx-auto max-w-[440px]"
       >
         {/* Custom Mobile Header (Transparent Overlay) */}
-        <div className="absolute top-0 left-0 w-full bg-gradient-to-b from-black/60 to-transparent text-white pt-safe z-40 pointer-events-auto">
+        <div className="absolute top-0 left-0 w-full bg-gradient-to-b from-black/70 via-black/25 to-transparent text-white pt-safe z-40 pointer-events-auto">
           <div className="flex items-center justify-between px-4 py-2">
-            <div className="flex items-center gap-1">
-              <button className="p-2 hover:bg-white/20 rounded-full transition-colors text-white flex items-center justify-center">
-                <span className="material-symbols-outlined text-[26px] drop-shadow-md">search</span>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveTab('shop');
+                }}
+                className="w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-md transition-all text-white flex items-center justify-center border border-white/10 active:scale-95 cursor-pointer"
+                title={isAr ? 'البحث والتسوق' : 'Search & Shop'}
+              >
+                <span className="material-symbols-outlined text-[20px] drop-shadow-md">search</span>
               </button>
-              <button className="p-2 hover:bg-white/20 rounded-full transition-colors text-white flex items-center justify-center" onClick={(e) => { e.stopPropagation(); setIsEditModalOpen(true); }}>
-                <span className="material-symbols-outlined text-[26px] drop-shadow-md">more_vert</span>
+              <button 
+                className="w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-md transition-all text-white flex items-center justify-center border border-white/10 active:scale-95 cursor-pointer" 
+                onClick={(e) => { 
+                  e.stopPropagation(); 
+                  setEditCaption(currentReel?.caption || '');
+                  setIsOptionsMenuOpen(true); 
+                }}
+                title={isAr ? 'خيارات الفيديو' : 'More options'}
+              >
+                <span className="material-symbols-outlined text-[22px] drop-shadow-md">more_vert</span>
               </button>
             </div>
-            <div className="flex items-center">
+            <div 
+              className="flex items-center cursor-pointer hover:opacity-90 transition-opacity"
+              onClick={(e) => {
+                e.stopPropagation();
+                setActiveTab('shop');
+              }}
+            >
               <EgLogo className="w-8 h-8 drop-shadow-md" color="#d00000" />
             </div>
           </div>
-          
-
         </div>
 
         {/* Swipeable Video Area */}
@@ -1063,24 +1174,6 @@ export default function DiscoverReels() {
               </div>
             ))}
           </div>
-
-        {/* Floating Arrow Indicators for Mobile */}
-        <div className="absolute left-3 top-1/2 -translate-y-1/2 z-30 flex flex-col gap-2">
-          <button 
-            onClick={handlePrevReel}
-            className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-md text-white hover:bg-[#d00000] transition-colors flex items-center justify-center shadow-lg active:scale-90"
-            title="Previous Reel"
-          >
-            <span className="material-symbols-outlined text-[20px]">keyboard_arrow_up</span>
-          </button>
-          <button 
-            onClick={handleNextReel}
-            className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-md text-white hover:bg-[#d00000] transition-colors flex items-center justify-center shadow-lg active:scale-90"
-            title="Next Reel"
-          >
-            <span className="material-symbols-outlined text-[20px]">keyboard_arrow_down</span>
-          </button>
-        </div>
 
         {/* Swipe Up Hint Badge (Fades after interaction) */}
         {currentReelIndex === 0 && (
@@ -1303,6 +1396,297 @@ export default function DiscoverReels() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Dynamic Three Dots Options Menu Drawer */}
+      {isOptionsMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/70 backdrop-blur-xs z-[60] flex flex-col justify-end items-center p-0 sm:p-4 animate-fade-in"
+          onClick={() => setIsOptionsMenuOpen(false)}
+        >
+          <div 
+            dir={isAr ? 'rtl' : 'ltr'}
+            className="w-full max-w-md bg-white text-slate-900 rounded-t-3xl sm:rounded-3xl p-5 shadow-2xl animate-sheet-slide-up flex flex-col space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header / Current Reel Preview */}
+            <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+              <div className="flex items-center gap-3 min-w-0">
+                <img 
+                  src={currentReel?.avatar || '/images/products/linen_abaya.jpg'} 
+                  alt="avatar" 
+                  className="w-10 h-10 rounded-full object-cover border border-gray-200 shadow-xs shrink-0" 
+                />
+                <div className="min-w-0">
+                  <h4 className="font-bold text-sm text-slate-900 truncate">{currentReel?.creatorName || 'Creator'}</h4>
+                  <p className="text-xs text-gray-500 truncate">{currentReel?.creatorHandle}</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setIsOptionsMenuOpen(false)}
+                className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:text-slate-900 hover:bg-gray-200 transition-colors cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[18px]">close</span>
+              </button>
+            </div>
+
+            {/* Actions List */}
+            <div className="space-y-1 text-sm font-semibold text-slate-800">
+              {/* Copy / Share */}
+              <button 
+                onClick={handleShareLink}
+                className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-gray-50 active:bg-gray-100 transition-colors text-start cursor-pointer"
+              >
+                <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                  <span className="material-symbols-outlined text-[20px]">share</span>
+                </div>
+                <div className="flex flex-col flex-1">
+                  <span>{isAr ? 'مشاركة ونسخ الرابط' : 'Share & Copy Link'}</span>
+                  <span className="text-[11px] text-gray-400 font-normal">{isAr ? 'انسخ رابط هذا الريل لمشاركته' : 'Copy link to clipboard'}</span>
+                </div>
+              </button>
+
+              {/* Bookmark / Save to collection */}
+              <button 
+                onClick={handleToggleSaveReel}
+                className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-gray-50 active:bg-gray-100 transition-colors text-start cursor-pointer"
+              >
+                <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                  <span className="material-symbols-outlined text-[20px]">{isSaved ? 'bookmark_added' : 'bookmark_add'}</span>
+                </div>
+                <div className="flex flex-col flex-1">
+                  <span>{isSaved ? (isAr ? 'محفوظ في المفضلة' : 'Saved in collection') : (isAr ? 'حفظ الفيديو في المفضلة' : 'Save to collection')}</span>
+                  <span className="text-[11px] text-gray-400 font-normal">{isAr ? 'حفظ للرجوع إليه لاحقاً ومزامنته في السيرفر' : 'Save to watch later & sync with backend'}</span>
+                </div>
+              </button>
+
+              {/* Creator Profile / Store */}
+              <button 
+                onClick={() => {
+                  setIsOptionsMenuOpen(false);
+                  setActiveTab('profile');
+                }}
+                className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-gray-50 active:bg-gray-100 transition-colors text-start cursor-pointer"
+              >
+                <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+                  <span className="material-symbols-outlined text-[20px]">person</span>
+                </div>
+                <div className="flex flex-col flex-1">
+                  <span>{isAr ? 'زيارة صفحة المصمم / الصانع' : 'View Creator Profile'}</span>
+                  <span className="text-[11px] text-gray-400 font-normal">{isAr ? 'استكشف كافة تصاميم وأعمال الصانع' : 'Explore creator shop and reels'}</span>
+                </div>
+              </button>
+
+              {/* Not interested / Hide */}
+              <button 
+                onClick={handleHideReel}
+                className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-gray-50 active:bg-gray-100 transition-colors text-start cursor-pointer"
+              >
+                <div className="w-9 h-9 rounded-xl bg-gray-100 text-gray-600 flex items-center justify-center shrink-0">
+                  <span className="material-symbols-outlined text-[20px]">visibility_off</span>
+                </div>
+                <div className="flex flex-col flex-1">
+                  <span>{isAr ? 'غير مهتم بهذا المحتوى' : 'Not interested in this'}</span>
+                  <span className="text-[11px] text-gray-400 font-normal">{isAr ? 'إخفاء هذا الفيديو وتحديث التفضيلات في الباك إند' : 'Hide from feed & update backend preferences'}</span>
+                </div>
+              </button>
+
+              {/* Report Reel */}
+              <button 
+                onClick={() => {
+                  setIsOptionsMenuOpen(false);
+                  setIsReportModalOpen(true);
+                }}
+                className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-red-50 active:bg-red-100 transition-colors text-start text-red-600 cursor-pointer"
+              >
+                <div className="w-9 h-9 rounded-xl bg-red-100 text-red-600 flex items-center justify-center shrink-0">
+                  <span className="material-symbols-outlined text-[20px]">flag</span>
+                </div>
+                <div className="flex flex-col flex-1">
+                  <span className="font-bold">{isAr ? 'إبلاغ عن هذا الفيديو' : 'Report Reel'}</span>
+                  <span className="text-[11px] text-red-400 font-normal">{isAr ? 'إبلاغ الإدارة عن محتوى مضلل أو مخالف' : 'Report violation to backend moderation'}</span>
+                </div>
+              </button>
+
+              {/* Management Actions (Edit Caption / Delete) */}
+              <div className="pt-2 border-t border-gray-100 flex items-center gap-2">
+                <button 
+                  onClick={() => {
+                    setIsOptionsMenuOpen(false);
+                    setEditCaption(currentReel?.caption || '');
+                    setIsEditReelModalOpen(true);
+                  }}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-gray-200 text-xs font-bold text-slate-700 hover:bg-gray-50 active:scale-95 transition-all cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[16px]">edit</span>
+                  <span>{isAr ? 'تعديل الوصف' : 'Edit Caption'}</span>
+                </button>
+                <button 
+                  onClick={handleDeleteReel}
+                  className="px-3.5 py-2.5 rounded-xl border border-red-200 text-xs font-bold text-red-600 hover:bg-red-50 active:scale-95 transition-all flex items-center gap-1 cursor-pointer"
+                  title={isAr ? 'حذف الريل' : 'Delete Reel'}
+                >
+                  <span className="material-symbols-outlined text-[16px]">delete</span>
+                  <span>{isAr ? 'حذف' : 'Delete'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Report Modal */}
+      {isReportModalOpen && (
+        <div 
+          className="fixed inset-0 bg-black/70 backdrop-blur-xs z-[70] flex items-center justify-center p-4 animate-fade-in"
+          onClick={() => setIsReportModalOpen(false)}
+        >
+          <div 
+            dir={isAr ? 'rtl' : 'ltr'}
+            className="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl space-y-4 animate-sheet-slide-up text-slate-900"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+              <div className="flex items-center gap-2 text-red-600 font-bold text-base">
+                <span className="material-symbols-outlined text-[24px]">flag</span>
+                <h3>{isAr ? 'إبلاغ عن محتوى' : 'Report Reel'}</h3>
+              </div>
+              <button 
+                onClick={() => setIsReportModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[18px]">close</span>
+              </button>
+            </div>
+
+            <p className="text-xs text-gray-600">
+              {isAr 
+                ? 'يساعدنا بلاغك في الحفاظ على أمان مجتمع EG-Commerce وجودة المحتوى.' 
+                : 'Your report helps keep the EG-Commerce community safe and trustworthy.'}
+            </p>
+
+            {/* Reasons List */}
+            <div className="space-y-2">
+              {[
+                { id: 'misleading', ar: 'محتوى مضلل أو احتيال تجاري', en: 'Misleading or commercial fraud' },
+                { id: 'inappropriate', ar: 'محتوى غير لائق أو مسيء', en: 'Inappropriate or offensive content' },
+                { id: 'copyright', ar: 'انتهاك حقوق الملكية الفكرية والعلامة التجارية', en: 'Intellectual property / Copyright infringement' },
+                { id: 'broken', ar: 'عطل تقني أو فيديو رديء وغير صالح', en: 'Broken playback or low quality' }
+              ].map((reason) => (
+                <label 
+                  key={reason.id}
+                  className={`flex items-center gap-3 p-3 rounded-2xl border text-xs font-semibold cursor-pointer transition-colors ${
+                    reportReason === reason.id 
+                      ? 'border-[#d00000] bg-red-50/50 text-[#d00000]' 
+                      : 'border-gray-200 hover:bg-gray-50 text-slate-700'
+                  }`}
+                >
+                  <input 
+                    type="radio" 
+                    name="reportReason" 
+                    value={reason.id} 
+                    checked={reportReason === reason.id} 
+                    onChange={(e) => setReportReason(e.target.value)}
+                    className="accent-[#d00000]"
+                  />
+                  <span>{isAr ? reason.ar : reason.en}</span>
+                </label>
+              ))}
+            </div>
+
+            {/* Additional details */}
+            <div>
+              <label className="text-xs font-bold text-slate-700 block mb-1">
+                {isAr ? 'ملاحظات إضافية (اختياري)' : 'Additional Details (Optional)'}
+              </label>
+              <textarea 
+                value={reportDetails}
+                onChange={(e) => setReportDetails(e.target.value)}
+                placeholder={isAr ? 'صف المشكلة بالتفصيل لمساعدة المشرفين...' : 'Explain the issue in detail...'}
+                rows={3}
+                className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-3 text-xs focus:ring-2 focus:ring-[#d00000] focus:outline-none"
+              />
+            </div>
+
+            {/* Modal Buttons */}
+            <div className="flex items-center gap-2 pt-2">
+              <button 
+                onClick={handleSubmitReport}
+                className="flex-1 py-3 bg-[#d00000] text-white rounded-2xl text-xs font-bold hover:bg-[#b00000] shadow-md active:scale-95 transition-all cursor-pointer"
+              >
+                {isAr ? 'إرسال البلاغ الآن' : 'Submit Report'}
+              </button>
+              <button 
+                onClick={() => setIsReportModalOpen(false)}
+                className="px-5 py-3 bg-gray-100 text-slate-700 rounded-2xl text-xs font-bold hover:bg-gray-200 active:scale-95 transition-all cursor-pointer"
+              >
+                {isAr ? 'إلغاء' : 'Cancel'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Reel Modal */}
+      {isEditReelModalOpen && (
+        <div 
+          className="fixed inset-0 bg-black/70 backdrop-blur-xs z-[70] flex items-center justify-center p-4 animate-fade-in"
+          onClick={() => setIsEditReelModalOpen(false)}
+        >
+          <div 
+            dir={isAr ? 'rtl' : 'ltr'}
+            className="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl space-y-4 animate-sheet-slide-up text-slate-900"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+              <div className="flex items-center gap-2 text-slate-900 font-bold text-base">
+                <span className="material-symbols-outlined text-[24px]">edit_note</span>
+                <h3>{isAr ? 'تعديل وصف الريلز' : 'Edit Reel Caption'}</h3>
+              </div>
+              <button 
+                onClick={() => setIsEditReelModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[18px]">close</span>
+              </button>
+            </div>
+
+            <div>
+              <label className="text-xs font-bold text-slate-700 block mb-1.5">
+                {isAr ? 'نص الوصف والهاشتاجات' : 'Caption & Hashtags'}
+              </label>
+              <textarea 
+                value={editCaption}
+                onChange={(e) => setEditCaption(e.target.value)}
+                rows={4}
+                className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-3 text-xs focus:ring-2 focus:ring-[#d00000] focus:outline-none"
+              />
+            </div>
+
+            <div className="flex items-center gap-2 pt-2">
+              <button 
+                onClick={handleSaveEditReel}
+                className="flex-1 py-3 bg-[#d00000] text-white rounded-2xl text-xs font-bold hover:bg-[#b00000] shadow-md active:scale-95 transition-all cursor-pointer"
+              >
+                {isAr ? 'حفظ التعديلات' : 'Save Changes'}
+              </button>
+              <button 
+                onClick={() => setIsEditReelModalOpen(false)}
+                className="px-5 py-3 bg-gray-100 text-slate-700 rounded-2xl text-xs font-bold hover:bg-gray-200 active:scale-95 transition-all cursor-pointer"
+              >
+                {isAr ? 'إلغاء' : 'Cancel'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Dynamic Toast Message */}
+      {toastMessage && (
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] bg-slate-950/95 text-white px-5 py-3 rounded-2xl shadow-2xl border border-white/20 text-xs font-bold flex items-center gap-2.5 backdrop-blur-md animate-fade-in pointer-events-none">
+          <span className="material-symbols-outlined text-[20px] text-emerald-400">check_circle</span>
+          <span>{toastMessage}</span>
         </div>
       )}
     </div>

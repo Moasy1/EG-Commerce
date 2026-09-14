@@ -774,11 +774,20 @@ export function AppProvider({ children }) {
     const size = selectedVariant.size || 'M';
     const color = selectedVariant.color || 'Default';
     
-    // Optimistic UI update could go here, but we will wait for service
-    const updatedCart = await CartService.addToCart(product.id, product.merchantId, product.price, 1, size, color);
+    // Save to CartService with full metadata
+    await CartService.addToCart(
+      product.id, 
+      product.merchantId, 
+      product.price, 
+      1, 
+      size, 
+      color, 
+      null, 
+      product.title, 
+      product.image, 
+      product.merchant || product.brand || 'EG-Commerce'
+    );
     
-    // In our fallback we get an array back, in real DB we get item. 
-    // Just refetch cart for simplicity for this prototype transition
     const fetchedCart = await CartService.getCartItems();
     setCartItems(fetchedCart);
   };
@@ -786,15 +795,17 @@ export function AppProvider({ children }) {
   const updateQuantity = (cartItemId, delta) => {
     setCartItems(prev => prev.map(item => {
       if (item.id === cartItemId) {
-        const newQty = Math.max(1, item.quantity + delta);
+        const newQty = Math.max(1, (item.quantity || 1) + delta);
         return { ...item, quantity: newQty };
       }
       return item;
     }));
+    CartService.updateLocalQuantity(cartItemId, delta);
   };
 
   const removeFromCart = (cartItemId) => {
     setCartItems(prev => prev.filter(item => item.id !== cartItemId));
+    CartService.removeFromLocalCart(cartItemId);
   };
 
   const totalCartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);

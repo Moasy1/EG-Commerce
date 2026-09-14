@@ -8,6 +8,7 @@ export default function AuthModal() {
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState('');
   const [selectedRole, setSelectedRole] = useState('user');
   
@@ -16,15 +17,27 @@ export default function AuthModal() {
   
   const modalRef = useRef(null);
   
-  // Basic focus management for accessibility
+  // Escape key & focus management
   useEffect(() => {
-    if (isAuthModalOpen && modalRef.current) {
-      // Small timeout to ensure rendering is complete before focusing
-      setTimeout(() => {
-        const firstInput = modalRef.current.querySelector('input');
-        if (firstInput) firstInput.focus();
-      }, 50);
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isAuthModalOpen) {
+        setIsAuthModalOpen(false);
+      }
+    };
+
+    if (isAuthModalOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+      if (modalRef.current) {
+        setTimeout(() => {
+          const firstInput = modalRef.current.querySelector('input');
+          if (firstInput) firstInput.focus();
+        }, 50);
+      }
     }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
   }, [isAuthModalOpen, mode]);
 
   if (!isAuthModalOpen) return null;
@@ -54,10 +67,15 @@ export default function AuthModal() {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+    <div 
+      onClick={(e) => {
+        if (e.target === e.currentTarget) setIsAuthModalOpen(false);
+      }}
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in"
+    >
       <div 
         ref={modalRef}
-        className="bg-white rounded-3xl w-full max-w-md p-6 md:p-8 shadow-2xl relative" 
+        className="bg-white rounded-3xl w-full max-w-md p-6 md:p-8 shadow-2xl relative animate-scale-up" 
         dir={isAr ? 'rtl' : 'ltr'}
         role="dialog"
         aria-modal="true"
@@ -123,9 +141,10 @@ export default function AuthModal() {
                   onChange={(e) => setSelectedRole(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#d00000] focus:bg-white transition-all"
                 >
-                  <option value="user">{isAr ? 'مستخدم' : 'User'}</option>
-                  <option value="merchant">{isAr ? 'تاجر' : 'Merchant'}</option>
-                  <option value="driver">{isAr ? 'سائق' : 'Driver'}</option>
+                  <option value="user">{isAr ? 'مشتري / مستخدم' : 'Buyer / User'}</option>
+                  <option value="creator">{isAr ? 'صانع محتوى / مبدع' : 'Creator'}</option>
+                  <option value="merchant">{isAr ? 'تاجر / براند مصري' : 'Merchant / Egyptian Brand'}</option>
+                  <option value="driver">{isAr ? 'مندوب توصيل' : 'Delivery Partner'}</option>
                 </select>
               </div>
             </>
@@ -142,7 +161,7 @@ export default function AuthModal() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#d00000] focus:bg-white transition-all"
-              placeholder={isAr ? 'البريد الإلكتروني' : 'name@example.com'}
+              placeholder={isAr ? 'example@domain.com' : 'name@example.com'}
               autoComplete={mode === 'login' ? 'email' : 'username'}
               aria-invalid={!!error}
             />
@@ -152,23 +171,35 @@ export default function AuthModal() {
             <label htmlFor="auth-password" className="block text-xs font-bold text-slate-700 mb-1">
               {isAr ? 'كلمة المرور' : 'Password'}
             </label>
-            <input 
-              id="auth-password"
-              type="password" 
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#d00000] focus:bg-white transition-all"
-              placeholder="••••••••"
-              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-              aria-invalid={!!error}
-            />
+            <div className="relative">
+              <input 
+                id="auth-password"
+                type={showPassword ? 'text' : 'password'} 
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#d00000] focus:bg-white transition-all pe-10"
+                placeholder="••••••••"
+                autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                aria-invalid={!!error}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className={`absolute top-1/2 -translate-y-1/2 ${isAr ? 'left-3' : 'right-3'} text-gray-400 hover:text-gray-600 focus:outline-none`}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                <span className="material-symbols-outlined text-[18px]">
+                  {showPassword ? 'visibility_off' : 'visibility'}
+                </span>
+              </button>
+            </div>
           </div>
 
           <button 
             type="submit"
             disabled={loading}
-            className="w-full bg-[#d00000] text-white font-bold py-3.5 rounded-xl hover:bg-red-700 active:scale-[0.98] transition-all disabled:opacity-70 disabled:scale-100 mt-2 focus:outline-none focus:ring-4 focus:ring-red-500/30"
+            className="w-full bg-[#d00000] text-white font-bold py-3.5 rounded-xl hover:bg-red-700 active:scale-[0.98] transition-all disabled:opacity-70 disabled:scale-100 mt-2 focus:outline-none focus:ring-4 focus:ring-red-500/30 shadow-md shadow-red-500/20"
           >
             {loading ? (isAr ? 'جاري التحميل...' : 'Loading...') : (mode === 'login' ? (isAr ? 'تسجيل الدخول' : 'Sign In') : (isAr ? 'إنشاء حساب' : 'Create Account'))}
           </button>

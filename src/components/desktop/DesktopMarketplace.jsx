@@ -56,7 +56,7 @@ export default function DesktopMarketplace() {
   ];
 
   return (
-    <div className="w-full bg-white text-slate-900 flex flex-col font-sans min-h-[580px] overflow-hidden select-none text-left">
+    <div dir={isAr ? 'rtl' : 'ltr'} className="w-full bg-white text-slate-900 flex flex-col font-sans min-h-[580px] overflow-hidden select-none text-start">
       {/* 1. Top Bar */}
       <div className="px-5 py-2.5 border-b border-gray-100 flex items-center justify-between gap-4">
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => setActiveTab('reels')}>
@@ -68,15 +68,15 @@ export default function DesktopMarketplace() {
           <span className="material-symbols-outlined text-[17px] text-gray-400">search</span>
           <input
             type="text"
-            placeholder="Search products, categories, brands..."
+            placeholder={isAr ? "ابحث عن منتجات، علامات تجارية، فئات..." : "Search products, categories, brands..."}
             className="w-full bg-transparent focus:outline-none text-xs text-slate-800 placeholder:text-gray-400"
           />
         </div>
 
         <div className="flex items-center gap-3 text-gray-600 text-xs font-semibold">
-          <button className="flex items-center gap-1 hover:text-[#d00000]"><span className="material-symbols-outlined text-[18px]">tune</span><span>Filters</span></button>
+          <button className="flex items-center gap-1 hover:text-[#d00000]"><span className="material-symbols-outlined text-[18px]">tune</span><span>{isAr ? 'تصفية' : 'Filters'}</span></button>
           <span className="text-gray-300">|</span>
-          <button className="flex items-center gap-1 hover:text-[#d00000]"><span className="text-gray-500">Sort by:</span><span className="text-slate-900 font-bold">Most Popular</span></button>
+          <button className="flex items-center gap-1 hover:text-[#d00000]"><span className="text-gray-500">{isAr ? 'الترتيب:' : 'Sort by:'}</span><span className="text-slate-900 font-bold">{isAr ? 'الأكثر طلباً' : 'Most Popular'}</span></button>
           <div className="flex items-center gap-2 ml-2">
             <button onClick={() => setActiveTab('cart')} className="p-1 hover:text-[#d00000]"><span className="material-symbols-outlined text-[19px]">shopping_cart</span></button>
             <img src="/images/reels/reel_2.jpg" alt="User" className="w-6 h-6 rounded-full object-cover ring-1 ring-gray-300" />
@@ -113,7 +113,7 @@ export default function DesktopMarketplace() {
       {/* 3. Main Content: Left Filters + 4-Column Product Grid */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left Filter Column */}
-        <aside className="w-52 p-4 border-r border-gray-100 space-y-4 text-left shrink-0 bg-gray-50/50">
+        <aside className={`w-52 p-4 ${isAr ? 'border-l' : 'border-r'} border-gray-100 space-y-4 text-start shrink-0 bg-gray-50/50`}>
           <div>
             <h4 className="text-xs font-bold text-slate-900 mb-2">{isAr ? 'التصنيفات' : 'Categories'}</h4>
             <div className="space-y-1 text-[11px] text-gray-600 font-medium">

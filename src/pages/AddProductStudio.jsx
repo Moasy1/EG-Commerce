@@ -59,57 +59,40 @@ export default function AddProductStudio() {
 
   return (
     <div className="w-full min-h-screen bg-[#f8f9fa] text-slate-900 flex flex-col font-sans select-none text-right" dir="rtl">
-      {/* ========================================================================= */}
-      {/* 1. TOP HEADER (Matching Image 1)                                          */}
-      {/* ========================================================================= */}
-      <header className="w-full bg-white border-b border-gray-200 px-6 py-3 sticky top-0 z-30 shadow-xs">
+      {/* Top Breadcrumb & Action Banner */}
+      <div className="w-full bg-white border-b border-gray-200/80 px-4 md:px-8 py-3.5 sticky top-0 md:top-14 z-20 shadow-2xs">
         <div className="max-w-[1780px] mx-auto flex items-center justify-between gap-4">
-          {/* Right (RTL Start): Logo */}
-          <div 
-            onClick={() => setActiveTab('reels')}
-            className="flex items-center gap-3 cursor-pointer shrink-0"
-          >
-            <EgLogo className="w-9 h-9" color="#d00000" />
-            <span className="text-xl font-black text-slate-900 tracking-tight">EG-Commerce</span>
-          </div>
-
-          {/* Center: Search Bar */}
-          <div className="flex-1 max-w-xl mx-4">
-            <div className="w-full flex items-center gap-2.5 px-4 py-2 bg-gray-100/90 rounded-full border border-gray-200/80 focus-within:border-[#d00000] focus-within:bg-white transition-all text-xs text-gray-600">
-              <span className="material-symbols-outlined text-[18px] text-gray-400">search</span>
-              <input
-                type="text"
-                placeholder="ابحث عن منتجات، أو تصنيفات، أو طلبات..."
-                className="w-full bg-transparent focus:outline-none text-xs text-slate-800 placeholder:text-gray-400 font-medium"
-              />
-            </div>
-          </div>
-
-          {/* Left (RTL End): Notifications & User Profile */}
-          <div className="flex items-center gap-3 shrink-0">
-            {/* Notification Bell with Badge 5 */}
-            <button className="relative p-2 rounded-full hover:bg-gray-100 text-gray-600 transition-colors">
-              <span className="material-symbols-outlined text-[22px]">notifications</span>
-              <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-[#d00000] text-white text-[10px] font-bold flex items-center justify-center">
-                5
-              </span>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setActiveTab('dashboard')}
+              className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-slate-900 transition-colors"
+              title="العودة للوحة التحكم"
+            >
+              <span className="material-symbols-outlined text-[20px] rtl:rotate-180">arrow_back</span>
             </button>
-
-            {/* User Profile */}
-            <div className="flex items-center gap-2.5 cursor-pointer pr-1 border-r border-gray-200 mr-1">
-              <div className="text-right hidden sm:block">
-                <span className="text-xs font-bold text-slate-900 block leading-tight">أحمد محمد</span>
-                <span className="text-[10px] text-gray-500 block">بائع معتمد</span>
-              </div>
-              <img 
-                src="/images/reels/reel_1.jpg" 
-                alt="Ahmed Mohamed" 
-                className="w-9 h-9 rounded-full object-cover ring-2 ring-gray-200"
-              />
+            <div>
+              <h1 className="text-sm md:text-base font-black text-slate-900 leading-tight">استوديو إضافة منتج جديد</h1>
+              <p className="text-[11px] text-gray-500 hidden sm:block">ارفع فيديو ريلز تفاعلي وحدد المقاسات والمخزون والشحن الموحد</p>
             </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setActiveTab('dashboard')}
+              className="px-4 py-2 text-xs font-bold text-gray-600 hover:bg-gray-100 rounded-xl transition-all"
+            >
+              إلغاء
+            </button>
+            <button 
+              onClick={handlePublish}
+              className="px-5 py-2 text-xs font-bold bg-[#d00000] hover:bg-[#b00000] text-white rounded-xl shadow-md shadow-red-500/20 active:scale-95 transition-all flex items-center gap-1.5"
+            >
+              <span className="material-symbols-outlined text-[16px]">publish</span>
+              <span>نشر المنتج الآن</span>
+            </button>
           </div>
         </div>
-      </header>
+      </div>
 
       {/* ========================================================================= */}
       {/* 2. MAIN WORKSPACE WITH RIGHT SIDEBAR (Matching Image 1)                   */}

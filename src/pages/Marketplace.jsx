@@ -159,7 +159,7 @@ export default function Marketplace() {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
                   </>
                 )}
-                <div className="relative z-10 text-left">
+                <div className="relative z-10 text-start">
                   {cat.isRedCard ? (
                     <span className="material-symbols-outlined text-[20px] mb-1 text-white">local_fire_department</span>
                   ) : (
@@ -251,7 +251,7 @@ export default function Marketplace() {
                 </button>
               </div>
 
-              <div className="p-2.5 text-left space-y-1">
+              <div className="p-2.5 text-start space-y-1">
                 <div className="flex items-center gap-1 text-[10px] text-amber-500 font-bold">
                   <span className="material-symbols-outlined text-[12px]">star</span>
                   <span>{product.rating}</span>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
 import { AuthService } from '../../services/AuthService';
 import EgLogo from '../common/EgLogo';
@@ -19,6 +19,36 @@ export default function Header() {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false);
 
+  const profileMenuRef = useRef(null);
+  const createMenuRef = useRef(null);
+
+  // Close dropdowns on outside click or Escape key
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(e.target)) {
+        setIsProfileMenuOpen(false);
+      }
+      if (createMenuRef.current && !createMenuRef.current.contains(e.target)) {
+        setIsCreateMenuOpen(false);
+      }
+    };
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setIsProfileMenuOpen(false);
+        setIsCreateMenuOpen(false);
+        setIsNotifOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
   const isAr = language === 'ar';
   const isReels = activeTab === 'reels';
   const isDashboard = activeTab === 'dashboard' || activeTab === 'merchant' || activeTab === 'add_product' || activeTab === 'merchant_campaign';
@@ -34,7 +64,7 @@ export default function Header() {
             className="flex items-center gap-1.5 sm:gap-3.5 cursor-pointer shrink-0 group"
           >
             <EgLogo className="w-7 h-7 sm:w-9 sm:h-9 group-hover:scale-105 transition-transform" color="#d00000" />
-            <div className="flex flex-col text-left">
+            <div className="flex flex-col text-start">
               <span className="text-base sm:text-xl font-black tracking-tight leading-none text-slate-900">
                 EG-Commerce
               </span>
@@ -173,10 +203,11 @@ export default function Header() {
           </button>
 
           {/* Create Menu Dropdown */}
-          <div className="relative" onMouseLeave={() => setIsCreateMenuOpen(false)}>
+          <div className="relative" ref={createMenuRef}>
             <button
-              onMouseEnter={() => setIsCreateMenuOpen(true)}
               onClick={() => setIsCreateMenuOpen(!isCreateMenuOpen)}
+              aria-expanded={isCreateMenuOpen}
+              aria-haspopup="true"
               className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 ${
                 ['studio', 'dashboard'].includes(activeTab)
                   ? 'bg-slate-900 text-white shadow-xs'
@@ -190,12 +221,12 @@ export default function Header() {
 
             {isCreateMenuOpen && (
               <div className="absolute top-full mt-1 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden text-slate-900 z-50 flex flex-col py-1 animate-fade-in">
-                <button onClick={() => { setActiveTab('studio'); setIsCreateMenuOpen(false); }} className="px-4 py-2.5 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-left">
+                <button onClick={() => { setActiveTab('studio'); setIsCreateMenuOpen(false); }} className="px-4 py-2.5 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-start">
                   <span className="material-symbols-outlined text-[18px] text-[#d00000]">video_camera_front</span>
                   {isAr ? 'استوديو المبدعين' : 'Creator Studio'}
                 </button>
                 <div className="h-px w-full bg-gray-100 my-1"></div>
-                <button onClick={() => { setActiveTab('dashboard'); setIsCreateMenuOpen(false); }} className="px-4 py-2.5 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-left">
+                <button onClick={() => { setActiveTab('dashboard'); setIsCreateMenuOpen(false); }} className="px-4 py-2.5 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-start">
                   <span className="material-symbols-outlined text-[18px] text-slate-700">storefront</span>
                   {isAr ? 'لوحة التاجر' : 'Seller Hub'}
                 </button>
@@ -240,11 +271,12 @@ export default function Header() {
 
           {/* Auth Navigation */}
           {user ? (
-            <div className="relative" onMouseLeave={() => setIsProfileMenuOpen(false)}>
+            <div className="relative" ref={profileMenuRef}>
               <div 
-                onMouseEnter={() => setIsProfileMenuOpen(true)}
                 onClick={() => { setIsProfileMenuOpen(!isProfileMenuOpen); setIsNotifOpen(false); }}
                 className="cursor-pointer flex items-center gap-2 pl-1 ml-1"
+                aria-expanded={isProfileMenuOpen}
+                aria-haspopup="true"
               >
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 text-gray-500 overflow-hidden ring-2 transition-all ${isProfileMenuOpen ? 'ring-[#d00000]' : 'ring-transparent'}`}>
                   {user?.profile?.avatar_url ? (
@@ -260,63 +292,63 @@ export default function Header() {
                   <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full flex items-center justify-center bg-gray-100 text-gray-500 overflow-hidden">
                       {user?.profile?.avatar_url ? (
-                        <img src={user.profile.avatar_url} className="w-full h-full object-cover" />
+                        <img src={user.profile.avatar_url} className="w-full h-full object-cover" alt="Profile" />
                       ) : (
                         <span className="material-symbols-outlined text-[24px]">person</span>
                       )}
                     </div>
-                    <div className="flex flex-col text-left overflow-hidden">
+                    <div className="flex flex-col text-start overflow-hidden">
                       <span className="text-sm font-bold truncate">{user?.name || user?.email?.split('@')[0]}</span>
                       <span className="text-[10px] text-[#d00000] font-bold uppercase">{user?.role}</span>
                     </div>
                   </div>
                   
-                  <button onClick={() => { setActiveTab('profile'); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-left mt-1">
+                  <button onClick={() => { setActiveTab('profile'); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-start mt-1">
                     <span className="material-symbols-outlined text-[18px]">person</span> {isAr ? 'الملف الشخصي' : 'My Profile'}
                   </button>
 
                   {(user?.role === 'user' || user?.role === 'superadmin') && (
                     <>
-                      <button onClick={() => { setActiveTab('tracking'); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-left">
+                      <button onClick={() => { setActiveTab('tracking'); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-start">
                         <span className="material-symbols-outlined text-[18px]">local_shipping</span> {isAr ? 'الطلبات' : 'Orders'}
                       </button>
-                      <button onClick={() => { setActiveTab('rewards'); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-left">
+                      <button onClick={() => { setActiveTab('rewards'); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-start">
                         <span className="material-symbols-outlined text-[18px]">workspace_premium</span> {isAr ? 'المكافآت' : 'Rewards Hub'}
                       </button>
                     </>
                   )}
 
                   {(user?.role === 'merchant' || user?.role === 'superadmin') && (
-                    <button onClick={() => { setActiveTab('dashboard'); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-left">
+                    <button onClick={() => { setActiveTab('dashboard'); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-start">
                       <span className="material-symbols-outlined text-[18px]">storefront</span> {isAr ? 'مركز التجار' : 'Merchant Centre'}
                     </button>
                   )}
 
                   {(user?.role === 'driver' || user?.role === 'superadmin') && (
-                    <button onClick={() => { setActiveTab('delivery'); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-left">
+                    <button onClick={() => { setActiveTab('delivery'); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-start">
                       <span className="material-symbols-outlined text-[18px]">two_wheeler</span> {isAr ? 'بوابة المناديب' : 'Rider Portal'}
                     </button>
                   )}
 
                   {user?.role === 'superadmin' && (
-                    <button onClick={() => { setActiveTab('admin'); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-left">
+                    <button onClick={() => { setActiveTab('admin'); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-start">
                       <span className="material-symbols-outlined text-[18px]">admin_panel_settings</span> {isAr ? 'لوحة الإدارة' : 'Admin Dashboard'}
                     </button>
                   )}
 
-                  <button onClick={() => { setLanguage(l => l === 'ar' ? 'en' : 'ar'); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex sm:hidden items-center gap-2 text-left">
+                  <button onClick={() => { setLanguage(l => l === 'ar' ? 'en' : 'ar'); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex sm:hidden items-center gap-2 text-start">
                     <span className="material-symbols-outlined text-[18px]">language</span> {isAr ? 'Switch to English' : 'التبديل للعربية'}
                   </button>
 
-                  <button onClick={() => { setActiveTab('settings'); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-left border-t border-gray-50 pt-2 mt-1">
+                  <button onClick={() => { setActiveTab('settings'); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-start border-t border-gray-50 pt-2 mt-1">
                     <span className="material-symbols-outlined text-[18px]">settings</span> {isAr ? 'الإعدادات' : 'Settings'}
                   </button>
 
-                  <button onClick={() => { setActiveTab('showcase'); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-left text-blue-600 mt-1">
+                  <button onClick={() => { setActiveTab('showcase'); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-start text-blue-600 mt-1">
                     <span className="material-symbols-outlined text-[18px]">visibility</span> {isAr ? 'عرض الشاشات' : 'Screen Index'}
                   </button>
 
-                  <button onClick={async () => { await AuthService.signOut(); setUser(null); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-left text-red-600 mt-1 border-t border-gray-50 pt-2">
+                  <button onClick={async () => { await AuthService.signOut(); setUser(null); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-start text-red-600 mt-1 border-t border-gray-50 pt-2">
                     <span className="material-symbols-outlined text-[18px]">logout</span> {isAr ? 'تسجيل الخروج' : 'Sign Out'}
                   </button>
                 </div>

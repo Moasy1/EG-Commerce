@@ -23,21 +23,21 @@ export default function Settings() {
         <div className="w-full md:w-64 shrink-0 space-y-1">
           <button 
             onClick={() => setActiveSettingsTab('profile')}
-            className={`w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-colors ${activeTab === 'profile' ? 'bg-slate-900 text-white' : 'hover:bg-gray-50 text-gray-700'}`}
+            className={`w-full text-start flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-colors ${activeTab === 'profile' ? 'bg-slate-900 text-white' : 'hover:bg-gray-50 text-gray-700'}`}
           >
             <span className="material-symbols-outlined text-[20px]">person</span>
             {isAr ? 'الملف الشخصي' : 'Profile'}
           </button>
           <button 
             onClick={() => setActiveSettingsTab('preferences')}
-            className={`w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-colors ${activeTab === 'preferences' ? 'bg-slate-900 text-white' : 'hover:bg-gray-50 text-gray-700'}`}
+            className={`w-full text-start flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-colors ${activeTab === 'preferences' ? 'bg-slate-900 text-white' : 'hover:bg-gray-50 text-gray-700'}`}
           >
             <span className="material-symbols-outlined text-[20px]">tune</span>
             {isAr ? 'التفضيلات' : 'Preferences'}
           </button>
           <button 
             onClick={() => setActiveSettingsTab('notifications')}
-            className={`w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-colors ${activeTab === 'notifications' ? 'bg-slate-900 text-white' : 'hover:bg-gray-50 text-gray-700'}`}
+            className={`w-full text-start flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-colors ${activeTab === 'notifications' ? 'bg-slate-900 text-white' : 'hover:bg-gray-50 text-gray-700'}`}
           >
             <span className="material-symbols-outlined text-[20px]">notifications</span>
             {isAr ? 'الإشعارات' : 'Notifications'}

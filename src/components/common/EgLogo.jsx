@@ -10,8 +10,11 @@ export default function EgLogo({ className = "w-8 h-8", color = "#d00000" }) {
       viewBox="0 0 48 48" 
       fill="none" 
       xmlns="http://www.w3.org/2000/svg" 
+      role="img"
+      aria-label="EG-Commerce Logo"
       className={`shrink-0 ${className}`}
     >
+      <title>EG-Commerce Logo</title>
       {/* Outer Red Arch */}
       <path 
         d="M10 44V22C10 14.268 16.268 8 24 8C31.732 8 38 14.268 38 22V44H29V22C29 19.2386 26.7614 17 24 17C21.2386 17 19 19.2386 19 22V44H10Z" 

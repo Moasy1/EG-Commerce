@@ -27,17 +27,17 @@ export default function DeviceFrame({ children }) {
       {/* iPhone Device Mockup Shell */}
       <div className="relative w-full max-w-[390px] h-[844px] max-h-[92vh] bg-surface rounded-[48px] border-[10px] border-surface-dim shadow-[0_25px_60px_-15px_rgba(0,0,0,0.15),0_0_0_1px_rgba(0,0,0,0.06)] overflow-hidden flex flex-col">
         {/* Dynamic Island Notch */}
-        <div className="absolute top-2 left-1/2 -translate-x-1/2 w-28 h-6 bg-slate-900 rounded-full z-50 flex items-center justify-end px-3">
+        <div className="absolute top-2 left-1/2 -translate-x-1/2 w-28 h-6 bg-slate-900 rounded-full z-50 flex items-center justify-end px-3" aria-hidden="true">
           <span className="w-2.5 h-2.5 rounded-full bg-slate-800" />
         </div>
 
         {/* Scrollable Screen Content */}
-        <div className="w-full h-full overflow-y-auto overflow-x-hidden flex flex-col bg-surface">
+        <div className="w-full h-full overflow-y-auto overflow-x-hidden flex flex-col bg-surface overscroll-contain">
           {children}
         </div>
 
         {/* Home Bar Indicator */}
-        <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-32 h-1 bg-slate-900/30 rounded-full z-50 pointer-events-none" />
+        <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-32 h-1 bg-slate-900/30 rounded-full z-50 pointer-events-none" aria-hidden="true" />
       </div>
     </div>
   );

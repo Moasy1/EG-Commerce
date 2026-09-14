@@ -157,7 +157,7 @@ export default function ScreenShowcase() {
               <span>{isAr ? '🇬🇧 English' : '🇪🇬 العربية'}</span>
             </button>
 
-            <div className={`hidden xl:flex flex-col ${isAr ? 'items-start text-left' : 'items-end text-right'}`}>
+            <div className="hidden xl:flex flex-col items-end text-end">
               <div className="text-[11px] font-mono font-bold tracking-widest text-gray-500 uppercase">
                 {isAr ? 'أشخاص حقيقيون / أسلوب حقيقي / مصر' : 'REAL PEOPLE / REAL STYLE / EGYPT'}
               </div>

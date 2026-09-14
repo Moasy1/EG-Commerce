@@ -13,10 +13,12 @@ export default function DesktopCreatorAnalytics() {
     { title: 'Ethnic Accessories', views: '14.2K', likes: '980', sales: 'EGP 4.7K', img: '/images/products/copper_lantern.jpg' },
   ];
 
+  const isAr = language === 'ar';
+
   return (
-    <div className="w-full bg-white text-slate-900 flex font-sans min-h-[580px] overflow-hidden select-none text-left">
+    <div dir={isAr ? 'rtl' : 'ltr'} className="w-full bg-white text-slate-900 flex font-sans min-h-[580px] overflow-hidden select-none text-start">
       {/* 1. Left Sidebar */}
-      <aside className="w-48 bg-gray-50/80 border-r border-gray-200/80 p-3 flex flex-col justify-between shrink-0">
+      <aside className={`w-48 bg-gray-50/80 ${isAr ? 'border-l' : 'border-r'} border-gray-200/80 p-3 flex flex-col justify-between shrink-0`}>
         <div className="space-y-4">
           <div className="flex items-center gap-2 px-2 py-1 cursor-pointer" onClick={() => setActiveTab('reels')}>
             <EgLogo className="w-6 h-6" color="#d00000" />
@@ -25,12 +27,12 @@ export default function DesktopCreatorAnalytics() {
 
           <nav className="space-y-1 text-xs font-semibold">
             {[
-              { id: 'studio', label: 'Creator Studio', icon: 'smart_display' },
-              { id: 'analytics', label: 'Analytics', icon: 'analytics' },
-              { id: 'campaigns', label: 'Campaigns', icon: 'campaign' },
-              { id: 'content', label: 'Content', icon: 'video_library' },
-              { id: 'profile', label: 'Profile', icon: 'account_circle' },
-              { id: 'settings', label: 'Settings', icon: 'settings' },
+              { id: 'studio', label: isAr ? 'استوديو المبدعين' : 'Creator Studio', icon: 'smart_display' },
+              { id: 'analytics', label: isAr ? 'التحليلات' : 'Analytics', icon: 'analytics' },
+              { id: 'campaigns', label: isAr ? 'الحملات' : 'Campaigns', icon: 'campaign' },
+              { id: 'content', label: isAr ? 'المحتوى' : 'Content', icon: 'video_library' },
+              { id: 'profile', label: isAr ? 'الملف الشخصي' : 'Profile', icon: 'account_circle' },
+              { id: 'settings', label: isAr ? 'الإعدادات' : 'Settings', icon: 'settings' },
             ].map((item) => (
               <button
                 key={item.id}
@@ -48,8 +50,8 @@ export default function DesktopCreatorAnalytics() {
           </nav>
         </div>
 
-        <div className="p-2.5 rounded-xl bg-gray-100/70 border border-gray-200 text-left">
-          <span className="text-[10px] text-gray-500 block">Logged in as:</span>
+        <div className="p-2.5 rounded-xl bg-gray-100/70 border border-gray-200 text-start">
+          <span className="text-[10px] text-gray-500 block">{isAr ? 'مسجل الدخول باسم:' : 'Logged in as:'}</span>
           <span className="text-xs font-bold text-slate-800">Yasmin El Sayed</span>
         </div>
       </aside>

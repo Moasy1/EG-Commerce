@@ -385,7 +385,7 @@ export default function CategoryPage() {
                 </div>
 
                 {/* Product Meta */}
-                <div className="p-3 text-left space-y-1.5">
+                <div className="p-3 text-start space-y-1.5">
                   <div className="flex items-center justify-between text-[10px]">
                     <div className="flex items-center gap-1 text-amber-500 font-bold">
                       <span className="material-symbols-outlined text-[13px] fill-current">star</span>
@@ -439,7 +439,7 @@ export default function CategoryPage() {
             >
               <img src={cat.image} alt={cat.label} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
-              <div className="relative z-10 text-left">
+              <div className="relative z-10 text-start">
                 <span className="text-xs font-black block">{isAr ? (cat.labelAr || cat.label) : cat.label}</span>
               </div>
             </div>

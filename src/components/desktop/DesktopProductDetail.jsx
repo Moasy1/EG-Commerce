@@ -38,8 +38,10 @@ export default function DesktopProductDetail() {
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) 
     : 20;
 
+  const isAr = language === 'ar';
+
   return (
-    <div className="w-full bg-white text-slate-900 flex flex-col font-sans min-h-[580px] overflow-hidden select-none text-left">
+    <div dir={isAr ? 'rtl' : 'ltr'} className="w-full bg-white text-slate-900 flex flex-col font-sans min-h-[580px] overflow-hidden select-none text-start">
       {/* 1. Top Bar */}
       <div className="px-5 py-2.5 border-b border-gray-100 flex items-center justify-between gap-4">
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => setActiveTab('reels')}>
@@ -51,15 +53,15 @@ export default function DesktopProductDetail() {
           <span className="material-symbols-outlined text-[17px] text-gray-400">search</span>
           <input
             type="text"
-            placeholder="Search products, brands, orders..."
+            placeholder={isAr ? "ابحث عن منتجات، طلبات، علامات تجارية..." : "Search products, brands, orders..."}
             className="w-full bg-transparent focus:outline-none text-xs text-slate-800 placeholder:text-gray-400"
           />
         </div>
 
         <div className="flex items-center gap-3 text-gray-600">
-          <button className="p-1 hover:text-[#d00000]"><span className="material-symbols-outlined text-[19px]">favorite</span></button>
-          <button className="p-1 hover:text-[#d00000]"><span className="material-symbols-outlined text-[19px]">chat</span></button>
-          <button onClick={() => setActiveTab('cart')} className="p-1 hover:text-[#d00000]"><span className="material-symbols-outlined text-[19px]">shopping_cart</span></button>
+          <button className="p-1 hover:text-[#d00000]" title="Favorites"><span className="material-symbols-outlined text-[19px]">favorite</span></button>
+          <button className="p-1 hover:text-[#d00000]" title="Chat"><span className="material-symbols-outlined text-[19px]">chat</span></button>
+          <button onClick={() => setActiveTab('cart')} className="p-1 hover:text-[#d00000]" title="Cart"><span className="material-symbols-outlined text-[19px]">shopping_cart</span></button>
           <img src="/images/reels/reel_2.jpg" alt="User" className="w-6 h-6 rounded-full object-cover ring-1 ring-gray-300" />
         </div>
       </div>
@@ -277,7 +279,7 @@ export default function DesktopProductDetail() {
         </div>
 
         {/* Review Item Preview */}
-        <div className="flex items-start gap-3 text-left">
+        <div className="flex items-start gap-3 text-start">
           <img src="/images/reels/reel_2.jpg" alt="Reviewer" className="w-7 h-7 rounded-full object-cover" />
           <div className="space-y-0.5">
             <div className="flex items-center gap-2">
@@ -288,7 +290,7 @@ export default function DesktopProductDetail() {
               </div>
             </div>
             <p className="text-[11px] text-gray-600">
-              Amazing quality and flawless finish! Matches the video reel demonstration perfectly.
+              {isAr ? 'خامة وجودة ممتازة وتطريز متقن جداً! يطابق الفيديو المعروض تماماً.' : 'Amazing quality and flawless finish! Matches the video reel demonstration perfectly.'}
             </p>
           </div>
         </div>

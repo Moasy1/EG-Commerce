@@ -61,8 +61,9 @@ export default function ProductDetail() {
           <button 
             onClick={() => setActiveTab('shop')} 
             className="p-1.5 text-slate-800 hover:text-[#d00000] transition-colors"
+            aria-label="Back"
           >
-            <span className="material-symbols-outlined text-[24px]">chevron_left</span>
+            <span className="material-symbols-outlined text-[24px] rtl:rotate-180">chevron_left</span>
           </button>
 
           <div className="cursor-pointer" onClick={() => setActiveTab('reels')}>
@@ -148,7 +149,7 @@ export default function ProductDetail() {
         </div>
 
         {/* Product Details Section */}
-        <div className="p-4 text-left space-y-4">
+        <div className="p-4 text-start space-y-4">
           <div className="space-y-1">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold text-[#d00000] uppercase tracking-wider">Egyptian Heritage Linen</span>
@@ -198,7 +199,7 @@ export default function ProductDetail() {
               <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 border border-gray-300">
                 <img src="/images/brands/talieska_logo.jpg" alt="Merchant" className="w-full h-full object-cover" />
               </div>
-              <div className="text-left">
+              <div className="text-start">
                 <div className="flex items-center gap-1">
                   <span className="text-xs font-bold text-slate-900">Talieska Studio</span>
                   <span className="material-symbols-outlined text-[14px] text-blue-500">verified</span>

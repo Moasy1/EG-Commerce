@@ -137,14 +137,14 @@ export default function AdminDashboard() {
             </div>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm" dir={isAr ? 'rtl' : 'ltr'}>
+            <table className="w-full text-start text-sm" dir={isAr ? 'rtl' : 'ltr'}>
               <thead className="bg-gray-50 text-xs text-gray-500 font-bold">
                 <tr>
-                  <th className="px-6 py-3">User ID</th>
-                  <th className="px-6 py-3">Name</th>
-                  <th className="px-6 py-3">Role</th>
-                  <th className="px-6 py-3">Joined Date</th>
-                  <th className="px-6 py-3 text-right">Actions</th>
+                  <th className="px-6 py-3 text-start">{isAr ? 'معرف المستخدم' : 'User ID'}</th>
+                  <th className="px-6 py-3 text-start">{isAr ? 'الاسم' : 'Name'}</th>
+                  <th className="px-6 py-3 text-start">{isAr ? 'الدور' : 'Role'}</th>
+                  <th className="px-6 py-3 text-start">{isAr ? 'تاريخ الانضمام' : 'Joined Date'}</th>
+                  <th className="px-6 py-3 text-end">{isAr ? 'الإجراءات' : 'Actions'}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -163,7 +163,7 @@ export default function AdminDashboard() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-xs text-gray-500">{new Date(u.created_at).toLocaleDateString()}</td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-4 text-end">
                       <button onClick={() => setEditingUser(u)} className="text-blue-600 hover:text-blue-800 text-xs font-bold px-2 py-1 bg-blue-50 rounded">Edit</button>
                     </td>
                   </tr>

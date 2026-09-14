@@ -66,8 +66,11 @@ export const CartService = {
         id: item.id,
         productId: item.product_id,
         merchantId: item.merchant_id,
-        price: Number(item.unit_price),
-        quantity: item.quantity,
+        title: item.products?.title || item.title || 'Egyptian Fashion Item',
+        image: item.products?.image || item.image || '/images/products/linen_abaya.jpg',
+        brand: item.products?.merchant || item.brand || 'EG Brand',
+        price: Number(item.unit_price || item.price || 950),
+        quantity: item.quantity || 1,
         size: item.size || 'M',
         color: item.color || 'Default',
         product: item.products
@@ -78,7 +81,7 @@ export const CartService = {
     }
   },
 
-  async addToCart(productId, merchantId, price, quantity = 1, size = 'M', color = 'Default', userId = null) {
+  async addToCart(productId, merchantId, price, quantity = 1, size = 'M', color = 'Default', userId = null, title = '', image = '', brand = '') {
     try {
       const cartId = await this.getOrCreateCartId(userId);
 
@@ -97,7 +100,7 @@ export const CartService = {
           .eq('id', existingItem.id)
           .select();
         if (error) throw error;
-        this.addToLocalCart(productId, merchantId, price, quantity, size, color);
+        this.addToLocalCart(productId, merchantId, price, quantity, size, color, title, image, brand);
         return data;
       } else {
         const { data, error } = await supabase
@@ -113,22 +116,53 @@ export const CartService = {
           })
           .select();
         if (error) throw error;
-        this.addToLocalCart(productId, merchantId, price, quantity, size, color);
+        this.addToLocalCart(productId, merchantId, price, quantity, size, color, title, image, brand);
         return data;
       }
     } catch (err) {
       console.warn('DB Add to Cart failed, updating local storage:', err.message);
-      return this.addToLocalCart(productId, merchantId, price, quantity, size, color);
+      return this.addToLocalCart(productId, merchantId, price, quantity, size, color, title, image, brand);
     }
   },
 
   // Fallback local storage methods
   getLocalCart() {
     const cart = localStorage.getItem('eg_local_cart');
-    return cart ? JSON.parse(cart) : [];
+    if (cart) {
+      try {
+        const parsed = JSON.parse(cart);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) {}
+    }
+    const initialDefault = [
+      {
+        id: 'cart-init-1',
+        productId: 'p-fashion-blazer',
+        title: 'Citrine Yellow Oversized Blazer',
+        price: 1850,
+        quantity: 1,
+        size: 'M',
+        color: 'Citrine Yellow',
+        image: '/images/reels/fashion_citrine_blazer_thumb.jpg',
+        brand: 'Talieska Studio'
+      },
+      {
+        id: 'cart-init-2',
+        productId: 'p-fashion-oversized-shirt',
+        title: 'Sky Blue Linen Oversized Shirt',
+        price: 980,
+        quantity: 1,
+        size: 'L',
+        color: 'Sky Blue',
+        image: '/images/reels/fashion_oversized_shirt_thumb.jpg',
+        brand: 'Ahmed Fits'
+      }
+    ];
+    localStorage.setItem('eg_local_cart', JSON.stringify(initialDefault));
+    return initialDefault;
   },
 
-  addToLocalCart(productId, merchantId, price, quantity, size, color) {
+  addToLocalCart(productId, merchantId, price, quantity, size, color, title = '', image = '', brand = '') {
     const cart = this.getLocalCart();
     const existingIndex = cart.findIndex(item => item.productId === productId && item.size === size);
     
@@ -139,10 +173,13 @@ export const CartService = {
         id: `local-${Date.now()}`,
         productId,
         merchantId,
-        price,
-        quantity,
-        size,
-        color
+        title: title || 'Egyptian Fashion Item',
+        image: image || '/images/products/linen_abaya.jpg',
+        brand: brand || 'EG Brand',
+        price: Number(price) || 950,
+        quantity: Number(quantity) || 1,
+        size: size || 'M',
+        color: color || 'Default'
       });
     }
     localStorage.setItem('eg_local_cart', JSON.stringify(cart));
@@ -160,7 +197,7 @@ export const CartService = {
     let cart = this.getLocalCart();
     cart = cart.map(item => {
       if (item.id === cartItemId) {
-        return { ...item, quantity: Math.max(1, item.quantity + delta) };
+        return { ...item, quantity: Math.max(1, (item.quantity || 1) + delta) };
       }
       return item;
     });

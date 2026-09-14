@@ -25,7 +25,7 @@ export default function ProfileCloset() {
 
   if (!user) {
     return (
-      <div className="w-full min-h-[844px] bg-gray-50 flex flex-col items-center justify-center p-6 text-center select-none pb-20">
+      <div className="w-full min-h-[calc(100vh-64px)] flex-1 bg-gray-50 flex flex-col items-center justify-center p-6 text-center select-none pb-20">
         <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-sm mb-6 text-gray-300">
           <span className="material-symbols-outlined text-[40px]">person</span>
         </div>
@@ -49,7 +49,7 @@ export default function ProfileCloset() {
 
   // If we have a logged in user, render their actual profile info
   return (
-    <div className="w-full min-h-[844px] bg-white text-slate-900 flex flex-col font-sans select-none pb-20 pt-4">
+    <div className="w-full min-h-[calc(100vh-64px)] flex-1 bg-white text-slate-900 flex flex-col font-sans select-none pb-20 pt-4">
       {/* 3. Profile Header Info */}
       <div className="px-5 pt-3 pb-4 flex flex-col items-center text-center space-y-3">
         

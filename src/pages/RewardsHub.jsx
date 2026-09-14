@@ -81,7 +81,7 @@ export default function RewardsHub() {
             <div className="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden my-1.5">
               <div className="h-full bg-secondary rounded-full w-[65%]" />
             </div>
-            <span className="text-[10px] text-on-surface-variant block text-left">باقي 550 Points للـ Gold Tier</span>
+            <span className="text-[10px] text-on-surface-variant block text-start">باقي 550 Points للـ Gold Tier</span>
           </div>
         </div>
       </div>

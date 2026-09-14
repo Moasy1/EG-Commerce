@@ -2,14 +2,10 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import EgLogo from '../components/common/EgLogo';
 import DesktopProductDetail from '../components/desktop/DesktopProductDetail';
+import SizeGuideModal from '../components/common/SizeGuideModal';
 
 export default function ProductDetail() {
-  const { selectedProduct, addToCart, setActiveTab } = useApp();
-  const [selectedSize, setSelectedSize] = useState('S');
-  const [isFavorited, setIsFavorited] = useState(false);
-  const [addedToast, setAddedToast] = useState(false);
-  const [isPlayingVideo, setIsPlayingVideo] = useState(false);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const { selectedProduct, addToCart, setActiveTab, isAr, language } = useApp();
 
   // Fallback to Linen Co-ord Set if no product selected
   const product = selectedProduct || {
@@ -24,6 +20,29 @@ export default function ProductDetail() {
     sizes: ['XS', 'S', 'M', 'L', 'XL'],
     merchantId: 'm-01'
   };
+
+  const availableSizes = product.sizes && product.sizes.length > 0 
+    ? product.sizes 
+    : ['XS', 'S', 'M', 'L', 'XL'];
+
+  const availableSwatches = product.colorSwatches && product.colorSwatches.length > 0
+    ? product.colorSwatches
+    : (product.colors && product.colors.length > 0 
+        ? product.colors.map(c => ({ name: c, hex: '#8b5a2b' })) 
+        : [
+            { name: 'أصفر ليموني • Lemon', hex: '#d4af37' },
+            { name: 'بيج كتاني • Linen Beige', hex: '#d2b48c' },
+            { name: 'أسود كلاسيك • Onyx Black', hex: '#111827' }
+          ]);
+
+  const [selectedSize, setSelectedSize] = useState(availableSizes[0] || 'M');
+  const [selectedColor, setSelectedColor] = useState(availableSwatches[0]?.name || 'Default');
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [addedToast, setAddedToast] = useState(false);
+  const [isPlayingVideo, setIsPlayingVideo] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [showSizeGuide, setShowSizeGuide] = useState(false);
+
   const productImages = product.images && product.images.length > 0 ? product.images : [
     product.image,
     product.image.replace('.jpg', '_2.jpg').replace('.webp', '_2.webp').replace('.png', '_2.png'),
@@ -39,7 +58,7 @@ export default function ProductDetail() {
   };
 
   const handleAddToCart = () => {
-    addToCart({ ...product, selectedSize });
+    addToCart(product, { size: selectedSize, color: selectedColor });
     setAddedToast(true);
     setTimeout(() => setAddedToast(false), 2000);
   };
@@ -167,21 +186,64 @@ export default function ProductDetail() {
             </div>
           </div>
 
+          {/* Color Swatches Selector */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs font-bold text-slate-800">
+              <span>{isAr ? 'اللون المحدد:' : 'Selected Color:'}</span>
+              <span className="text-[#d00000] font-bold text-xs">{selectedColor}</span>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              {availableSwatches.map((swatch, idx) => {
+                const isSelected = selectedColor === swatch.name;
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setSelectedColor(swatch.name)}
+                    className={`group flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all ${
+                      isSelected
+                        ? 'border-[#d00000] bg-red-50/50 text-[#d00000] shadow-xs'
+                        : 'border-gray-200 bg-white text-slate-700 hover:border-gray-300'
+                    }`}
+                  >
+                    <span 
+                      className={`w-4 h-4 rounded-full border border-black/10 shrink-0 transition-transform ${
+                        isSelected ? 'scale-110 ring-2 ring-offset-1 ring-[#d00000]' : 'group-hover:scale-105'
+                      }`}
+                      style={{ backgroundColor: swatch.hex || '#d4af37' }}
+                    />
+                    <span>{swatch.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           {/* Size Selector */}
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs font-bold text-slate-800">
-              <span>Select Size</span>
-              <span className="text-gray-500 underline cursor-pointer">Size Guide</span>
+              <span>{isAr ? 'اختر المقاس' : 'Select Size'}</span>
+              <button
+                type="button"
+                onClick={() => setShowSizeGuide(true)}
+                className="text-[#d00000] hover:text-[#900000] underline flex items-center gap-1 cursor-pointer font-bold"
+              >
+                <span className="material-symbols-outlined text-[15px]">straighten</span>
+                <span>{isAr ? 'دليل المقاسات' : 'Size Guide'}</span>
+                {product.sizeGuide && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#d00000] animate-ping" />
+                )}
+              </button>
             </div>
-            <div className="flex items-center gap-2">
-              {['XS', 'S', 'M', 'L', 'XL'].map((size) => (
+            <div className="flex items-center gap-2 flex-wrap">
+              {availableSizes.map((size) => (
                 <button
                   key={size}
                   onClick={() => setSelectedSize(size)}
-                  className={`w-11 h-11 rounded-xl font-bold text-xs transition-all border ${
+                  className={`min-w-[44px] h-11 px-3 rounded-xl font-bold text-xs transition-all border ${
                     selectedSize === size
                       ? 'border-[#d00000] bg-[#d00000] text-white shadow-sm'
-                      : 'border-gray-200 text-slate-700 hover:border-gray-300'
+                      : 'border-gray-200 text-slate-700 hover:border-gray-300 bg-white'
                   }`}
                 >
                   {size}
@@ -201,14 +263,14 @@ export default function ProductDetail() {
               </div>
               <div className="text-start">
                 <div className="flex items-center gap-1">
-                  <span className="text-xs font-bold text-slate-900">Talieska Studio</span>
+                  <span className="text-xs font-bold text-slate-900">{product.merchant || 'Talieska Studio'}</span>
                   <span className="material-symbols-outlined text-[14px] text-blue-500">verified</span>
                 </div>
                 <span className="text-[10px] text-gray-500">Cairo, Egypt • 4.9 ★ (180 orders)</span>
               </div>
             </div>
             <button className="px-3 py-1 rounded-full border border-gray-300 text-xs font-bold text-slate-800 hover:border-[#d00000] hover:text-[#d00000]">
-              Visit
+              {isAr ? 'زيارة المتجر' : 'Visit'}
             </button>
           </div>
         </div>
@@ -226,7 +288,7 @@ export default function ProductDetail() {
             className="flex-1 h-12 rounded-2xl bg-[#d00000] text-white font-bold text-sm shadow-md hover:brightness-110 active:scale-98 transition-all flex items-center justify-center gap-2"
           >
             <span className="material-symbols-outlined text-[18px]">add_shopping_cart</span>
-            <span>Add to Cart • EGP {product.price}</span>
+            <span>{isAr ? 'إضافة للسلة' : 'Add to Cart'} • EGP {product.price}</span>
           </button>
         </div>
 
@@ -237,6 +299,16 @@ export default function ProductDetail() {
             <span>Added to Cart! تم الإضافة للسلة</span>
           </div>
         )}
+
+        {/* Size Guide Modal */}
+        <SizeGuideModal
+          isOpen={showSizeGuide}
+          onClose={() => setShowSizeGuide(false)}
+          product={product}
+          selectedSize={selectedSize}
+          onSelectSize={(sz) => setSelectedSize(sz)}
+          isAr={isAr}
+        />
       </div>
     </div>
   );

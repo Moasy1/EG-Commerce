@@ -239,6 +239,8 @@ export const ProductService = {
       stock: Number(productData.stock || productData.quantity || 20),
       sizes: productData.sizes || ['M', 'L'],
       colors: productData.colors || ['Default'],
+      colorSwatches: productData.colorSwatches || null,
+      sizeGuide: productData.sizeGuide || null,
       isSyndicated: true,
       pointsEarned: Math.floor((Number(productData.price) || 0) * 0.1),
       createdAt: new Date().toISOString()

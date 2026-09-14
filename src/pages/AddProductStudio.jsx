@@ -46,6 +46,68 @@ const FASHION_VIDEO_PRESETS = [
   }
 ];
 
+// Curated Egyptian Fashion Color Themes
+const CURATED_COLOR_PALETTES = [
+  {
+    themeName: '🇪🇬 التراث والكتان المصري',
+    swatches: [
+      { name: 'أحمر نوبي', hex: '#b91c1c' },
+      { name: 'رملي صيفي', hex: '#e2d9cc' },
+      { name: 'أخضر واحات', hex: '#15803d' },
+      { name: 'طيني أسمر', hex: '#78350f' },
+      { name: 'خردلي ذهبي', hex: '#d97706' }
+    ]
+  },
+  {
+    themeName: '🌊 ألوان الساحل والبحر',
+    swatches: [
+      { name: 'سماوي ناصع', hex: '#38bdf8' },
+      { name: 'أزرق متوسطي', hex: '#0284c7' },
+      { name: 'فيروزي مرجاني', hex: '#0d9488' },
+      { name: 'أبيض لؤلؤي', hex: '#f8fafc' },
+      { name: 'كحلي ملكي', hex: '#1e40af' }
+    ]
+  },
+  {
+    themeName: '🌸 تريند الباستيل 2026',
+    swatches: [
+      { name: 'وردي هادئ', hex: '#f472b6' },
+      { name: 'لافندر ناعم', hex: '#c084fc' },
+      { name: 'مشمشي باستيل', hex: '#fdba74' },
+      { name: 'مينت نعناعي', hex: '#86efac' },
+      { name: 'ليموني بارد', hex: '#fef08a' }
+    ]
+  }
+];
+
+// Curated Sizing Presets by Category
+const SIZING_PRESETS = [
+  {
+    category: '👗 ملابس وفساتين حريمي',
+    sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL']
+  },
+  {
+    category: '🧕 عبايات وجلابيات مصرية',
+    sizes: ['52 (طول 133)', '54 (طول 138)', '56 (طول 143)', '58 (طول 148)', '60 (طول 153)', 'مقاس موحد']
+  },
+  {
+    category: '👕 قمصان وكاجوال رجالي',
+    sizes: ['S', 'M', 'L', 'XL', '2XL', '3XL']
+  },
+  {
+    category: '✨ مقاس حر (Free Size)',
+    sizes: ['Free Size (مقاس موحد مريح)']
+  }
+];
+
+const DEFAULT_SIZE_CHART = [
+  { size: 'S', chest: '88 - 92', waist: '68 - 72', hips: '94 - 98', length: '140' },
+  { size: 'M', chest: '92 - 96', waist: '72 - 76', hips: '98 - 102', length: '142' },
+  { size: 'L', chest: '96 - 102', waist: '76 - 82', hips: '102 - 108', length: '145' },
+  { size: 'XL', chest: '102 - 108', waist: '82 - 88', hips: '108 - 114', length: '145' },
+  { size: 'XXL', chest: '108 - 116', waist: '88 - 96', hips: '114 - 122', length: '148' },
+];
+
 export default function AddProductStudio() {
   const { setActiveTab, addProduct } = useApp();
 
@@ -58,8 +120,38 @@ export default function AddProductStudio() {
   const [originalPrice, setOriginalPrice] = useState(1650);
   const [category, setCategory] = useState('الفساتين');
   const [quantity, setQuantity] = useState(20);
+
+  // Sizing & Size Guide State
+  const [availableSizes, setAvailableSizes] = useState(['XS', 'S', 'M', 'L', 'XL', 'XXL']);
   const [selectedSizes, setSelectedSizes] = useState(['L']);
-  const [selectedColor, setSelectedColor] = useState('red');
+  const [customSizeInput, setCustomSizeInput] = useState('');
+  const [isAddingCustomSize, setIsAddingCustomSize] = useState(false);
+
+  // Size Guide Upload / Interactive Chart State
+  const [sizeGuideType, setSizeGuideType] = useState('chart'); // 'chart' | 'image'
+  const [sizeGuideImage, setSizeGuideImage] = useState(null);
+  const [sizeGuideImageName, setSizeGuideImageName] = useState('');
+  const [isSizeChartEditorOpen, setIsSizeChartEditorOpen] = useState(false);
+  const [sizeChart, setSizeChart] = useState(DEFAULT_SIZE_CHART);
+  const [showSizeGuidePreviewModal, setShowSizeGuidePreviewModal] = useState(false);
+  const sizeGuideInputRef = useRef(null);
+
+  // Dynamic Color Palette & Swatches State
+  const [colorPalette, setColorPalette] = useState([
+    { id: 'c-red', name: 'أحمر تراثي', hex: '#d00000', isPreset: true },
+    { id: 'c-black', name: 'أسود كلاسيك', hex: '#111827', isPreset: true },
+    { id: 'c-emerald', name: 'زمردي مصري', hex: '#047857', isPreset: true },
+    { id: 'c-beige', name: 'كتان رملي', hex: '#fef3c7', isPreset: true },
+    { id: 'c-navy', name: 'كحلي داكن', hex: '#1e3a8a', isPreset: true },
+    { id: 'c-terracotta', name: 'تيراكوتا نوبي', hex: '#c2410c', isPreset: true }
+  ]);
+  const [selectedColorIds, setSelectedColorIds] = useState(['c-red']);
+  const [primaryColorId, setPrimaryColorId] = useState('c-red');
+
+  // Custom Color Creator State
+  const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
+  const [newColorHex, setNewColorHex] = useState('#7c3aed');
+  const [newColorName, setNewColorName] = useState('');
   const [shippingEnabled, setShippingEnabled] = useState(true);
   const [governorate, setGovernorate] = useState('جميع المحافظات');
   const [area, setArea] = useState('جميع المناطق');
@@ -241,11 +333,131 @@ export default function AddProductStudio() {
     });
   };
 
+  // Sizing Handlers
   const toggleSize = (size) => {
-    setSelectedSizes(prev => 
-      prev.includes(size) ? prev.filter(s => s !== size) : [...prev, size]
-    );
+    setSelectedSizes(prev => {
+      if (prev.includes(size)) {
+        if (prev.length === 1) return prev; // Keep at least one size
+        return prev.filter(s => s !== size);
+      } else {
+        return [...prev, size];
+      }
+    });
   };
+
+  const handleAddCustomSize = (e) => {
+    e?.preventDefault();
+    const clean = customSizeInput.trim();
+    if (!clean) return;
+    if (!availableSizes.includes(clean)) {
+      setAvailableSizes(prev => [...prev, clean]);
+    }
+    if (!selectedSizes.includes(clean)) {
+      setSelectedSizes(prev => [...prev, clean]);
+    }
+    setCustomSizeInput('');
+    setIsAddingCustomSize(false);
+  };
+
+  const removeAvailableSize = (size, e) => {
+    e?.stopPropagation();
+    setAvailableSizes(prev => prev.filter(s => s !== size));
+    setSelectedSizes(prev => prev.filter(s => s !== size));
+  };
+
+  const applySizingPreset = (preset) => {
+    setAvailableSizes(preset.sizes);
+    setSelectedSizes([preset.sizes[0], preset.sizes[1] || preset.sizes[0]]);
+  };
+
+  const handleSizeGuideUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    setSizeGuideImage(url);
+    setSizeGuideImageName(file.name);
+    setSizeGuideType('image');
+  };
+
+  const removeSizeGuideImage = (e) => {
+    e?.stopPropagation();
+    setSizeGuideImage(null);
+    setSizeGuideImageName('');
+    setSizeGuideType('chart');
+    if (sizeGuideInputRef.current) sizeGuideInputRef.current.value = '';
+  };
+
+  const handleSizeChartChange = (index, field, value) => {
+    setSizeChart(prev => {
+      const copy = [...prev];
+      copy[index] = { ...copy[index], [field]: value };
+      return copy;
+    });
+  };
+
+  const addSizeChartRow = () => {
+    setSizeChart(prev => [
+      ...prev,
+      { size: `مقاس ${prev.length + 1}`, chest: '100', waist: '80', hips: '105', length: '145' }
+    ]);
+  };
+
+  // Color Swatches Handlers
+  const toggleColorSelection = (colorId) => {
+    setSelectedColorIds(prev => {
+      if (prev.includes(colorId)) {
+        if (prev.length === 1) return prev; // Keep at least one selected
+        const updated = prev.filter(id => id !== colorId);
+        if (primaryColorId === colorId && updated.length > 0) {
+          setPrimaryColorId(updated[0]);
+        }
+        return updated;
+      } else {
+        return [...prev, colorId];
+      }
+    });
+  };
+
+  const handleAddCustomColor = (e) => {
+    e?.preventDefault();
+    const name = newColorName.trim() || `لون مخصص (${newColorHex.toUpperCase()})`;
+    const newId = `c-custom-${Date.now()}`;
+    const newColor = { id: newId, name, hex: newColorHex, isPreset: false };
+    
+    setColorPalette(prev => [...prev, newColor]);
+    setSelectedColorIds(prev => [...prev, newId]);
+    setPrimaryColorId(newId);
+    setNewColorName('');
+    setIsColorPickerOpen(false);
+  };
+
+  const handleApplyThemeSwatch = (swatch) => {
+    const existing = colorPalette.find(c => c.hex.toLowerCase() === swatch.hex.toLowerCase());
+    if (existing) {
+      if (!selectedColorIds.includes(existing.id)) {
+        setSelectedColorIds(prev => [...prev, existing.id]);
+      }
+      setPrimaryColorId(existing.id);
+    } else {
+      const newId = `c-theme-${Date.now()}-${Math.random().toString(36).substring(2, 5)}`;
+      const newColor = { id: newId, name: swatch.name, hex: swatch.hex, isPreset: false };
+      setColorPalette(prev => [...prev, newColor]);
+      setSelectedColorIds(prev => [...prev, newId]);
+      setPrimaryColorId(newId);
+    }
+  };
+
+  const removeCustomColor = (colorId, e) => {
+    e?.stopPropagation();
+    setColorPalette(prev => prev.filter(c => c.id !== colorId));
+    setSelectedColorIds(prev => prev.filter(id => id !== colorId));
+    if (primaryColorId === colorId) {
+      const remaining = colorPalette.filter(c => c.id !== colorId);
+      if (remaining[0]) setPrimaryColorId(remaining[0].id);
+    }
+  };
+
+  const primaryColor = colorPalette.find(c => c.id === primaryColorId) || colorPalette[0];
 
   // Main Publish Action
   const handlePublish = async (e) => {
@@ -268,6 +480,11 @@ export default function AddProductStudio() {
     setPublishProgress(10);
     setPublishStatusText('جاري فحص وتشفير ملف الفيديو وإعداد المقاسات...');
 
+    const selectedColorObjects = selectedColorIds
+      .map(id => colorPalette.find(c => c.id === id))
+      .filter(Boolean);
+    const selectedColorNames = selectedColorObjects.map(c => c.name);
+
     const newProdPayload = {
       id: `p-${Date.now()}`,
       sku: `EG-${Date.now().toString().slice(-6)}`,
@@ -282,7 +499,14 @@ export default function AddProductStudio() {
       reviewsCount: 1,
       stock: Number(quantity) || 20,
       sizes: selectedSizes.length > 0 ? selectedSizes : ['M', 'L'],
-      colors: [selectedColor],
+      sizeGuide: {
+        type: sizeGuideType,
+        image: sizeGuideImage,
+        chart: sizeChart,
+        hasGuide: Boolean(sizeGuideImage || (sizeChart && sizeChart.length > 0))
+      },
+      colors: selectedColorNames.length > 0 ? selectedColorNames : ['أحمر تراثي'],
+      colorSwatches: selectedColorObjects,
       description: description,
       specs: specs,
       isSyndicated: true,
@@ -531,9 +755,34 @@ export default function AddProductStudio() {
                       <span className="text-[10px] font-bold text-slate-900 block truncate">
                         {productName || 'اسم المنتج'}
                       </span>
-                      <span className="text-[11px] font-black text-[#d00000] block mt-0.5 font-mono">
-                        EGP {Number(price || 0).toLocaleString()}
-                      </span>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <span className="text-[11px] font-black text-[#d00000] font-mono">
+                          EGP {Number(price || 0).toLocaleString()}
+                        </span>
+                        {primaryColor && (
+                          <span className="inline-flex items-center gap-1 text-[9px] font-bold text-gray-700 bg-gray-100/90 px-1.5 py-0.5 rounded-full border border-gray-200">
+                            <span 
+                              className="w-2.5 h-2.5 rounded-full border border-black/20 shrink-0" 
+                              style={{ backgroundColor: primaryColor.hex }} 
+                            />
+                            <span className="max-w-[70px] truncate">{primaryColor.name}</span>
+                          </span>
+                        )}
+                        {selectedSizes.length > 0 && (
+                          <span 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowSizeGuidePreviewModal(true);
+                            }}
+                            className="inline-flex items-center gap-0.5 text-[9px] font-mono font-bold text-slate-800 bg-gray-100 hover:bg-gray-200 px-1.5 py-0.5 rounded-full border border-gray-200 cursor-pointer"
+                            title="عرض دليل المقاسات"
+                          >
+                            <span className="material-symbols-outlined text-[10px] text-gray-500">straighten</span>
+                            <span>{selectedSizes[0]}</span>
+                            {selectedSizes.length > 1 && <span className="text-[8px] text-gray-400">+{selectedSizes.length - 1}</span>}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -927,59 +1176,469 @@ export default function AddProductStudio() {
                     </div>
                   </div>
 
-                  {/* Sizes (S, M, L active red, XL, XXL) */}
-                  <div className="space-y-1 md:col-span-2">
-                    <label className="text-xs font-bold text-slate-800 block">
-                      <span className="text-[#d00000]">*</span> المقاسات المتاحة
-                    </label>
+                  {/* Interactive Sizes & Size Guide Studio */}
+                  <div className="space-y-2.5 md:col-span-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-[16px] text-gray-500">straighten</span>
+                        <label className="text-xs font-bold text-slate-800">
+                          <span className="text-[#d00000]">*</span> المقاسات ودليل القياسات (Sizes & Guide)
+                        </label>
+                      </div>
+                      <span className="text-[10px] font-bold text-gray-500">
+                        محدد {selectedSizes.length} من {availableSizes.length}
+                      </span>
+                    </div>
+
+                    {/* Active Size Chips + Add Custom Size */}
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      {['XS', 'S', 'M', 'L', 'XL', 'XXL'].map((s) => (
+                      {availableSizes.map((s) => {
+                        const isSelected = selectedSizes.includes(s);
+                        const isCustom = !['XS', 'S', 'M', 'L', 'XL', 'XXL'].includes(s);
+
+                        return (
+                          <div key={s} className="relative group">
+                            <button
+                              type="button"
+                              onClick={() => toggleSize(s)}
+                              className={`h-8 min-w-[34px] px-2.5 rounded-xl text-xs font-bold transition-all border cursor-pointer flex items-center justify-center gap-1 ${
+                                isSelected
+                                  ? 'bg-[#d00000] text-white border-[#d00000] shadow-xs'
+                                  : 'bg-gray-50 text-gray-700 border-gray-200 hover:border-gray-300'
+                              }`}
+                            >
+                              <span>{s}</span>
+                              {isSelected && <span className="text-[10px]">✓</span>}
+                            </button>
+
+                            {/* Delete custom size button */}
+                            {isCustom && (
+                              <button
+                                type="button"
+                                onClick={(e) => removeAvailableSize(s, e)}
+                                className="absolute -top-1.5 -start-1 w-4 h-4 rounded-full bg-red-600 text-white text-[9px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-xs"
+                                title="حذف المقاس"
+                              >
+                                ✕
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+
+                      {/* Add Custom Size Button */}
+                      {!isAddingCustomSize ? (
                         <button
-                          key={s}
                           type="button"
-                          onClick={() => toggleSize(s)}
-                          className={`w-8 h-8 rounded-lg text-xs font-bold transition-all border cursor-pointer ${
-                            selectedSizes.includes(s)
-                              ? 'bg-[#d00000] text-white border-[#d00000] shadow-xs'
-                              : 'bg-gray-50 text-gray-700 border-gray-200 hover:border-gray-300'
-                          }`}
+                          onClick={() => setIsAddingCustomSize(true)}
+                          className="h-8 px-2.5 rounded-xl border border-dashed border-gray-300 text-xs font-bold text-gray-600 hover:border-gray-500 hover:bg-gray-50 flex items-center gap-1 cursor-pointer"
                         >
-                          {s}
+                          <span className="material-symbols-outlined text-[14px]">add</span>
+                          <span>مقاس مخصص</span>
+                        </button>
+                      ) : (
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="text"
+                            autoFocus
+                            value={customSizeInput}
+                            onChange={(e) => setCustomSizeInput(e.target.value)}
+                            placeholder="مثال: 56، 44 EU، One Size"
+                            className="h-8 w-32 px-2 rounded-xl border border-[#d00000] bg-white text-xs font-bold focus:outline-none"
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handleAddCustomSize();
+                              }
+                            }}
+                          />
+                          <button
+                            type="button"
+                            onClick={handleAddCustomSize}
+                            className="h-8 px-2.5 bg-[#d00000] text-white rounded-xl text-xs font-bold cursor-pointer"
+                          >
+                            حفظ
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setIsAddingCustomSize(false)}
+                            className="h-8 px-1.5 text-gray-400 hover:text-slate-900 text-xs"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Sizing Presets Quick Selector */}
+                    <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+                      <span className="text-[10px] text-gray-400 font-bold">نماذج سريعة:</span>
+                      {SIZING_PRESETS.map((preset, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => applySizingPreset(preset)}
+                          className="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors cursor-pointer"
+                        >
+                          {preset.category}
                         </button>
                       ))}
+                    </div>
+
+                    {/* Size Guide Management Card (Upload Image or View/Edit Chart) */}
+                    <div className="rounded-2xl border border-dashed border-blue-200 bg-blue-50/40 p-3 space-y-2 text-start">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5">
+                          <span className="material-symbols-outlined text-[16px] text-blue-600">rule</span>
+                          <span className="text-xs font-bold text-slate-900">دليل المقاسات للمشترين (Size Guide)</span>
+                        </div>
+
+                        {/* Status tag */}
+                        {sizeGuideImage ? (
+                          <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-100 text-emerald-700 flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[11px]">image</span>
+                            <span>تم إرفاق صورة</span>
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-blue-100 text-blue-700">
+                            جدول القياسات مفعل
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="text-[10px] text-gray-500">
+                        {sizeGuideImage 
+                          ? `ملف الصورة: ${sizeGuideImageName || 'size_chart.png'}`
+                          : 'يمكنك رفع صورة لدليل مقاسات علامتك التجارية أو استخدام جدول القياسات التفاعلي أدناه.'
+                        }
+                      </p>
+
+                      {/* Hidden Size Guide Input */}
+                      <input 
+                        ref={sizeGuideInputRef}
+                        type="file" 
+                        accept="image/*,application/pdf"
+                        onChange={handleSizeGuideUpload}
+                        className="hidden" 
+                      />
+
+                      {/* Size Guide Action Buttons */}
+                      <div className="flex items-center gap-2 flex-wrap pt-0.5">
+                        <button
+                          type="button"
+                          onClick={() => sizeGuideInputRef.current?.click()}
+                          className="px-2.5 py-1.5 rounded-xl bg-white border border-blue-200 text-[11px] font-bold text-blue-700 hover:bg-blue-50 transition-colors flex items-center gap-1 cursor-pointer shadow-2xs"
+                        >
+                          <span className="material-symbols-outlined text-[14px]">cloud_upload</span>
+                          <span>{sizeGuideImage ? 'استبدال صورة الدليل' : 'رفع صورة دليل المقاسات'}</span>
+                        </button>
+
+                        {sizeGuideImage && (
+                          <button
+                            type="button"
+                            onClick={removeSizeGuideImage}
+                            className="px-2 py-1.5 rounded-xl bg-white border border-red-200 text-[11px] font-bold text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                            title="إزالة صورة الدليل"
+                          >
+                            إزالة الصورة
+                          </button>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={() => setIsSizeChartEditorOpen(!isSizeChartEditorOpen)}
+                          className={`px-2.5 py-1.5 rounded-xl border text-[11px] font-bold transition-colors flex items-center gap-1 cursor-pointer ${
+                            isSizeChartEditorOpen 
+                              ? 'bg-blue-600 text-white border-blue-600' 
+                              : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50 shadow-2xs'
+                          }`}
+                        >
+                          <span className="material-symbols-outlined text-[14px]">table_chart</span>
+                          <span>{isSizeChartEditorOpen ? 'إخفاء جدول القياسات' : 'تعديل جدول القياسات'}</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setShowSizeGuidePreviewModal(true)}
+                          className="px-2.5 py-1.5 rounded-xl bg-white border border-gray-200 text-[11px] font-bold text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-1 cursor-pointer shadow-2xs ms-auto"
+                        >
+                          <span className="material-symbols-outlined text-[14px]">visibility</span>
+                          <span>معاينة كما يراها المشتري</span>
+                        </button>
+                      </div>
+
+                      {/* Interactive Size Chart Table Editor */}
+                      {isSizeChartEditorOpen && (
+                        <div className="pt-2 border-t border-blue-200/60 space-y-2 animate-fade-in">
+                          <div className="flex items-center justify-between text-[11px] font-bold text-slate-800">
+                            <span>جدول مقاسات القطعة (بالسنتيمتر cm):</span>
+                            <button
+                              type="button"
+                              onClick={addSizeChartRow}
+                              className="text-[10px] font-bold text-blue-600 hover:underline flex items-center gap-0.5 cursor-pointer"
+                            >
+                              <span>+ إضافة مقاس</span>
+                            </button>
+                          </div>
+
+                          <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-2xs">
+                            <table className="w-full text-[10px] text-center">
+                              <thead className="bg-gray-100 text-slate-700 font-bold border-b border-gray-200">
+                                <tr>
+                                  <th className="py-1.5 px-2">المقاس</th>
+                                  <th className="py-1.5 px-2">الصدر (سم)</th>
+                                  <th className="py-1.5 px-2">الوسط (سم)</th>
+                                  <th className="py-1.5 px-2">الأرداف (سم)</th>
+                                  <th className="py-1.5 px-2">الطول (سم)</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-gray-100">
+                                {sizeChart.map((row, rIdx) => (
+                                  <tr key={rIdx} className="hover:bg-gray-50/50">
+                                    <td className="py-1 px-1.5 font-bold">
+                                      <input
+                                        type="text"
+                                        value={row.size}
+                                        onChange={(e) => handleSizeChartChange(rIdx, 'size', e.target.value)}
+                                        className="w-14 text-center font-bold bg-transparent border-b border-transparent hover:border-gray-300 focus:border-blue-500 focus:outline-none"
+                                      />
+                                    </td>
+                                    <td className="py-1 px-1.5">
+                                      <input
+                                        type="text"
+                                        value={row.chest}
+                                        onChange={(e) => handleSizeChartChange(rIdx, 'chest', e.target.value)}
+                                        className="w-16 text-center bg-transparent border-b border-transparent hover:border-gray-300 focus:border-blue-500 focus:outline-none"
+                                      />
+                                    </td>
+                                    <td className="py-1 px-1.5">
+                                      <input
+                                        type="text"
+                                        value={row.waist}
+                                        onChange={(e) => handleSizeChartChange(rIdx, 'waist', e.target.value)}
+                                        className="w-16 text-center bg-transparent border-b border-transparent hover:border-gray-300 focus:border-blue-500 focus:outline-none"
+                                      />
+                                    </td>
+                                    <td className="py-1 px-1.5">
+                                      <input
+                                        type="text"
+                                        value={row.hips}
+                                        onChange={(e) => handleSizeChartChange(rIdx, 'hips', e.target.value)}
+                                        className="w-16 text-center bg-transparent border-b border-transparent hover:border-gray-300 focus:border-blue-500 focus:outline-none"
+                                      />
+                                    </td>
+                                    <td className="py-1 px-1.5">
+                                      <input
+                                        type="text"
+                                        value={row.length}
+                                        onChange={(e) => handleSizeChartChange(rIdx, 'length', e.target.value)}
+                                        className="w-16 text-center bg-transparent border-b border-transparent hover:border-gray-300 focus:border-blue-500 focus:outline-none"
+                                      />
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
 
-                {/* Color Swatches */}
-                <div className="space-y-1.5 pt-1">
-                  <label className="text-xs font-bold text-slate-800 block">
-                    <span className="text-[#d00000]">*</span> اللون الأساسي
-                  </label>
-                  <div className="flex items-center gap-2">
-                    {[
-                      { id: 'red', color: 'bg-red-600', label: 'أحمر تراثي' },
-                      { id: 'black', color: 'bg-black', label: 'أسود كلاسيك' },
-                      { id: 'emerald', color: 'bg-emerald-700', label: 'زمردي مصري' },
-                      { id: 'beige', color: 'bg-amber-100', label: 'كتان رملي' },
-                      { id: 'navy', color: 'bg-blue-900', label: 'كحلي داكن' }
-                    ].map((c) => (
-                      <div
-                        key={c.id}
-                        onClick={() => setSelectedColor(c.id)}
-                        className={`w-7 h-7 rounded-full cursor-pointer transition-all flex items-center justify-center ${c.color} ${
-                          selectedColor === c.id ? 'ring-2 ring-offset-2 ring-[#d00000] scale-110' : 'ring-1 ring-gray-300'
-                        }`}
-                        title={c.label}
-                      >
-                        {selectedColor === c.id && (
-                          <span className={c.id === 'beige' ? 'text-slate-900 text-[11px] font-black' : 'text-white text-[11px] font-black'}>
-                            ✓
-                          </span>
-                        )}
-                      </div>
-                    ))}
+                {/* Interactive Color Swatches & Custom Palette Studio */}
+                <div className="space-y-2 pt-1 border-t border-gray-100">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-[16px] text-gray-500">palette</span>
+                      <label className="text-xs font-bold text-slate-800">
+                        <span className="text-[#d00000]">*</span> ألوان وباليت المنتج (Color Swatches)
+                      </label>
+                    </div>
+                    <span className="text-[10px] font-bold text-gray-500">
+                      محدد {selectedColorIds.length} من {colorPalette.length}
+                    </span>
                   </div>
+
+                  {/* Horizontal Swatches Carousel / List */}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {colorPalette.map((c) => {
+                      const isSelected = selectedColorIds.includes(c.id);
+                      const isPrimary = primaryColorId === c.id;
+                      const isLightColor = ['#fef3c7', '#ffffff', '#f8fafc', '#fef08a', '#e2d9cc'].includes(c.hex.toLowerCase());
+
+                      return (
+                        <div
+                          key={c.id}
+                          className="relative group"
+                        >
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (!isSelected) {
+                                toggleColorSelection(c.id);
+                              }
+                              setPrimaryColorId(c.id);
+                            }}
+                            className={`w-8 h-8 rounded-full cursor-pointer transition-all flex items-center justify-center relative ${
+                              isPrimary
+                                ? 'ring-3 ring-[#d00000] ring-offset-2 scale-110 shadow-sm'
+                                : isSelected
+                                ? 'ring-2 ring-slate-800 ring-offset-1 scale-105'
+                                : 'opacity-60 hover:opacity-100 ring-1 ring-gray-300'
+                            }`}
+                            style={{ backgroundColor: c.hex }}
+                            title={`${c.name} (${c.hex})${isPrimary ? ' - اللون الأساسي' : ''}`}
+                          >
+                            {/* Checkmark or Star */}
+                            {isPrimary ? (
+                              <span className={`text-[12px] font-black ${isLightColor ? 'text-slate-900' : 'text-white'}`}>
+                                ★
+                              </span>
+                            ) : isSelected ? (
+                              <span className={`text-[11px] font-bold ${isLightColor ? 'text-slate-900' : 'text-white'}`}>
+                                ✓
+                              </span>
+                            ) : null}
+                          </button>
+
+                          {/* Delete custom swatch button */}
+                          {!c.isPreset && (
+                            <button
+                              type="button"
+                              onClick={(e) => removeCustomColor(c.id, e)}
+                              className="absolute -top-1 -start-1 w-4 h-4 rounded-full bg-red-600 text-white text-[9px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-xs"
+                              title="حذف اللون"
+                            >
+                              ✕
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+
+                    {/* Toggle Add Custom Color Popover Button */}
+                    <button
+                      type="button"
+                      onClick={() => setIsColorPickerOpen(!isColorPickerOpen)}
+                      className={`h-8 px-2.5 rounded-full border text-xs font-bold transition-all flex items-center gap-1 cursor-pointer ${
+                        isColorPickerOpen
+                          ? 'border-[#d00000] bg-red-50 text-[#d00000]'
+                          : 'border-dashed border-gray-300 text-gray-600 hover:border-gray-500 hover:bg-gray-50'
+                      }`}
+                      title="إضافة لون مخصص أو اختيار باليت"
+                    >
+                      <span className="material-symbols-outlined text-[15px]">
+                        {isColorPickerOpen ? 'close' : 'add'}
+                      </span>
+                      <span>{isColorPickerOpen ? 'إغلاق' : 'إضافة لون / باليت'}</span>
+                    </button>
+                  </div>
+
+                  {/* Primary Color Indicator */}
+                  {primaryColor && (
+                    <div className="flex items-center gap-2 text-[11px] text-gray-600 bg-gray-50 p-2 rounded-xl border border-gray-200/80">
+                      <span className="font-bold text-slate-800">اللون الأساسي للغلاف:</span>
+                      <span 
+                        className="w-3.5 h-3.5 rounded-full border border-gray-300 shadow-2xs" 
+                        style={{ backgroundColor: primaryColor.hex }} 
+                      />
+                      <span className="font-bold text-slate-900">{primaryColor.name}</span>
+                      <span className="text-[10px] font-mono text-gray-400">({primaryColor.hex.toUpperCase()})</span>
+                      <span className="text-[10px] text-gray-400 ms-auto">انقر على أي لون لتعيينه كأساسي</span>
+                    </div>
+                  )}
+
+                  {/* Expanded Custom Color Creator & Palette Browser */}
+                  {isColorPickerOpen && (
+                    <div className="p-3.5 rounded-2xl bg-gray-50 border border-gray-200 space-y-3 animate-fade-in text-start">
+                      <div className="flex items-center justify-between border-b border-gray-200/60 pb-2">
+                        <span className="text-xs font-black text-slate-900 flex items-center gap-1.5">
+                          <span className="material-symbols-outlined text-[16px] text-[#d00000]">colorize</span>
+                          <span>مُنشئ ألوان مخصصة (Custom Swatch Creator)</span>
+                        </span>
+                      </div>
+
+                      {/* Custom Color Input Row */}
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {/* Native Color Picker Circle */}
+                        <label className="relative cursor-pointer shrink-0" title="اختر اللون">
+                          <div 
+                            className="w-10 h-10 rounded-xl border-2 border-white shadow-md flex items-center justify-center transition-transform hover:scale-105"
+                            style={{ backgroundColor: newColorHex }}
+                          >
+                            <span className="material-symbols-outlined text-[18px] text-white drop-shadow-md">colorize</span>
+                          </div>
+                          <input 
+                            type="color" 
+                            value={newColorHex} 
+                            onChange={(e) => setNewColorHex(e.target.value)} 
+                            className="sr-only" 
+                          />
+                        </label>
+
+                        {/* Hex Display */}
+                        <div className="w-24">
+                          <input 
+                            type="text" 
+                            value={newColorHex} 
+                            onChange={(e) => setNewColorHex(e.target.value)} 
+                            className="w-full px-2 py-2 rounded-xl border border-gray-200 bg-white text-xs font-mono font-bold text-center focus:outline-none focus:border-[#d00000]" 
+                            placeholder="#000000"
+                          />
+                        </div>
+
+                        {/* Name Input */}
+                        <div className="flex-1 min-w-[140px]">
+                          <input 
+                            type="text" 
+                            value={newColorName} 
+                            onChange={(e) => setNewColorName(e.target.value)} 
+                            placeholder="اسم اللون (مثال: كشمير دافئ، زيتوني)" 
+                            className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-white text-xs font-medium focus:outline-none focus:border-[#d00000]"
+                          />
+                        </div>
+
+                        {/* Add Button */}
+                        <button
+                          type="button"
+                          onClick={handleAddCustomColor}
+                          className="px-4 py-2 bg-[#d00000] text-white text-xs font-bold rounded-xl shadow-xs hover:bg-[#b00000] transition-all cursor-pointer shrink-0"
+                        >
+                          إضافة اللون
+                        </button>
+                      </div>
+
+                      {/* Curated Pre-made Palettes (1-click additions) */}
+                      <div className="pt-2 border-t border-gray-200/60 space-y-2">
+                        <span className="text-[11px] font-bold text-slate-700 block">
+                          🎨 باليتات مقترحة جاهزة (انقر لإضافة اللون مباشرة):
+                        </span>
+                        
+                        <div className="space-y-1.5">
+                          {CURATED_COLOR_PALETTES.map((group, idx) => (
+                            <div key={idx} className="flex items-center gap-2 bg-white px-2.5 py-1.5 rounded-xl border border-gray-200/70">
+                              <span className="text-[10px] font-bold text-gray-600 min-w-[130px] shrink-0">
+                                {group.themeName}:
+                              </span>
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                {group.swatches.map((swatch, sIdx) => (
+                                  <button
+                                    key={sIdx}
+                                    type="button"
+                                    onClick={() => handleApplyThemeSwatch(swatch)}
+                                    className="w-5 h-5 rounded-full border border-gray-300 hover:scale-125 transition-transform cursor-pointer shadow-2xs"
+                                    style={{ backgroundColor: swatch.hex }}
+                                    title={`${swatch.name} (${swatch.hex}) - انقر للإضافة للباليت`}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Shipping Settings */}
@@ -1167,6 +1826,101 @@ export default function AddProductStudio() {
               >
                 <span>العودة للوحة التحكم</span>
                 <span className="material-symbols-outlined text-[15px] rtl:rotate-180">arrow_forward</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* ========================================================================= */}
+      {/* 5. SIZE GUIDE PREVIEW MODAL                                                */}
+      {/* ========================================================================= */}
+      {showSizeGuidePreviewModal && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 max-w-lg w-full text-start space-y-4 shadow-2xl border border-gray-200 animate-scale-up">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-[20px]">straighten</span>
+                </div>
+                <div>
+                  <h3 className="text-sm font-black text-slate-900">دليل مقاسات {productName}</h3>
+                  <p className="text-[11px] text-gray-500">معاينة جدول المقاسات كما يظهر للمشتري في صفحة المنتج والريلز</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowSizeGuidePreviewModal(false)}
+                className="w-8 h-8 rounded-full hover:bg-gray-100 text-gray-500 hover:text-slate-900 flex items-center justify-center cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Content: Uploaded Image or Table Chart */}
+            {sizeGuideImage ? (
+              <div className="space-y-2">
+                <div className="rounded-2xl overflow-hidden border border-gray-200 max-h-[380px] bg-gray-50 flex items-center justify-center">
+                  <img src={sizeGuideImage} alt="Size Guide Chart" className="w-full h-auto object-contain max-h-[380px]" />
+                </div>
+                <p className="text-[10px] text-gray-400 text-center font-mono">
+                  {sizeGuideImageName} • صورة معتمدة من التاجر
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-xs">
+                  <table className="w-full text-xs text-center">
+                    <thead className="bg-gray-100 text-slate-800 font-bold border-b border-gray-200">
+                      <tr>
+                        <th className="py-2.5 px-3">المقاس</th>
+                        <th className="py-2.5 px-3">الصدر (سم)</th>
+                        <th className="py-2.5 px-3">الوسط (سم)</th>
+                        <th className="py-2.5 px-3">الأرداف (سم)</th>
+                        <th className="py-2.5 px-3">الطول (سم)</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 font-medium text-slate-700">
+                      {sizeChart.map((row, idx) => (
+                        <tr key={idx} className={selectedSizes.includes(row.size) ? 'bg-red-50/40 font-bold' : 'hover:bg-gray-50'}>
+                          <td className="py-2.5 px-3">
+                            <span className={`inline-block px-2 py-0.5 rounded-lg ${
+                              selectedSizes.includes(row.size) ? 'bg-[#d00000] text-white' : 'bg-gray-100'
+                            }`}>
+                              {row.size}
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-3 font-mono">{row.chest}</td>
+                          <td className="py-2.5 px-3 font-mono">{row.waist}</td>
+                          <td className="py-2.5 px-3 font-mono">{row.hips}</td>
+                          <td className="py-2.5 px-3 font-mono">{row.length}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Measuring Tips */}
+                <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100 space-y-1 text-[11px] text-gray-600">
+                  <div className="font-bold text-slate-900 flex items-center gap-1">
+                    <span className="material-symbols-outlined text-[14px] text-amber-500">info</span>
+                    <span>نصائح أخذ القياس بدقة:</span>
+                  </div>
+                  <ul className="list-disc list-inside space-y-0.5 text-[10px] text-gray-500">
+                    <li>قم بالقياس باستخدام شريط قياس مرن فوق الملابس الخفيفة.</li>
+                    <li>إذا كان قياسك بين مقاسين، يفضل اختيار المقاس الأكبر لراحة أكبر في الكتان.</li>
+                  </ul>
+                </div>
+              </div>
+            )}
+
+            {/* Modal Footer */}
+            <div className="pt-2 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowSizeGuidePreviewModal(false)}
+                className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all cursor-pointer"
+              >
+                إغلاق المعاينة
               </button>
             </div>
           </div>

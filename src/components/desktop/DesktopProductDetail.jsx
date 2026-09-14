@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import EgLogo from '../common/EgLogo';
+import SizeGuideModal from '../common/SizeGuideModal';
 
 export default function DesktopProductDetail() {
-  const { selectedProduct, products, addToCart, setActiveTab } = useApp();
-  const [selectedThumb, setSelectedThumb] = useState(0);
-  const [selectedSize, setSelectedSize] = useState('S');
-  const [quantity, setQuantity] = useState(1);
-  const [activeTabSub, setActiveTabSub] = useState('reviews');
-  const [isPlayingVideo, setIsPlayingVideo] = useState(false);
+  const { selectedProduct, products, addToCart, setActiveTab, language, isAr: contextIsAr } = useApp();
+  const isAr = contextIsAr !== undefined ? contextIsAr : (language === 'ar');
 
   // Fallback to first product if none selected
   const product = selectedProduct || (products && products[0]) || {
@@ -25,20 +22,27 @@ export default function DesktopProductDetail() {
     sizes: ['S', 'M', 'L', 'XL']
   };
 
-  const galleryThumbs = [
-    product.image,
-    ...(product.secondaryImages || [
-      '/images/products/linen_abaya.jpg',
-      '/images/products/silk_dress.jpg',
-      '/images/products/wool_blazer.jpg'
-    ])
-  ].slice(0, 4);
+  const availableSizes = product.sizes && product.sizes.length > 0 
+    ? product.sizes 
+    : ['S', 'M', 'L', 'XL'];
 
-  const discountPercent = product.originalPrice 
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) 
-    : 20;
+  const availableSwatches = product.colorSwatches && product.colorSwatches.length > 0
+    ? product.colorSwatches
+    : (product.colors && product.colors.length > 0 
+        ? product.colors.map(c => ({ name: c, hex: '#8b5a2b' })) 
+        : [
+            { name: 'أصفر ليموني • Lemon', hex: '#d4af37' },
+            { name: 'بيج كتاني • Linen Beige', hex: '#d2b48c' },
+            { name: 'أسود كلاسيك • Onyx Black', hex: '#111827' }
+          ]);
 
-  const isAr = language === 'ar';
+  const [selectedThumb, setSelectedThumb] = useState(0);
+  const [selectedSize, setSelectedSize] = useState(availableSizes[0] || 'M');
+  const [selectedColor, setSelectedColor] = useState(availableSwatches[0]?.name || 'Default');
+  const [quantity, setQuantity] = useState(1);
+  const [activeTabSub, setActiveTabSub] = useState('reviews');
+  const [isPlayingVideo, setIsPlayingVideo] = useState(false);
+  const [showSizeGuide, setShowSizeGuide] = useState(false);
 
   return (
     <div dir={isAr ? 'rtl' : 'ltr'} className="w-full bg-white text-slate-900 flex flex-col font-sans min-h-[580px] overflow-hidden select-none text-start">
@@ -171,15 +175,61 @@ export default function DesktopProductDetail() {
               {product.description || 'تصميم استثنائي راقٍ مصنوع بأيدي أمهر المصممين المصريين، يجمع بين البساطة والفخامة.'}
             </p>
 
+            {/* Color Swatches Selector */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-xs font-bold text-slate-800">
+                <span>{isAr ? 'اللون المحدد:' : 'Color:'}</span>
+                <span className="text-[#d00000] font-bold text-xs">{selectedColor}</span>
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                {availableSwatches.map((swatch, idx) => {
+                  const isSelected = selectedColor === swatch.name;
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setSelectedColor(swatch.name)}
+                      className={`group flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-semibold transition-all ${
+                        isSelected
+                          ? 'border-[#d00000] bg-red-50/60 text-[#d00000] shadow-xs'
+                          : 'border-gray-200 bg-white text-slate-700 hover:border-gray-300'
+                      }`}
+                    >
+                      <span 
+                        className={`w-3.5 h-3.5 rounded-full border border-black/10 shrink-0 transition-transform ${
+                          isSelected ? 'scale-110 ring-2 ring-offset-1 ring-[#d00000]' : 'group-hover:scale-105'
+                        }`}
+                        style={{ backgroundColor: swatch.hex || '#d4af37' }}
+                      />
+                      <span className="text-[11px]">{swatch.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             {/* Size Selector */}
             <div className="space-y-1.5">
-              <span className="text-xs font-bold text-slate-800">Size:</span>
-              <div className="flex items-center gap-2">
-                {(product.sizes || ['XS', 'S', 'M', 'L', 'XL']).map((sz) => (
+              <div className="flex items-center justify-between text-xs font-bold text-slate-800">
+                <span>{isAr ? 'المقاس:' : 'Size:'}</span>
+                <button
+                  type="button"
+                  onClick={() => setShowSizeGuide(true)}
+                  className="text-[#d00000] hover:text-[#900000] underline flex items-center gap-1 cursor-pointer font-bold text-[11px]"
+                >
+                  <span className="material-symbols-outlined text-[14px]">straighten</span>
+                  <span>{isAr ? 'دليل المقاسات' : 'Size Guide'}</span>
+                  {product.sizeGuide && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#d00000] animate-ping" />
+                  )}
+                </button>
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                {availableSizes.map((sz) => (
                   <button
                     key={sz}
                     onClick={() => setSelectedSize(sz)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+                    className={`min-w-[40px] px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
                       selectedSize === sz
                         ? 'bg-[#d00000] text-white border-[#d00000] shadow-xs'
                         : 'bg-white text-slate-700 border-gray-200 hover:bg-gray-50'
@@ -213,14 +263,17 @@ export default function DesktopProductDetail() {
                 onClick={() => {
                   addToCart({
                     ...product,
-                    selectedSize
+                    quantity
+                  }, {
+                    size: selectedSize,
+                    color: selectedColor
                   });
                   setActiveTab('cart');
                 }}
                 className="flex-1 py-2.5 rounded-xl bg-[#d00000] text-white text-xs font-bold hover:bg-[#b00000] transition-colors flex items-center justify-center gap-1.5 shadow-md active:scale-98"
               >
                 <span className="material-symbols-outlined text-[17px]">shopping_bag</span>
-                <span>Add to Cart • EGP {product.price * quantity}</span>
+                <span>{isAr ? 'إضافة للسلة' : 'Add to Cart'} • EGP {product.price * quantity}</span>
               </button>
             </div>
           </div>
@@ -295,6 +348,16 @@ export default function DesktopProductDetail() {
           </div>
         </div>
       </div>
+
+      {/* Size Guide Modal */}
+      <SizeGuideModal
+        isOpen={showSizeGuide}
+        onClose={() => setShowSizeGuide(false)}
+        product={product}
+        selectedSize={selectedSize}
+        onSelectSize={(sz) => setSelectedSize(sz)}
+        isAr={isAr}
+      />
     </div>
   );
 }

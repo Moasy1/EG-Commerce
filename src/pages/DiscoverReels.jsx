@@ -707,7 +707,7 @@ export default function DiscoverReels() {
         </div>
 
         <div className="absolute bottom-6 left-4 right-[60px] flex flex-col justify-end space-y-3 z-20 pointer-events-auto">
-            {/* Floating Product Pill(s) */}
+            {/* Floating Shop Action: Bag Icon Circle on the Left + Product Pill */}
             {(() => {
               const allProducts = (reel.products && reel.products.length > 0)
                 ? reel.products
@@ -715,31 +715,53 @@ export default function DiscoverReels() {
               
               if (allProducts.length === 0) return null;
 
+              const handleShopAction = (e) => {
+                e.stopPropagation();
+                if (allProducts.length > 1) {
+                  setIsShopTheLookOpen(true);
+                } else {
+                  const singleProd = allProducts[0];
+                  const matched = products?.find(p => p.id === singleProd?.id) || singleProd;
+                  if (matched) openQuickBuy(matched);
+                }
+              };
+
               return (
-                <div 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (allProducts.length > 1) {
-                      setIsShopTheLookOpen(true);
-                    } else {
-                      const matched = products?.find(p => p.id === allProducts[0]?.id) || allProducts[0];
-                      if (matched) openProductDetail(matched);
-                    }
-                  }}
-                  className="inline-flex w-fit items-center gap-2 bg-white/95 backdrop-blur-md rounded-xl py-2 px-3 shadow-lg cursor-pointer hover:bg-white active:scale-95 transition-transform animate-fade-in"
-                >
-                  <div className="flex -space-x-2 rtl:space-x-reverse">
-                    {allProducts.slice(0, 3).map((p, i) => (
-                      <img key={i} src={p.image} alt={p.title || ''} className="w-7 h-7 rounded-full border-2 border-white object-cover shadow-xs" />
-                    ))}
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-[11px] font-black text-slate-900 leading-tight">🛍️ {isAr ? 'تسوق الإطلالة' : 'Shop the Look'}</span>
-                    <span className="text-[10px] font-bold text-gray-500 leading-tight">
-                      ({allProducts.length} {allProducts.length === 1 ? (isAr ? 'عنصر' : 'item') : (isAr ? 'عناصر' : 'items')})
+                <div className="inline-flex items-center gap-2 w-fit animate-fade-in" style={{ direction: 'ltr' }}>
+                  {/* Shop Now Bag Icon Circle (Beside the pill on the left) */}
+                  <button
+                    onClick={handleShopAction}
+                    className="w-10 h-10 rounded-full bg-[#cc0000] text-white flex items-center justify-center shadow-lg hover:brightness-110 active:scale-90 transition-all shrink-0 cursor-pointer border border-white/30"
+                    title={isAr ? 'تسوق الآن' : 'Shop Now'}
+                  >
+                    <span className="material-symbols-outlined text-[20px]">shopping_bag</span>
+                  </button>
+
+                  {/* Product Pill */}
+                  <div 
+                    onClick={handleShopAction}
+                    dir={isAr ? 'rtl' : 'ltr'}
+                    className="inline-flex items-center gap-2 bg-white/95 backdrop-blur-md rounded-2xl py-1.5 px-3 shadow-lg cursor-pointer hover:bg-white active:scale-95 transition-transform"
+                  >
+                    <div className="flex -space-x-2 rtl:space-x-reverse">
+                      {allProducts.slice(0, 3).map((p, i) => (
+                        <img key={i} src={p.image} alt={p.title || ''} className="w-7 h-7 rounded-full border-2 border-white object-cover shadow-xs shrink-0" />
+                      ))}
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[12px] font-black text-slate-900 leading-tight">
+                        {isAr ? 'تسوق الآن' : 'Shop Now'}
+                      </span>
+                      <span className="text-[10px] font-bold text-gray-500 leading-tight">
+                        {allProducts.length > 1 
+                          ? `(${allProducts.length} ${isAr ? 'عناصر' : 'items'})`
+                          : (allProducts[0]?.price ? `${allProducts[0].price} ${isAr ? 'ج.م' : 'EGP'}` : (isAr ? 'عرض المنتج' : 'View'))}
+                      </span>
+                    </div>
+                    <span className="material-symbols-outlined text-[16px] text-slate-600 ml-0.5 rtl:mr-0.5 rtl:ml-0">
+                      {isAr ? 'chevron_left' : 'chevron_right'}
                     </span>
                   </div>
-                  <span className="material-symbols-outlined text-[16px] text-slate-900 ml-1 rtl:mr-1 rtl:ml-0">open_in_new</span>
                 </div>
               );
             })()}
@@ -775,23 +797,6 @@ export default function DiscoverReels() {
               </div>
 
             </div>
-            
-            {/* Shop Now Full Width Button */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                if (reel.products && reel.products.length > 1) {
-                  setIsShopTheLookOpen(true);
-                } else {
-                  const singleProd = reel.products ? reel.products[0] : reel.product;
-                  if (singleProd) openQuickBuy(singleProd);
-                }
-              }}
-              className="w-full py-3 mt-1 rounded-xl bg-[#cc0000] text-white text-[15px] font-bold shadow-lg hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2"
-            >
-              <span className="material-symbols-outlined text-[20px]">shopping_bag</span>
-              <span>{isAr ? 'تسوق الآن' : 'Shop Now'}</span>
-            </button>
           </div>
         </div>
     );

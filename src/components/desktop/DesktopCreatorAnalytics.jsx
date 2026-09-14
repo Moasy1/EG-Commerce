@@ -3,7 +3,7 @@ import { useApp } from '../../context/AppContext';
 import EgLogo from '../common/EgLogo';
 
 export default function DesktopCreatorAnalytics() {
-  const { setActiveTab } = useApp();
+  const { setActiveTab, language } = useApp();
   const [activeNav, setActiveNav] = useState('analytics');
 
   const shoppableItems = [

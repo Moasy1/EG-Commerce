@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import Header from './components/layout/Header';
 import BottomNav from './components/layout/BottomNav';
 import QuickBuyDrawer from './components/common/QuickBuyDrawer';
+import ErrorBoundary from './components/common/ErrorBoundary';
 
 import DiscoverReels from './pages/DiscoverReels';
 import Marketplace from './pages/Marketplace';
@@ -25,7 +26,14 @@ import Settings from './pages/Settings';
 import AuthModal from './components/AuthModal';
 
 function MainContent() {
-  const { activeTab, language } = useApp();
+  const { activeTab, setActiveTab, language } = useApp();
+
+  useEffect(() => {
+    window.__resetToReels = () => setActiveTab('reels');
+    return () => {
+      delete window.__resetToReels;
+    };
+  }, [setActiveTab]);
 
   const renderActiveScreen = () => {
     switch (activeTab) {
@@ -89,7 +97,9 @@ function MainContent() {
           key={activeTab} 
           className={`w-full flex-1 flex flex-col ${activeTab === 'reels' ? 'h-full' : 'animate-page-enter'}`}
         >
-          {renderActiveScreen()}
+          <ErrorBoundary key={activeTab} onReset={() => setActiveTab('reels')}>
+            {renderActiveScreen()}
+          </ErrorBoundary>
         </div>
       </main>
 
@@ -106,8 +116,10 @@ function MainContent() {
 
 export default function App() {
   return (
-    <AppProvider>
-      <MainContent />
-    </AppProvider>
+    <ErrorBoundary>
+      <AppProvider>
+        <MainContent />
+      </AppProvider>
+    </ErrorBoundary>
   );
 }

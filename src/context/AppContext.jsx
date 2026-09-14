@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { ProductService } from '../services/ProductService';
+import { ReelsService } from '../services/ReelsService';
 import { CartService } from '../services/CartService';
 import { AuthService } from '../services/AuthService';
 import { RewardService } from '../services/RewardService';
@@ -689,15 +690,35 @@ export function AppProvider({ children }) {
     ));
   };
 
-  const addProduct = (newProd) => {
-    setProducts(prev => [newProd, ...prev]);
+  const addProduct = async (newProd) => {
+    // 1. Persist product via ProductService
+    const created = await ProductService.createProduct(newProd);
+
+    // 2. If product has video, also create a Reel in ReelsService!
+    if (newProd.video) {
+      await ReelsService.saveReel({
+        id: `reel-${created.id}`,
+        creatorHandle: '@talieska_official',
+        creatorName: 'Talieska Studio • تاليسكا ستوديو',
+        avatar: created.image,
+        videoBg: newProd.video,
+        caption: `${created.title} • إطلالة جديدة وحصرية متوفرة للطلب الآن! ✨ #موضة_مصرية`,
+        music: 'Summer Aesthetic Vibes • Instrumental',
+        products: [created]
+      });
+    }
+
+    // 3. Update active in-memory products state
+    setProducts(prev => [created, ...prev.filter(p => p.id !== created.id)]);
+    return created;
   };
 
   const updateProduct = (updatedProd) => {
     setProducts(prev => prev.map(p => p.id === updatedProd.id ? updatedProd : p));
   };
 
-  const deleteProduct = (productId) => {
+  const deleteProduct = async (productId) => {
+    await ProductService.deleteProduct(productId);
     setProducts(prev => prev.filter(p => p.id !== productId));
   };
 

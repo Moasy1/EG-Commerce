@@ -157,12 +157,26 @@ export const ProductService = {
   async getProducts(categorySlug = null) {
     let allProducts = [];
 
+    // 1. Fetch custom uploaded products from persistent local storage
+    let customProducts = [];
+    try {
+      const stored = localStorage.getItem('eg_custom_products');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          customProducts = parsed;
+        }
+      }
+    } catch (e) {
+      console.warn('Could not parse eg_custom_products from storage:', e);
+    }
+
     try {
       let query = supabase.from('products').select('*');
       
       const { data, error } = await query;
       if (error || !data || data.length === 0) {
-        allProducts = INITIAL_PRODUCTS;
+        allProducts = [...customProducts, ...INITIAL_PRODUCTS];
       } else {
         // Map DB products to frontend format
         const dbMapped = data.map(dbProduct => ({
@@ -179,6 +193,7 @@ export const ProductService = {
           stock: dbProduct.stock_quantity || 20,
           isSyndicated: true,
           image: dbProduct.images && dbProduct.images.length > 0 ? dbProduct.images[0] : '/images/reels/reel_2.jpg',
+          images: dbProduct.images || [],
           video: null,
           pointsEarned: Math.floor(Number(dbProduct.base_price) * 0.1),
           category: dbProduct.category_id || 'General',
@@ -187,13 +202,14 @@ export const ProductService = {
           colors: ['Default']
         }));
 
-        // Merge DB products with INITIAL_PRODUCTS to guarantee full fashion catalog
-        const existingIds = new Set(dbMapped.map(p => p.id));
-        allProducts = [...dbMapped, ...INITIAL_PRODUCTS.filter(p => !existingIds.has(p.id))];
+        // Merge Custom + DB products with INITIAL_PRODUCTS
+        const existingIds = new Set([...customProducts.map(p => p.id), ...dbMapped.map(p => p.id)]);
+        allProducts = [...customProducts, ...dbMapped, ...INITIAL_PRODUCTS.filter(p => !existingIds.has(p.id))];
       }
     } catch (err) {
       console.warn('Error fetching products from backend:', err.message);
-      allProducts = INITIAL_PRODUCTS;
+      const existingIds = new Set(customProducts.map(p => p.id));
+      allProducts = [...customProducts, ...INITIAL_PRODUCTS.filter(p => !existingIds.has(p.id))];
     }
 
     if (categorySlug && categorySlug !== 'all') {
@@ -201,6 +217,81 @@ export const ProductService = {
     }
 
     return allProducts;
+  },
+
+  async createProduct(productData) {
+    const finalProduct = {
+      id: productData.id || `p-${Date.now()}`,
+      sku: productData.sku || `SKU-${Date.now().toString().slice(-6)}`,
+      title: productData.title,
+      price: Number(productData.price) || 0,
+      originalPrice: productData.originalPrice ? Number(productData.originalPrice) : Math.round((Number(productData.price) || 0) * 1.25),
+      merchant: productData.merchant || 'Talieska Studio • تاليسكا ستوديو',
+      merchantId: productData.merchantId || 'm0000000-0000-0000-0000-000000000001',
+      merchantVerified: true,
+      category: productData.category || 'الفساتين',
+      description: productData.description || '',
+      image: productData.image || (productData.images && productData.images[0]) || '/images/products/linen_abaya.jpg',
+      images: productData.images || [productData.image || '/images/products/linen_abaya.jpg'],
+      video: productData.video || null,
+      rating: 5.0,
+      reviewsCount: 1,
+      stock: Number(productData.stock || productData.quantity || 20),
+      sizes: productData.sizes || ['M', 'L'],
+      colors: productData.colors || ['Default'],
+      isSyndicated: true,
+      pointsEarned: Math.floor((Number(productData.price) || 0) * 0.1),
+      createdAt: new Date().toISOString()
+    };
+
+    // 1. Attempt Supabase backend insertion
+    try {
+      const dbPayload = {
+        title: finalProduct.title,
+        slug: finalProduct.sku,
+        description: finalProduct.description,
+        base_price: finalProduct.price,
+        sale_price: finalProduct.originalPrice,
+        stock_quantity: finalProduct.stock,
+        status: 'active',
+        images: finalProduct.images,
+        category_id: finalProduct.category,
+        merchant_id: 'd0000000-0000-0000-0000-000000000001'
+      };
+
+      const { data, error } = await supabase.from('products').insert(dbPayload).select();
+      if (!error && data && data.length > 0) {
+        finalProduct.id = data[0].id;
+      }
+    } catch (err) {
+      console.warn('Backend DB insert skipped (using synchronized local storage):', err.message);
+    }
+
+    // 2. Always persist into localStorage so it is immediately active across all pages
+    try {
+      const stored = localStorage.getItem('eg_custom_products');
+      let customProducts = stored ? JSON.parse(stored) : [];
+      customProducts = [finalProduct, ...customProducts.filter(p => p.id !== finalProduct.id)];
+      localStorage.setItem('eg_custom_products', JSON.stringify(customProducts));
+    } catch (e) {
+      console.warn('Could not persist product to local storage:', e);
+    }
+
+    return finalProduct;
+  },
+
+  async deleteProduct(productId) {
+    try {
+      await supabase.from('products').delete().eq('id', productId);
+    } catch (e) {}
+
+    try {
+      const stored = localStorage.getItem('eg_custom_products');
+      if (stored) {
+        const customProducts = JSON.parse(stored).filter(p => p.id !== productId);
+        localStorage.setItem('eg_custom_products', JSON.stringify(customProducts));
+      }
+    } catch (e) {}
   },
 
   async getMerchants() {

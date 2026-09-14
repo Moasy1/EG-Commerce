@@ -1,248 +1,1198 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import EgLogo from '../common/EgLogo';
+import { UgcService } from '../../services/UgcService';
 
 export default function DesktopCreatorAnalytics() {
   const { setActiveTab, language } = useApp();
-  const [activeNav, setActiveNav] = useState('analytics');
-
-  const shoppableItems = [
-    { title: 'Summer Dress Look', views: '48.2K', likes: '3.4K', sales: 'EGP 18.2K', img: '/images/products/silk_dress.jpg' },
-    { title: 'Abaya Styling Tips', views: '32.1K', likes: '2.1K', sales: 'EGP 12.5K', img: '/images/products/linen_abaya.jpg' },
-    { title: "Men's Linen Outfit", views: '19.8K', likes: '1.4K', sales: 'EGP 9.1K', img: '/images/products/linen_shirt.jpg' },
-    { title: 'Ethnic Accessories', views: '14.2K', likes: '980', sales: 'EGP 4.7K', img: '/images/products/copper_lantern.jpg' },
-  ];
-
   const isAr = language === 'ar';
 
+  const [activeNav, setActiveNav] = useState('studio'); // 'studio' | 'analytics' | 'campaigns' | 'content' | 'profile' | 'settings'
+  const [loading, setLoading] = useState(true);
+  const [toastMessage, setToastMessage] = useState('');
+
+  // Backend state
+  const [profile, setProfile] = useState(null);
+  const [analytics, setAnalytics] = useState(null);
+  const [campaigns, setCampaigns] = useState([]);
+  const [content, setContent] = useState([]);
+  const [settings, setSettings] = useState(null);
+
+  // Timeframe filter for analytics
+  const [timeframe, setTimeframe] = useState('7d');
+
+  // Modals & form state
+  const [showEditProfileModal, setShowEditProfileModal] = useState(false);
+  const [profileForm, setProfileForm] = useState({});
+
+  const [showApplyModal, setShowApplyModal] = useState(false);
+  const [selectedCampaignForApply, setSelectedCampaignForApply] = useState(null);
+  const [applyNotes, setApplyNotes] = useState('');
+
+  const [showDraftModal, setShowDraftModal] = useState(false);
+  const [selectedCampaignForDraft, setSelectedCampaignForDraft] = useState(null);
+  const [draftUrl, setDraftUrl] = useState('');
+  const [draftNotes, setDraftNotes] = useState('');
+
+  const [showNewReelModal, setShowNewReelModal] = useState(false);
+  const [newReelForm, setNewReelForm] = useState({
+    title: '',
+    taggedProduct: 'عباية كتان ناعمة وتوب عصري',
+    thumbnail: '/images/products/linen_abaya.jpg'
+  });
+
+  const [campaignFilter, setCampaignFilter] = useState('all'); // 'all' | 'applied' | 'approved'
+  const [contentFilter, setContentFilter] = useState('all'); // 'all' | 'published' | 'under_review'
+
+  const showToast = (msg) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(''), 3500);
+  };
+
+  // Initial load from UgcService backend
+  const loadAllData = async () => {
+    setLoading(true);
+    try {
+      const [profData, analData, campData, contData, settData] = await Promise.all([
+        UgcService.getProfile(),
+        UgcService.getAnalytics(timeframe),
+        UgcService.getCampaigns(),
+        UgcService.getContent(),
+        UgcService.getSettings()
+      ]);
+      setProfile(profData);
+      setProfileForm(profData);
+      setAnalytics(analData);
+      setCampaigns(campData);
+      setContent(contData);
+      setSettings(settData);
+    } catch (err) {
+      console.error('Error loading creator studio data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadAllData();
+  }, [timeframe]);
+
+  // Handler: Update profile
+  const handleSaveProfile = async (e) => {
+    e.preventDefault();
+    const updated = await UgcService.updateProfile(profileForm);
+    setProfile(updated);
+    setShowEditProfileModal(false);
+    showToast(isAr ? 'تم حفظ بيانات الملف الشخصي بنجاح! ✨' : 'Profile updated successfully!');
+  };
+
+  // Handler: Apply for campaign
+  const handleApplyCampaign = async () => {
+    if (!selectedCampaignForApply) return;
+    await UgcService.applyForCampaign(selectedCampaignForApply.id, profile?.id, applyNotes);
+    const updated = await UgcService.getCampaigns();
+    setCampaigns(updated);
+    setShowApplyModal(false);
+    setApplyNotes('');
+    showToast(isAr ? 'تم تقديم طلب المشاركة في الحملة بنجاح! 🎉' : 'Campaign application submitted successfully!');
+  };
+
+  // Handler: Submit draft reel
+  const handleSubmitDraft = async () => {
+    if (!selectedCampaignForDraft || !draftUrl) return;
+    await UgcService.submitCampaignDraft(selectedCampaignForDraft.id, draftUrl, draftNotes);
+    const updated = await UgcService.getCampaigns();
+    setCampaigns(updated);
+    setShowDraftModal(false);
+    setDraftUrl('');
+    setDraftNotes('');
+    showToast(isAr ? 'تم إرسال مسودة الريلز لمراجعة البراند! 🎬' : 'Reel draft submitted for brand review!');
+  };
+
+  // Handler: Create new reel
+  const handleCreateNewReel = async (e) => {
+    e.preventDefault();
+    if (!newReelForm.title) return;
+    await UgcService.createContent({
+      ...newReelForm,
+      status: 'published'
+    });
+    const updated = await UgcService.getContent();
+    setContent(updated);
+    setShowNewReelModal(false);
+    setNewReelForm({
+      title: '',
+      taggedProduct: 'عباية كتان ناعمة وتوب عصري',
+      thumbnail: '/images/products/linen_abaya.jpg'
+    });
+    showToast(isAr ? 'تم نشر الريلز بنجاح في المنصة! 🚀' : 'Reel published successfully!');
+  };
+
+  // Handler: Update settings
+  const handleSaveSettings = async (e) => {
+    e.preventDefault();
+    const updated = await UgcService.updateSettings(settings);
+    setSettings(updated);
+    showToast(isAr ? 'تم حفظ إعدادات الدفع والحساب بنجاح! 💳' : 'Settings and payout info saved!');
+  };
+
+  const navItems = [
+    { id: 'studio', label: isAr ? 'استوديو المبدعين' : 'Creator Studio', icon: 'smart_display' },
+    { id: 'analytics', label: isAr ? 'التحليلات' : 'Analytics', icon: 'analytics' },
+    { id: 'campaigns', label: isAr ? 'الحملات' : 'Campaigns', icon: 'campaign' },
+    { id: 'content', label: isAr ? 'المحتوى' : 'Content', icon: 'video_library' },
+    { id: 'profile', label: isAr ? 'الملف الشخصي' : 'Profile', icon: 'account_circle' },
+    { id: 'settings', label: isAr ? 'الإعدادات' : 'Settings', icon: 'settings' },
+  ];
+
+  if (loading && !profile) {
+    return (
+      <div className="min-h-[550px] flex flex-col items-center justify-center p-12 text-slate-500">
+        <div className="w-10 h-10 border-4 border-[#d00000] border-t-transparent rounded-full animate-spin mb-4" />
+        <p className="text-sm font-bold">{isAr ? 'جاري تحميل بيانات استوديو المبدعين...' : 'Loading Creator Studio...'}</p>
+      </div>
+    );
+  }
+
   return (
-    <div dir={isAr ? 'rtl' : 'ltr'} className="w-full bg-white text-slate-900 flex font-sans min-h-[580px] overflow-hidden select-none text-start">
-      {/* 1. Left Sidebar */}
-      <aside className={`w-48 bg-gray-50/80 ${isAr ? 'border-l' : 'border-r'} border-gray-200/80 p-3 flex flex-col justify-between shrink-0`}>
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 px-2 py-1 cursor-pointer" onClick={() => setActiveTab('reels')}>
+    <div dir={isAr ? 'rtl' : 'ltr'} className="w-full bg-white text-slate-900 flex flex-col md:flex-row font-sans min-h-[680px] overflow-hidden select-none text-start relative">
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 px-5 py-2.5 rounded-2xl bg-slate-900 text-white text-xs font-bold shadow-2xl flex items-center gap-2 border border-slate-700 animate-bounce">
+          <span className="material-symbols-outlined text-emerald-400 text-base">check_circle</span>
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
+      {/* Mobile Horizontal Navigation Tabs */}
+      <div className="md:hidden flex items-center gap-2 p-2.5 overflow-x-auto border-b border-gray-200 bg-gray-50/90 no-scrollbar sticky top-0 z-20">
+        {navItems.map((item) => (
+          <button
+            key={item.id}
+            onClick={() => setActiveNav(item.id)}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap flex items-center gap-1.5 transition-all shrink-0 ${
+              activeNav === item.id
+                ? 'bg-[#d00000] text-white shadow-xs'
+                : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-100'
+            }`}
+          >
+            <span className="material-symbols-outlined text-[16px]">{item.icon}</span>
+            <span>{item.label}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* 1. Left / Right Sidebar (Desktop only, RTL aware) */}
+      <aside className={`hidden md:flex w-56 bg-gray-50/90 ${isAr ? 'border-l' : 'border-r'} border-gray-200 p-3.5 flex-col justify-between shrink-0`}>
+        <div className="space-y-5">
+          <div className="flex items-center gap-2.5 px-2 py-1 cursor-pointer" onClick={() => setActiveTab('reels')}>
             <EgLogo className="w-6 h-6" color="#d00000" />
-            <span className="font-black text-xs tracking-tight text-slate-900">EG-Commerce</span>
+            <div>
+              <span className="font-black text-xs tracking-tight text-slate-900 block leading-none">EG-Commerce</span>
+              <span className="text-[9px] text-[#d00000] font-bold">Creator Suite 🇪🇬</span>
+            </div>
           </div>
 
-          <nav className="space-y-1 text-xs font-semibold">
-            {[
-              { id: 'studio', label: isAr ? 'استوديو المبدعين' : 'Creator Studio', icon: 'smart_display' },
-              { id: 'analytics', label: isAr ? 'التحليلات' : 'Analytics', icon: 'analytics' },
-              { id: 'campaigns', label: isAr ? 'الحملات' : 'Campaigns', icon: 'campaign' },
-              { id: 'content', label: isAr ? 'المحتوى' : 'Content', icon: 'video_library' },
-              { id: 'profile', label: isAr ? 'الملف الشخصي' : 'Profile', icon: 'account_circle' },
-              { id: 'settings', label: isAr ? 'الإعدادات' : 'Settings', icon: 'settings' },
-            ].map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setActiveNav(item.id)}
-                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all ${
-                  activeNav === item.id
-                    ? 'bg-[#d00000] text-white font-bold shadow-xs'
-                    : 'text-gray-600 hover:bg-gray-200/60 hover:text-slate-900'
-                }`}
-              >
-                <span className="material-symbols-outlined text-[17px]">{item.icon}</span>
-                <span>{item.label}</span>
-              </button>
-            ))}
+          <nav className="space-y-1.5 text-xs font-semibold">
+            {navItems.map((item) => {
+              const isActive = activeNav === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveNav(item.id)}
+                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition-all cursor-pointer ${
+                    isActive
+                      ? 'bg-[#d00000] text-white font-bold shadow-sm'
+                      : 'text-gray-600 hover:bg-gray-200/60 hover:text-slate-900'
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-[19px]">{item.icon}</span>
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
           </nav>
         </div>
 
-        <div className="p-2.5 rounded-xl bg-gray-100/70 border border-gray-200 text-start">
-          <span className="text-[10px] text-gray-500 block">{isAr ? 'مسجل الدخول باسم:' : 'Logged in as:'}</span>
-          <span className="text-xs font-bold text-slate-800">Yasmin El Sayed</span>
+        {/* Bottom Profile Mini Card */}
+        <div 
+          onClick={() => setActiveNav('profile')}
+          className="p-3 rounded-2xl bg-white border border-gray-200 shadow-xs cursor-pointer hover:border-gray-300 transition-colors flex items-center gap-2.5"
+        >
+          <img src={profile?.avatar || '/images/reels/reel_1.jpg'} alt="Avatar" className="w-8 h-8 rounded-full object-cover ring-1 ring-[#d00000]/30" />
+          <div className="min-w-0 flex-1">
+            <span className="text-[10px] text-gray-400 block">{isAr ? 'حساب موثق ✓' : 'Verified Creator'}</span>
+            <span className="text-xs font-bold text-slate-900 truncate block">{profile?.name?.split('•')[0] || 'ياسمين السيد'}</span>
+          </div>
         </div>
       </aside>
 
-      {/* 2. Main Creator Area */}
-      <main className="flex-1 flex flex-col min-w-0 bg-white overflow-y-auto">
-        {/* Top Search Bar */}
-        <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between gap-4">
-          <div className="flex-1 max-w-md flex items-center gap-2 px-3 py-1.5 bg-gray-100/90 rounded-full text-xs text-gray-500">
-            <span className="material-symbols-outlined text-[17px] text-gray-400">search</span>
+      {/* 2. Main Content Area */}
+      <main className="flex-1 flex flex-col min-w-0 bg-white overflow-y-auto max-h-[85vh]">
+        {/* Top Header Bar */}
+        <div className="px-6 py-3.5 border-b border-gray-100 flex items-center justify-between gap-4 sticky top-0 bg-white/95 backdrop-blur-sm z-10">
+          <div className="flex-1 max-w-md flex items-center gap-2 px-3.5 py-2 bg-gray-100/90 rounded-full text-xs text-gray-500">
+            <span className="material-symbols-outlined text-[18px] text-gray-400">search</span>
             <input
               type="text"
-              placeholder="Search creators, campaigns, insights..."
+              placeholder={isAr ? 'بحث في الحملات، الفيديوهات، الإحصائيات...' : 'Search campaigns, content, stats...'}
               className="w-full bg-transparent focus:outline-none text-xs text-slate-800 placeholder:text-gray-400"
             />
           </div>
 
-          <div className="flex items-center gap-2.5 text-gray-600">
-            <button className="p-1 hover:text-[#d00000]"><span className="material-symbols-outlined text-[19px]">notifications</span></button>
-            <button className="p-1 hover:text-[#d00000]"><span className="material-symbols-outlined text-[19px]">chat</span></button>
-            <img src="/images/reels/reel_1.jpg" alt="Yasmin" className="w-6 h-6 rounded-full object-cover ring-1 ring-gray-300" />
-          </div>
-        </div>
-
-        {/* Title */}
-        <div className="px-5 pt-3 pb-2">
-          <h2 className="text-base font-bold text-slate-900">Creator Analytics & Campaigns</h2>
-          <p className="text-[11px] text-gray-500">Track your performance and join brand campaigns</p>
-        </div>
-
-        {/* Top Section: Creator Profile Header + 4 KPI Cards */}
-        <div className="px-5 py-2 grid grid-cols-12 gap-3">
-          {/* Creator Profile Card (Col 4) */}
-          <div className="col-span-4 p-3.5 rounded-2xl bg-gray-50 border border-gray-100 flex flex-col justify-between space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <img src="/images/reels/reel_1.jpg" alt="Yasmin" className="w-12 h-12 rounded-full object-cover" />
-                <span className="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-sky-500 text-white flex items-center justify-center text-[10px]">✓</span>
-              </div>
-              <div>
-                <div className="flex items-center gap-1">
-                  <h3 className="text-xs font-bold text-slate-900">Yasmin El Sayed</h3>
-                  <span className="text-sky-500 text-[11px]">✓</span>
-                </div>
-                <span className="text-[10px] text-gray-500 block">Cairo, Egypt</span>
-                <span className="text-[10px] text-gray-400">Fashion & Lifestyle Creator</span>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between text-center pt-1 border-t border-gray-200/60">
-              <div>
-                <span className="text-xs font-bold text-slate-900 block">245K</span>
-                <span className="text-[9px] text-gray-400">Followers</span>
-              </div>
-              <div>
-                <span className="text-xs font-bold text-slate-900 block">13.6%</span>
-                <span className="text-[9px] text-gray-400">Engagement</span>
-              </div>
-              <div>
-                <span className="text-xs font-bold text-slate-900 block">12.8K</span>
-                <span className="text-[9px] text-gray-400">Reach</span>
-              </div>
-            </div>
-
-            <button className="w-full py-1.5 rounded-xl border border-gray-300 text-slate-700 text-[11px] font-bold hover:bg-gray-100 transition-colors flex items-center justify-center gap-1">
-              <span className="material-symbols-outlined text-[13px]">edit</span>
-              <span>Edit Profile</span>
+          <div className="flex items-center gap-3 text-gray-600">
+            <button 
+              onClick={() => setShowNewReelModal(true)}
+              className="px-3.5 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-black transition-colors flex items-center gap-1.5 shadow-xs"
+            >
+              <span className="material-symbols-outlined text-[16px]">add_circle</span>
+              <span>{isAr ? 'نشر ريلز جديد' : 'New Reel'}</span>
             </button>
-          </div>
-
-          {/* 4 KPI Cards (Col 8) */}
-          <div className="col-span-8 grid grid-cols-4 gap-2.5">
-            <div className="p-3 rounded-2xl bg-gray-50 border border-gray-100 flex flex-col justify-between">
-              <span className="text-[10px] text-gray-500 font-semibold">Total Views</span>
-              <div className="text-lg font-black text-slate-900">1.2M</div>
-              <span className="text-[9px] text-emerald-600 font-bold">+18% this week</span>
-            </div>
-            <div className="p-3 rounded-2xl bg-gray-50 border border-gray-100 flex flex-col justify-between">
-              <span className="text-[10px] text-gray-500 font-semibold">Likes</span>
-              <div className="text-lg font-black text-slate-900">98.4K</div>
-              <span className="text-[9px] text-emerald-600 font-bold">+14% this week</span>
-            </div>
-            <div className="p-3 rounded-2xl bg-gray-50 border border-gray-100 flex flex-col justify-between">
-              <span className="text-[10px] text-gray-500 font-semibold">Comments</span>
-              <div className="text-lg font-black text-slate-900">8.7K</div>
-              <span className="text-[9px] text-emerald-600 font-bold">+9% this week</span>
-            </div>
-            <div className="p-3 rounded-2xl bg-gray-50 border border-gray-100 flex flex-col justify-between">
-              <span className="text-[10px] text-gray-500 font-semibold">Shares</span>
-              <div className="text-lg font-black text-slate-900">12.3K</div>
-              <span className="text-[9px] text-emerald-600 font-bold">+22% this week</span>
-            </div>
-
-            {/* Performance Area Line Chart Card */}
-            <div className="col-span-4 p-3 rounded-2xl bg-white border border-gray-100 shadow-xs space-y-2">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-slate-900">Reach & Engagement Over Time</span>
-                <span className="text-[10px] text-gray-400 font-medium">Apr 21 - Apr 27</span>
-              </div>
-              
-              {/* SVG Area Sparkline Chart */}
-              <div className="h-20 w-full relative">
-                <svg viewBox="0 0 400 80" className="w-full h-full overflow-visible">
-                  <defs>
-                    <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#d00000" stopOpacity="0.25" />
-                      <stop offset="100%" stopColor="#d00000" stopOpacity="0.0" />
-                    </linearGradient>
-                  </defs>
-                  {/* Area fill */}
-                  <path d="M0 60 Q 50 30, 100 45 T 200 20 T 300 40 T 400 15 L 400 80 L 0 80 Z" fill="url(#chartGrad)" />
-                  {/* Stroke line */}
-                  <path d="M0 60 Q 50 30, 100 45 T 200 20 T 300 40 T 400 15" fill="none" stroke="#d00000" strokeWidth="2.5" />
-                  {/* Data Points */}
-                  <circle cx="100" cy="45" r="3" fill="#d00000" />
-                  <circle cx="200" cy="20" r="3" fill="#d00000" />
-                  <circle cx="300" cy="40" r="3" fill="#d00000" />
-                  <circle cx="400" cy="15" r="3" fill="#d00000" />
-                </svg>
-              </div>
-
-              <div className="flex items-center justify-between text-[9px] text-gray-400 font-mono pt-1 border-t border-gray-100">
-                <span>Apr 21</span>
-                <span>Apr 23</span>
-                <span>Apr 24</span>
-                <span>Apr 25</span>
-                <span>Apr 27</span>
-              </div>
-            </div>
+            <button 
+              onClick={() => setActiveTab('reels')}
+              className="p-1.5 rounded-xl hover:bg-gray-100 text-gray-700 title={isAr ? 'عرض الريلز' : 'View Reels'}"
+            >
+              <span className="material-symbols-outlined text-[20px]">movie</span>
+            </button>
+            <img src={profile?.avatar || '/images/reels/reel_1.jpg'} alt="Avatar" className="w-7 h-7 rounded-full object-cover ring-2 ring-gray-200" />
           </div>
         </div>
 
-        {/* Lower Section: Shoppable Content + Join Next Campaign Card */}
-        <div className="px-5 py-3 grid grid-cols-12 gap-3 items-start">
-          {/* Your Shoppable Content (Col 7) */}
-          <div className="col-span-7 p-3.5 rounded-2xl border border-gray-100 bg-white shadow-xs space-y-2.5">
-            <div className="flex items-center justify-between">
-              <h4 className="text-xs font-bold text-slate-900">Your Shoppable Content</h4>
-              <button className="text-[10px] font-bold text-[#d00000] hover:underline">View All</button>
+        {/* TAB 1: STUDIO OVERVIEW */}
+        {activeNav === 'studio' && (
+          <div className="p-6 space-y-5 animate-page-enter">
+            <div>
+              <h2 className="text-lg font-black text-slate-900">{isAr ? 'لوحة تحكم المبدع • النظرة العامة' : 'Creator Studio & Overview'}</h2>
+              <p className="text-xs text-gray-500 mt-0.5">{isAr ? 'تابع أدائك، مبيعاتك عبر الفيديوهات، وانضم لأحدث حملات البراندات المصرية' : 'Track performance, video commerce sales, and join brand campaigns'}</p>
             </div>
 
-            <div className="space-y-2">
-              {shoppableItems.map((item, idx) => (
-                <div key={idx} className="flex items-center justify-between p-2 rounded-xl bg-gray-50/70 border border-gray-100">
-                  <div className="flex items-center gap-2.5">
-                    <img src={item.img} alt={item.title} className="w-8 h-8 rounded-lg object-cover" />
-                    <div>
-                      <h5 className="text-[11px] font-bold text-slate-800">{item.title}</h5>
-                      <span className="text-[9px] text-gray-400">{item.views} views • {item.likes} likes • {item.sales} generated</span>
-                    </div>
+            {/* Profile Card + 4 KPIs */}
+            <div className="grid grid-cols-12 gap-4">
+              {/* Profile Card */}
+              <div className="col-span-12 lg:col-span-4 p-4 rounded-3xl bg-gray-50/80 border border-gray-200/90 flex flex-col justify-between space-y-4">
+                <div className="flex items-center gap-3.5">
+                  <div className="relative">
+                    <img src={profile?.avatar || '/images/reels/reel_1.jpg'} alt="Avatar" className="w-14 h-14 rounded-2xl object-cover ring-2 ring-white shadow-sm" />
+                    <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-sky-500 text-white flex items-center justify-center text-[10px] font-bold border-2 border-white">✓</span>
                   </div>
+                  <div>
+                    <h3 className="text-sm font-black text-slate-900">{profile?.name}</h3>
+                    <span className="text-[11px] text-gray-500 block">{profile?.handle} • {profile?.city}</span>
+                    <span className="text-[10px] text-[#d00000] font-bold mt-0.5 block">{profile?.niche}</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 text-center py-2 px-1 bg-white rounded-2xl border border-gray-100">
+                  <div>
+                    <span className="text-xs font-black text-slate-900 block">{profile?.followers}</span>
+                    <span className="text-[9px] text-gray-400 font-medium">{isAr ? 'متابع' : 'Followers'}</span>
+                  </div>
+                  <div>
+                    <span className="text-xs font-black text-slate-900 block">{profile?.engagementRate}</span>
+                    <span className="text-[9px] text-gray-400 font-medium">{isAr ? 'تفاعل' : 'Engagement'}</span>
+                  </div>
+                  <div>
+                    <span className="text-xs font-black text-emerald-600 block">{profile?.totalCommission}</span>
+                    <span className="text-[9px] text-gray-400 font-medium">{isAr ? 'أرباح العمولة' : 'Commission'}</span>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
                   <button 
-                    onClick={() => setActiveTab('reels')}
-                    className="px-3 py-1 rounded-lg bg-[#d00000] text-white text-[10px] font-bold hover:bg-[#b00000]"
+                    onClick={() => {
+                      setProfileForm(profile);
+                      setShowEditProfileModal(true);
+                    }}
+                    className="flex-1 py-2 rounded-xl border border-gray-300 text-slate-800 text-xs font-bold hover:bg-gray-100 transition-colors flex items-center justify-center gap-1.5"
                   >
-                    Shop Now
+                    <span className="material-symbols-outlined text-[15px]">edit</span>
+                    <span>{isAr ? 'تعديل الملف' : 'Edit Profile'}</span>
+                  </button>
+                  <button 
+                    onClick={() => setActiveNav('campaigns')}
+                    className="flex-1 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-black transition-colors flex items-center justify-center gap-1.5 shadow-xs"
+                  >
+                    <span>{isAr ? 'استعراض الحملات' : 'Campaigns'}</span>
                   </button>
                 </div>
-              ))}
+              </div>
+
+              {/* 4 KPI Cards + Line Chart */}
+              <div className="col-span-12 lg:col-span-8 flex flex-col justify-between space-y-4">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="p-3.5 rounded-2xl bg-gray-50 border border-gray-100">
+                    <span className="text-[11px] text-gray-500 font-bold block">{isAr ? 'إجمالي المشاهدات' : 'Total Views'}</span>
+                    <div className="text-xl font-black text-slate-900 mt-1">{profile?.reach || '1.2M'}</div>
+                    <span className="text-[10px] text-emerald-600 font-bold block mt-1">+18% {isAr ? 'هذا الأسبوع' : 'this week'}</span>
+                  </div>
+                  <div className="p-3.5 rounded-2xl bg-gray-50 border border-gray-100">
+                    <span className="text-[11px] text-gray-500 font-bold block">{isAr ? 'الإعجابات' : 'Likes'}</span>
+                    <div className="text-xl font-black text-slate-900 mt-1">98.4K</div>
+                    <span className="text-[10px] text-emerald-600 font-bold block mt-1">+14% {isAr ? 'هذا الأسبوع' : 'this week'}</span>
+                  </div>
+                  <div className="p-3.5 rounded-2xl bg-gray-50 border border-gray-100">
+                    <span className="text-[11px] text-gray-500 font-bold block">{isAr ? 'التعليقات' : 'Comments'}</span>
+                    <div className="text-xl font-black text-slate-900 mt-1">8.7K</div>
+                    <span className="text-[10px] text-emerald-600 font-bold block mt-1">+9% {isAr ? 'هذا الأسبوع' : 'this week'}</span>
+                  </div>
+                  <div className="p-3.5 rounded-2xl bg-gray-50 border border-gray-100">
+                    <span className="text-[11px] text-gray-500 font-bold block">{isAr ? 'المشاركات' : 'Shares'}</span>
+                    <div className="text-xl font-black text-slate-900 mt-1">12.3K</div>
+                    <span className="text-[10px] text-emerald-600 font-bold block mt-1">+22% {isAr ? 'هذا الأسبوع' : 'this week'}</span>
+                  </div>
+                </div>
+
+                {/* Performance Sparkline Card */}
+                <div className="p-4 rounded-3xl bg-white border border-gray-200 shadow-xs space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="font-bold text-xs text-slate-900">{isAr ? 'منحنى الوصول والتفاعل (Reach & Engagement)' : 'Reach & Engagement Trend'}</span>
+                      <p className="text-[10px] text-gray-400">{isAr ? 'نمو أسبوعي مستمر مع زيادة مبيعات الكتالوج' : 'Weekly growth driving commerce conversions'}</p>
+                    </div>
+                    <button onClick={() => setActiveNav('analytics')} className="text-[11px] font-bold text-[#d00000] hover:underline">
+                      {isAr ? 'التفاصيل الكاملة ←' : 'Full Analytics →'}
+                    </button>
+                  </div>
+                  <div className="h-20 w-full relative">
+                    <svg viewBox="0 0 400 80" className="w-full h-full overflow-visible">
+                      <defs>
+                        <linearGradient id="chartGradStudio" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#d00000" stopOpacity="0.25" />
+                          <stop offset="100%" stopColor="#d00000" stopOpacity="0.0" />
+                        </linearGradient>
+                      </defs>
+                      <path d="M0 60 Q 50 30, 100 45 T 200 20 T 300 40 T 400 15 L 400 80 L 0 80 Z" fill="url(#chartGradStudio)" />
+                      <path d="M0 60 Q 50 30, 100 45 T 200 20 T 300 40 T 400 15" fill="none" stroke="#d00000" strokeWidth="2.5" />
+                      <circle cx="100" cy="45" r="3.5" fill="#d00000" />
+                      <circle cx="200" cy="20" r="3.5" fill="#d00000" />
+                      <circle cx="300" cy="40" r="3.5" fill="#d00000" />
+                      <circle cx="400" cy="15" r="3.5" fill="#d00000" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Shoppable Content & Next Campaign */}
+            <div className="grid grid-cols-12 gap-4 pt-2">
+              <div className="col-span-12 lg:col-span-7 p-4 rounded-3xl border border-gray-200 bg-white shadow-xs space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-black text-slate-900">{isAr ? 'أحدث الفيديوهات القابلة للشراء (Shoppable Content)' : 'Your Shoppable Content'}</h4>
+                  <button onClick={() => setActiveNav('content')} className="text-[11px] font-bold text-[#d00000] hover:underline">
+                    {isAr ? 'عرض الكل' : 'View All'}
+                  </button>
+                </div>
+
+                <div className="space-y-2.5">
+                  {content.slice(0, 3).map((item) => (
+                    <div key={item.id} className="flex items-center justify-between p-2.5 rounded-2xl bg-gray-50/80 border border-gray-100 hover:border-gray-200 transition-all">
+                      <div className="flex items-center gap-3">
+                        <img src={item.thumbnail} alt={item.title} className="w-11 h-11 rounded-xl object-cover" />
+                        <div>
+                          <h5 className="text-xs font-bold text-slate-800 line-clamp-1">{item.title}</h5>
+                          <span className="text-[10px] text-gray-400 block mt-0.5">
+                            {item.views} {isAr ? 'مشاهدة' : 'views'} • {item.salesGenerated} {isAr ? 'مبيعات' : 'sales'}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-end">
+                        <span className="text-xs font-black text-emerald-600 block">{item.commissionEarned}</span>
+                        <span className="text-[9px] text-gray-400">{isAr ? 'عمولتك' : 'Earned'}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Next Campaign Card */}
+              <div className="col-span-12 lg:col-span-5 p-4 rounded-3xl border border-red-100 bg-gradient-to-br from-red-50/70 to-white shadow-xs flex flex-col justify-between space-y-4">
+                <div>
+                  <span className="px-2.5 py-0.5 rounded-full bg-[#d00000] text-white text-[10px] font-black">{isAr ? 'حملة مميزة' : 'Featured'}</span>
+                  <h4 className="text-sm font-black text-slate-900 mt-2">{campaigns[0]?.title || 'حملة إطلاق الكتان الصيفي'}</h4>
+                  <p className="text-xs text-gray-600 mt-1 leading-relaxed">
+                    {campaigns[0]?.brandName} • {campaigns[0]?.rewardLabel}
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setSelectedCampaignForApply(campaigns[0]);
+                    setShowApplyModal(true);
+                  }}
+                  className="w-full py-2.5 rounded-xl bg-[#d00000] text-white text-xs font-bold hover:bg-[#b00000] transition-colors shadow-xs"
+                >
+                  {isAr ? 'تقديم طلب المشاركة الآن' : 'Apply For Campaign'}
+                </button>
+              </div>
             </div>
           </div>
+        )}
 
-          {/* Join Our Next Campaign Banner (Col 5) */}
-          <div className="col-span-5 p-3.5 rounded-2xl border border-gray-100 bg-gradient-to-br from-red-50/60 to-white shadow-xs flex flex-col justify-between space-y-3">
-            <div className="flex items-center justify-between gap-3">
+        {/* TAB 2: ANALYTICS */}
+        {activeNav === 'analytics' && (
+          <div className="p-6 space-y-6 animate-page-enter">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <span className="px-2 py-0.5 rounded bg-[#d00000] text-white text-[9px] font-bold">Featured</span>
-                <h4 className="text-xs font-bold text-slate-900 mt-1">Join Our Next Campaign</h4>
-                <p className="text-[10px] text-gray-600 leading-relaxed mt-0.5">
-                  Get featured, earn commission, grow your audience with top Egyptian brands.
-                </p>
+                <h2 className="text-lg font-black text-slate-900">{isAr ? 'تحليلات الأداء والمبيعات' : 'Creator Analytics & Sales'}</h2>
+                <p className="text-xs text-gray-500 mt-0.5">{isAr ? 'مؤشرات التفاعل، المبيعات الناتجة عن الروابط، وتوزيع الجمهور في محافظات مصر' : 'Metrics, commerce conversion, and demographic breakdown'}</p>
               </div>
-              <img src="/images/products/linen_abaya.jpg" alt="Campaign" className="w-16 h-20 rounded-xl object-cover shadow-sm shrink-0" />
+
+              {/* Timeframe Filter */}
+              <div className="flex items-center gap-1.5 bg-gray-100 p-1 rounded-2xl">
+                {[
+                  { id: '7d', label: isAr ? 'آخر 7 أيام' : '7 Days' },
+                  { id: '30d', label: isAr ? 'آخر 30 يوم' : '30 Days' },
+                  { id: 'all', label: isAr ? 'كل الفترات' : 'All Time' }
+                ].map((tf) => (
+                  <button
+                    key={tf.id}
+                    onClick={() => setTimeframe(tf.id)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                      timeframe === tf.id ? 'bg-white text-slate-900 shadow-xs' : 'text-gray-500 hover:text-slate-900'
+                    }`}
+                  >
+                    {tf.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            <button 
-              onClick={() => setActiveTab('studio')}
-              className="w-full py-2 rounded-xl bg-[#d00000] text-white text-xs font-bold hover:bg-[#b00000] transition-colors shadow-xs"
-            >
-              View Campaigns
-            </button>
+            {/* Revenue Highlights */}
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+              <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200/80">
+                <span className="text-[11px] font-bold text-emerald-800">{isAr ? 'إجمالي المبيعات المحققة' : 'Gross Merchandise Value'}</span>
+                <div className="text-xl font-black text-emerald-700 mt-1">{analytics?.salesGenerated || '44,500 ج.م'}</div>
+                <span className="text-[10px] text-emerald-600 font-semibold">{isAr ? 'عبر التاج المباشر في الريلز' : 'Through tagged reels'}</span>
+              </div>
+              <div className="p-4 rounded-2xl bg-red-50/70 border border-red-200/80">
+                <span className="text-[11px] font-bold text-red-800">{isAr ? 'أرباح العمولة المستحقة' : 'Commission Earned'}</span>
+                <div className="text-xl font-black text-[#d00000] mt-1">{analytics?.commissionEarned || '6,675 ج.م'}</div>
+                <span className="text-[10px] text-red-600 font-semibold">{isAr ? 'جاهزة للسحب الفوري عبر إنستاباي' : 'Ready for payout via InstaPay'}</span>
+              </div>
+              <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200">
+                <span className="text-[11px] font-bold text-gray-600">{isAr ? 'معدل إكمال المشاهدة' : 'Avg Completion Rate'}</span>
+                <div className="text-xl font-black text-slate-900 mt-1">{analytics?.completionRate || '68%'}</div>
+                <span className="text-[10px] text-gray-500 font-semibold">{analytics?.avgWatchTime || '18.4s'} {isAr ? 'متوسط وقت المشاهدة' : 'avg watch time'}</span>
+              </div>
+              <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200">
+                <span className="text-[11px] font-bold text-gray-600">{isAr ? 'معدل التفاعل الإجمالي' : 'Engagement Rate'}</span>
+                <div className="text-xl font-black text-slate-900 mt-1">{analytics?.engagementRate || '13.6%'}</div>
+                <span className="text-[10px] text-emerald-600 font-semibold">{isAr ? 'أعلى من المتوسط بـ 3.2%' : 'Above average by 3.2%'}</span>
+              </div>
+            </div>
 
-            {/* Value Props Row */}
-            <div className="grid grid-cols-3 gap-1 text-center text-[9px] text-gray-500 font-medium pt-1 border-t border-gray-200/60">
-              <div>Higher Reach</div>
-              <div>More Sales</div>
-              <div>Creator Support</div>
+            {/* Weekly Days Breakdown Bar Chart */}
+            <div className="p-5 rounded-3xl border border-gray-200 bg-white shadow-xs space-y-4">
+              <h3 className="text-xs font-black text-slate-900">{isAr ? 'المشاهدات والمبيعات اليومية خلال الأسبوع' : 'Daily Views & Sales Breakdown'}</h3>
+              <div className="grid grid-cols-7 gap-2 pt-4 items-end min-h-[140px]">
+                {analytics?.weeklyTrend?.map((item, idx) => {
+                  const heightPercent = Math.min(100, Math.round((item.views / 20000) * 100));
+                  return (
+                    <div key={idx} className="flex flex-col items-center gap-1.5 group">
+                      <span className="text-[9px] font-bold text-gray-400 group-hover:text-[#d00000]">{item.views}</span>
+                      <div className="w-full max-w-[38px] bg-gray-100 rounded-xl h-28 flex items-end overflow-hidden p-0.5">
+                        <div 
+                          style={{ height: `${heightPercent}%` }} 
+                          className="w-full bg-gradient-to-t from-[#d00000] to-red-400 rounded-lg transition-all"
+                        />
+                      </div>
+                      <span className="text-[10px] font-bold text-slate-700">{item.day}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Demographics & Egyptian Cities Breakdown */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Egyptian Cities */}
+              <div className="p-5 rounded-3xl border border-gray-200 bg-white shadow-xs space-y-3.5">
+                <h4 className="text-xs font-black text-slate-900">{isAr ? 'التوزيع الجغرافي للمتابعين (محافظات مصر 🇪🇬)' : 'Audience by Egyptian Cities'}</h4>
+                <div className="space-y-2.5">
+                  {analytics?.demographicsCities?.map((c, idx) => (
+                    <div key={idx} className="space-y-1">
+                      <div className="flex justify-between text-xs font-bold">
+                        <span className="text-slate-800">{c.city}</span>
+                        <span className="text-gray-500">{c.percentage}% ({c.count})</span>
+                      </div>
+                      <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div 
+                          style={{ width: `${c.percentage}%` }}
+                          className="h-full bg-[#d00000] rounded-full"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Age Distribution */}
+              <div className="p-5 rounded-3xl border border-gray-200 bg-white shadow-xs space-y-3.5">
+                <h4 className="text-xs font-black text-slate-900">{isAr ? 'الفئات العمرية ونسبة الجنس' : 'Age & Gender Demographics'}</h4>
+                <div className="space-y-2.5">
+                  {analytics?.ageDistribution?.map((a, idx) => (
+                    <div key={idx} className="space-y-1">
+                      <div className="flex justify-between text-xs font-bold">
+                        <span className="text-slate-800">{a.age} سنة</span>
+                        <span className="text-gray-500">{a.percentage}%</span>
+                      </div>
+                      <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div 
+                          style={{ width: `${a.percentage}%` }}
+                          className="h-full bg-slate-800 rounded-full"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="pt-2 flex items-center justify-between border-t border-gray-100 text-xs font-bold">
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-pink-500" />
+                    <span>78% {isAr ? 'إناث (نساء)' : 'Female'}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-blue-500" />
+                    <span>22% {isAr ? 'ذكور (رجال)' : 'Male'}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: CAMPAIGNS */}
+        {activeNav === 'campaigns' && (
+          <div className="p-6 space-y-6 animate-page-enter">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-black text-slate-900">{isAr ? 'حملات البراندات للتعاون (Brand Campaigns Hub)' : 'Brand Campaigns Hub'}</h2>
+                <p className="text-xs text-gray-500 mt-0.5">{isAr ? 'قدم على حملات البراندات المصرية، احصل على أطقم مجانية وعمولات مبيعات مباشرة' : 'Apply to fashion campaigns, receive gifted pieces and commerce commissions'}</p>
+              </div>
+
+              <div className="flex items-center gap-1.5 bg-gray-100 p-1 rounded-2xl">
+                {[
+                  { id: 'all', label: isAr ? 'كل الحملات' : 'All Campaigns' },
+                  { id: 'applied', label: isAr ? 'طلباتي' : 'Applied' },
+                  { id: 'approved', label: isAr ? 'المقبولة' : 'Approved' }
+                ].map((f) => (
+                  <button
+                    key={f.id}
+                    onClick={() => setCampaignFilter(f.id)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                      campaignFilter === f.id ? 'bg-white text-slate-900 shadow-xs' : 'text-gray-500 hover:text-slate-900'
+                    }`}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Campaigns Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {campaigns
+                .filter((c) => {
+                  if (campaignFilter === 'applied') return c.applied;
+                  if (campaignFilter === 'approved') return c.applicationStatus === 'approved' || c.applicationStatus === 'draft_submitted';
+                  return true;
+                })
+                .map((camp) => (
+                  <div key={camp.id} className="p-5 rounded-3xl border border-gray-200 bg-white shadow-xs space-y-4 flex flex-col justify-between hover:border-gray-300 transition-all">
+                    <div>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2.5">
+                          <img src={camp.brandLogo} alt={camp.brandName} className="w-9 h-9 rounded-xl object-cover ring-1 ring-gray-200" />
+                          <div>
+                            <span className="text-xs font-black text-slate-900 block">{camp.brandName}</span>
+                            <span className="text-[10px] text-gray-400">{isAr ? 'الموعد النهائي:' : 'Deadline:'} {camp.deadline}</span>
+                          </div>
+                        </div>
+
+                        {camp.applicationStatus === 'approved' && (
+                          <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-black">
+                            {isAr ? 'تمت الموافقة ✓' : 'Approved ✓'}
+                          </span>
+                        )}
+                        {camp.applicationStatus === 'applied' && (
+                          <span className="px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-black">
+                            {isAr ? 'قيد المراجعة ⏳' : 'Under Review ⏳'}
+                          </span>
+                        )}
+                        {camp.applicationStatus === 'draft_submitted' && (
+                          <span className="px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-black">
+                            {isAr ? 'تم إرسال المسودة 🎬' : 'Draft Submitted 🎬'}
+                          </span>
+                        )}
+                      </div>
+
+                      <h3 className="text-sm font-black text-slate-900 mt-3 leading-snug">{camp.title}</h3>
+                      <p className="text-xs text-gray-600 mt-1 leading-relaxed bg-gray-50 p-2.5 rounded-2xl border border-gray-100">
+                        <strong className="text-slate-800">{isAr ? 'المكافأة:' : 'Reward:'}</strong> {camp.rewardLabel}
+                      </p>
+
+                      <div className="mt-3 text-[11px] text-gray-500 space-y-1">
+                        <p><span className="font-bold text-slate-700">{isAr ? 'المنتج المستهدف:' : 'Target Piece:'}</span> {camp.productName}</p>
+                        <p><span className="font-bold text-slate-700">{isAr ? 'إرشادات المحتوى:' : 'Guidelines:'}</span> {camp.guidelines}</p>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-gray-100 flex items-center justify-between gap-3">
+                      <span className="text-[10px] font-bold text-gray-400">
+                        {camp.slotsAvailable} {isAr ? 'أماكن متبقية' : 'slots left'}
+                      </span>
+
+                      {camp.applicationStatus === 'approved' ? (
+                        <button
+                          onClick={() => {
+                            setSelectedCampaignForDraft(camp);
+                            setShowDraftModal(true);
+                          }}
+                          className="px-4 py-2 rounded-xl bg-[#d00000] text-white text-xs font-bold hover:bg-[#b00000] transition-colors shadow-xs"
+                        >
+                          {isAr ? 'إرسال مسودة الريلز 🎬' : 'Submit Reel Draft'}
+                        </button>
+                      ) : camp.applicationStatus === 'draft_submitted' ? (
+                        <button disabled className="px-4 py-2 rounded-xl bg-gray-100 text-gray-600 text-xs font-bold cursor-not-allowed">
+                          {isAr ? 'المسودة قيد مراجعة البراند' : 'Draft In Review'}
+                        </button>
+                      ) : camp.applied ? (
+                        <button disabled className="px-4 py-2 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 text-xs font-bold cursor-not-allowed">
+                          {isAr ? 'تم التقديم' : 'Applied'}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            setSelectedCampaignForApply(camp);
+                            setShowApplyModal(true);
+                          }}
+                          className="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-black transition-colors shadow-xs"
+                        >
+                          {isAr ? 'تقديم طلب انضمام' : 'Apply Now'}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 4: CONTENT */}
+        {activeNav === 'content' && (
+          <div className="p-6 space-y-6 animate-page-enter">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-black text-slate-900">{isAr ? 'إدارة محتوى الريلز والفيديوهات' : 'Content & Reels Library'}</h2>
+                <p className="text-xs text-gray-500 mt-0.5">{isAr ? 'عرض أداء الفيديوهات، المنتجات الموسومة، والمبيعات الناتجة عن كل ريل' : 'Manage your shoppable reels and tagged products'}</p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 bg-gray-100 p-1 rounded-2xl">
+                  {[
+                    { id: 'all', label: isAr ? 'الكل' : 'All' },
+                    { id: 'published', label: isAr ? 'منشور' : 'Published' },
+                    { id: 'under_review', label: isAr ? 'مسودات' : 'Drafts' }
+                  ].map((f) => (
+                    <button
+                      key={f.id}
+                      onClick={() => setContentFilter(f.id)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                        contentFilter === f.id ? 'bg-white text-slate-900 shadow-xs' : 'text-gray-500 hover:text-slate-900'
+                      }`}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => setShowNewReelModal(true)}
+                  className="px-4 py-2 rounded-2xl bg-[#d00000] text-white text-xs font-bold hover:bg-[#b00000] transition-colors shadow-xs flex items-center gap-1.5"
+                >
+                  <span className="material-symbols-outlined text-[16px]">upload</span>
+                  <span>{isAr ? 'نشر ريلز' : 'Upload'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Content Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {content
+                .filter((c) => {
+                  if (contentFilter === 'published') return c.status === 'published';
+                  if (contentFilter === 'under_review') return c.status === 'under_review';
+                  return true;
+                })
+                .map((item) => (
+                  <div key={item.id} className="rounded-3xl border border-gray-200 bg-white overflow-hidden shadow-xs hover:border-gray-300 transition-all flex flex-col justify-between">
+                    <div className="relative aspect-[4/3] bg-gray-100 overflow-hidden">
+                      <img src={item.thumbnail} alt={item.title} className="w-full h-full object-cover" />
+                      <span className={`absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-black ${
+                        item.status === 'published' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'
+                      }`}>
+                        {item.status === 'published' ? (isAr ? 'منشور ✓' : 'Published') : (isAr ? 'قيد المراجعة' : 'Draft')}
+                      </span>
+
+                      <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-3 text-white">
+                        <span className="text-[10px] bg-white/20 backdrop-blur-xs px-2 py-0.5 rounded-full font-bold">
+                          🛍️ {item.taggedProduct}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="p-4 space-y-3">
+                      <h4 className="text-xs font-black text-slate-900 line-clamp-2 leading-snug">{item.title}</h4>
+
+                      <div className="grid grid-cols-3 gap-2 text-center py-2 bg-gray-50 rounded-2xl text-[10px]">
+                        <div>
+                          <span className="font-black text-slate-800 block">{item.views}</span>
+                          <span className="text-gray-400">{isAr ? 'مشاهدة' : 'Views'}</span>
+                        </div>
+                        <div>
+                          <span className="font-black text-slate-800 block">{item.likes}</span>
+                          <span className="text-gray-400">{isAr ? 'إعجاب' : 'Likes'}</span>
+                        </div>
+                        <div>
+                          <span className="font-black text-emerald-600 block">{item.salesGenerated}</span>
+                          <span className="text-gray-400">{isAr ? 'مبيعات' : 'Sales'}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-1 border-t border-gray-100 text-[11px]">
+                        <span className="text-emerald-700 font-bold">{isAr ? 'أرباحك:' : 'Earned:'} {item.commissionEarned}</span>
+                        <button 
+                          onClick={() => setActiveTab('reels')}
+                          className="font-bold text-[#d00000] hover:underline"
+                        >
+                          {isAr ? 'مشاهدة في الريلز ←' : 'Watch →'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 5: PROFILE & MEDIA KIT */}
+        {activeNav === 'profile' && (
+          <div className="p-6 space-y-6 animate-page-enter">
+            {/* Header Banner & Card */}
+            <div className="rounded-3xl border border-gray-200 bg-white overflow-hidden shadow-xs">
+              <div className="h-32 bg-gradient-to-r from-[#d00000] via-rose-600 to-amber-600 relative">
+                <button
+                  onClick={() => {
+                    setProfileForm(profile);
+                    setShowEditProfileModal(true);
+                  }}
+                  className="absolute bottom-3 left-3 px-3 py-1.5 rounded-xl bg-white/90 backdrop-blur-xs text-slate-900 text-xs font-bold hover:bg-white transition-all shadow-xs flex items-center gap-1"
+                >
+                  <span className="material-symbols-outlined text-[15px]">edit</span>
+                  <span>{isAr ? 'تعديل الملف الشخصي' : 'Edit Media Kit'}</span>
+                </button>
+              </div>
+
+              <div className="p-6 pt-0 relative">
+                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 -mt-12 mb-4">
+                  <div className="flex items-end gap-3.5">
+                    <img src={profile?.avatar || '/images/reels/reel_1.jpg'} alt="Avatar" className="w-24 h-24 rounded-3xl object-cover ring-4 ring-white shadow-md" />
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <h2 className="text-base font-black text-slate-900">{profile?.name}</h2>
+                        <span className="text-sky-500 font-black text-sm">✓</span>
+                      </div>
+                      <span className="text-xs text-gray-500 block">{profile?.handle} • {profile?.city}</span>
+                      <span className="text-xs text-[#d00000] font-bold block mt-0.5">{profile?.niche}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-xs text-gray-700 leading-relaxed max-w-2xl bg-gray-50 p-3.5 rounded-2xl border border-gray-100">
+                  {profile?.bio}
+                </p>
+
+                {/* Media Kit Live Stats */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
+                  <div className="p-3.5 rounded-2xl bg-gray-50 border border-gray-100 text-center">
+                    <span className="text-xs font-black text-slate-900 block">{profile?.followers}</span>
+                    <span className="text-[10px] text-gray-400">{isAr ? 'المتابعون' : 'Followers'}</span>
+                  </div>
+                  <div className="p-3.5 rounded-2xl bg-gray-50 border border-gray-100 text-center">
+                    <span className="text-xs font-black text-slate-900 block">{profile?.reach}</span>
+                    <span className="text-[10px] text-gray-400">{isAr ? 'الوصول الشهري' : 'Monthly Reach'}</span>
+                  </div>
+                  <div className="p-3.5 rounded-2xl bg-gray-50 border border-gray-100 text-center">
+                    <span className="text-xs font-black text-slate-900 block">{profile?.engagementRate}</span>
+                    <span className="text-[10px] text-gray-400">{isAr ? 'معدل التفاعل' : 'Engagement Rate'}</span>
+                  </div>
+                  <div className="p-3.5 rounded-2xl bg-gray-50 border border-gray-100 text-center">
+                    <span className="text-xs font-black text-emerald-600 block">{profile?.totalCommission}</span>
+                    <span className="text-[10px] text-gray-400">{isAr ? 'إجمالي الأرباح' : 'Total Earned'}</span>
+                  </div>
+                </div>
+
+                {/* Social Handles */}
+                <div className="flex flex-wrap items-center gap-3 mt-4 pt-4 border-t border-gray-100 text-xs">
+                  <a href={profile?.instagram} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-pink-50 text-pink-700 border border-pink-200 font-bold hover:bg-pink-100 transition-colors">
+                    <span>📷 Instagram</span>
+                    <span className="text-[10px]">@cairo_chic</span>
+                  </a>
+                  <a href={profile?.tiktok} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-800 border border-slate-200 font-bold hover:bg-slate-200 transition-colors">
+                    <span>🎵 TikTok</span>
+                    <span className="text-[10px]">@cairo_chic</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 6: SETTINGS & PAYOUTS */}
+        {activeNav === 'settings' && (
+          <div className="p-6 space-y-6 max-w-3xl animate-page-enter">
+            <div>
+              <h2 className="text-lg font-black text-slate-900">{isAr ? 'إعدادات الحساب وطرق سحب الأرباح' : 'Creator Settings & Payouts'}</h2>
+              <p className="text-xs text-gray-500 mt-0.5">{isAr ? 'حدد وسيلة استلام عمولاتك (إنستاباي أو فودافون كاش) وإشعارات الحملات' : 'Configure payment methods, InstaPay, Vodafone Cash, and notifications'}</p>
+            </div>
+
+            <form onSubmit={handleSaveSettings} className="space-y-6">
+              {/* Payment Methods */}
+              <div className="p-5 rounded-3xl border border-gray-200 bg-white shadow-xs space-y-4">
+                <h3 className="text-xs font-black text-slate-900">{isAr ? 'طريقة سحب الأرباح والعمولات 🇪🇬' : 'Payout Method'}</h3>
+                
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { id: 'instapay', label: 'إنستاباي (InstaPay)', desc: 'تحويل فوري لحظي' },
+                    { id: 'vodafone_cash', label: 'فودافون كاش', desc: 'محفظة الهاتف الذكي' },
+                    { id: 'bank_transfer', label: 'حساب بنكي CIB', desc: 'تحويل بنكي رسمي' }
+                  ].map((m) => (
+                    <div
+                      key={m.id}
+                      onClick={() => setSettings({ ...settings, payoutMethod: m.id })}
+                      className={`p-3.5 rounded-2xl border cursor-pointer transition-all ${
+                        settings?.payoutMethod === m.id
+                          ? 'border-[#d00000] bg-red-50/50 text-[#d00000] font-bold shadow-xs'
+                          : 'border-gray-200 hover:border-gray-300 text-slate-700'
+                      }`}
+                    >
+                      <span className="text-xs block font-bold">{m.label}</span>
+                      <span className="text-[10px] text-gray-500 block mt-0.5">{m.desc}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {settings?.payoutMethod === 'instapay' && (
+                  <div className="space-y-1 pt-2">
+                    <label className="text-xs font-bold text-slate-700 block">{isAr ? 'عنوان إنستاباي (IPA Handle):' : 'InstaPay Handle:'}</label>
+                    <input
+                      type="text"
+                      value={settings?.instapayHandle || ''}
+                      onChange={(e) => setSettings({ ...settings, instapayHandle: e.target.value })}
+                      placeholder="username@instapay"
+                      className="w-full px-3.5 py-2 rounded-xl border border-gray-200 text-xs text-slate-800 focus:outline-none focus:border-[#d00000]"
+                    />
+                  </div>
+                )}
+
+                {settings?.payoutMethod === 'vodafone_cash' && (
+                  <div className="space-y-1 pt-2">
+                    <label className="text-xs font-bold text-slate-700 block">{isAr ? 'رقم محفظة فودافون كاش:' : 'Vodafone Cash Number:'}</label>
+                    <input
+                      type="tel"
+                      value={settings?.vodafoneCashPhone || ''}
+                      onChange={(e) => setSettings({ ...settings, vodafoneCashPhone: e.target.value })}
+                      placeholder="010XXXXXXXX"
+                      className="w-full px-3.5 py-2 rounded-xl border border-gray-200 text-xs text-slate-800 focus:outline-none focus:border-[#d00000]"
+                    />
+                  </div>
+                )}
+
+                {settings?.payoutMethod === 'bank_transfer' && (
+                  <div className="grid grid-cols-2 gap-3 pt-2">
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-slate-700 block">{isAr ? 'اسم البنك:' : 'Bank Name:'}</label>
+                      <input
+                        type="text"
+                        value={settings?.bankName || ''}
+                        onChange={(e) => setSettings({ ...settings, bankName: e.target.value })}
+                        className="w-full px-3.5 py-2 rounded-xl border border-gray-200 text-xs text-slate-800 focus:outline-none"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-slate-700 block">{isAr ? 'رقم الآيبان (IBAN):' : 'IBAN:'}</label>
+                      <input
+                        type="text"
+                        value={settings?.bankIban || ''}
+                        onChange={(e) => setSettings({ ...settings, bankIban: e.target.value })}
+                        className="w-full px-3.5 py-2 rounded-xl border border-gray-200 text-xs text-slate-800 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Notification Toggles */}
+              <div className="p-5 rounded-3xl border border-gray-200 bg-white shadow-xs space-y-3">
+                <h3 className="text-xs font-black text-slate-900">{isAr ? 'تفضيلات التنبيهات والإشعارات' : 'Notification Alerts'}</h3>
+                
+                {[
+                  { key: 'emailNotifications', label: isAr ? 'إشعارات البريد عند وصول حملة براند جديدة' : 'Email alerts for new campaigns' },
+                  { key: 'smsAlerts', label: isAr ? 'رسائل SMS / واتساب عند تحويل العمولات' : 'SMS / WhatsApp alerts for payouts' },
+                  { key: 'showSalesOnProfile', label: isAr ? 'إظهار إجمالي مبيعات الريلز في الميديا كيت العام' : 'Show sales stats on public media kit' }
+                ].map((item) => (
+                  <label key={item.key} className="flex items-center justify-between p-2.5 rounded-2xl hover:bg-gray-50 cursor-pointer">
+                    <span className="text-xs font-bold text-slate-800">{item.label}</span>
+                    <input
+                      type="checkbox"
+                      checked={settings?.[item.key] || false}
+                      onChange={(e) => setSettings({ ...settings, [item.key]: e.target.checked })}
+                      className="w-4 h-4 accent-[#d00000] cursor-pointer"
+                    />
+                  </label>
+                ))}
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3 rounded-2xl bg-[#d00000] text-white text-xs font-bold hover:bg-[#b00000] transition-colors shadow-sm"
+              >
+                {isAr ? 'حفظ كافة الإعدادات والبيانات' : 'Save All Settings'}
+              </button>
+            </form>
+          </div>
+        )}
+      </main>
+
+      {/* MODAL 1: EDIT PROFILE MODAL */}
+      {showEditProfileModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 w-full max-w-lg space-y-4 shadow-2xl animate-page-enter">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-black text-slate-900">{isAr ? 'تعديل الملف الشخصي للمبدع' : 'Edit Creator Profile'}</h3>
+              <button onClick={() => setShowEditProfileModal(false)} className="text-gray-400 hover:text-slate-800">✕</button>
+            </div>
+
+            <form onSubmit={handleSaveProfile} className="space-y-3">
+              <div>
+                <label className="text-xs font-bold text-slate-700 block mb-1">{isAr ? 'الاسم الظاهر:' : 'Name:'}</label>
+                <input
+                  type="text"
+                  value={profileForm.name || ''}
+                  onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs focus:outline-none focus:border-[#d00000]"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-700 block mb-1">{isAr ? 'نبذة عنك (Bio):' : 'Bio:'}</label>
+                <textarea
+                  rows={3}
+                  value={profileForm.bio || ''}
+                  onChange={(e) => setProfileForm({ ...profileForm, bio: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs focus:outline-none focus:border-[#d00000]"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">{isAr ? 'المدينة / المحافظة:' : 'City:'}</label>
+                  <input
+                    type="text"
+                    value={profileForm.city || ''}
+                    onChange={(e) => setProfileForm({ ...profileForm, city: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">{isAr ? 'مجال المحتوى:' : 'Niche:'}</label>
+                  <input
+                    type="text"
+                    value={profileForm.niche || ''}
+                    onChange={(e) => setProfileForm({ ...profileForm, niche: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowEditProfileModal(false)}
+                  className="flex-1 py-2.5 rounded-xl border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-100"
+                >
+                  {isAr ? 'إلغاء' : 'Cancel'}
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2.5 rounded-xl bg-[#d00000] text-white text-xs font-bold hover:bg-[#b00000] shadow-xs"
+                >
+                  {isAr ? 'حفظ التعديلات' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 2: APPLY FOR CAMPAIGN MODAL */}
+      {showApplyModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 w-full max-w-md space-y-4 shadow-2xl animate-page-enter">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-black text-slate-900">{isAr ? 'تقديم طلب للمشاركة في الحملة' : 'Apply For Campaign'}</h3>
+              <button onClick={() => setShowApplyModal(false)} className="text-gray-400 hover:text-slate-800">✕</button>
+            </div>
+
+            <div className="bg-gray-50 p-3 rounded-2xl border border-gray-100">
+              <h4 className="text-xs font-black text-slate-800">{selectedCampaignForApply?.title}</h4>
+              <p className="text-[11px] text-gray-500 mt-0.5">{selectedCampaignForApply?.brandName} • {selectedCampaignForApply?.rewardLabel}</p>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-slate-700 block">{isAr ? 'اقتراحك للفيديو / فكرة الستايلنج للبراند:' : 'Your Video Pitch / Concept:'}</label>
+              <textarea
+                rows={3}
+                value={applyNotes}
+                onChange={(e) => setApplyNotes(e.target.value)}
+                placeholder={isAr ? 'مثال: سأقوم بتصوير ريلز في ضوء النهار بستايل كاجوال مع إبراز خامة الكتان...' : 'e.g. Daylight reel focusing on fabric quality...'}
+                className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs focus:outline-none focus:border-[#d00000]"
+              />
+            </div>
+
+            <div className="flex gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setShowApplyModal(false)}
+                className="flex-1 py-2.5 rounded-xl border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-100"
+              >
+                {isAr ? 'إلغاء' : 'Cancel'}
+              </button>
+              <button
+                type="button"
+                onClick={handleApplyCampaign}
+                className="flex-1 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-black shadow-xs"
+              >
+                {isAr ? 'تأكيد التقديم' : 'Confirm Application'}
+              </button>
             </div>
           </div>
         </div>
-      </main>
+      )}
+
+      {/* MODAL 3: SUBMIT DRAFT REEL MODAL */}
+      {showDraftModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 w-full max-w-md space-y-4 shadow-2xl animate-page-enter">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-black text-slate-900">{isAr ? 'إرسال مسودة الريلز لمراجعة البراند' : 'Submit Reel Draft'}</h3>
+              <button onClick={() => setShowDraftModal(false)} className="text-gray-400 hover:text-slate-800">✕</button>
+            </div>
+
+            <div className="bg-gray-50 p-3 rounded-2xl border border-gray-100">
+              <h4 className="text-xs font-black text-slate-800">{selectedCampaignForDraft?.title}</h4>
+              <p className="text-[11px] text-gray-500 mt-0.5">{selectedCampaignForDraft?.brandName}</p>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-slate-700 block">{isAr ? 'رابط مسودة الفيديو (Google Drive أو Instagram Draft):' : 'Reel Draft URL:'}</label>
+              <input
+                type="url"
+                required
+                value={draftUrl}
+                onChange={(e) => setDraftUrl(e.target.value)}
+                placeholder="https://drive.google.com/... or reel link"
+                className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs focus:outline-none focus:border-[#d00000]"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-slate-700 block">{isAr ? 'ملاحظات إضافية للبراند:' : 'Notes for Brand:'}</label>
+              <textarea
+                rows={2}
+                value={draftNotes}
+                onChange={(e) => setDraftNotes(e.target.value)}
+                placeholder={isAr ? 'تم استخدام كود الخصم في الثانية 0:04 مع إبراز التفاصيل' : 'Discount code showcased at 0:04'}
+                className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs focus:outline-none"
+              />
+            </div>
+
+            <div className="flex gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setShowDraftModal(false)}
+                className="flex-1 py-2.5 rounded-xl border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-100"
+              >
+                {isAr ? 'إلغاء' : 'Cancel'}
+              </button>
+              <button
+                type="button"
+                onClick={handleSubmitDraft}
+                className="flex-1 py-2.5 rounded-xl bg-[#d00000] text-white text-xs font-bold hover:bg-[#b00000] shadow-xs"
+              >
+                {isAr ? 'إرسال للمراجعة' : 'Submit Draft'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 4: NEW REEL MODAL */}
+      {showNewReelModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 w-full max-w-md space-y-4 shadow-2xl animate-page-enter">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-black text-slate-900">{isAr ? 'نشر فيديو ريلز جديد' : 'Upload New Reel'}</h3>
+              <button onClick={() => setShowNewReelModal(false)} className="text-gray-400 hover:text-slate-800">✕</button>
+            </div>
+
+            <form onSubmit={handleCreateNewReel} className="space-y-3">
+              <div>
+                <label className="text-xs font-bold text-slate-700 block mb-1">{isAr ? 'عنوان الريلز / الكابشن:' : 'Reel Title / Caption:'}</label>
+                <input
+                  type="text"
+                  required
+                  value={newReelForm.title}
+                  onChange={(e) => setNewReelForm({ ...newReelForm, title: e.target.value })}
+                  placeholder={isAr ? 'تنسيق لوك صيفي أنيق مع قطن مصري 🇪🇬✨' : 'Summer chic style with Egyptian cotton...'}
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs focus:outline-none focus:border-[#d00000]"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-700 block mb-1">{isAr ? 'المنتج الموسوم للشراء (Tagged Product):' : 'Tagged Product:'}</label>
+                <select
+                  value={newReelForm.taggedProduct}
+                  onChange={(e) => setNewReelForm({ ...newReelForm, taggedProduct: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs focus:outline-none bg-white"
+                >
+                  <option value="عباية كتان ناعمة وتوب عصري">عباية كتان ناعمة وتوب عصري (تاليسكا)</option>
+                  <option value="فستان حرير بوهيمي ناعم">فستان حرير بوهيمي ناعم (رَواس)</option>
+                  <option value="قميص كتان بيج طبيعي">قميص كتان بيج طبيعي (نايلوتيك)</option>
+                  <option value="إكسسوارات نحاسية يدوية">إكسسوارات نحاسية يدوية (خان الخليلي)</option>
+                  <option value="بليزر سيترين أصفر فاقع">بليزر سيترين أصفر فاقع (كايرو شيك)</option>
+                </select>
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowNewReelModal(false)}
+                  className="flex-1 py-2.5 rounded-xl border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-100"
+                >
+                  {isAr ? 'إلغاء' : 'Cancel'}
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2.5 rounded-xl bg-[#d00000] text-white text-xs font-bold hover:bg-[#b00000] shadow-xs"
+                >
+                  {isAr ? 'نشر الريلز الآن 🚀' : 'Publish Reel 🚀'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

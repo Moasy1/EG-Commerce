@@ -124,6 +124,93 @@ export default function DiscoverReels() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const lastScrollTime = useRef(0);
 
+  // Shop the Look Drawer Slide-Down Gesture State
+  const [drawerDragY, setDrawerDragY] = useState(0);
+  const [isDrawerDragging, setIsDrawerDragging] = useState(false);
+  const drawerStartY = useRef(0);
+  const currentDragY = useRef(0);
+  const drawerListRef = useRef(null);
+  const listTouchStartY = useRef(0);
+  const isListDragging = useRef(false);
+
+  // Close Shop the Look drawer helper
+  const closeShopTheLook = () => {
+    setIsShopTheLookOpen(false);
+    setDrawerDragY(0);
+    currentDragY.current = 0;
+    setIsDrawerDragging(false);
+  };
+
+  const handleDrawerPointerDown = (e) => {
+    if (e.button !== undefined && e.button !== 0) return;
+    drawerStartY.current = e.clientY;
+    currentDragY.current = 0;
+    setIsDrawerDragging(true);
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+
+  const handleDrawerPointerMove = (e) => {
+    if (!isDrawerDragging) return;
+    const deltaY = e.clientY - drawerStartY.current;
+    if (deltaY > 0) {
+      currentDragY.current = deltaY;
+      setDrawerDragY(deltaY);
+    } else {
+      currentDragY.current = 0;
+      setDrawerDragY(0);
+    }
+  };
+
+  const handleDrawerPointerUp = (e) => {
+    if (!isDrawerDragging) return;
+    setIsDrawerDragging(false);
+    try {
+      if (e.currentTarget?.hasPointerCapture?.(e.pointerId)) {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      }
+    } catch (err) {}
+
+    if (currentDragY.current > 70) {
+      closeShopTheLook();
+    } else {
+      setDrawerDragY(0);
+      currentDragY.current = 0;
+    }
+  };
+
+  const handleListTouchStart = (e) => {
+    listTouchStartY.current = e.touches[0].clientY;
+    isListDragging.current = false;
+  };
+
+  const handleListTouchMove = (e) => {
+    const currentY = e.touches[0].clientY;
+    const deltaY = currentY - listTouchStartY.current;
+
+    if (drawerListRef.current && drawerListRef.current.scrollTop <= 0 && deltaY > 0) {
+      isListDragging.current = true;
+      setIsDrawerDragging(true);
+      currentDragY.current = deltaY;
+      setDrawerDragY(deltaY);
+    } else if (isListDragging.current && deltaY > 0) {
+      currentDragY.current = deltaY;
+      setDrawerDragY(deltaY);
+    }
+  };
+
+  const handleListTouchEnd = () => {
+    if (isListDragging.current) {
+      isListDragging.current = false;
+      setIsDrawerDragging(false);
+      if (currentDragY.current > 70) {
+        closeShopTheLook();
+      } else {
+        setDrawerDragY(0);
+        currentDragY.current = 0;
+      }
+    }
+  };
+
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -1007,58 +1094,149 @@ export default function DiscoverReels() {
 
       )}
 
-      {/* Shop the Look Drawer */}
+      {/* Shop the Look Backdrop Overlay */}
+      {isShopTheLookOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 transition-opacity animate-fade-in"
+          onClick={closeShopTheLook}
+        />
+      )}
+
+      {/* Shop the Look Drawer with Slide Down to Cancel */}
       <div 
-        className={`absolute bottom-0 left-0 w-full bg-white rounded-t-3xl shadow-2xl z-50 transition-transform duration-300 ${isShopTheLookOpen ? 'translate-y-0' : 'translate-y-full'}`}
-        style={{ height: '55%' }}
+        className={`fixed md:absolute bottom-0 left-0 w-full bg-white rounded-t-3xl shadow-2xl z-50 ${
+          isDrawerDragging ? 'transition-none' : 'transition-transform duration-300 ease-out'
+        }`}
+        style={{ 
+          height: '55%',
+          transform: isShopTheLookOpen 
+            ? `translateY(${Math.max(0, drawerDragY)}px)` 
+            : 'translateY(100%)'
+        }}
       >
         <div className="w-full h-full flex flex-col relative text-slate-900" dir={isAr ? 'rtl' : 'ltr'}>
-          <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-12 h-1 bg-white/50 rounded-full"></div>
+          {/* Top Slide Down Drag Zone & Handle */}
+          <div 
+            className="w-full pt-3 pb-1 flex flex-col items-center justify-center cursor-grab active:cursor-grabbing touch-none select-none hover:bg-gray-50/70 transition-colors rounded-t-3xl"
+            onPointerDown={handleDrawerPointerDown}
+            onPointerMove={handleDrawerPointerMove}
+            onPointerUp={handleDrawerPointerUp}
+            onPointerCancel={handleDrawerPointerUp}
+            title={isAr ? 'اسحب للأسفل للإلغاء' : 'Slide down to cancel'}
+          >
+            <div className="w-14 h-1.5 bg-gray-300 rounded-full hover:bg-gray-400 transition-colors" />
+            <span className="text-[10px] text-gray-400 font-medium mt-1 select-none flex items-center gap-0.5">
+              <span className="material-symbols-outlined text-[13px]">keyboard_arrow_down</span>
+              {isAr ? 'اسحب للأسفل للإلغاء' : 'Slide down to cancel'}
+            </span>
+          </div>
           
-          <div className="flex items-center justify-between p-4 border-b border-gray-100">
+          <div 
+            className="flex items-center justify-between px-4 pb-3 pt-1 border-b border-gray-100 cursor-grab active:cursor-grabbing select-none touch-none"
+            onPointerDown={handleDrawerPointerDown}
+            onPointerMove={handleDrawerPointerMove}
+            onPointerUp={handleDrawerPointerUp}
+            onPointerCancel={handleDrawerPointerUp}
+          >
             <div>
               <h3 className="font-black text-lg">🛍️ {isAr ? 'تسوق الإطلالة' : 'Shop the Look'}</h3>
               <p className="text-xs text-gray-500 font-medium">{(currentReel?.products?.length || (currentReel?.product ? 1 : 0))} {isAr ? 'عناصر في هذا الفيديو' : 'items featured in this reel'}</p>
             </div>
             <button 
-              onClick={() => setIsShopTheLookOpen(false)}
-              className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200"
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                closeShopTheLook();
+              }}
+              className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 active:scale-95 transition-all cursor-pointer"
+              title={isAr ? 'إغلاق' : 'Close'}
             >
               <span className="material-symbols-outlined text-[18px]">close</span>
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {(currentReel?.products && currentReel.products.length > 0 ? currentReel.products : (currentReel?.product ? [currentReel.product] : [])).map((prod, idx) => (
-              <div key={idx} className="flex gap-4 p-3 bg-white border border-gray-100 rounded-2xl shadow-sm">
-                <img src={prod.image} className="w-20 h-24 rounded-xl object-cover" />
-                <div className="flex flex-col flex-1 py-1">
-                  <span className="text-[10px] font-bold text-gray-400 mb-1">{prod.sku}</span>
-                  <h4 className="font-bold text-sm text-slate-900 leading-tight mb-2 line-clamp-2">{prod.title}</h4>
-                  <div className="mt-auto flex items-end justify-between">
-                    <div>
-                      <span className="font-black text-[#d00000] text-sm block">EGP {prod.price}</span>
-                      {prod.originalPrice && (
-                        <div className="flex items-center gap-1.5 mt-0.5">
-                          <span className="text-[10px] text-gray-400 line-through">EGP {prod.originalPrice}</span>
-                          <span className="text-[9px] font-bold bg-red-50 text-[#d00000] px-1 rounded">{prod.discount}</span>
-                        </div>
-                      )}
+          <div 
+            ref={drawerListRef}
+            onTouchStart={handleListTouchStart}
+            onTouchMove={handleListTouchMove}
+            onTouchEnd={handleListTouchEnd}
+            className="flex-1 overflow-y-auto p-4 space-y-4"
+          >
+            {(currentReel?.products && currentReel.products.length > 0 ? currentReel.products : (currentReel?.product ? [currentReel.product] : [])).map((prod, idx) => {
+              const handleOpenDetails = () => {
+                closeShopTheLook();
+                const matched = products?.find(p => p.id === prod.id || p.sku === prod.sku || p.title === prod.title) || {
+                  ...prod,
+                  title: prod.title,
+                  price: prod.price,
+                  image: prod.image,
+                  category: 'Fashion',
+                  rating: 4.9,
+                  reviewsCount: 120,
+                  merchantId: 'm-01',
+                  merchant: currentReel?.creatorName || 'Talieska Studio',
+                  description: prod.title
+                };
+                openProductDetail(matched);
+              };
+
+              return (
+                <div key={idx} className="flex gap-4 p-3 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+                  {/* Clickable Product Image */}
+                  <div 
+                    onClick={handleOpenDetails}
+                    className="relative cursor-pointer group flex-shrink-0"
+                    title={isAr ? 'عرض تفاصيل المنتج' : 'View product details'}
+                  >
+                    <img 
+                      src={prod.image} 
+                      alt={prod.title}
+                      className="w-20 h-24 rounded-xl object-cover group-hover:opacity-90 group-hover:scale-105 active:scale-95 transition-all shadow-xs" 
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/15 rounded-xl transition-colors flex items-center justify-center pointer-events-none">
+                      <span className="material-symbols-outlined text-white opacity-0 group-hover:opacity-100 transition-opacity text-[20px] drop-shadow-md">open_in_new</span>
                     </div>
-                    <button 
-                      onClick={() => {
-                        setIsShopTheLookOpen(false);
-                        const matched = products?.find(p => p.id === prod.id) || prod;
-                        openQuickBuy(matched);
-                      }}
-                      className="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-black shadow-md"
+                  </div>
+
+                  <div className="flex flex-col flex-1 py-1 min-w-0">
+                    <span className="text-[10px] font-bold text-gray-400 mb-1">{prod.sku}</span>
+                    
+                    {/* Clickable Product Title */}
+                    <h4 
+                      onClick={handleOpenDetails}
+                      className="font-bold text-sm text-slate-900 leading-tight mb-2 line-clamp-2 cursor-pointer hover:text-[#d00000] active:opacity-75 transition-colors"
+                      title={isAr ? 'عرض تفاصيل المنتج' : 'View product details'}
                     >
-                      {isAr ? 'شراء' : 'Buy'}
-                    </button>
+                      {prod.title}
+                    </h4>
+
+                    <div className="mt-auto flex items-end justify-between gap-2">
+                      <div onClick={handleOpenDetails} className="cursor-pointer group">
+                        <span className="font-black text-[#d00000] text-sm block group-hover:underline">EGP {prod.price}</span>
+                        {prod.originalPrice && (
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <span className="text-[10px] text-gray-400 line-through">EGP {prod.originalPrice}</span>
+                            <span className="text-[9px] font-bold bg-red-50 text-[#d00000] px-1 rounded">{prod.discount}</span>
+                          </div>
+                        )}
+                      </div>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          closeShopTheLook();
+                          const matched = products?.find(p => p.id === prod.id || p.sku === prod.sku || p.title === prod.title) || prod;
+                          openQuickBuy(matched);
+                        }}
+                        className="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-black active:scale-95 shadow-md transition-all flex items-center gap-1"
+                      >
+                        <span className="material-symbols-outlined text-[14px]">shopping_bag</span>
+                        <span>{isAr ? 'شراء' : 'Buy'}</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>

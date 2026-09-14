@@ -716,7 +716,7 @@ export default function DiscoverReels() {
     }
   ];
 
-  const currentReel = reelsList[currentReelIndex];
+  const currentReel = reelsList[currentReelIndex] || reelsList[0] || DEFAULT_REELS[0];
 
   // Navigation functions
   const handleNextReel = () => {
@@ -1032,7 +1032,7 @@ export default function DiscoverReels() {
           {/* Ambient blurred backdrop of current reel */}
           <div 
             className="absolute inset-0 opacity-20 filter blur-3xl bg-cover bg-center pointer-events-none transition-all duration-700"
-            style={{ backgroundImage: `url(${currentReel.videoBg})` }}
+            style={{ backgroundImage: `url(${currentReel?.videoBg || ''})` }}
           />
 
           {/* Centered Phone Frame for Vertical Reels */}
@@ -1347,7 +1347,7 @@ export default function DiscoverReels() {
           >
             <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-3">
               <h3 className="text-sm font-bold text-slate-900">
-                {isAr ? `التعليقات (${currentReel.comments})` : `Comments (${currentReel.comments})`}
+                {isAr ? `التعليقات (${currentReel?.comments || 0})` : `Comments (${currentReel?.comments || 0})`}
               </h3>
               <button 
                 onClick={() => setIsCommentsOpen(false)} 

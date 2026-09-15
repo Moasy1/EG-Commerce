@@ -43,11 +43,11 @@ export default function ProductDetail() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showSizeGuide, setShowSizeGuide] = useState(false);
 
-  const productImages = product.images && product.images.length > 0 ? product.images : [
-    product.image,
-    product.image.replace('.jpg', '_2.jpg').replace('.webp', '_2.webp').replace('.png', '_2.png'),
-    product.image.replace('.jpg', '_3.jpg').replace('.webp', '_3.webp').replace('.png', '_3.png'),
-    product.image.replace('.jpg', '_4.jpg').replace('.webp', '_4.webp').replace('.png', '_4.png'),
+  const productImages = (product.images && product.images.length > 0) ? product.images : [
+    product.image || '/images/products/linen_abaya.jpg',
+    typeof product.image === 'string' ? product.image.replace('.jpg', '_2.jpg').replace('.webp', '_2.webp').replace('.png', '_2.png') : '/images/products/linen_abaya.jpg',
+    typeof product.image === 'string' ? product.image.replace('.jpg', '_3.jpg').replace('.webp', '_3.webp').replace('.png', '_3.png') : '/images/products/linen_abaya.jpg',
+    typeof product.image === 'string' ? product.image.replace('.jpg', '_4.jpg').replace('.webp', '_4.webp').replace('.png', '_4.png') : '/images/products/linen_abaya.jpg',
   ];
 
   const handleScroll = (e) => {

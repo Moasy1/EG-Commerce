@@ -44,6 +44,19 @@ export default function DesktopProductDetail() {
   const [isPlayingVideo, setIsPlayingVideo] = useState(false);
   const [showSizeGuide, setShowSizeGuide] = useState(false);
 
+  const galleryThumbs = (product.images && product.images.length > 0)
+    ? product.images
+    : [
+        product.image || '/images/products/linen_abaya.jpg',
+        typeof product.image === 'string' ? product.image.replace('.jpg', '_2.jpg').replace('.webp', '_2.webp').replace('.png', '_2.png') : '/images/products/linen_abaya.jpg',
+        typeof product.image === 'string' ? product.image.replace('.jpg', '_3.jpg').replace('.webp', '_3.webp').replace('.png', '_3.png') : '/images/products/linen_abaya.jpg',
+        typeof product.image === 'string' ? product.image.replace('.jpg', '_4.jpg').replace('.webp', '_4.webp').replace('.png', '_4.png') : '/images/products/linen_abaya.jpg',
+      ];
+
+  const discountPercent = product.originalPrice && product.originalPrice > product.price
+    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+    : 15;
+
   return (
     <div dir={isAr ? 'rtl' : 'ltr'} className="w-full bg-white text-slate-900 flex flex-col font-sans min-h-[580px] overflow-hidden select-none text-start">
       {/* 1. Top Bar */}

@@ -2,18 +2,20 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 
 export default function MerchantStorefront() {
-  const { 
-    merchants, 
-    selectedMerchantId, 
+  const {
+    merchants,
+    selectedMerchantId,
     setSelectedMerchantId,
-    products, 
-    openProductDetail, 
-    addToCart, 
-    openQuickBuy,
+    products,
     setActiveTab,
     isSubdomainMode,
-    totalCartCount
+    openProductDetail,
+    openQuickBuy,
+    totalCartCount,
+    user
   } = useApp();
+
+  const canManageStore = user && (user.role === 'superadmin' || user.role === 'admin' || user.role === 'merchant');
 
   const currentMerchant = (merchants && merchants.length > 0)
     ? (merchants.find(m => m.id === selectedMerchantId) || merchants[0])
@@ -312,8 +314,8 @@ export default function MerchantStorefront() {
 
   return (
     <div className={`w-full min-h-screen flex flex-col selection:bg-primary/20 pb-24 ${themeRootClass} ${fontClass}`}>
-      {/* 1. Top B2B SaaS Subdomain & Platform Bridge Bar (Only displayed in platform preview mode) */}
-      {!isSubdomainMode && (
+      {/* 1. Top B2B SaaS Subdomain & Platform Bridge Bar (Only displayed for authorized store managers/admins in platform preview mode) */}
+      {!isSubdomainMode && canManageStore && (
         <div className={`w-full py-2 px-3 md:px-6 border-b ${subCardBgClass}`}>
           <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-2 text-xs">
             {/* Subdomain & Verification Badge */}

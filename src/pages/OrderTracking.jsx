@@ -2,10 +2,12 @@ import React from 'react';
 import { useApp } from '../context/AppContext';
 import { useEffect, useState } from 'react';
 import { OrderService } from '../services/OrderService';
+import InvoiceModal from '../components/common/InvoiceModal';
 
 export default function OrderTracking() {
   const { setActiveTab, user } = useApp();
   const [orders, setOrders] = useState([]);
+  const [activeInvoiceOrder, setActiveInvoiceOrder] = useState(null);
 
   useEffect(() => {
     const loadOrders = async () => {
@@ -61,6 +63,32 @@ export default function OrderTracking() {
         </div>
       </div>
 
+      {/* Official Tax Invoice & Waybill Quick Access */}
+      {latestOrder && (
+        <div className="mb-6">
+          <button
+            onClick={() => setActiveInvoiceOrder(latestOrder)}
+            className="w-full p-4 rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 hover:from-black hover:to-slate-900 text-white font-bold text-xs flex items-center justify-between shadow-md transition-all active:scale-98 border border-slate-700"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-[#d00000] text-white flex items-center justify-center shadow-sm">
+                <span className="material-symbols-outlined text-[20px]">receipt_long</span>
+              </div>
+              <div className="text-right">
+                <span className="block text-xs sm:text-sm font-bold">الفاتورة الضريبية الرسمية وبوليصة الشحن (ETA Invoice)</span>
+                <span className="block text-[10px] text-slate-400 mt-0.5">
+                  فاتورة إلكترونية معتمدة برقم ${latestOrder?.id || ''} مع كود التحقق ومصاريف شحن بوسطة
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center gap-1.5 text-xs text-red-400 font-bold bg-white/10 px-3 py-1.5 rounded-xl">
+              <span>عرض / طباعة</span>
+              <span className="material-symbols-outlined text-[16px]">chevron_left</span>
+            </div>
+          </button>
+        </div>
+      )}
+
       {/* Stepper Progress */}
       <div className="rounded-xl bg-surface-container-lowest border border-surface-container-high p-5 mb-6 shadow-sm">
         <h2 className="text-xs font-bold text-on-surface mb-5">Order Tracking Status • حالة الشحنة</h2>
@@ -103,10 +131,20 @@ export default function OrderTracking() {
                 <span className="text-[11px] font-semibold text-secondary font-mono">طرد {idx + 1} • {ord.id}</span>
                 <h4 className="text-xs font-bold text-on-surface">{ord.merchantName || 'متجر مصري معتمد'}</h4>
               </div>
-              <span className="px-2 py-0.5 rounded-full bg-secondary/10 text-secondary text-[11px] font-semibold flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-secondary" />
-                {ord.shippingStatus === 'in_transit' ? 'مع المندوب' : ord.shippingStatus === 'delivered' ? 'مكتمل التسليم' : 'جاري التجهيز'}
-              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setActiveInvoiceOrder(ord)}
+                  className="px-2.5 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 text-slate-800 font-bold text-[10px] flex items-center gap-1 transition-colors"
+                  title="معاينة الفاتورة"
+                >
+                  <span className="material-symbols-outlined text-[13px] text-[#d00000]">receipt_long</span>
+                  <span>الفاتورة</span>
+                </button>
+                <span className="px-2 py-0.5 rounded-full bg-secondary/10 text-secondary text-[11px] font-semibold flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-secondary" />
+                  {ord.shippingStatus === 'in_transit' ? 'مع المندوب' : ord.shippingStatus === 'delivered' ? 'مكتمل التسليم' : 'جاري التجهيز'}
+                </span>
+              </div>
             </div>
             <div className="flex items-center justify-between text-xs text-on-surface-variant">
               <span className="font-semibold text-on-surface">{ord.productTitle}</span>
@@ -136,6 +174,13 @@ export default function OrderTracking() {
           Continue Shopping • تابعي التسوق
         </button>
       </div>
+
+      {/* Official Tax Invoice & Waybill Modal */}
+      <InvoiceModal
+        isOpen={!!activeInvoiceOrder}
+        onClose={() => setActiveInvoiceOrder(null)}
+        order={activeInvoiceOrder}
+      />
     </div>
   );
 }

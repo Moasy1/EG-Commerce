@@ -3,6 +3,8 @@ import { useApp } from '../../context/AppContext';
 import { MerchantService } from '../../services/MerchantService';
 import EgLogo from '../common/EgLogo';
 import ProductFormModal from '../merchant/ProductFormModal';
+import InvoiceModal from '../common/InvoiceModal';
+import { printOrderInvoice } from '../../utils/invoiceGenerator';
 
 export default function DesktopSellerDashboard() {
   const { 
@@ -26,6 +28,7 @@ export default function DesktopSellerDashboard() {
   // Product CRUD modal state
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [productToEdit, setProductToEdit] = useState(null);
+  const [activeInvoiceOrder, setActiveInvoiceOrder] = useState(null);
 
   const currentMerchant = merchants?.find(m => m.id === selectedMerchantId) || merchants?.[0];
   const merchantProducts = products?.filter(p => p.merchantId === currentMerchant?.id) || [];
@@ -678,27 +681,16 @@ export default function DesktopSellerDashboard() {
                                     <span className="material-symbols-outlined text-[15px]">content_copy</span>
                                   </button>
                                   <button
-                                    onClick={() => {
-                                      const printable = `
-                                        <html dir="rtl">
-                                          <head><title>${o.id}</title><style>body{font-family:Arial,sans-serif;padding:24px;line-height:1.7} h1{font-size:18px}.row{border-bottom:1px solid #eee;padding:8px 0}.label{color:#666;font-size:12px}.value{font-weight:700}</style></head>
-                                          <body>
-                                            <h1>فاتورة وبوليصة شحن: ${o.id}</h1>
-                                            <div class="row"><div class="label">المتجر</div><div class="value">${currentMerchant?.name || ''}</div></div>
-                                            <div class="row"><div class="label">العميل</div><div class="value">${o.customerName || ''}</div></div>
-                                            <div class="row"><div class="label">الهاتف</div><div class="value">${o.phone || ''}</div></div>
-                                            <div class="row"><div class="label">العنوان</div><div class="value">${o.address || ''}</div></div>
-                                            <div class="row"><div class="label">المنتج</div><div class="value">${o.productTitle || ''}</div></div>
-                                            <div class="row"><div class="label">الإجمالي</div><div class="value">${(o.amount || 0).toLocaleString()} ج.م</div></div>
-                                            <div class="row"><div class="label">رقم تتبع بوسطة</div><div class="value">${o.trackingNumber || ''}</div></div>
-                                          </body>
-                                        </html>
-                                      `;
-                                      const w = window.open('', '_blank');
-                                      if (w) { w.document.write(printable); w.document.close(); w.print(); }
-                                    }}
+                                    onClick={() => setActiveInvoiceOrder(o)}
+                                    className="w-7 h-7 rounded-lg bg-red-50 text-[#d00000] flex items-center justify-center hover:bg-red-100 transition-colors"
+                                    title="معاينة الفاتورة الضريبية والبوليصة"
+                                  >
+                                    <span className="material-symbols-outlined text-[15px]">receipt_long</span>
+                                  </button>
+                                  <button
+                                    onClick={() => printOrderInvoice(o, currentMerchant)}
                                     className="w-7 h-7 rounded-lg bg-slate-900 text-white flex items-center justify-center hover:bg-black transition-colors"
-                                    title="طباعة البوليصة والفاتورة"
+                                    title="طباعة المستند الرسمي"
                                   >
                                     <span className="material-symbols-outlined text-[15px]">print</span>
                                   </button>
@@ -1022,6 +1014,14 @@ export default function DesktopSellerDashboard() {
         isOpen={isProductModalOpen}
         onClose={() => { setIsProductModalOpen(false); setProductToEdit(null); }}
         productToEdit={productToEdit}
+      />
+
+      {/* Official Tax Invoice & Waybill Modal */}
+      <InvoiceModal
+        isOpen={!!activeInvoiceOrder}
+        onClose={() => setActiveInvoiceOrder(null)}
+        order={activeInvoiceOrder}
+        merchant={currentMerchant}
       />
     </div>
   );

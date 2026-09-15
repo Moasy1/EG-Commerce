@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { AdminService } from '../services/AdminService';
 import { OrderService } from '../services/OrderService';
+import InvoiceModal from '../components/common/InvoiceModal';
+import { printOrderInvoice } from '../utils/invoiceGenerator';
 
 export default function AdminDashboard() {
   const { language, user, setIsAuthModalOpen, setActiveTab: setAppTab, orders: appOrders, updateOrderStatus: updateAppOrderStatus } = useApp();
@@ -27,6 +29,7 @@ export default function AdminDashboard() {
   const [roleFilter, setRoleFilter] = useState('all');
   const [storeFilter, setStoreFilter] = useState('all');
   const [toastMessage, setToastMessage] = useState(null);
+  const [activeInvoiceOrder, setActiveInvoiceOrder] = useState(null);
 
   // Modal Dialog States
   const [modalType, setModalType] = useState(null); // 'addStore' | 'editStore' | 'addUser' | 'editUser' | 'addProduct' | 'editProduct' | 'addCreator' | 'editCreator'
@@ -293,6 +296,14 @@ export default function AdminDashboard() {
 
   return (
     <div className="w-full flex-1 max-w-7xl mx-auto px-4 md:px-6 py-6 pb-28 md:pb-12 text-slate-900" dir={isAr ? 'rtl' : 'ltr'}>
+      {/* Official Tax Invoice & Waybill Modal */}
+      <InvoiceModal
+        isOpen={!!activeInvoiceOrder}
+        onClose={() => setActiveInvoiceOrder(null)}
+        order={activeInvoiceOrder}
+        merchant={stores.find(s => s.id === activeInvoiceOrder?.merchantId)}
+      />
+
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-5 py-2.5 rounded-full text-xs font-bold shadow-2xl flex items-center gap-2 animate-bounce">
@@ -615,26 +626,8 @@ export default function AdminDashboard() {
         };
 
         const printOrder = (order) => {
-          const printable = `
-            <html dir="rtl">
-              <head><title>${order.id}</title><style>body{font-family:Arial,sans-serif;padding:24px;line-height:1.7} h1{font-size:20px}.row{border-bottom:1px solid #eee;padding:8px 0}.label{color:#666;font-size:12px}.value{font-weight:700}</style></head>
-              <body>
-                <h1>فاتورة / بوليصة طلب ${order.id}</h1>
-                <div class="row"><div class="label">المتجر</div><div class="value">${order.merchantName || order.merchantId || ''}</div></div>
-                <div class="row"><div class="label">العميل</div><div class="value">${order.customerName || ''}</div></div>
-                <div class="row"><div class="label">الهاتف</div><div class="value">${order.phone || ''}</div></div>
-                <div class="row"><div class="label">العنوان</div><div class="value">${order.address || ''}</div></div>
-                <div class="row"><div class="label">المنتجات</div><div class="value">${order.productTitle || ''}</div></div>
-                <div class="row"><div class="label">الإجمالي</div><div class="value">${(order.amount || 0).toLocaleString()} ج.م</div></div>
-                <div class="row"><div class="label">التتبع</div><div class="value">${order.trackingNumber || ''}</div></div>
-              </body>
-            </html>
-          `;
-          const printWindow = window.open('', '_blank');
-          if (!printWindow) return;
-          printWindow.document.write(printable);
-          printWindow.document.close();
-          printWindow.print();
+          const store = stores.find(s => s.id === order.merchantId) || null;
+          printOrderInvoice(order, store);
         };
 
         return (
@@ -838,13 +831,16 @@ export default function AdminDashboard() {
                             <option value="delivered">مكتمل التوصيل</option>
                             <option value="returned">مرتجع</option>
                           </select>
-                          <button onClick={() => openWhatsApp(o)} className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
+                          <button onClick={() => openWhatsApp(o)} className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center" title="واتساب العميل">
                             <span className="material-symbols-outlined text-[17px]">chat</span>
                           </button>
-                          <button onClick={() => copyOrderText(o)} className="w-9 h-9 rounded-lg bg-slate-50 text-slate-700 flex items-center justify-center">
+                          <button onClick={() => copyOrderText(o)} className="w-9 h-9 rounded-lg bg-slate-50 text-slate-700 flex items-center justify-center" title="نسخ بيانات الطلب">
                             <span className="material-symbols-outlined text-[17px]">content_copy</span>
                           </button>
-                          <button onClick={() => printOrder(o)} className="w-9 h-9 rounded-lg bg-slate-900 text-white flex items-center justify-center">
+                          <button onClick={() => setActiveInvoiceOrder(o)} className="w-9 h-9 rounded-lg bg-red-50 text-[#d00000] flex items-center justify-center" title="معاينة الفاتورة الضريبية والبوليصة">
+                            <span className="material-symbols-outlined text-[17px]">receipt_long</span>
+                          </button>
+                          <button onClick={() => printOrder(o)} className="w-9 h-9 rounded-lg bg-slate-900 text-white flex items-center justify-center" title="طباعة فورية">
                             <span className="material-symbols-outlined text-[17px]">print</span>
                           </button>
                         </div>
@@ -942,7 +938,10 @@ export default function AdminDashboard() {
                                 <button onClick={() => copyOrderText(o)} className="w-8 h-8 rounded-lg bg-slate-50 text-slate-700 flex items-center justify-center" title={isAr ? 'نسخ الطلب' : 'Copy order'}>
                                   <span className="material-symbols-outlined text-[16px]">content_copy</span>
                                 </button>
-                                <button onClick={() => printOrder(o)} className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center" title={isAr ? 'طباعة' : 'Print'}>
+                                <button onClick={() => setActiveInvoiceOrder(o)} className="w-8 h-8 rounded-lg bg-red-50 text-[#d00000] flex items-center justify-center hover:bg-red-100 transition-colors" title={isAr ? 'معاينة الفاتورة والبوليصة' : 'View Tax Invoice & Waybill'}>
+                                  <span className="material-symbols-outlined text-[16px]">receipt_long</span>
+                                </button>
+                                <button onClick={() => printOrder(o)} className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center hover:bg-black transition-colors" title={isAr ? 'طباعة المستند الرسمي' : 'Print Official Invoice'}>
                                   <span className="material-symbols-outlined text-[16px]">print</span>
                                 </button>
                               </div>

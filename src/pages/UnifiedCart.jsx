@@ -12,7 +12,8 @@ export default function UnifiedCart() {
     grandTotal, 
     setActiveTab, 
     language,
-    isAr 
+    isAr,
+    isSubdomainMode
   } = useApp();
 
   const [promoCode, setPromoCode] = useState('');
@@ -34,10 +35,19 @@ export default function UnifiedCart() {
     >
       {/* Top Navigation Bar */}
       <div className="px-5 pt-4 pb-3 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-[#fcfbfa]/95 backdrop-blur-md z-10">
-        <h1 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-          <span>{isAr ? 'سلة التسوق الموحدة' : 'Your Unified Cart'}</span>
-          <span className="text-gray-400 text-sm font-semibold">({cartItems.length})</span>
-        </h1>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setActiveTab(isSubdomainMode ? 'storefront' : 'shop')}
+            className="p-1.5 rounded-full hover:bg-gray-100 text-slate-700 transition-colors"
+            title="العودة"
+          >
+            <span className="material-symbols-outlined text-[22px] rtl:rotate-180">arrow_back</span>
+          </button>
+          <h1 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+            <span>{isAr ? 'سلة التسوق' : 'Shopping Cart'}</span>
+            <span className="text-gray-400 text-sm font-semibold">({cartItems.length})</span>
+          </h1>
+        </div>
         {cartItems.length > 0 && (
           <span className="text-xs font-bold text-[#d00000] bg-red-50 px-2.5 py-1 rounded-full border border-red-100 flex items-center gap-1">
             <span className="material-symbols-outlined text-[14px]">timer</span>

@@ -10,7 +10,9 @@ export default function MerchantStorefront() {
     openProductDetail, 
     addToCart, 
     openQuickBuy,
-    setActiveTab
+    setActiveTab,
+    isSubdomainMode,
+    totalCartCount
   } = useApp();
 
   const currentMerchant = (merchants && merchants.length > 0)
@@ -310,61 +312,63 @@ export default function MerchantStorefront() {
 
   return (
     <div className={`w-full min-h-screen flex flex-col selection:bg-primary/20 pb-24 ${themeRootClass} ${fontClass}`}>
-      {/* 1. Top B2B SaaS Subdomain & Platform Bridge Bar */}
-      <div className={`w-full py-2 px-3 md:px-6 border-b ${subCardBgClass}`}>
-        <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-2 text-xs">
-          {/* Subdomain & Verification Badge */}
-          <div className="flex items-center gap-2">
-            <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 font-mono text-[11px] font-bold">
-              <span className="material-symbols-outlined text-[14px]">verified</span>
-              {currentMerchant.subdomain}
-            </span>
-            {currentMerchant.customDomain && (
-              <span className={`hidden sm:inline-flex items-center gap-1 text-[11px] ${textMutedClass}`}>
-                <span className="material-symbols-outlined text-[13px] text-emerald-500">lock</span>
-                {currentMerchant.customDomain}
+      {/* 1. Top B2B SaaS Subdomain & Platform Bridge Bar (Only displayed in platform preview mode) */}
+      {!isSubdomainMode && (
+        <div className={`w-full py-2 px-3 md:px-6 border-b ${subCardBgClass}`}>
+          <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-2 text-xs">
+            {/* Subdomain & Verification Badge */}
+            <div className="flex items-center gap-2">
+              <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 font-mono text-[11px] font-bold">
+                <span className="material-symbols-outlined text-[14px]">verified</span>
+                {currentMerchant.subdomain}
               </span>
-            )}
-            <span className={`hidden md:inline text-[10px] px-2 py-0.5 rounded ${subCardBgClass} ${textMutedClass}`}>
-              النمط: {themeMode === 'light' ? 'نهاري راقي' : themeMode === 'midnight' ? 'ميدنايت مخملي' : 'فخامة داكنة'}
-            </span>
-          </div>
+              {currentMerchant.customDomain && (
+                <span className={`hidden sm:inline-flex items-center gap-1 text-[11px] ${textMutedClass}`}>
+                  <span className="material-symbols-outlined text-[13px] text-emerald-500">lock</span>
+                  {currentMerchant.customDomain}
+                </span>
+              )}
+              <span className={`hidden md:inline text-[10px] px-2 py-0.5 rounded ${subCardBgClass} ${textMutedClass}`}>
+                النمط: {themeMode === 'light' ? 'نهاري راقي' : themeMode === 'midnight' ? 'ميدنايت مخملي' : 'فخامة داكنة'}
+              </span>
+            </div>
 
-          {/* SaaS Demo Controls: Switch Merchant Storefront or Go to Merchant Admin */}
-          <div className="flex items-center gap-2">
-            <span className={`text-[11px] hidden md:inline ${textMutedClass}`}>معاينة متجر آخر:</span>
-            <select
-              value={currentMerchant.id}
-              onChange={(e) => setSelectedMerchantId(e.target.value)}
-              className={`px-2 py-0.5 rounded text-[11px] border focus:outline-none cursor-pointer ${subCardBgClass}`}
-            >
-              {merchants.map(m => (
-                <option key={m.id} value={m.id} className="bg-surface text-on-surface">
-                  🏬 {m.shortName} ({m.slug})
-                </option>
-              ))}
-            </select>
+            {/* SaaS Demo Controls: Switch Merchant Storefront or Go to Merchant Admin */}
+            <div className="flex items-center gap-2">
+              <span className={`text-[11px] hidden md:inline ${textMutedClass}`}>معاينة متجر آخر:</span>
+              <select
+                value={currentMerchant.id}
+                onChange={(e) => setSelectedMerchantId(e.target.value)}
+                className={`px-2 py-0.5 rounded text-[11px] border focus:outline-none cursor-pointer ${subCardBgClass}`}
+              >
+                {merchants.map(m => (
+                  <option key={m.id} value={m.id} className="bg-surface text-on-surface">
+                    🏬 {m.shortName} ({m.slug})
+                  </option>
+                ))}
+              </select>
 
-            <button
-              onClick={() => setActiveTab('dashboard')}
-              className="flex items-center gap-1 px-2.5 py-0.5 rounded-md font-bold text-[11px] transition-all text-white shadow-xs"
-              style={{ backgroundColor: accentColor }}
-            >
-              <span className="material-symbols-outlined text-[13px]">palette</span>
-              <span>تخصيص المظهر (SaaS)</span>
-            </button>
+              <button
+                onClick={() => setActiveTab('dashboard')}
+                className="flex items-center gap-1 px-2.5 py-0.5 rounded-md font-bold text-[11px] transition-all text-white shadow-xs"
+                style={{ backgroundColor: accentColor }}
+              >
+                <span className="material-symbols-outlined text-[13px]">palette</span>
+                <span>تخصيص المظهر (SaaS)</span>
+              </button>
 
-            <button
-              onClick={() => setActiveTab('reels')}
-              className={`flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] transition-all border ${subCardBgClass} hover:opacity-80`}
-              title="العودة إلى تطبيق EG-Commerce وسوق الموضة العام"
-            >
-              <span className="material-symbols-outlined text-[13px]">arrow_forward</span>
-              <span>سوق EG الموحد</span>
-            </button>
+              <button
+                onClick={() => setActiveTab('reels')}
+                className={`flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] transition-all border ${subCardBgClass} hover:opacity-80`}
+                title="العودة إلى تطبيق EG-Commerce وسوق الموضة العام"
+              >
+                <span className="material-symbols-outlined text-[13px]">arrow_forward</span>
+                <span>سوق EG الموحد</span>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* 2. Merchant Announcement Bar (Dynamic Visibility & Color) */}
       {showAnnouncementBar && (
@@ -502,17 +506,17 @@ export default function MerchantStorefront() {
             </a>
 
             <button 
-              onClick={() => setShowStoreCheckoutNotice(true)}
+              onClick={() => setActiveTab('cart')}
               className={`relative p-2 rounded-full border transition-all ${subCardBgClass} hover:opacity-80`}
-              title="سلة المتجر المباشرة"
+              title="سلة المتجر"
             >
               <span className="material-symbols-outlined text-[20px]">shopping_bag</span>
-              {storeCartCount > 0 && (
+              {totalCartCount > 0 && (
                 <span 
                   className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-white text-[10px] font-bold flex items-center justify-center shadow-xs"
                   style={{ backgroundColor: accentColor }}
                 >
-                  {storeCartCount}
+                  {totalCartCount}
                 </span>
               )}
             </button>
@@ -1424,11 +1428,16 @@ export default function MerchantStorefront() {
           </div>
 
           <div className="flex items-center justify-center gap-2 py-3 border-t text-[11px]">
-            <span>مستضاف ومُدار عبر منصة:</span>
-            <span className="font-mono font-bold flex items-center gap-1">
+            <span>مدعوم بواسطة</span>
+            <a 
+              href="https://egyptian-commerce.com" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="font-bold hover:underline flex items-center gap-1.5"
+            >
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: accentColor }} />
-              EG-Commerce B2B SaaS Platform
-            </span>
+              Egyptian Commerce • التجارة المصرية
+            </a>
           </div>
         </footer>
       </main>

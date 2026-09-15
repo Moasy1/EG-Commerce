@@ -647,12 +647,74 @@ export const INITIAL_PRODUCTS = [
   }
 ];
 
+export function detectSubdomain() {
+  if (typeof window === 'undefined') return { isSubdomain: false, merchantSlug: null, merchantId: 'm-01' };
+  
+  const hostname = (window.location.hostname || '').toLowerCase().trim();
+  const searchParams = new URLSearchParams(window.location.search);
+  const querySub = (searchParams.get('subdomain') || searchParams.get('store') || '').toLowerCase().trim();
+
+  // 1. Explicit query parameter (highest precedence for dev / testing e.g. ?subdomain=talieska or ?subdomain=demo)
+  if (querySub) {
+    const slug = querySub === 'demo' ? 'talieska' : querySub;
+    const found = MERCHANTS_DATA.find(m => 
+      m.slug.toLowerCase() === slug || 
+      m.id.toLowerCase() === slug || 
+      m.subdomain?.toLowerCase().includes(slug)
+    );
+    return {
+      isSubdomain: true,
+      merchantSlug: slug,
+      merchantId: found ? found.id : 'm-01'
+    };
+  }
+
+  // 2. Custom domain match (e.g. shop.talieskastudio.com, khancraft-eg.com)
+  const customMatched = MERCHANTS_DATA.find(m => 
+    m.customDomain && hostname.includes(m.customDomain.toLowerCase())
+  );
+  if (customMatched) {
+    return {
+      isSubdomain: true,
+      merchantSlug: customMatched.slug,
+      merchantId: customMatched.id
+    };
+  }
+
+  // 3. Subdomain on localhost or production domain
+  const parts = hostname.split('.');
+  const isLocalhost = hostname.includes('localhost') || hostname.includes('127.0.0.1');
+  const minParts = isLocalhost ? 2 : 3;
+
+  if (parts.length >= minParts) {
+    const prefix = parts[0].toLowerCase().trim();
+    const ignored = ['www', 'app', 'shop', 'api', 'admin', 'stage', 'staging', 'mail', 'cpanel', 'webmail'];
+    if (!ignored.includes(prefix)) {
+      const slug = prefix === 'demo' ? 'talieska' : prefix;
+      const found = MERCHANTS_DATA.find(m => 
+        m.slug.toLowerCase() === slug || 
+        m.id.toLowerCase() === slug || 
+        m.subdomain?.toLowerCase().includes(slug)
+      );
+      return {
+        isSubdomain: true,
+        merchantSlug: slug,
+        merchantId: found ? found.id : 'm-01'
+      };
+    }
+  }
+
+  return { isSubdomain: false, merchantSlug: null, merchantId: 'm-01' };
+}
+
 export function AppProvider({ children }) {
-  const [activeTab, setActiveTab] = useState('reels');
+  const initialSubdomain = detectSubdomain();
+  const [isSubdomainMode, setIsSubdomainMode] = useState(initialSubdomain.isSubdomain);
+  const [activeTab, setActiveTab] = useState(() => initialSubdomain.isSubdomain ? 'storefront' : 'reels');
   const [products, setProducts] = useState(INITIAL_PRODUCTS);
   const [selectedProduct, setSelectedProduct] = useState(INITIAL_PRODUCTS[0]);
   const [merchants, setMerchants] = useState(MERCHANTS_DATA);
-  const [selectedMerchantId, setSelectedMerchantId] = useState('m-01');
+  const [selectedMerchantId, setSelectedMerchantId] = useState(() => initialSubdomain.merchantId);
   const [orders, setOrders] = useState(INITIAL_ORDERS);
   const [role, setRole] = useState('buyer');
   const [deviceMode, setDeviceMode] = useState('responsive');
@@ -684,34 +746,15 @@ export function AppProvider({ children }) {
     loadData();
   }, []);
 
-  // Automatic Subdomain & Storefront Route Detection (e.g. talieska.egyptian-commerce.com, demo.egyptian-commerce.com, ?subdomain=talieska)
+  // Sync Subdomain & Storefront if window location or merchants change
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const hostname = window.location.hostname || '';
-    const params = new URLSearchParams(window.location.search);
-    const querySubdomain = params.get('subdomain') || params.get('store');
-    
-    let detectedSlug = querySubdomain;
-    if (!detectedSlug && hostname) {
-      const parts = hostname.split('.');
-      if (parts.length >= 3 && !['www', 'app', 'shop', 'api', 'admin'].includes(parts[0].toLowerCase())) {
-        detectedSlug = parts[0];
+    const detected = detectSubdomain();
+    if (detected.isSubdomain) {
+      setIsSubdomainMode(true);
+      if (detected.merchantId) {
+        setSelectedMerchantId(detected.merchantId);
       }
-    }
-
-    if (detectedSlug) {
-      const cleanSlug = detectedSlug.toLowerCase().trim();
-      const targetSlug = cleanSlug === 'demo' ? 'talieska' : cleanSlug;
-      const matched = merchants.find(m => 
-        m.slug === targetSlug || 
-        m.id === targetSlug ||
-        m.subdomain?.toLowerCase().includes(targetSlug)
-      );
-
-      if (matched) {
-        setSelectedMerchantId(matched.id);
-        setActiveTab('storefront');
-      }
+      setActiveTab(prev => (prev === 'reels' ? 'storefront' : prev));
     }
   }, [merchants]);
 
@@ -932,7 +975,9 @@ export function AppProvider({ children }) {
       setSelectedCategory,
       openCategoryPage,
       unreadNotifications,
-      setUnreadNotifications
+      setUnreadNotifications,
+      isSubdomainMode,
+      setIsSubdomainMode
     }}>
       {children}
     </AppContext.Provider>

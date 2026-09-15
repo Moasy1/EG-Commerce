@@ -4,7 +4,7 @@ import EgLogo from '../common/EgLogo';
 import SizeGuideModal from '../common/SizeGuideModal';
 
 export default function DesktopProductDetail() {
-  const { selectedProduct, products, addToCart, setActiveTab, language, isAr: contextIsAr } = useApp();
+  const { selectedProduct, products, addToCart, setActiveTab, language, isAr: contextIsAr, isSubdomainMode } = useApp();
   const isAr = contextIsAr !== undefined ? contextIsAr : (language === 'ar');
 
   // Fallback to first product if none selected
@@ -48,9 +48,20 @@ export default function DesktopProductDetail() {
     <div dir={isAr ? 'rtl' : 'ltr'} className="w-full bg-white text-slate-900 flex flex-col font-sans min-h-[580px] overflow-hidden select-none text-start">
       {/* 1. Top Bar */}
       <div className="px-5 py-2.5 border-b border-gray-100 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-2 cursor-pointer" onClick={() => setActiveTab('reels')}>
-          <EgLogo className="w-6 h-6" color="#d00000" />
-          <span className="font-black text-xs tracking-tight">EG-Commerce</span>
+        <div className="flex items-center gap-3">
+          {isSubdomainMode && (
+            <button
+              onClick={() => setActiveTab('storefront')}
+              className="flex items-center gap-1 text-xs font-bold text-slate-700 hover:text-[#d00000] px-2.5 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
+            >
+              <span className="material-symbols-outlined text-[16px] rtl:rotate-180">arrow_back</span>
+              <span>العودة للمتجر</span>
+            </button>
+          )}
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => setActiveTab(isSubdomainMode ? 'storefront' : 'reels')}>
+            <EgLogo className="w-6 h-6" color="#d00000" />
+            <span className="font-black text-xs tracking-tight">{isSubdomainMode ? 'Storefront' : 'EG-Commerce'}</span>
+          </div>
         </div>
 
         <div className="flex-1 max-w-md flex items-center gap-2 px-3 py-1.5 bg-gray-100/90 rounded-full text-xs text-gray-500">

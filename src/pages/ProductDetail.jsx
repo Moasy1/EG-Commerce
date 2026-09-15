@@ -5,7 +5,7 @@ import DesktopProductDetail from '../components/desktop/DesktopProductDetail';
 import SizeGuideModal from '../components/common/SizeGuideModal';
 
 export default function ProductDetail() {
-  const { selectedProduct, addToCart, setActiveTab, isAr, language } = useApp();
+  const { selectedProduct, addToCart, setActiveTab, isAr, language, isSubdomainMode } = useApp();
 
   // Fallback to Linen Co-ord Set if no product selected
   const product = selectedProduct || {
@@ -78,14 +78,14 @@ export default function ProductDetail() {
         {/* Top Navigation Bar: Back Arrow, Center Red Logo, Heart & Share */}
         <div className="w-full px-4 py-2 flex items-center justify-between">
           <button 
-            onClick={() => setActiveTab('shop')} 
+            onClick={() => setActiveTab(isSubdomainMode ? 'storefront' : 'shop')} 
             className="p-1.5 text-slate-800 hover:text-[#d00000] transition-colors"
             aria-label="Back"
           >
             <span className="material-symbols-outlined text-[24px] rtl:rotate-180">chevron_left</span>
           </button>
 
-          <div className="cursor-pointer" onClick={() => setActiveTab('reels')}>
+          <div className="cursor-pointer" onClick={() => setActiveTab(isSubdomainMode ? 'storefront' : 'reels')}>
             <EgLogo className="w-7 h-7" color="#d00000" />
           </div>
 

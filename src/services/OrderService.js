@@ -162,7 +162,8 @@ function setStoredOrders(orders) {
 function saveCreatedOrders(createdOrders) {
   const orders = Array.isArray(createdOrders) ? createdOrders : [createdOrders];
   const currentOrders = getStoredOrders();
-  const updatedOrders = [...orders, ...currentOrders];
+  const existingIds = new Set(orders.map(order => order.id));
+  const updatedOrders = [...orders, ...currentOrders.filter(order => !existingIds.has(order.id))];
 
   setStoredOrders(updatedOrders);
 
@@ -174,6 +175,49 @@ function saveCreatedOrders(createdOrders) {
   }
 
   return createdOrders;
+}
+
+function normalizePlatformOrder(row) {
+  const data = row?.order_data || row;
+  if (!data) return null;
+
+  return {
+    ...data,
+    id: data.id || row.display_id,
+    merchantId: data.merchantId || row.merchant_id,
+    customerName: data.customerName || row.customer_name,
+    phone: data.phone || row.phone,
+    shippingStatus: data.shippingStatus || row.shipping_status || 'ready_for_pickup',
+    paymentStatus: data.paymentStatus || row.payment_status || 'pending',
+    amount: data.amount ?? Number(row.total_amount || 0),
+    createdAt: data.createdAt || row.created_at,
+    databaseId: data.databaseId || row.id
+  };
+}
+
+async function syncPlatformOrders(createdOrders) {
+  const orders = Array.isArray(createdOrders) ? createdOrders : [createdOrders];
+  if (orders.length === 0) return;
+
+  const rows = orders.map(order => ({
+    display_id: order.id,
+    merchant_id: order.merchantId || 'm-01',
+    customer_name: order.customerName || null,
+    phone: order.phone || null,
+    order_data: order,
+    shipping_status: order.shippingStatus || 'ready_for_pickup',
+    payment_status: order.paymentStatus || 'pending',
+    total_amount: order.amount || order.total || 0,
+    updated_at: new Date().toISOString()
+  }));
+
+  const { error } = await supabase
+    .from('platform_orders')
+    .upsert(rows, { onConflict: 'display_id' });
+
+  if (error) {
+    console.warn('Platform order sync failed:', error.message);
+  }
 }
 
 export const OrderService = {
@@ -207,6 +251,7 @@ export const OrderService = {
         const result = await CommerceApi.createOrder(payload);
         if (Array.isArray(result?.orders) && result.orders.length > 0) {
           const created = result.orders.length === 1 ? result.orders[0] : result.orders;
+          await syncPlatformOrders(created);
           return saveCreatedOrders(created);
         }
       } catch (err) {
@@ -299,11 +344,31 @@ export const OrderService = {
       }
     }
 
+    await syncPlatformOrders(createdOrders);
     return saveCreatedOrders(createdOrders.length === 1 ? createdOrders[0] : createdOrders);
   },
 
   async getOrders(userId = null) {
     const localOrders = getStoredOrders();
+    try {
+      const { data, error } = await supabase
+        .from('platform_orders')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (!error && Array.isArray(data) && data.length > 0) {
+        const sharedOrders = data.map(normalizePlatformOrder).filter(Boolean);
+        if (userId) {
+          const userOrders = sharedOrders.filter(o => o.userId === userId);
+          return userOrders.length > 0 ? userOrders : sharedOrders;
+        }
+        setStoredOrders(sharedOrders);
+        return sharedOrders;
+      }
+    } catch (err) {
+      // Use local orders when the shared sync table has not been installed yet.
+    }
+
     try {
       let query = supabase.from('orders').select('*, order_items(*)');
       if (userId) {
@@ -334,6 +399,22 @@ export const OrderService = {
     setStoredOrders(updated);
 
     const order = orders.find(o => o.id === orderId);
+    const platformOrder = updated.find(o => o.id === orderId);
+    if (platformOrder) {
+      try {
+        await supabase
+          .from('platform_orders')
+          .update({
+            shipping_status: newStatus,
+            order_data: platformOrder,
+            updated_at: new Date().toISOString()
+          })
+          .eq('display_id', orderId);
+      } catch (err) {
+        console.warn('Platform order status sync failed:', err.message);
+      }
+    }
+
     if (typeof window !== 'undefined') {
       try {
         await CommerceApi.updateOrderStatus(orderId, newStatus, order?.databaseId || null);

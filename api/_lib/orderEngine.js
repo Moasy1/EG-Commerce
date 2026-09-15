@@ -146,6 +146,22 @@ export async function persistOrdersBestEffort(orders) {
 
   const results = [];
 
+  const platformRows = orders.map(order => ({
+    display_id: order.id,
+    merchant_id: order.merchantId || 'm-01',
+    customer_name: order.customerName || null,
+    phone: order.phone || null,
+    order_data: order,
+    shipping_status: order.shippingStatus || 'ready_for_pickup',
+    payment_status: order.paymentStatus || 'pending',
+    total_amount: order.amount || 0,
+    updated_at: new Date().toISOString()
+  }));
+
+  const { error: platformError } = await supabase
+    .from('platform_orders')
+    .upsert(platformRows, { onConflict: 'display_id' });
+
   for (const order of orders) {
     const orderRecord = {
       user_id: isUuid(order.userId) ? order.userId : null,
@@ -186,7 +202,10 @@ export async function persistOrdersBestEffort(orders) {
   }
 
   return {
-    persisted: results.some(result => result.persisted),
+    persisted: !platformError || results.some(result => result.persisted),
+    platformOrders: platformError
+      ? { persisted: false, error: platformError.message }
+      : { persisted: true, count: platformRows.length },
     results
   };
 }

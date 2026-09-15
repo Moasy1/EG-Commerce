@@ -882,6 +882,9 @@ export function AppProvider({ children }) {
 
       const fetchedCart = await CartService.getCartItems();
       setCartItems(fetchedCart);
+
+      const fetchedOrders = await OrderService.getOrders();
+      setOrders(fetchedOrders);
     };
     loadData();
   }, []);

@@ -60,8 +60,8 @@ export default function AdminDashboard() {
     setCreators(creatorsData);
     setUsers(usersData);
     setCatalogItems(catalogData);
-    // Load all platform orders
-    const allOrders = OrderService.getInitialOrders();
+    // Load all platform orders across the main domain and store subdomains
+    const allOrders = await OrderService.getOrders();
     setPlatformOrders(allOrders);
     setLoading(false);
   };

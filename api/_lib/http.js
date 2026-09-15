@@ -1,4 +1,7 @@
 export function sendJson(response, statusCode, payload) {
+  response.setHeader('Access-Control-Allow-Origin', '*');
+  response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  response.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS');
   response.status(statusCode).setHeader('Content-Type', 'application/json');
   response.end(JSON.stringify(payload));
 }
@@ -14,6 +17,14 @@ export function sendError(response, statusCode, message, details = null) {
 }
 
 export function requireMethod(request, response, methods) {
+  if (request.method === 'OPTIONS') {
+    response.setHeader('Access-Control-Allow-Origin', '*');
+    response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    response.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS');
+    response.status(204).end();
+    return false;
+  }
+
   if (methods.includes(request.method)) return true;
 
   response.setHeader('Allow', methods.join(', '));

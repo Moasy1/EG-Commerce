@@ -1,6 +1,6 @@
 /**
  * Official Egyptian Ecommerce Tax Invoice & Bosta Waybill Generator
- * Generates high-fidelity, printable Arabic/English tax invoices and shipping waybills.
+ * Guarantees a single-page A4 print fit with scannable QR Code and official platform branding.
  */
 
 export function numberToArabicWords(num) {
@@ -15,7 +15,6 @@ export function numberToArabicWords(num) {
 
   let words = [];
 
-  // Thousands
   const thousands = Math.floor(n / 1000);
   const remainder = n % 1000;
 
@@ -29,14 +28,12 @@ export function numberToArabicWords(num) {
     words.push(thousands + ' ألف');
   }
 
-  // Hundreds
   const h = Math.floor(remainder / 100);
   const remTens = remainder % 100;
   if (h > 0) {
     words.push(hundreds[h]);
   }
 
-  // Tens & Ones
   if (remTens > 0) {
     if (remTens <= 10) {
       words.push(ones[remTens]);
@@ -69,20 +66,17 @@ export function generateInvoiceHtml(order, merchant = null) {
   const invoiceNumber = `INV-${orderId.replace(/[^a-zA-Z0-9]/g, '')}-${new Date(order.createdAt || Date.now()).getFullYear()}`;
   const trackingNumber = order.trackingNumber || `BST-${Math.floor(10000000 + Math.random() * 90000000)}`;
   const orderDate = new Date(order.createdAt || Date.now()).toLocaleDateString('ar-EG', {
-    weekday: 'long',
     year: 'numeric',
-    month: 'long',
+    month: 'short',
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit'
   });
 
   const isPaid = order.paymentStatus === 'paid';
-  const isCod = order.paymentStatus === 'pending_cod' || (order.paymentMethod || '').toLowerCase().includes('cod');
-  
   const paymentMethodLabel = isPaid
-    ? (order.paymentMethod || 'الدفع الفوري (InstaPay / بطاقة بنكية)')
-    : 'الدفع عند الاستلام نقداً للمندوب (Cash on Delivery)';
+    ? (order.paymentMethod || 'الدفع الفوري (InstaPay / فيزا)')
+    : 'الدفع عند الاستلام نقداً للمندوب (COD)';
 
   // Items handling
   const items = (Array.isArray(order.items) && order.items.length > 0)
@@ -101,35 +95,38 @@ export function generateInvoiceHtml(order, merchant = null) {
   const discount = order.discount || 0;
   const shipping = order.shipping !== undefined ? order.shipping : 60;
   const totalAmount = order.amount || (subtotal - discount + shipping);
-  const vatAmount = Math.round(totalAmount * (14 / 114)); // 14% inclusive VAT in Egypt
-  const netBeforeVat = totalAmount - vatAmount;
+  const vatAmount = Math.round(totalAmount * (14 / 114));
   const amountInWords = numberToArabicWords(totalAmount);
+
+  // Real, scannable QR Code URL targeting the main platform tracking & verification endpoint
+  const verifyPlatformUrl = `https://egyptian-commerce.com/tracking?id=${encodeURIComponent(orderId)}`;
+  const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(verifyPlatformUrl)}&margin=1`;
 
   return `<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>فاتورة ضريبية رسمية • ${invoiceNumber} • ${storeShortName}</title>
+  <title>فاتورة ضريبية رسمية • ${invoiceNumber}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <style>
+    @page {
+      size: A4 portrait;
+      margin: 6mm 8mm;
+    }
+
     :root {
       --primary: #d00000;
-      --primary-dark: #900000;
       --slate-900: #0f172a;
       --slate-800: #1e293b;
       --slate-700: #334155;
       --slate-600: #475569;
-      --slate-500: #64748b;
       --gray-200: #e2e8f0;
       --gray-100: #f1f5f9;
       --gray-50: #f8fafc;
       --emerald-600: #059669;
-      --emerald-50: #ecfdf5;
-      --amber-600: #d97706;
-      --amber-50: #fffbeb;
     }
 
     * {
@@ -138,315 +135,278 @@ export function generateInvoiceHtml(order, merchant = null) {
       padding: 0;
     }
 
-    body {
+    html, body {
+      background: #f1f5f9;
       font-family: 'Cairo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background-color: #f3f4f6;
       color: var(--slate-900);
-      line-height: 1.5;
+      line-height: 1.35;
       -webkit-print-color-adjust: exact !important;
       print-color-adjust: exact !important;
-      padding: 24px;
     }
 
-    .page-container {
-      max-width: 820px;
-      margin: 0 auto;
-      background: #ffffff;
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-      overflow: hidden;
-      border: 1px solid var(--gray-200);
+    body {
+      padding: 16px;
     }
 
-    /* Print Controls Bar (Screen only) */
     .screen-actions {
-      max-width: 820px;
-      margin: 0 auto 16px auto;
+      max-width: 780px;
+      margin: 0 auto 12px auto;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
-      padding: 12px 18px;
+      gap: 10px;
+      padding: 10px 16px;
       background: #ffffff;
-      border-radius: 16px;
+      border-radius: 12px;
       border: 1px solid var(--gray-200);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
     }
 
     .action-btn {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 10px 20px;
-      border-radius: 12px;
-      font-size: 13px;
+      gap: 6px;
+      padding: 8px 18px;
+      border-radius: 10px;
+      font-size: 12px;
       font-weight: 700;
       cursor: pointer;
       border: none;
-      transition: all 0.2s ease;
       font-family: inherit;
+      transition: all 0.2s;
     }
-
     .btn-primary {
       background: var(--primary);
-      color: #ffffff;
+      color: #fff;
     }
-    .btn-primary:hover {
-      background: var(--primary-dark);
-      transform: translateY(-1px);
-    }
-
-    .btn-secondary {
-      background: var(--slate-900);
-      color: #ffffff;
-    }
-    .btn-secondary:hover {
-      background: #000;
-    }
-
+    .btn-primary:hover { background: #b00000; }
     .btn-outline {
       background: var(--gray-50);
       color: var(--slate-700);
       border: 1px solid var(--gray-200);
     }
-    .btn-outline:hover {
-      background: var(--gray-100);
+
+    /* Exactly Single Page A4 Container */
+    .a4-sheet {
+      width: 100%;
+      max-width: 780px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 14px;
+      border: 1px solid var(--gray-200);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
     }
 
-    /* Header & Badges */
-    .invoice-header {
-      padding: 32px 36px 24px 36px;
+    /* Header */
+    .inv-header {
+      padding: 18px 24px 10px 24px;
       border-bottom: 2px solid var(--gray-100);
-      position: relative;
     }
 
-    .header-top {
+    .header-row {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      gap: 20px;
+      gap: 12px;
     }
 
-    .platform-brand {
+    .brand-col {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
     }
 
-    .logo-box {
-      width: 54px;
-      height: 54px;
-      border-radius: 14px;
-      background: linear-gradient(135deg, #d00000 0%, #780000 100%);
-      color: #ffffff;
+    .brand-emblem {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: var(--primary);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
-      font-weight: 900;
-      box-shadow: 0 4px 12px rgba(208, 0, 0, 0.25);
-      border: 2px solid #ffffff;
+      box-shadow: 0 3px 8px rgba(208, 0, 0, 0.25);
     }
 
-    .platform-text h1 {
-      font-size: 20px;
+    .brand-titles h1 {
+      font-size: 16px;
       font-weight: 900;
       color: var(--slate-900);
-      letter-spacing: -0.3px;
-      line-height: 1.2;
+      line-height: 1.15;
     }
 
-    .platform-text p {
-      font-size: 11px;
-      color: var(--slate-500);
-      font-weight: 600;
+    .brand-titles p {
+      font-size: 10px;
+      color: var(--slate-600);
       font-family: 'Inter', sans-serif;
+      font-weight: 700;
     }
 
-    .invoice-title-meta {
+    .brand-titles .store-line {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--primary);
+      margin-top: 1px;
+    }
+
+    .meta-col {
       text-align: left;
       direction: ltr;
     }
 
-    .invoice-badge {
+    .meta-badge {
       display: inline-block;
-      padding: 4px 12px;
+      padding: 3px 10px;
       background: #fee2e2;
       color: var(--primary);
-      border-radius: 30px;
-      font-size: 11px;
+      border-radius: 20px;
+      font-size: 10px;
       font-weight: 800;
-      letter-spacing: 0.5px;
-      margin-bottom: 6px;
       text-transform: uppercase;
+      letter-spacing: 0.3px;
     }
 
-    .invoice-number {
-      font-size: 18px;
+    .inv-number {
+      font-size: 15px;
       font-weight: 900;
-      font-family: 'Inter', monospace;
       color: var(--slate-900);
+      font-family: 'Inter', monospace;
+      margin-top: 2px;
     }
 
-    .order-ref {
-      font-size: 11px;
-      color: var(--slate-500);
+    .inv-sub {
+      font-size: 10px;
+      color: var(--slate-600);
       font-weight: 600;
     }
 
-    /* Sub-header Legal Strip */
+    /* Legal Strip */
     .legal-strip {
-      margin-top: 20px;
-      padding: 10px 14px;
+      margin-top: 10px;
+      padding: 6px 12px;
       background: var(--gray-50);
-      border-radius: 12px;
+      border-radius: 8px;
       border: 1px dashed var(--gray-200);
       display: flex;
-      align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 10px;
-      font-size: 11px;
-    }
-
-    .legal-item strong {
-      color: var(--slate-800);
+      gap: 6px;
+      font-size: 10px;
     }
 
     /* Parties Section */
-    .parties-section {
-      padding: 24px 36px;
+    .parties-grid {
+      padding: 10px 24px;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 24px;
-      border-bottom: 1px solid var(--gray-100);
+      gap: 12px;
     }
 
-    .party-card {
+    .party-box {
       background: var(--gray-50);
-      border-radius: 14px;
-      padding: 18px;
       border: 1px solid var(--gray-200);
-      position: relative;
+      border-radius: 10px;
+      padding: 10px 12px;
     }
 
-    .party-title {
-      font-size: 10px;
+    .party-label {
+      font-size: 9px;
       font-weight: 800;
-      color: var(--slate-500);
+      color: var(--slate-600);
       text-transform: uppercase;
-      letter-spacing: 0.8px;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
     }
 
     .party-name {
-      font-size: 15px;
+      font-size: 13px;
       font-weight: 800;
       color: var(--slate-900);
-      margin-bottom: 6px;
+      margin-bottom: 2px;
     }
 
-    .party-detail {
-      font-size: 12px;
-      color: var(--slate-600);
-      line-height: 1.6;
-    }
-
-    .party-detail strong {
-      color: var(--slate-800);
-    }
-
-    .shipping-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      margin-top: 8px;
-      padding: 4px 10px;
-      border-radius: 8px;
+    .party-info {
       font-size: 10px;
-      font-weight: 700;
-      background: #eff6ff;
-      color: #1d4ed8;
-      border: 1px solid #bfdbfe;
+      color: var(--slate-600);
+      line-height: 1.4;
     }
 
-    /* Bosta Waybill Voucher Bar */
-    .bosta-voucher {
-      margin: 0 36px 20px 36px;
-      padding: 16px 20px;
-      border-radius: 14px;
-      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    /* Bosta Courier Banner */
+    .bosta-bar {
+      margin: 2px 24px 8px 24px;
+      padding: 8px 14px;
+      border-radius: 10px;
+      background: #0f172a;
       color: #ffffff;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
-    }
-
-    .bosta-logo {
-      display: flex;
-      align-items: center;
       gap: 10px;
     }
 
-    .bosta-icon {
-      width: 32px;
-      height: 32px;
+    .bosta-tag {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .bosta-badge {
+      width: 24px;
+      height: 24px;
       background: #e11d48;
-      border-radius: 8px;
+      border-radius: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 900;
-      font-size: 16px;
-    }
-
-    .bosta-info h4 {
       font-size: 13px;
-      font-weight: 800;
-      letter-spacing: -0.2px;
     }
 
-    .bosta-info p {
-      font-size: 10px;
+    .bosta-title {
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .bosta-desc {
+      font-size: 9px;
       color: #94a3b8;
     }
 
-    .barcode-box {
+    .bosta-barcode {
       text-align: center;
-      background: rgba(255, 255, 255, 0.08);
-      padding: 6px 14px;
-      border-radius: 10px;
-      border: 1px dashed rgba(255, 255, 255, 0.2);
+      background: rgba(255,255,255,0.08);
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px dashed rgba(255,255,255,0.2);
     }
 
-    .barcode-visual {
+    .barcode-bars {
       font-family: monospace;
-      font-size: 17px;
-      letter-spacing: 5px;
+      font-size: 13px;
+      letter-spacing: 4px;
       font-weight: 900;
       color: #38bdf8;
+      line-height: 1;
     }
 
-    .barcode-num {
+    .barcode-txt {
       font-family: 'Inter', monospace;
-      font-size: 10px;
+      font-size: 9px;
       color: #cbd5e1;
-      letter-spacing: 1px;
     }
 
-    /* Table Section */
-    .items-section {
-      padding: 0 36px 24px 36px;
+    /* Items Table */
+    .items-wrap {
+      padding: 0 24px 8px 24px;
     }
 
     .items-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 12px;
+      font-size: 11px;
     }
 
     .items-table thead tr {
@@ -456,278 +416,234 @@ export function generateInvoiceHtml(order, merchant = null) {
     }
 
     .items-table th {
-      padding: 12px 14px;
+      padding: 7px 10px;
       text-align: right;
+      font-size: 10px;
       font-weight: 800;
       color: var(--slate-700);
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
     }
 
     .items-table td {
-      padding: 14px;
+      padding: 8px 10px;
       border-bottom: 1px solid var(--gray-100);
-      color: var(--slate-800);
       vertical-align: middle;
     }
 
-    .item-desc-title {
+    .item-title {
       font-weight: 800;
       color: var(--slate-900);
-      font-size: 13px;
-    }
-
-    .item-desc-sub {
       font-size: 11px;
-      color: var(--slate-500);
-      margin-top: 2px;
     }
 
-    .item-badge {
-      display: inline-block;
-      padding: 2px 8px;
+    .item-meta {
+      font-size: 9px;
+      color: var(--slate-600);
+      display: flex;
+      gap: 6px;
+      margin-top: 1px;
+    }
+
+    .item-tag {
       background: var(--gray-100);
-      border-radius: 6px;
-      font-size: 10px;
-      font-weight: 600;
-      margin-left: 4px;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 8px;
     }
 
-    /* Totals & QR Section */
-    .totals-grid {
-      padding: 20px 36px 32px 36px;
+    /* Totals & QR Grid */
+    .totals-wrap {
+      padding: 10px 24px 14px 24px;
+      border-top: 1px solid var(--gray-200);
       display: grid;
-      grid-template-columns: 1.1fr 1fr;
-      gap: 28px;
-      border-top: 1px solid var(--gray-100);
-      background: linear-gradient(180deg, #ffffff 0%, var(--gray-50) 100%);
+      grid-template-columns: 1.15fr 1fr;
+      gap: 16px;
+      background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
     }
 
-    .qr-compliance-box {
+    /* QR Code Card with Main Platform Logo */
+    .qr-platform-card {
       display: flex;
       align-items: center;
-      gap: 16px;
-      padding: 16px;
+      gap: 12px;
+      padding: 10px 12px;
       background: #ffffff;
-      border-radius: 14px;
+      border-radius: 10px;
       border: 1px solid var(--gray-200);
     }
 
-    .qr-mockup {
-      width: 86px;
-      height: 86px;
-      background: #0f172a;
-      border-radius: 10px;
-      padding: 6px;
+    .qr-code-img {
+      width: 78px;
+      height: 78px;
+      border-radius: 8px;
+      border: 1px solid var(--gray-200);
+      display: block;
+      shrink-0: 0;
+      background: #fff;
+    }
+
+    .qr-details h5 {
+      font-size: 11px;
+      font-weight: 900;
+      color: var(--slate-900);
       display: flex;
       align-items: center;
-      justify-content: center;
-      color: #ffffff;
-      font-size: 8px;
-      font-family: monospace;
-      text-align: center;
-      line-height: 1.1;
-      border: 2px solid #334155;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-      position: relative;
+      gap: 5px;
     }
 
-    .qr-patterns {
-      width: 100%;
-      height: 100%;
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      grid-template-rows: repeat(6, 1fr);
-      gap: 2px;
+    .qr-details p {
+      font-size: 9px;
+      color: var(--slate-600);
+      line-height: 1.35;
+      margin-top: 2px;
     }
 
-    .qr-dot {
+    .platform-seal {
+      margin-top: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      padding: 2px 6px;
+      border-radius: 6px;
+      color: #15803d;
+      font-size: 9px;
+      font-weight: 800;
+    }
+
+    /* Financials Card */
+    .fin-card {
       background: #ffffff;
-      border-radius: 1px;
-    }
-    .qr-dot-dark {
-      background: #0f172a;
+      border: 1px solid var(--gray-200);
+      border-radius: 10px;
+      padding: 10px 14px;
     }
 
-    .compliance-text h5 {
-      font-size: 12px;
+    .fin-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--slate-600);
+      padding: 2px 0;
+    }
+
+    .fin-row.bold {
       font-weight: 800;
       color: var(--slate-900);
-      margin-bottom: 3px;
     }
 
-    .compliance-text p {
-      font-size: 10px;
-      color: var(--slate-500);
-      line-height: 1.5;
-    }
-
-    .stamp-container {
-      margin-top: 12px;
+    .fin-total {
       display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1.5px solid var(--gray-200);
+      margin-top: 4px;
+      padding-top: 6px;
+    }
+
+    .fin-total .label {
+      font-size: 12px;
+      font-weight: 900;
+      color: var(--slate-900);
+    }
+
+    .fin-total .val {
+      font-size: 16px;
+      font-weight: 900;
+      color: var(--primary);
+      font-family: 'Inter', monospace;
+    }
+
+    .fin-words {
+      font-size: 9px;
+      color: var(--slate-600);
+      text-align: left;
+      direction: rtl;
+      font-style: italic;
+      margin-top: 2px;
+    }
+
+    .payment-pill {
+      margin-top: 6px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 9px;
+      font-weight: 800;
+    }
+    .pill-paid {
+      background: #ecfdf5;
+      color: #059669;
+      border: 1px solid #a7f3d0;
+    }
+    .pill-cod {
+      background: #fffbeb;
+      color: #d97706;
+      border: 1px solid #fde68a;
+    }
+
+    /* Footer */
+    .inv-footer {
+      background: var(--slate-900);
+      color: #94a3b8;
+      padding: 10px 24px;
+      font-size: 9px;
+      line-height: 1.4;
+      display: flex;
+      justify-content: space-between;
       align-items: center;
       gap: 12px;
     }
 
-    .stamp-badge {
-      width: 68px;
-      height: 68px;
-      border-radius: 50%;
-      border: 2px dashed #059669;
-      color: #059669;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      transform: rotate(-10deg);
-      font-size: 9px;
-      font-weight: 900;
-      text-align: center;
-      line-height: 1.2;
-      background: rgba(5, 150, 105, 0.04);
-    }
-
-    /* Summary Financials */
-    .summary-card {
-      background: #ffffff;
-      border-radius: 14px;
-      padding: 16px 20px;
-      border: 1px solid var(--gray-200);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
-    }
-
-    .summary-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 6px 0;
-      font-size: 12px;
-      color: var(--slate-600);
-    }
-
-    .summary-row.bold {
-      font-weight: 700;
-      color: var(--slate-900);
-    }
-
-    .summary-divider {
-      height: 1px;
-      background: var(--gray-200);
-      margin: 8px 0;
-    }
-
-    .grand-total-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 0 6px 0;
-      border-top: 2px solid var(--gray-200);
-      margin-top: 4px;
-    }
-
-    .grand-total-label {
-      font-size: 14px;
-      font-weight: 900;
-      color: var(--slate-900);
-    }
-
-    .grand-total-val {
-      font-size: 20px;
-      font-weight: 900;
-      color: var(--primary);
-      font-family: 'Inter', 'Cairo', sans-serif;
-    }
-
-    .words-amount {
-      font-size: 11px;
-      color: var(--slate-500);
-      text-align: left;
-      direction: rtl;
-      margin-top: 4px;
-      font-style: italic;
-    }
-
-    .payment-status-pill {
-      margin-top: 12px;
-      padding: 8px 12px;
-      border-radius: 10px;
-      text-align: center;
-      font-size: 11px;
-      font-weight: 800;
-    }
-
-    .status-paid {
-      background: var(--emerald-50);
-      color: var(--emerald-600);
-      border: 1px solid #a7f3d0;
-    }
-
-    .status-cod {
-      background: var(--amber-50);
-      color: var(--amber-600);
-      border: 1px solid #fde68a;
-    }
-
-    /* Footer Notes */
-    .invoice-footer {
-      background: var(--slate-900);
-      color: #94a3b8;
-      padding: 20px 36px;
-      font-size: 11px;
-      line-height: 1.6;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 16px;
-    }
-
-    .footer-guarantee {
-      max-width: 540px;
-    }
-
-    .footer-guarantee strong {
+    .inv-footer strong {
       color: #ffffff;
     }
 
-    .footer-stamp-meta {
-      text-align: left;
-      direction: ltr;
-      font-family: 'Inter', monospace;
-      font-size: 10px;
-      color: #64748b;
-    }
-
-    /* Print Optimization */
+    /* Print Optimization - Strictly 1 Page A4 */
     @media print {
-      body {
-        background: #ffffff !important;
+      html, body {
+        width: 100% !important;
+        height: 100% !important;
+        max-height: 297mm !important;
+        margin: 0 !important;
         padding: 0 !important;
+        background: #ffffff !important;
+        overflow: hidden !important;
       }
+
       .screen-actions {
         display: none !important;
       }
-      .page-container {
+
+      .a4-sheet {
         box-shadow: none !important;
-        border: none !important;
+        border: 1px solid #cbd5e1 !important;
         max-width: 100% !important;
+        width: 100% !important;
+        height: 100% !important;
+        max-height: 285mm !important;
         border-radius: 0 !important;
+        page-break-after: avoid !important;
+        page-break-inside: avoid !important;
       }
     }
   </style>
 </head>
 <body>
 
-  <!-- Screen Actions Bar (hidden when printed) -->
+  <!-- Screen Actions Bar -->
   <div class="screen-actions">
     <div style="display: flex; align-items: center; gap: 8px;">
-      <span style="font-size: 14px; font-weight: 800; color: var(--slate-900);">فاتورة معتمدة وبوليصة شحن</span>
-      <span style="font-size: 11px; color: var(--slate-500); font-family: monospace;">#${orderId}</span>
+      <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10 44V22C10 14.268 16.268 8 24 8C31.732 8 38 14.268 38 22V44H29V22C29 19.2386 26.7614 17 24 17C21.2386 17 19 19.2386 19 22V44H10Z" fill="#d00000" />
+        <path d="M21.5 44V26C21.5 24.6193 22.6193 23.5 24 23.5C25.3807 23.5 26.5 24.6193 26.5 26V44H21.5Z" fill="#d00000" />
+      </svg>
+      <span style="font-size: 13px; font-weight: 800;">فاتورة ضريبية رسمية وبوليصة شحن A4</span>
+      <span style="font-size: 11px; color: var(--slate-600); font-family: monospace;">#${orderId}</span>
     </div>
     <div style="display: flex; align-items: center; gap: 8px;">
       <button onclick="window.print()" class="action-btn btn-primary">
-        <span>طباعة المستند الرسمي (A4 / حراري)</span>
+        <span>طباعة صفحة A4 واحدة (Print 1-Page A4)</span>
       </button>
       <button onclick="window.close()" class="action-btn btn-outline">
         <span>إغلاق</span>
@@ -735,119 +651,106 @@ export function generateInvoiceHtml(order, merchant = null) {
     </div>
   </div>
 
-  <div class="page-container">
+  <!-- Main A4 Printable Document Container -->
+  <div class="a4-sheet">
 
-    <!-- 1. Header & Organization Meta -->
-    <header class="invoice-header">
-      <div class="header-top">
-        <div class="platform-brand">
-          <div class="logo-box">EG</div>
-          <div class="platform-text">
-            <h1>التجارة المصرية • Egyptian Commerce</h1>
+    <!-- 1. Header with Platform Logo & Emblem -->
+    <header class="inv-header">
+      <div class="header-row">
+        <div class="brand-col">
+          <div class="brand-emblem">
+            <!-- Official EG-Commerce Arch Gateway Emblem -->
+            <svg width="26" height="26" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 44V22C10 14.268 16.268 8 24 8C31.732 8 38 14.268 38 22V44H29V22C29 19.2386 26.7614 17 24 17C21.2386 17 19 19.2386 19 22V44H10Z" fill="#ffffff" />
+              <path d="M21.5 44V26C21.5 24.6193 22.6193 23.5 24 23.5C25.3807 23.5 26.5 24.6193 26.5 26V44H21.5Z" fill="#ffffff" />
+            </svg>
+          </div>
+          <div class="brand-titles">
+            <h1>منصة التجارة المصرية • Egyptian Commerce</h1>
             <p>E-COMMERCE ENTERPRISE PLATFORM & DISCOVERY HUB</p>
-            <div style="margin-top: 4px; font-size: 12px; font-weight: 700; color: var(--primary);">
-              متجر: ${storeName}
-            </div>
+            <div class="store-line">متجر الشريك: ${storeName}</div>
           </div>
         </div>
 
-        <div class="invoice-title-meta">
-          <span class="invoice-badge">فاتورة ضريبية مبسطة</span>
-          <div class="invoice-number">${invoiceNumber}</div>
-          <div class="order-ref">Order Ref: <strong>${orderId}</strong></div>
-          <div class="order-ref" style="margin-top: 2px;">التاريخ: ${orderDate}</div>
+        <div class="meta-col">
+          <span class="meta-badge">فاتورة ضريبية مبسطة ETA</span>
+          <div class="inv-number">${invoiceNumber}</div>
+          <div class="inv-sub">Order Ref: <strong>${orderId}</strong> | ${orderDate}</div>
         </div>
       </div>
 
       <div class="legal-strip">
-        <div class="legal-item">
-          سجل تجاري: <strong>${storeCommReg} استثمار القاهرة</strong>
-        </div>
-        <div class="legal-item">
-          رقم التسجيل الضريبي: <strong dir="ltr">${storeTaxId}</strong>
-        </div>
-        <div class="legal-item">
-          رابط المتجر: <strong>${storeSubdomain}</strong>
-        </div>
-        <div class="legal-item">
-          حالة الفاتورة: <strong style="color: #059669;">معتمدة إلكترونياً (ETA Validated) ✓</strong>
-        </div>
+        <div>سجل تجاري: <strong>${storeCommReg} استثمار القاهرة</strong></div>
+        <div>رقم التسجيل الضريبي: <strong dir="ltr">${storeTaxId}</strong></div>
+        <div>رابط المتجر: <strong>${storeSubdomain}</strong></div>
+        <div>التوثيق: <strong style="color: #059669;">معتمدة إلكترونياً (ETA Verified) ✓</strong></div>
       </div>
     </header>
 
-    <!-- 2. Parties Information (Seller & Customer) -->
-    <section class="parties-section">
-      <!-- Seller Party -->
-      <div class="party-card">
-        <div class="party-title">
-          <span>🏬 بيانات المتجر والمشغل (Seller / Atelier)</span>
-        </div>
+    <!-- 2. Parties Information -->
+    <section class="parties-grid">
+      <div class="party-box">
+        <div class="party-label">🏬 بيانات المتجر البائع (Seller)</div>
         <div class="party-name">${storeName}</div>
-        <div class="party-detail">
+        <div class="party-info">
           <div><strong>العنوان:</strong> ${storeAddress}</div>
-          <div><strong>خدمة العملاء:</strong> <span dir="ltr">${storePhone}</span></div>
+          <div><strong>الهاتف:</strong> <span dir="ltr">${storePhone}</span></div>
           <div><strong>الدومين:</strong> ${storeSubdomain}</div>
         </div>
       </div>
 
-      <!-- Customer / Consignee -->
-      <div class="party-card">
-        <div class="party-title">
-          <span>👤 العميل المستلم وعنوان الشحن (Consignee)</span>
-        </div>
+      <div class="party-box">
+        <div class="party-label">👤 العميل المستلم والشحن (Consignee)</div>
         <div class="party-name">${order.customerName || 'عميل تجارة مصرية'}</div>
-        <div class="party-detail">
+        <div class="party-info">
           <div><strong>الهاتف:</strong> <span dir="ltr">${order.phone || '+20 100 000 0000'}</span></div>
-          <div><strong>عنوان التوصيل:</strong> ${order.address || 'القاهرة، جمهورية مصر العربية'}</div>
-          <div><strong>طريقة الدفع:</strong> ${paymentMethodLabel}</div>
-        </div>
-        <div class="shipping-badge">
-          <span>معاينة وقياس القطعة متاحة بحضور مندوب التوصيل</span>
+          <div><strong>العنوان:</strong> ${order.address || 'القاهرة، جمهورية مصر العربية'}</div>
+          <div><strong>طريقة السداد:</strong> ${paymentMethodLabel}</div>
         </div>
       </div>
     </section>
 
-    <!-- 3. Integrated Bosta Express Waybill Voucher -->
-    <div class="bosta-voucher">
-      <div class="bosta-logo">
-        <div class="bosta-icon">B</div>
-        <div class="bosta-info">
-          <h4>بوسطة إكسبريس للشحن السريع • BOSTA EXPRESS AWB</h4>
-          <p>شحنة تجارة إلكترونية سريعة ومؤمنة بالكامل مع إمكانية التتبع اللحظي</p>
+    <!-- 3. Integrated Bosta Courier Bar -->
+    <div class="bosta-bar">
+      <div class="bosta-tag">
+        <div class="bosta-badge">B</div>
+        <div>
+          <div class="bosta-title">بوسطة إكسبريس للشحن السريع • BOSTA EXPRESS AWB</div>
+          <div class="bosta-desc">شحنة مؤمنة بالكامل - محطة فرز القاهرة الكبرى (CAI-HUB-04)</div>
         </div>
       </div>
 
-      <div class="barcode-box">
-        <div class="barcode-visual">||| | ||||| ||| |||||||</div>
-        <div class="barcode-num">${trackingNumber}</div>
+      <div class="bosta-barcode">
+        <div class="barcode-bars">||| | ||||| ||| |||||||</div>
+        <div class="barcode-txt">${trackingNumber}</div>
       </div>
     </div>
 
     <!-- 4. Line Items Table -->
-    <section class="items-section">
+    <section class="items-wrap">
       <table class="items-table">
         <thead>
           <tr>
-            <th style="width: 36px; text-align: center;">#</th>
+            <th style="width: 28px; text-align: center;">#</th>
             <th>المنتج والوصف</th>
-            <th style="text-align: center; width: 80px;">الكمية</th>
-            <th style="text-align: left; width: 110px;">سعر الوحدة</th>
-            <th style="text-align: left; width: 110px;">الإجمالي</th>
+            <th style="text-align: center; width: 60px;">الكمية</th>
+            <th style="text-align: left; width: 95px;">سعر الوحدة</th>
+            <th style="text-align: left; width: 95px;">الإجمالي</th>
           </tr>
         </thead>
         <tbody>
           ${items.map((item, idx) => `
             <tr>
-              <td style="text-align: center; font-weight: 700; color: var(--slate-500);">${idx + 1}</td>
+              <td style="text-align: center; font-weight: 700; color: var(--slate-600);">${idx + 1}</td>
               <td>
-                <div class="item-desc-title">${item.title || item.name || order.productTitle || 'منتج أزياء وتراث'}</div>
-                <div class="item-desc-sub">
-                  ${item.size ? `<span class="item-badge">المقاس: ${item.size}</span>` : ''}
-                  ${item.color ? `<span class="item-badge">اللون: ${item.color}</span>` : ''}
-                  <span class="item-badge">كود: ${item.productId || 'EG-PROD'}</span>
+                <div class="item-title">${item.title || item.name || order.productTitle || 'منتج أزياء وتراث'}</div>
+                <div class="item-meta">
+                  ${item.size ? `<span class="item-tag">مقاس: ${item.size}</span>` : ''}
+                  ${item.color ? `<span class="item-tag">لون: ${item.color}</span>` : ''}
+                  <span class="item-tag">كود: ${item.productId || 'EG-PROD'}</span>
                 </div>
               </td>
-              <td style="text-align: center; font-weight: 700; font-family: monospace; font-size: 14px;">${item.quantity || 1}</td>
+              <td style="text-align: center; font-weight: 700; font-family: monospace;">${item.quantity || 1}</td>
               <td style="text-align: left; font-family: 'Inter', monospace; font-weight: 700;">${(item.price || 0).toLocaleString()} ج.م</td>
               <td style="text-align: left; font-family: 'Inter', monospace; font-weight: 900; color: var(--slate-900);">
                 ${((item.price || 0) * (item.quantity || 1)).toLocaleString()} ج.م
@@ -858,88 +761,81 @@ export function generateInvoiceHtml(order, merchant = null) {
       </table>
     </section>
 
-    <!-- 5. Tax Breakdown, Totals & Verification QR -->
-    <section class="totals-grid">
-      <!-- Left Box: Tax QR & Seal -->
-      <div>
-        <div class="qr-compliance-box">
-          <div class="qr-mockup">
-            <div class="qr-patterns">
-              <div class="qr-dot"></div><div class="qr-dot"></div><div class="qr-dot"></div><div class="qr-dot-dark"></div><div class="qr-dot"></div><div class="qr-dot"></div>
-              <div class="qr-dot"></div><div class="qr-dot-dark"></div><div class="qr-dot"></div><div class="qr-dot"></div><div class="qr-dot-dark"></div><div class="qr-dot"></div>
-              <div class="qr-dot"></div><div class="qr-dot"></div><div class="qr-dot"></div><div class="qr-dot-dark"></div><div class="qr-dot"></div><div class="qr-dot"></div>
-              <div class="qr-dot-dark"></div><div class="qr-dot"></div><div class="qr-dot-dark"></div><div class="qr-dot"></div><div class="qr-dot"></div><div class="qr-dot-dark"></div>
-              <div class="qr-dot"></div><div class="qr-dot-dark"></div><div class="qr-dot"></div><div class="qr-dot-dark"></div><div class="qr-dot"></div><div class="qr-dot"></div>
-              <div class="qr-dot"></div><div class="qr-dot"></div><div class="qr-dot"></div><div class="qr-dot"></div><div class="qr-dot-dark"></div><div class="qr-dot"></div>
-            </div>
-          </div>
-          <div class="compliance-text">
-            <h5>رمز التحقق الإلكتروني المعتمد (QR)</h5>
-            <p>مشفر طبقاً لضوابط منظومة الفاتورة الإلكترونية لمصلحة الضرائب المصرية (ETA). مسح الرمز يؤكد صحة الفاتورة ومعاملة الشحن المعتمدة.</p>
-          </div>
-        </div>
-
-        <div class="stamp-container">
-          <div class="stamp-badge">
-            <span>مصلحة الضرائب</span>
-            <span>معتمد 2026</span>
-            <span>ETA VERIFIED</span>
-          </div>
-          <div style="font-size: 11px; color: var(--slate-500); line-height: 1.4;">
-            <div><strong>رقم البوليصة المرجعي:</strong> ${trackingNumber}</div>
-            <div><strong>حالة المعاملة:</strong> موثقة على السحابة المركزية</div>
+    <!-- 5. Totals & Scannable QR Section with Main Platform Branding -->
+    <section class="totals-wrap">
+      <!-- QR Code with Platform Logo & Verification Link -->
+      <div class="qr-platform-card">
+        <img 
+          src="${qrApiUrl}" 
+          alt="Platform Verification QR Code" 
+          class="qr-code-img"
+          loading="eager"
+        />
+        <div class="qr-details">
+          <h5>
+            <!-- Mini Platform Logo in QR Box -->
+            <svg width="14" height="14" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 44V22C10 14.268 16.268 8 24 8C31.732 8 38 14.268 38 22V44H29V22C29 19.2386 26.7614 17 24 17C21.2386 17 19 19.2386 19 22V44H10Z" fill="#d00000" />
+              <path d="M21.5 44V26C21.5 24.6193 22.6193 23.5 24 23.5C25.3807 23.5 26.5 24.6193 26.5 26V44H21.5Z" fill="#d00000" />
+            </svg>
+            <span>رمز التحقق من المنصة (QR)</span>
+          </h5>
+          <p>
+            امسح الرمز بكاميرا الهاتف للتحقق الفوري من صحة الفاتورة على منصة التجارة المصرية وتتبع مسار الشحنة.
+          </p>
+          <div class="platform-seal">
+            <span>منظومة الضرائب المصرية ETA • موثق</span>
           </div>
         </div>
       </div>
 
-      <!-- Right Box: Financial Calculation -->
-      <div class="summary-card">
-        <div class="summary-row">
+      <!-- Financial Calculation -->
+      <div class="fin-card">
+        <div class="fin-row">
           <span>المجموع الفرعي للمنتجات:</span>
           <span style="font-family: 'Inter', monospace; font-weight: 700;">${subtotal.toLocaleString()} ج.م</span>
         </div>
 
         ${discount > 0 ? `
-          <div class="summary-row" style="color: #059669;">
-            <span>الخصم الترويجي المطبق:</span>
+          <div class="fin-row" style="color: #059669;">
+            <span>الخصم المطبق:</span>
             <span style="font-family: 'Inter', monospace; font-weight: 700;">-${discount.toLocaleString()} ج.م</span>
           </div>
         ` : ''}
 
-        <div class="summary-row">
-          <span>تكلفة الشحن (بوسطة إكسبريس):</span>
+        <div class="fin-row">
+          <span>شحن بوسطة إكسبريس:</span>
           <span style="font-family: 'Inter', monospace; font-weight: 700;">${shipping > 0 ? `${shipping.toLocaleString()} ج.م` : 'مجاني'}</span>
         </div>
 
-        <div class="summary-row" style="font-size: 11px; color: var(--slate-500);">
+        <div class="fin-row" style="font-size: 9px; color: var(--slate-600);">
           <span>ضريبة القيمة المضافة 14% (متضمنة):</span>
           <span style="font-family: 'Inter', monospace;">${vatAmount.toLocaleString()} ج.م</span>
         </div>
 
-        <div class="grand-total-row">
-          <span class="grand-total-label">الإجمالي النهائي المستحق:</span>
-          <span class="grand-total-val">${totalAmount.toLocaleString()} ج.م</span>
+        <div class="fin-total">
+          <span class="label">الإجمالي النهائي:</span>
+          <span class="val">${totalAmount.toLocaleString()} ج.م</span>
         </div>
 
-        <div class="words-amount">${amountInWords}</div>
+        <div class="fin-words">${amountInWords}</div>
 
-        <div class="payment-status-pill ${isPaid ? 'status-paid' : 'status-cod'}">
+        <div class="payment-pill ${isPaid ? 'pill-paid' : 'pill-cod'}">
           ${isPaid 
-            ? '✓ مدفوع إلكترونياً بالكامل (PAID IN FULL • تم التأكيد البنكي)' 
+            ? '✓ مدفوع إلكترونياً بالكامل (PAID IN FULL • تم التأكيد)' 
             : `○ مطلوب تحصيل ${totalAmount.toLocaleString()} ج.م نقداً عند الاستلام (COD)`}
         </div>
       </div>
     </section>
 
-    <!-- 6. Legal Guarantees & Consumer Rights Footer -->
-    <footer class="invoice-footer">
-      <div class="footer-guarantee">
+    <!-- 6. Legal & Protection Footer -->
+    <footer class="inv-footer">
+      <div>
         <strong>حقوق المستهلك والضمان:</strong>
-        طبقاً للقانون رقم 181 لسنة 2018، يحق للعميل استبدال أو استرجاع المنتجات خلال 14 يوماً من تاريخ الاستلام في حالتها الأصلية. للدعم السريع أو تتبع الشحنة تواصل عبر واتساب ${storePhone} أو مركز المساعدة المركزي.
+        حق المعاينة والاستبدال خلال 14 يوماً من الاستلام طبقاً لقانون حماية المستهلك المصري رقم 181 لسنة 2018.
       </div>
-      <div class="footer-stamp-meta">
-        <div>SYS-REF: ${orderId}-EGY</div>
-        <div>VERIFIED PLATFORM COPY</div>
+      <div style="text-align: left; direction: ltr; font-family: 'Inter', monospace; font-size: 8px;">
+        egyptian-commerce.com • REF:${orderId}
       </div>
     </footer>
 

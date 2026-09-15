@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { CommerceApi } from './CommerceApi';
 
 const ORDERS_STORAGE_KEY = 'eg_platform_orders';
 
@@ -158,6 +159,23 @@ function setStoredOrders(orders) {
   }
 }
 
+function saveCreatedOrders(createdOrders) {
+  const orders = Array.isArray(createdOrders) ? createdOrders : [createdOrders];
+  const currentOrders = getStoredOrders();
+  const updatedOrders = [...orders, ...currentOrders];
+
+  setStoredOrders(updatedOrders);
+
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('eg_local_cart');
+    if (orders.length > 0) {
+      sessionStorage.setItem('eg_last_order_id', orders[0].id);
+    }
+  }
+
+  return createdOrders;
+}
+
 export const OrderService = {
   getInitialOrders() {
     return getStoredOrders();
@@ -182,6 +200,18 @@ export const OrderService = {
       };
     } else {
       payload = payloadOrCartItems || {};
+    }
+
+    if (typeof window !== 'undefined') {
+      try {
+        const result = await CommerceApi.createOrder(payload);
+        if (Array.isArray(result?.orders) && result.orders.length > 0) {
+          const created = result.orders.length === 1 ? result.orders[0] : result.orders;
+          return saveCreatedOrders(created);
+        }
+      } catch (err) {
+        console.warn('Commerce API create order failed, using browser fallback:', err.message);
+      }
     }
 
     const cartItems = payload.cartItems || [];
@@ -269,19 +299,7 @@ export const OrderService = {
       }
     }
 
-    // Save to persistent localStorage
-    const currentOrders = getStoredOrders();
-    const updatedOrders = [...createdOrders, ...currentOrders];
-    setStoredOrders(updatedOrders);
-
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('eg_local_cart');
-      if (createdOrders.length > 0) {
-        sessionStorage.setItem('eg_last_order_id', createdOrders[0].id);
-      }
-    }
-
-    return createdOrders.length === 1 ? createdOrders[0] : createdOrders;
+    return saveCreatedOrders(createdOrders.length === 1 ? createdOrders[0] : createdOrders);
   },
 
   async getOrders(userId = null) {
@@ -314,6 +332,15 @@ export const OrderService = {
     const orders = getStoredOrders();
     const updated = orders.map(o => o.id === orderId ? { ...o, shippingStatus: newStatus } : o);
     setStoredOrders(updated);
+
+    const order = orders.find(o => o.id === orderId);
+    if (typeof window !== 'undefined') {
+      try {
+        await CommerceApi.updateOrderStatus(orderId, newStatus, order?.databaseId || null);
+      } catch (err) {
+        console.warn('Commerce API order status update failed, using local fallback:', err.message);
+      }
+    }
 
     try {
       supabase.from('orders').update({ status: newStatus }).eq('id', orderId).then();

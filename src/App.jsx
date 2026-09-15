@@ -81,6 +81,84 @@ function MainContent() {
     );
   }
 
+function ProtectedRoute({ requiredRole, title, description, children }) {
+  const { user, setIsAuthModalOpen, language, setActiveTab } = useApp();
+  const isAr = language === 'ar';
+
+  const isSuperadmin = user?.role === 'superadmin' || user?.role === 'admin';
+  const hasAccess = isSuperadmin || (
+    Array.isArray(requiredRole) 
+      ? requiredRole.includes(user?.role) 
+      : user?.role === requiredRole
+  );
+
+  if (!user) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center text-center p-6 space-y-4 max-w-md mx-auto">
+        <div className="w-16 h-16 rounded-full bg-red-100 text-[#d00000] flex items-center justify-center shadow-sm">
+          <span className="material-symbols-outlined text-[36px]">lock</span>
+        </div>
+        <h2 className="text-xl font-bold text-slate-900">
+          {title || (isAr ? 'تسجيل الدخول مطلوب' : 'Authentication Required')}
+        </h2>
+        <p className="text-sm text-gray-500 leading-relaxed">
+          {description || (isAr 
+            ? 'هذا القسم مخصص فقط للمستخدمين المصرح لهم. يرجى تسجيل الدخول بحساب مصرح للوصول إلى لوحة التحكم.' 
+            : 'This section requires authorized credentials. Please sign in to proceed.')}
+        </p>
+        <div className="flex items-center gap-3 pt-2">
+          <button
+            onClick={() => setIsAuthModalOpen(true)}
+            className="px-6 py-2.5 rounded-full bg-[#d00000] hover:bg-red-700 text-white text-xs font-bold shadow-md active:scale-95 transition-all"
+          >
+            {isAr ? 'تسجيل الدخول الآن' : 'Sign In Now'}
+          </button>
+          <button
+            onClick={() => setActiveTab('reels')}
+            className="px-4 py-2.5 rounded-full border border-gray-300 hover:bg-gray-100 text-slate-700 text-xs font-bold transition-all"
+          >
+            {isAr ? 'العودة للرئيسية' : 'Return Home'}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!hasAccess) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center text-center p-6 space-y-4 max-w-md mx-auto">
+        <div className="w-16 h-16 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center shadow-sm">
+          <span className="material-symbols-outlined text-[36px]">shield_person</span>
+        </div>
+        <h2 className="text-xl font-bold text-slate-900">
+          {isAr ? 'غير مصرح بالوصول لهذا الحساب' : 'Access Restricted for Current Account'}
+        </h2>
+        <p className="text-sm text-gray-500 leading-relaxed">
+          {isAr 
+            ? `أنت مسجل حالياً كـ (${user.role}). هذا القسم متاح فقط للمشرفين أو الحسابات المصرح لها.` 
+            : `You are signed in as (${user.role}). This section requires elevated permissions.`}
+        </p>
+        <div className="flex items-center gap-3 pt-2">
+          <button
+            onClick={() => setIsAuthModalOpen(true)}
+            className="px-6 py-2.5 rounded-full bg-[#d00000] hover:bg-red-700 text-white text-xs font-bold shadow-md active:scale-95 transition-all"
+          >
+            {isAr ? 'تبديل الحساب' : 'Switch Account'}
+          </button>
+          <button
+            onClick={() => setActiveTab('reels')}
+            className="px-4 py-2.5 rounded-full border border-gray-300 hover:bg-gray-100 text-slate-700 text-xs font-bold transition-all"
+          >
+            {isAr ? 'العودة للرئيسية' : 'Return Home'}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return children;
+}
+
   // 2. MAIN PLATFORM MODE (egyptian-commerce.com - Reels, Hub, Discovery, Studio)
   const renderActiveScreen = () => {
     switch (activeTab) {
@@ -98,26 +176,72 @@ function MainContent() {
         return <Checkout />;
       case 'dashboard':
       case 'merchant':
-        return <MerchantDashboard />;
+        return (
+          <ProtectedRoute 
+            requiredRole={['merchant', 'superadmin', 'admin']}
+            title="لوحة التاجر • Merchant Seller Hub"
+            description="لوحة التحكم والطلبات والمبيعات خاصة بالتجار المعتمدين والمشرف العام فقط."
+          >
+            <MerchantDashboard />
+          </ProtectedRoute>
+        );
       case 'add_product':
       case 'add-product':
-        return <AddProductStudio />;
+        return (
+          <ProtectedRoute 
+            requiredRole={['merchant', 'superadmin', 'admin']}
+            title="إضافة منتج • Add Product Studio"
+            description="إضافة منتجات جديدة إلى السوق متاح للتجار المعتمدين."
+          >
+            <AddProductStudio />
+          </ProtectedRoute>
+        );
+      case 'merchant_campaign':
+        return (
+          <ProtectedRoute 
+            requiredRole={['merchant', 'superadmin', 'admin']}
+            title="حملات التاجر • Merchant Campaigns"
+          >
+            <MerchantCampaign />
+          </ProtectedRoute>
+        );
       case 'studio':
       case 'creator':
-        return <CreatorStudio />;
-
+        return (
+          <ProtectedRoute 
+            requiredRole={['creator', 'merchant', 'superadmin', 'admin']}
+            title="استوديو المبدعين • Creator Studio"
+            description="لوحة صناع المحتوى وتحليلات الأرباح والشراكات مع البراندات."
+          >
+            <CreatorStudio />
+          </ProtectedRoute>
+        );
       case 'admin':
       case 'superadmin':
-        return <AdminDashboard />;
+        return (
+          <ProtectedRoute 
+            requiredRole={['superadmin', 'admin']}
+            title="لوحة الإدارة المركزية • Superadmin Platform Portal"
+            description="لوحة الإدارة والتحكم في المستخدمين والمتاجر ومراقبة المعاملات مخصصة فقط للمشرف العام."
+          >
+            <AdminDashboard />
+          </ProtectedRoute>
+        );
       case 'delivery':
-        return <DeliveryDashboard />;
+        return (
+          <ProtectedRoute 
+            requiredRole={['driver', 'superadmin', 'admin']}
+            title="بوابة المناديب • Rider Portal"
+            description="بوابة مناديب التوصيل والشحنات المتاحة."
+          >
+            <DeliveryDashboard />
+          </ProtectedRoute>
+        );
       case 'settings':
         return <Settings />;
       case 'storefront':
       case 'merchant-storefront':
         return <MerchantStorefront />;
-      case 'merchant_campaign':
-        return <MerchantCampaign />;
       case 'tracking':
         return <OrderTracking />;
       case 'rewards':

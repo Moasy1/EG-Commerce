@@ -17,8 +17,36 @@ export default function MerchantDashboard() {
     setActiveTab,
     updateProductSyndication,
     updateProduct,
-    deleteProduct
+    deleteProduct,
+    user,
+    isAr,
+    setIsAuthModalOpen
   } = useApp();
+
+  const isMerchant = user?.role === 'merchant' || user?.role === 'superadmin' || user?.role === 'admin';
+  if (!isMerchant) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center min-h-[60vh] text-center p-6 space-y-4 max-w-md mx-auto" dir={isAr ? 'rtl' : 'ltr'}>
+        <div className="w-16 h-16 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center shadow-sm">
+          <span className="material-symbols-outlined text-[36px]">storefront</span>
+        </div>
+        <h2 className="text-xl font-bold text-slate-900">
+          {isAr ? 'لوحة التاجر مخصصة للتجار المعتمدين' : 'Merchant Access Required'}
+        </h2>
+        <p className="text-sm text-gray-500 leading-relaxed">
+          {isAr 
+            ? 'لوحة التحكم والطلبات والمبيعات خاصة بالتجار المسجلين فقط. يرجى تسجيل الدخول بحساب تاجر.' 
+            : 'The seller hub and order metrics are restricted to verified merchants and platform administrators.'}
+        </p>
+        <button
+          onClick={() => setIsAuthModalOpen(true)}
+          className="px-6 py-2.5 rounded-full bg-[#d00000] text-white text-xs font-bold hover:brightness-110 shadow-md transition-all active:scale-95"
+        >
+          {isAr ? 'تسجيل الدخول كتاجر' : 'Sign in as Merchant'}
+        </button>
+      </div>
+    );
+  }
 
   const currentMerchant = merchants.find(m => m.id === selectedMerchantId) || merchants[0];
   const merchantProducts = products.filter(p => p.merchantId === currentMerchant.id);

@@ -42,14 +42,27 @@ export default function AdminDashboard() {
     );
   }
 
-  // Ensure only authenticated users can see this (or restrict to admin)
-  // For demo, we just show a warning if no user
-  if (!user) {
+  const isSuperadmin = user?.role === 'superadmin' || user?.role === 'admin';
+  if (!isSuperadmin) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center min-h-[50vh] text-center p-6">
-        <span className="material-symbols-outlined text-[48px] text-gray-300 mb-4">admin_panel_settings</span>
-        <h2 className="text-xl font-bold mb-2">Access Denied</h2>
-        <p className="text-sm text-gray-500">Please sign in to access the Admin Dashboard.</p>
+      <div className="flex-1 flex flex-col items-center justify-center min-h-[60vh] text-center p-6 space-y-4 max-w-md mx-auto" dir={isAr ? 'rtl' : 'ltr'}>
+        <div className="w-16 h-16 rounded-full bg-red-100 text-[#d00000] flex items-center justify-center shadow-sm">
+          <span className="material-symbols-outlined text-[36px]">admin_panel_settings</span>
+        </div>
+        <h2 className="text-xl font-bold text-slate-900">
+          {isAr ? 'الوصول مخصص للمشرف العام فقط' : 'Superadmin Access Restricted'}
+        </h2>
+        <p className="text-sm text-gray-500 leading-relaxed">
+          {isAr 
+            ? 'لوحة الإدارة والتحكم في المستخدمين والمتاجر مخصصة فقط للمشرف العام superadmin@egyptian-commerce.com' 
+            : 'The administration dashboard is restricted to platform superadmins only.'}
+        </p>
+        <button
+          onClick={() => setIsAuthModalOpen(true)}
+          className="px-6 py-2.5 rounded-full bg-[#d00000] text-white text-xs font-bold hover:brightness-110 shadow-md transition-all active:scale-95"
+        >
+          {isAr ? 'تسجيل الدخول كمشرف عام' : 'Sign in as Superadmin'}
+        </button>
       </div>
     );
   }

@@ -205,11 +205,17 @@ export default function Header() {
           {/* Create Menu Dropdown */}
           <div className="relative" ref={createMenuRef}>
             <button
-              onClick={() => setIsCreateMenuOpen(!isCreateMenuOpen)}
+              onClick={() => {
+                if (!user) {
+                  setIsAuthModalOpen(true);
+                  return;
+                }
+                setIsCreateMenuOpen(!isCreateMenuOpen);
+              }}
               aria-expanded={isCreateMenuOpen}
               aria-haspopup="true"
               className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 ${
-                ['studio', 'dashboard'].includes(activeTab)
+                ['studio', 'dashboard', 'add_product'].includes(activeTab)
                   ? 'bg-slate-900 text-white shadow-xs'
                   : isReels ? 'text-gray-300 hover:text-white hover:bg-white/10' : 'text-gray-600 hover:text-slate-900 hover:bg-gray-100'
               }`}
@@ -219,17 +225,36 @@ export default function Header() {
               <span className="material-symbols-outlined text-[16px]">expand_more</span>
             </button>
 
-            {isCreateMenuOpen && (
-              <div className="absolute top-full mt-1 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden text-slate-900 z-50 flex flex-col py-1 animate-fade-in">
-                <button onClick={() => { setActiveTab('studio'); setIsCreateMenuOpen(false); }} className="px-4 py-2.5 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-start">
-                  <span className="material-symbols-outlined text-[18px] text-[#d00000]">video_camera_front</span>
-                  {isAr ? 'استوديو المبدعين' : 'Creator Studio'}
-                </button>
-                <div className="h-px w-full bg-gray-100 my-1"></div>
-                <button onClick={() => { setActiveTab('dashboard'); setIsCreateMenuOpen(false); }} className="px-4 py-2.5 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-start">
-                  <span className="material-symbols-outlined text-[18px] text-slate-700">storefront</span>
-                  {isAr ? 'لوحة التاجر' : 'Seller Hub'}
-                </button>
+            {isCreateMenuOpen && user && (
+              <div className={`absolute ${isAr ? 'left-0' : 'right-0'} top-full mt-1 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden text-slate-900 z-50 flex flex-col py-1 animate-fade-in`}>
+                {(user.role === 'creator' || user.role === 'merchant' || user.role === 'superadmin' || user.role === 'admin') && (
+                  <button onClick={() => { setActiveTab('studio'); setIsCreateMenuOpen(false); }} className="px-4 py-2.5 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-start">
+                    <span className="material-symbols-outlined text-[18px] text-[#d00000]">video_camera_front</span>
+                    {isAr ? 'استوديو المبدعين' : 'Creator Studio'}
+                  </button>
+                )}
+                {(user.role === 'merchant' || user.role === 'superadmin' || user.role === 'admin') && (
+                  <>
+                    <div className="h-px w-full bg-gray-100 my-1"></div>
+                    <button onClick={() => { setActiveTab('dashboard'); setIsCreateMenuOpen(false); }} className="px-4 py-2.5 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-start">
+                      <span className="material-symbols-outlined text-[18px] text-slate-700">storefront</span>
+                      {isAr ? 'لوحة التاجر' : 'Seller Hub'}
+                    </button>
+                    <button onClick={() => { setActiveTab('add_product'); setIsCreateMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-start text-emerald-600">
+                      <span className="material-symbols-outlined text-[18px]">add_box</span>
+                      {isAr ? 'إضافة منتج جديد' : 'Add New Product'}
+                    </button>
+                  </>
+                )}
+                {(user.role === 'superadmin' || user.role === 'admin') && (
+                  <>
+                    <div className="h-px w-full bg-gray-100 my-1"></div>
+                    <button onClick={() => { setActiveTab('admin'); setIsCreateMenuOpen(false); }} className="px-4 py-2.5 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-start text-purple-700">
+                      <span className="material-symbols-outlined text-[18px]">admin_panel_settings</span>
+                      {isAr ? 'لوحة الإدارة المركزية' : 'Admin Dashboard'}
+                    </button>
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -330,9 +355,9 @@ export default function Header() {
                     </button>
                   )}
 
-                  {user?.role === 'superadmin' && (
-                    <button onClick={() => { setActiveTab('admin'); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-start">
-                      <span className="material-symbols-outlined text-[18px]">admin_panel_settings</span> {isAr ? 'لوحة الإدارة' : 'Admin Dashboard'}
+                  {(user?.role === 'superadmin' || user?.role === 'admin') && (
+                    <button onClick={() => { setActiveTab('admin'); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-start text-purple-700">
+                      <span className="material-symbols-outlined text-[18px]">admin_panel_settings</span> {isAr ? 'لوحة الإدارة المركزية' : 'Admin Dashboard'}
                     </button>
                   )}
 
@@ -344,9 +369,11 @@ export default function Header() {
                     <span className="material-symbols-outlined text-[18px]">settings</span> {isAr ? 'الإعدادات' : 'Settings'}
                   </button>
 
-                  <button onClick={() => { setActiveTab('showcase'); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-start text-blue-600 mt-1">
-                    <span className="material-symbols-outlined text-[18px]">visibility</span> {isAr ? 'عرض الشاشات' : 'Screen Index'}
-                  </button>
+                  {(user?.role === 'superadmin' || user?.role === 'admin') && (
+                    <button onClick={() => { setActiveTab('showcase'); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-start text-blue-600 mt-1">
+                      <span className="material-symbols-outlined text-[18px]">visibility</span> {isAr ? 'عرض الشاشات' : 'Screen Index'}
+                    </button>
+                  )}
 
                   <button onClick={async () => { await AuthService.signOut(); setUser(null); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-start text-red-600 mt-1 border-t border-gray-50 pt-2">
                     <span className="material-symbols-outlined text-[18px]">logout</span> {isAr ? 'تسجيل الخروج' : 'Sign Out'}

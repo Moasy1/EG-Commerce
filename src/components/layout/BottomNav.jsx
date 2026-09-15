@@ -2,7 +2,7 @@ import React from 'react';
 import { useApp } from '../../context/AppContext';
 
 export default function BottomNav() {
-  const { activeTab, setActiveTab, totalCartCount, language, user } = useApp();
+  const { activeTab, setActiveTab, totalCartCount, language, user, setIsAuthModalOpen } = useApp();
   const isAr = language === 'ar';
 
   return (
@@ -58,7 +58,19 @@ export default function BottomNav() {
         {/* 3. Center Red (+) Button */}
         <div className="flex-1 flex items-center justify-center">
           <button
-            onClick={() => setActiveTab('studio')}
+            onClick={() => {
+              if (!user) {
+                setIsAuthModalOpen(true);
+                return;
+              }
+              if (user.role === 'merchant') {
+                setActiveTab('dashboard');
+              } else if (user.role === 'creator' || user.role === 'superadmin' || user.role === 'admin') {
+                setActiveTab('studio');
+              } else {
+                setActiveTab('profile');
+              }
+            }}
             aria-label={isAr ? 'إنشاء محتوى أو منتج' : 'Create'}
             className="w-11 h-11 -mt-2 rounded-full bg-[#d00000] text-white flex items-center justify-center shadow-lg shadow-red-500/30 hover:brightness-110 active:scale-90 transition-all duration-150"
             title={isAr ? 'إنشاء' : 'Create'}

@@ -707,12 +707,110 @@ export function detectSubdomain() {
   return { isSubdomain: false, merchantSlug: null, merchantId: 'm-01' };
 }
 
+export function parseRouteFromLocation(pathname, search, isSubdomain) {
+  if (typeof window === 'undefined') return { tab: isSubdomain ? 'storefront' : 'reels' };
+  const cleanPath = (pathname || '/').replace(/\/+$/, '') || '/';
+  const params = new URLSearchParams(search || '');
+  
+  if (cleanPath === '/' || cleanPath === '') {
+    return {
+      tab: isSubdomain ? 'storefront' : 'reels',
+      productId: params.get('id') || null,
+      categorySlug: null
+    };
+  }
+
+  if (cleanPath === '/reels') return { tab: 'reels' };
+  if (cleanPath === '/shop' || cleanPath === '/marketplace') return { tab: 'shop' };
+  if (cleanPath === '/cart') return { tab: 'cart' };
+  if (cleanPath === '/checkout') return { tab: 'checkout' };
+  if (cleanPath === '/tracking') return { tab: 'tracking' };
+  if (cleanPath === '/rewards') return { tab: 'rewards' };
+  if (cleanPath === '/studio' || cleanPath === '/creator') return { tab: 'studio' };
+  if (cleanPath === '/dashboard' || cleanPath === '/merchant') return { tab: 'dashboard' };
+  if (cleanPath === '/add-product' || cleanPath === '/add_product') return { tab: 'add_product' };
+  if (cleanPath === '/admin' || cleanPath === '/superadmin') return { tab: 'admin' };
+  if (cleanPath === '/delivery') return { tab: 'delivery' };
+  if (cleanPath === '/settings') return { tab: 'settings' };
+  if (cleanPath === '/profile') return { tab: 'profile' };
+  if (cleanPath === '/showcase') return { tab: 'showcase' };
+  if (cleanPath === '/storefront' || cleanPath.startsWith('/store')) return { tab: 'storefront' };
+
+  if (cleanPath.startsWith('/product/')) {
+    const id = cleanPath.replace('/product/', '').trim();
+    return { tab: 'product', productId: id };
+  }
+
+  if (cleanPath.startsWith('/category/')) {
+    const slug = cleanPath.replace('/category/', '').trim();
+    return { tab: 'category', categorySlug: slug };
+  }
+
+  return { tab: isSubdomain ? 'storefront' : 'reels' };
+}
+
+export function getPathForTab(tab, { product, category, isSubdomain } = {}) {
+  switch (tab) {
+    case 'reels':
+      return isSubdomain ? '/' : '/reels';
+    case 'shop':
+    case 'marketplace':
+      return '/shop';
+    case 'category':
+      return category?.slug ? `/category/${category.slug}` : '/category';
+    case 'product':
+      return product?.id ? `/product/${product.id}` : '/product';
+    case 'cart':
+      return '/cart';
+    case 'checkout':
+      return '/checkout';
+    case 'tracking':
+      return '/tracking';
+    case 'rewards':
+      return '/rewards';
+    case 'studio':
+    case 'creator':
+      return '/studio';
+    case 'dashboard':
+    case 'merchant':
+      return '/dashboard';
+    case 'add_product':
+    case 'add-product':
+      return '/add-product';
+    case 'admin':
+    case 'superadmin':
+      return '/admin';
+    case 'delivery':
+      return '/delivery';
+    case 'settings':
+      return '/settings';
+    case 'profile':
+      return '/profile';
+    case 'showcase':
+      return '/showcase';
+    case 'storefront':
+      return '/';
+    default:
+      return isSubdomain ? '/' : '/';
+  }
+}
+
 export function AppProvider({ children }) {
   const initialSubdomain = detectSubdomain();
+  const initialRoute = typeof window !== 'undefined'
+    ? parseRouteFromLocation(window.location.pathname, window.location.search, initialSubdomain.isSubdomain)
+    : { tab: initialSubdomain.isSubdomain ? 'storefront' : 'reels' };
+
   const [isSubdomainMode, setIsSubdomainMode] = useState(initialSubdomain.isSubdomain);
-  const [activeTab, setActiveTab] = useState(() => initialSubdomain.isSubdomain ? 'storefront' : 'reels');
+  const [activeTab, setActiveTabState] = useState(() => initialRoute.tab);
   const [products, setProducts] = useState(INITIAL_PRODUCTS);
-  const [selectedProduct, setSelectedProduct] = useState(INITIAL_PRODUCTS[0]);
+  const [selectedProduct, setSelectedProduct] = useState(() => {
+    if (initialRoute.productId) {
+      const match = INITIAL_PRODUCTS.find(p => p.id === initialRoute.productId);
+      if (match) return match;
+    }
+    return INITIAL_PRODUCTS[0];
+  });
   const [merchants, setMerchants] = useState(MERCHANTS_DATA);
   const [selectedMerchantId, setSelectedMerchantId] = useState(() => initialSubdomain.merchantId);
   const [orders, setOrders] = useState(INITIAL_ORDERS);
@@ -721,6 +819,30 @@ export function AppProvider({ children }) {
   const [language, setLanguage] = useState('ar'); // 'ar' | 'en'
   const [user, setUser] = useState(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
+  // URL-synchronized navigation function
+  const setActiveTab = (tab, options = {}) => {
+    setActiveTabState(tab);
+    
+    if (typeof window === 'undefined') return;
+
+    const prod = options.product || selectedProduct;
+    const cat = options.category || selectedCategory;
+    const newPath = getPathForTab(tab, { product: prod, category: cat, isSubdomain: isSubdomainMode });
+
+    // Preserve existing query params like subdomain=talieska or store=talieska
+    const currentParams = new URLSearchParams(window.location.search);
+    const searchString = currentParams.toString();
+    const targetUrl = searchString ? `${newPath}?${searchString}` : newPath;
+
+    if (window.location.pathname !== newPath || options.forceUrl) {
+      if (options.replace) {
+        window.history.replaceState({ tab, productId: prod?.id, categorySlug: cat?.slug }, '', targetUrl);
+      } else {
+        window.history.pushState({ tab, productId: prod?.id, categorySlug: cat?.slug }, '', targetUrl);
+      }
+    }
+  };
 
   useEffect(() => {
     const loadData = async () => {
@@ -754,9 +876,31 @@ export function AppProvider({ children }) {
       if (detected.merchantId) {
         setSelectedMerchantId(detected.merchantId);
       }
-      setActiveTab(prev => (prev === 'reels' ? 'storefront' : prev));
     }
   }, [merchants]);
+
+  // Handle Browser Back / Forward buttons (popstate)
+  useEffect(() => {
+    const handlePopState = () => {
+      const route = parseRouteFromLocation(
+        window.location.pathname,
+        window.location.search,
+        isSubdomainMode
+      );
+      setActiveTabState(route.tab);
+      if (route.productId) {
+        const found = products.find(p => p.id === route.productId);
+        if (found) setSelectedProduct(found);
+      }
+      if (route.categorySlug) {
+        const foundCat = ProductService.getCategoryBySlug(route.categorySlug);
+        if (foundCat) setSelectedCategory(foundCat);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [isSubdomainMode, products]);
 
   const updateProductSyndication = (productId) => {
     setProducts(prev => prev.map(p => 
@@ -862,13 +1006,13 @@ export function AppProvider({ children }) {
       if (found) catObj = { ...found, ...categoryOrSlug };
     }
     setSelectedCategory(catObj);
-    setActiveTab('category');
+    setActiveTab('category', { category: catObj });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const openProductDetail = (product) => {
     setSelectedProduct(product);
-    setActiveTab('product');
+    setActiveTab('product', { product });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 

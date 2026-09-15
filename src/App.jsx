@@ -25,62 +25,6 @@ import DeliveryDashboard from './pages/DeliveryDashboard';
 import Settings from './pages/Settings';
 import AuthModal from './components/AuthModal';
 
-function MainContent() {
-  const { activeTab, setActiveTab, language, isSubdomainMode } = useApp();
-
-  useEffect(() => {
-    window.__resetToReels = () => {
-      if (isSubdomainMode) {
-        setActiveTab('storefront');
-      } else {
-        setActiveTab('reels');
-      }
-    };
-    return () => {
-      delete window.__resetToReels;
-    };
-  }, [setActiveTab, isSubdomainMode]);
-
-  // 1. PURE SHOPIFY-STYLE SUBDOMAIN BOUTIQUE MODE
-  // When accessed via subdomain (e.g. talieska.egyptian-commerce.com or ?subdomain=talieska)
-  // We ONLY render the merchant's isolated boutique, its cart, checkout, and product details.
-  // NO platform Header, NO bottom discovery navigation!
-  if (isSubdomainMode) {
-    const renderSubdomainScreen = () => {
-      switch (activeTab) {
-        case 'product':
-          return <ProductDetail />;
-        case 'cart':
-          return <UnifiedCart />;
-        case 'checkout':
-          return <Checkout />;
-        case 'tracking':
-          return <OrderTracking />;
-        case 'storefront':
-        default:
-          return <MerchantStorefront />;
-      }
-    };
-
-    return (
-      <div 
-        dir={language === 'ar' ? 'rtl' : 'ltr'} 
-        className="min-h-screen bg-[#080808] text-white flex flex-col relative font-sans"
-      >
-        <main className="flex-1 flex flex-col w-full min-h-0">
-          <div key={activeTab} className="w-full flex-1 flex flex-col animate-page-enter">
-            <ErrorBoundary key={activeTab} onReset={() => setActiveTab('storefront')}>
-              {renderSubdomainScreen()}
-            </ErrorBoundary>
-          </div>
-        </main>
-
-        <AuthModal />
-        <QuickBuyDrawer />
-      </div>
-    );
-  }
-
 function ProtectedRoute({ requiredRole, title, description, children }) {
   const { user, setIsAuthModalOpen, language, setActiveTab } = useApp();
   const isAr = language === 'ar';
@@ -158,6 +102,62 @@ function ProtectedRoute({ requiredRole, title, description, children }) {
 
   return children;
 }
+
+function MainContent() {
+  const { activeTab, setActiveTab, language, isSubdomainMode } = useApp();
+
+  useEffect(() => {
+    window.__resetToReels = () => {
+      if (isSubdomainMode) {
+        setActiveTab('storefront');
+      } else {
+        setActiveTab('reels');
+      }
+    };
+    return () => {
+      delete window.__resetToReels;
+    };
+  }, [setActiveTab, isSubdomainMode]);
+
+  // 1. PURE SHOPIFY-STYLE SUBDOMAIN BOUTIQUE MODE
+  // When accessed via subdomain (e.g. talieska.egyptian-commerce.com or ?subdomain=talieska)
+  // We ONLY render the merchant's isolated boutique, its cart, checkout, and product details.
+  // NO platform Header, NO bottom discovery navigation!
+  if (isSubdomainMode) {
+    const renderSubdomainScreen = () => {
+      switch (activeTab) {
+        case 'product':
+          return <ProductDetail />;
+        case 'cart':
+          return <UnifiedCart />;
+        case 'checkout':
+          return <Checkout />;
+        case 'tracking':
+          return <OrderTracking />;
+        case 'storefront':
+        default:
+          return <MerchantStorefront />;
+      }
+    };
+
+    return (
+      <div 
+        dir={language === 'ar' ? 'rtl' : 'ltr'} 
+        className="min-h-screen bg-[#080808] text-white flex flex-col relative font-sans"
+      >
+        <main className="flex-1 flex flex-col w-full min-h-0">
+          <div key={activeTab} className="w-full flex-1 flex flex-col animate-page-enter">
+            <ErrorBoundary key={activeTab} onReset={() => setActiveTab('storefront')}>
+              {renderSubdomainScreen()}
+            </ErrorBoundary>
+          </div>
+        </main>
+
+        <AuthModal />
+        <QuickBuyDrawer />
+      </div>
+    );
+  }
 
   // 2. MAIN PLATFORM MODE (egyptian-commerce.com - Reels, Hub, Discovery, Studio)
   const renderActiveScreen = () => {

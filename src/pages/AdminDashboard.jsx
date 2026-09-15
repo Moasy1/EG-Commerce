@@ -3,7 +3,8 @@ import { useApp } from '../context/AppContext';
 import { AdminService } from '../services/AdminService';
 
 export default function AdminDashboard() {
-  const { isAr, user } = useApp();
+  const { language, user, setIsAuthModalOpen } = useApp();
+  const isAr = language === 'ar';
   const [activeTab, setActiveTab] = useState('overview');
   const [stats, setStats] = useState(null);
   const [users, setUsers] = useState([]);
@@ -11,13 +12,13 @@ export default function AdminDashboard() {
   const [editingUser, setEditingUser] = useState(null);
   
   const chartData = [
-    { name: 'Mon', GMV: 12000 },
-    { name: 'Tue', GMV: 19000 },
-    { name: 'Wed', GMV: 15000 },
-    { name: 'Thu', GMV: 22000 },
-    { name: 'Fri', GMV: 28000 },
-    { name: 'Sat', GMV: 34000 },
-    { name: 'Sun', GMV: 24000 },
+    { name: 'Mon', labelAr: 'الإثنين', GMV: 12000 },
+    { name: 'Tue', labelAr: 'الثلاثاء', GMV: 19000 },
+    { name: 'Wed', labelAr: 'الأربعاء', GMV: 15000 },
+    { name: 'Thu', labelAr: 'الخميس', GMV: 22000 },
+    { name: 'Fri', labelAr: 'الجمعة', GMV: 28000 },
+    { name: 'Sat', labelAr: 'السبت', GMV: 34000 },
+    { name: 'Sun', labelAr: 'الأحد', GMV: 24000 },
   ];
 
   useEffect(() => {
@@ -74,67 +75,140 @@ export default function AdminDashboard() {
           <h1 className="font-serif text-2xl font-black">{isAr ? 'لوحة تحكم المنصة (Admin)' : 'Platform Admin Dashboard'}</h1>
           <p className="text-xs text-gray-500 mt-1">{isAr ? 'إدارة المستخدمين وعمولات المنصة' : 'Manage users and platform commissions'}</p>
         </div>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex items-center gap-2 mb-6 border-b border-gray-100 pb-2 overflow-x-auto hide-scrollbar">
-        {[
-          { id: 'overview', icon: 'monitoring', label: isAr ? 'نظرة عامة' : 'Overview' },
-          { id: 'users', icon: 'group', label: isAr ? 'المستخدمين' : 'Users' },
-          { id: 'commissions', icon: 'account_balance', label: isAr ? 'العمولات والمدفوعات' : 'Commissions & Payouts' }
-        ].map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-all ${
-              activeTab === tab.id ? 'bg-slate-900 text-white shadow-sm' : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
-            }`}
+        <div className="flex bg-gray-100 p-1 rounded-xl">
+          <button 
+            onClick={() => setActiveTab('overview')}
+            className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${activeTab === 'overview' ? 'bg-white text-slate-900 shadow-sm' : 'text-gray-500 hover:text-slate-900'}`}
           >
-            <span className="material-symbols-outlined text-[18px]">{tab.icon}</span>
-            {tab.label}
+            {isAr ? 'نظرة عامة' : 'Overview'}
           </button>
-        ))}
+          <button 
+            onClick={() => setActiveTab('users')}
+            className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${activeTab === 'users' ? 'bg-white text-slate-900 shadow-sm' : 'text-gray-500 hover:text-slate-900'}`}
+          >
+            {isAr ? 'المستخدمين' : 'Users'}
+          </button>
+        </div>
       </div>
 
-      {/* Tab Content */}
       {activeTab === 'overview' && (
         <div className="space-y-6">
-          {/* Top Stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col">
-              <span className="text-xs font-bold text-gray-500 mb-1">{isAr ? 'إجمالي المبيعات' : 'Total Platform GMV'}</span>
-              <span className="text-2xl font-black text-slate-900">{stats?.totalRevenue.toLocaleString()} ج.م</span>
-              <span className="text-[10px] text-emerald-600 font-bold mt-2 bg-emerald-50 px-2 py-0.5 rounded w-fit">+14.2% vs last month</span>
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+              <div className="w-8 h-8 rounded-lg bg-red-50 text-[#d00000] flex items-center justify-center mb-3">
+                <span className="material-symbols-outlined text-[18px]">payments</span>
+              </div>
+              <span className="text-xs text-gray-400 font-medium block">{isAr ? 'إجمالي المبيعات (GMV)' : 'Total GMV'}</span>
+              <span className="text-xl font-bold font-mono text-slate-900 mt-1 block">
+                {stats?.totalGMV?.toLocaleString()} <span className="text-xs font-normal">ج.م</span>
+              </span>
             </div>
-            <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col">
-              <span className="text-xs font-bold text-gray-500 mb-1">{isAr ? 'عمولة المنصة (12%)' : 'Platform Revenue'}</span>
-              <span className="text-2xl font-black text-emerald-600">{stats?.platformCommission.toLocaleString()} ج.م</span>
+
+            <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+              <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3">
+                <span className="material-symbols-outlined text-[18px]">account_balance_wallet</span>
+              </div>
+              <span className="text-xs text-gray-400 font-medium block">{isAr ? 'أرباح المنصة (عمولات)' : 'Platform Revenue'}</span>
+              <span className="text-xl font-bold font-mono text-emerald-600 mt-1 block">
+                {stats?.platformRevenue?.toLocaleString()} <span className="text-xs font-normal">ج.م</span>
+              </span>
             </div>
-            <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col">
-              <span className="text-xs font-bold text-gray-500 mb-1">{isAr ? 'إجمالي الطلبات' : 'Total Orders'}</span>
-              <span className="text-2xl font-black text-slate-900">{stats?.totalOrders}</span>
+
+            <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+              <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mb-3">
+                <span className="material-symbols-outlined text-[18px]">shopping_bag</span>
+              </div>
+              <span className="text-xs text-gray-400 font-medium block">{isAr ? 'إجمالي الطلبات' : 'Total Orders'}</span>
+              <span className="text-xl font-bold font-mono text-slate-900 mt-1 block">{stats?.totalOrders}</span>
             </div>
-            <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col">
-              <span className="text-xs font-bold text-gray-500 mb-1">{isAr ? 'التجار النشطين' : 'Active Merchants'}</span>
-              <span className="text-2xl font-black text-slate-900">{stats?.activeMerchants}</span>
+
+            <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+              <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center mb-3">
+                <span className="material-symbols-outlined text-[18px]">group</span>
+              </div>
+              <span className="text-xs text-gray-400 font-medium block">{isAr ? 'المستخدمين النشطين' : 'Active Users'}</span>
+              <span className="text-xl font-bold font-mono text-slate-900 mt-1 block">{stats?.activeUsers}</span>
             </div>
           </div>
 
-          {/* Chart Section */}
+          {/* Pure SVG Responsive GMV Chart */}
           <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mt-6">
-            <h3 className="font-bold text-slate-900 mb-6">{isAr ? 'حجم المعاملات (أخر 7 أيام)' : 'GMV Trend (Last 7 Days)'}</h3>
-            <div className="h-64 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} />
-                  <YAxis axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} width={60} />
-                  <Tooltip 
-                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="font-bold text-slate-900">{isAr ? 'حجم المعاملات الأسبوعي (GMV)' : 'Weekly GMV Trend (Last 7 Days)'}</h3>
+                <span className="text-xs text-gray-400 font-mono">154,000 ج.م إجمالي الأسبوع • نمو +18.4%</span>
+              </div>
+              <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100 text-xs font-bold font-mono">
+                مباشر ✓ Live
+              </span>
+            </div>
+
+            {/* Custom Interactive SVG Chart */}
+            <div className="w-full overflow-x-auto">
+              <div className="min-w-[640px] h-64 relative flex flex-col justify-between pt-4 pb-2">
+                {/* SVG Visual Graphic */}
+                <svg className="w-full h-44 overflow-visible" viewBox="0 0 700 160" preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="adminGmvGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#d00000" stopOpacity="0.28" />
+                      <stop offset="100%" stopColor="#d00000" stopOpacity="0.0" />
+                    </linearGradient>
+                  </defs>
+
+                  {/* Horizontal Gridlines */}
+                  <line x1="0" y1="20" x2="700" y2="20" stroke="#f1f5f9" strokeDasharray="4 4" />
+                  <line x1="0" y1="60" x2="700" y2="60" stroke="#f1f5f9" strokeDasharray="4 4" />
+                  <line x1="0" y1="100" x2="700" y2="100" stroke="#f1f5f9" strokeDasharray="4 4" />
+                  <line x1="0" y1="140" x2="700" y2="140" stroke="#e2e8f0" />
+
+                  {/* Gradient Area */}
+                  {/* Values mapped: Mon:12k->115, Tue:19k->88, Wed:15k->103, Thu:22k->76, Fri:28k->52, Sat:34k->28, Sun:24k->68 */}
+                  <path
+                    d="M 50 115 C 100 95, 120 90, 150 88 C 180 86, 220 101, 250 103 C 280 105, 320 80, 350 76 C 380 72, 420 56, 450 52 C 480 48, 520 30, 550 28 C 580 26, 620 62, 650 68 L 650 140 L 50 140 Z"
+                    fill="url(#adminGmvGrad)"
                   />
-                  <Line type="monotone" dataKey="GMV" stroke="#d00000" strokeWidth={3} dot={{r: 4, strokeWidth: 2}} activeDot={{r: 6}} />
-                </LineChart>
-              </ResponsiveContainer>
+
+                  {/* Stroke Line */}
+                  <path
+                    d="M 50 115 C 100 95, 120 90, 150 88 C 180 86, 220 101, 250 103 C 280 105, 320 80, 350 76 C 380 72, 420 56, 450 52 C 480 48, 520 30, 550 28 C 580 26, 620 62, 650 68"
+                    fill="none"
+                    stroke="#d00000"
+                    strokeWidth="3.5"
+                    strokeLinecap="round"
+                  />
+
+                  {/* Data Points and Floating Value Pills */}
+                  {[
+                    { cx: 50, cy: 115, val: '12K', label: 'Mon' },
+                    { cx: 150, cy: 88, val: '19K', label: 'Tue' },
+                    { cx: 250, cy: 103, val: '15K', label: 'Wed' },
+                    { cx: 350, cy: 76, val: '22K', label: 'Thu' },
+                    { cx: 450, cy: 52, val: '28K', label: 'Fri' },
+                    { cx: 550, cy: 28, val: '34K', label: 'Sat' },
+                    { cx: 650, cy: 68, val: '24K', label: 'Sun' },
+                  ].map((pt, idx) => (
+                    <g key={idx} className="group cursor-pointer">
+                      <circle cx={pt.cx} cy={pt.cy} r="5" fill="#ffffff" stroke="#d00000" strokeWidth="3" />
+                      {/* Value tag */}
+                      <rect x={pt.cx - 20} y={pt.cy - 24} width="40" height="18" rx="5" fill="#1e293b" />
+                      <text x={pt.cx} y={pt.cy - 12} textAnchor="middle" fill="#ffffff" fontSize="10" fontFamily="monospace" fontWeight="bold">
+                        {pt.val}
+                      </text>
+                    </g>
+                  ))}
+                </svg>
+
+                {/* Day Labels Row */}
+                <div className="grid grid-cols-7 text-center pt-2 border-t border-slate-100 text-xs text-slate-500 font-medium">
+                  {chartData.map((d, i) => (
+                    <div key={i} className="flex flex-col items-center">
+                      <span className="font-bold text-slate-700">{isAr ? d.labelAr : d.name}</span>
+                      <span className="text-[10px] text-gray-400 font-mono">{d.GMV.toLocaleString()} ج.م</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -819,6 +819,18 @@ export function AppProvider({ children }) {
   const [language, setLanguage] = useState('ar'); // 'ar' | 'en'
   const [user, setUser] = useState(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(() => {
+    if (initialRoute.categorySlug) {
+      const match = ProductService.getCategoryBySlug(initialRoute.categorySlug);
+      if (match) return match;
+    }
+    return {
+      id: 'women',
+      slug: 'women',
+      label: 'Women',
+      labelAr: 'أزياء نسائية'
+    };
+  });
 
   // URL-synchronized navigation function
   const setActiveTab = (tab, options = {}) => {
@@ -984,13 +996,6 @@ export function AppProvider({ children }) {
   const [rewardPoints, setRewardPoints] = useState(2450);
   const [pointsRedeemed, setPointsRedeemed] = useState(500);
   const [unreadNotifications, setUnreadNotifications] = useState(2);
-
-  const [selectedCategory, setSelectedCategory] = useState({
-    id: 'women',
-    slug: 'women',
-    label: 'Women',
-    labelAr: 'أزياء نسائية'
-  });
 
   const openCategoryPage = (categoryOrSlug) => {
     let catObj = categoryOrSlug;

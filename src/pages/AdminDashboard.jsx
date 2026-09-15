@@ -18,6 +18,10 @@ export default function AdminDashboard() {
   const [platformOrders, setPlatformOrders] = useState([]);
   const [orderStoreFilter, setOrderStoreFilter] = useState('all');
   const [orderStatusFilter, setOrderStatusFilter] = useState('all');
+  const [orderPaymentFilter, setOrderPaymentFilter] = useState('all');
+  const [orderSearchQuery, setOrderSearchQuery] = useState('');
+  const [orderSortMode, setOrderSortMode] = useState('newest');
+  const [selectedOrderIds, setSelectedOrderIds] = useState([]);
   
   // Filter States
   const [roleFilter, setRoleFilter] = useState('all');
@@ -478,18 +482,25 @@ export default function AdminDashboard() {
             case 'ready_for_pickup':
             case 'pending_cod':
             case 'processing':
-              return { label: 'قيد التجهيز', color: 'bg-amber-50 text-amber-600 border-amber-200' };
+              return { label: isAr ? 'قيد التجهيز' : 'Processing', color: 'bg-amber-50 text-amber-700 border-amber-200', icon: 'inventory_2' };
             case 'in_transit':
-              return { label: 'تم الشحن', color: 'bg-blue-50 text-blue-600 border-blue-200' };
+              return { label: isAr ? 'تم الشحن' : 'In transit', color: 'bg-blue-50 text-blue-700 border-blue-200', icon: 'local_shipping' };
             case 'delivered':
-              return { label: 'مكتمل التوصيل', color: 'bg-emerald-50 text-emerald-600 border-emerald-200' };
+              return { label: isAr ? 'مكتمل التوصيل' : 'Delivered', color: 'bg-emerald-50 text-emerald-700 border-emerald-200', icon: 'check_circle' };
             case 'returned':
-              return { label: 'مرتجع', color: 'bg-red-50 text-red-600 border-red-200' };
+              return { label: isAr ? 'مرتجع' : 'Returned', color: 'bg-red-50 text-red-700 border-red-200', icon: 'assignment_return' };
             default:
-              return { label: status || 'غير محدد', color: 'bg-gray-50 text-gray-600 border-gray-200' };
+              return { label: status || (isAr ? 'غير محدد' : 'Unknown'), color: 'bg-gray-50 text-gray-600 border-gray-200', icon: 'help' };
           }
         };
 
+        const getPaymentLabel = (order) => {
+          if (order.paymentStatus === 'paid') return isAr ? 'مدفوع' : 'Paid';
+          if ((order.paymentMethod || '').toLowerCase().includes('cod') || order.paymentStatus === 'pending_cod') return isAr ? 'دفع عند الاستلام' : 'COD';
+          return isAr ? 'بانتظار الدفع' : 'Pending';
+        };
+
+        const normalizedQuery = orderSearchQuery.trim().toLowerCase();
         const filtered = platformOrders.filter(o => {
           const storeMatch = orderStoreFilter === 'all' || o.merchantId === orderStoreFilter;
           let statusMatch = true;
@@ -497,66 +508,201 @@ export default function AdminDashboard() {
           else if (orderStatusFilter === 'shipped') statusMatch = o.shippingStatus === 'in_transit';
           else if (orderStatusFilter === 'completed') statusMatch = o.shippingStatus === 'delivered';
           else if (orderStatusFilter === 'returned') statusMatch = o.shippingStatus === 'returned';
-          return storeMatch && statusMatch;
+          const paymentMatch = orderPaymentFilter === 'all'
+            || (orderPaymentFilter === 'paid' && o.paymentStatus === 'paid')
+            || (orderPaymentFilter === 'cod' && (o.paymentStatus === 'pending_cod' || (o.paymentMethod || '').toLowerCase().includes('cod')))
+            || (orderPaymentFilter === 'pending' && o.paymentStatus !== 'paid' && o.paymentStatus !== 'pending_cod');
+          const haystack = [
+            o.id,
+            o.merchantName,
+            o.customerName,
+            o.phone,
+            o.productTitle,
+            o.trackingNumber,
+            o.address
+          ].filter(Boolean).join(' ').toLowerCase();
+          const searchMatch = !normalizedQuery || haystack.includes(normalizedQuery);
+          return storeMatch && statusMatch && paymentMatch && searchMatch;
+        }).sort((a, b) => {
+          if (orderSortMode === 'highest') return (b.amount || 0) - (a.amount || 0);
+          if (orderSortMode === 'lowest') return (a.amount || 0) - (b.amount || 0);
+          if (orderSortMode === 'oldest') return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+          return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
         });
 
         const totalGMV = filtered.reduce((sum, o) => sum + (o.amount || 0), 0);
         const platformCommission = Math.round(totalGMV * COMMISSION_RATE);
         const merchantPayout = totalGMV - platformCommission;
+        const pendingCount = filtered.filter(o => ['ready_for_pickup', 'pending_cod', 'processing'].includes(o.shippingStatus)).length;
+        const shippedCount = filtered.filter(o => o.shippingStatus === 'in_transit').length;
+        const paidCount = filtered.filter(o => o.paymentStatus === 'paid').length;
+        const codCount = filtered.filter(o => o.paymentStatus === 'pending_cod' || (o.paymentMethod || '').toLowerCase().includes('cod')).length;
+        const selectedOrders = filtered.filter(o => selectedOrderIds.includes(o.id));
+        const allFilteredSelected = filtered.length > 0 && filtered.every(o => selectedOrderIds.includes(o.id));
 
         const handlePlatformOrderStatusUpdate = (orderId, newStatus) => {
           setPlatformOrders(prev => prev.map(o => o.id === orderId ? { ...o, shippingStatus: newStatus } : o));
           OrderService.updateOrderStatus(orderId, newStatus);
+          showToast(isAr ? 'تم تحديث حالة الطلب' : 'Order status updated');
+        };
+
+        const toggleOrderSelection = (orderId) => {
+          setSelectedOrderIds(prev => prev.includes(orderId)
+            ? prev.filter(id => id !== orderId)
+            : [...prev, orderId]
+          );
+        };
+
+        const toggleAllFilteredOrders = () => {
+          if (allFilteredSelected) {
+            setSelectedOrderIds(prev => prev.filter(id => !filtered.some(o => o.id === id)));
+          } else {
+            setSelectedOrderIds(prev => Array.from(new Set([...prev, ...filtered.map(o => o.id)])));
+          }
+        };
+
+        const handleBulkStatusUpdate = async (newStatus) => {
+          await Promise.all(selectedOrders.map(order => OrderService.updateOrderStatus(order.id, newStatus)));
+          setPlatformOrders(prev => prev.map(order => selectedOrderIds.includes(order.id) ? { ...order, shippingStatus: newStatus } : order));
+          setSelectedOrderIds([]);
+          showToast(isAr ? `تم تحديث ${selectedOrders.length} طلب` : `${selectedOrders.length} orders updated`);
+        };
+
+        const handleRefreshOrders = async () => {
+          const latest = await OrderService.getOrders();
+          setPlatformOrders(latest);
+          setSelectedOrderIds([]);
+          showToast(isAr ? 'تم تحديث الطلبات' : 'Orders refreshed');
+        };
+
+        const copyOrderText = async (order) => {
+          const lines = [
+            `Order: ${order.id}`,
+            `Store: ${order.merchantName || order.merchantId}`,
+            `Customer: ${order.customerName}`,
+            `Phone: ${order.phone}`,
+            `Address: ${order.address}`,
+            `Items: ${order.productTitle}`,
+            `Total: ${order.amount || 0} EGP`,
+            `Tracking: ${order.trackingNumber || '-'}`
+          ];
+          try {
+            await navigator.clipboard.writeText(lines.join('\n'));
+            showToast(isAr ? 'تم نسخ بيانات الطلب' : 'Order details copied');
+          } catch (err) {
+            showToast(isAr ? 'تعذر النسخ من المتصفح' : 'Copy failed in this browser');
+          }
+        };
+
+        const openWhatsApp = (order) => {
+          const phone = (order.phone || '').replace(/[^\d+]/g, '');
+          const message = encodeURIComponent(`مرحباً ${order.customerName || ''}، طلبك ${order.id} حالته: ${getStatusBadge(order.shippingStatus).label}`);
+          window.open(`https://wa.me/${phone.replace(/^\+/, '')}?text=${message}`, '_blank', 'noopener,noreferrer');
+        };
+
+        const printOrder = (order) => {
+          const printable = `
+            <html dir="rtl">
+              <head><title>${order.id}</title><style>body{font-family:Arial,sans-serif;padding:24px;line-height:1.7} h1{font-size:20px}.row{border-bottom:1px solid #eee;padding:8px 0}.label{color:#666;font-size:12px}.value{font-weight:700}</style></head>
+              <body>
+                <h1>فاتورة / بوليصة طلب ${order.id}</h1>
+                <div class="row"><div class="label">المتجر</div><div class="value">${order.merchantName || order.merchantId || ''}</div></div>
+                <div class="row"><div class="label">العميل</div><div class="value">${order.customerName || ''}</div></div>
+                <div class="row"><div class="label">الهاتف</div><div class="value">${order.phone || ''}</div></div>
+                <div class="row"><div class="label">العنوان</div><div class="value">${order.address || ''}</div></div>
+                <div class="row"><div class="label">المنتجات</div><div class="value">${order.productTitle || ''}</div></div>
+                <div class="row"><div class="label">الإجمالي</div><div class="value">${(order.amount || 0).toLocaleString()} ج.م</div></div>
+                <div class="row"><div class="label">التتبع</div><div class="value">${order.trackingNumber || ''}</div></div>
+              </body>
+            </html>
+          `;
+          const printWindow = window.open('', '_blank');
+          if (!printWindow) return;
+          printWindow.document.write(printable);
+          printWindow.document.close();
+          printWindow.print();
         };
 
         return (
           <div className="space-y-4">
             {/* Summary KPIs */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+            <div className="grid grid-cols-2 xl:grid-cols-6 gap-3">
+              <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
                 <div className="w-7 h-7 rounded-lg bg-red-50 text-[#d00000] flex items-center justify-center mb-2">
                   <span className="material-symbols-outlined text-[16px]">receipt_long</span>
                 </div>
                 <span className="text-[11px] text-gray-400 font-medium block">{isAr ? 'إجمالي الطلبات المعروضة' : 'Filtered Orders'}</span>
                 <span className="text-lg font-bold font-mono text-slate-900 block">{filtered.length} <span className="text-xs font-normal">طلب</span></span>
               </div>
-              <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+              <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
                 <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center mb-2">
                   <span className="material-symbols-outlined text-[16px]">payments</span>
                 </div>
                 <span className="text-[11px] text-gray-400 font-medium block">{isAr ? 'إجمالي المعاملات (GMV)' : 'Total GMV'}</span>
                 <span className="text-lg font-bold font-mono text-slate-900 block">{totalGMV.toLocaleString()} <span className="text-xs font-normal">ج.م</span></span>
               </div>
-              <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+              <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
                 <div className="w-7 h-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center mb-2">
                   <span className="material-symbols-outlined text-[16px]">account_balance_wallet</span>
                 </div>
                 <span className="text-[11px] text-gray-400 font-medium block">{isAr ? `عمولة المنصة (${COMMISSION_RATE * 100}%)` : `Commission (${COMMISSION_RATE * 100}%)`}</span>
                 <span className="text-lg font-bold font-mono text-purple-600 block">{platformCommission.toLocaleString()} <span className="text-xs font-normal">ج.م</span></span>
               </div>
-              <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+              <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
                 <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mb-2">
                   <span className="material-symbols-outlined text-[16px]">storefront</span>
                 </div>
                 <span className="text-[11px] text-gray-400 font-medium block">{isAr ? 'صافي مستحقات التجار' : 'Merchant Payout'}</span>
                 <span className="text-lg font-bold font-mono text-blue-600 block">{merchantPayout.toLocaleString()} <span className="text-xs font-normal">ج.م</span></span>
               </div>
+              <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                <div className="w-7 h-7 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center mb-2">
+                  <span className="material-symbols-outlined text-[16px]">pending_actions</span>
+                </div>
+                <span className="text-[11px] text-gray-400 font-medium block">{isAr ? 'بانتظار التجهيز' : 'Needs Action'}</span>
+                <span className="text-lg font-bold font-mono text-amber-700 block">{pendingCount}</span>
+              </div>
+              <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                <div className="w-7 h-7 rounded-lg bg-sky-50 text-sky-700 flex items-center justify-center mb-2">
+                  <span className="material-symbols-outlined text-[16px]">route</span>
+                </div>
+                <span className="text-[11px] text-gray-400 font-medium block">{isAr ? 'في الشحن / مدفوع' : 'Transit / Paid'}</span>
+                <span className="text-lg font-bold font-mono text-sky-700 block">{shippedCount} / {paidCount}</span>
+              </div>
             </div>
 
             {/* Filters & Table */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden p-4 space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-gray-100">
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden p-4 space-y-4">
+              <div className="flex flex-wrap items-start justify-between gap-3 pb-3 border-b border-gray-100">
                 <div>
                   <h3 className="font-bold text-slate-900">{isAr ? 'الطلبات والمبيعات المركزية (Platform Orders & Sync)' : 'Central Platform Orders'}</h3>
                   <p className="text-xs text-gray-500 mt-0.5">
                     {isAr ? 'جميع الطلبات عبر كل المتاجر مع حساب العمولات والتوزيع' : 'All orders across all stores with commission split and sync status'}
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <button
+                  onClick={handleRefreshOrders}
+                  className="h-9 px-3 rounded-lg bg-slate-900 text-white text-xs font-bold flex items-center gap-1.5"
+                >
+                  <span className="material-symbols-outlined text-[16px]">refresh</span>
+                  <span>{isAr ? 'تحديث' : 'Refresh'}</span>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-2">
+                <label className="xl:col-span-2 h-10 flex items-center gap-2 px-3 rounded-lg border border-gray-200 bg-gray-50 text-xs">
+                  <span className="material-symbols-outlined text-[17px] text-gray-400">search</span>
+                  <input
+                    value={orderSearchQuery}
+                    onChange={e => setOrderSearchQuery(e.target.value)}
+                    placeholder={isAr ? 'ابحث برقم الطلب، العميل، الهاتف، التتبع...' : 'Search order, customer, phone, tracking...'}
+                    className="w-full bg-transparent outline-none text-slate-700"
+                  />
+                </label>
                   <select
                     value={orderStoreFilter}
                     onChange={e => setOrderStoreFilter(e.target.value)}
-                    className="px-3 py-1.5 rounded-xl border border-gray-200 bg-gray-50 text-xs font-bold text-gray-700 cursor-pointer focus:outline-none"
+                  className="h-10 px-3 rounded-lg border border-gray-200 bg-gray-50 text-xs font-bold text-gray-700 cursor-pointer focus:outline-none"
                   >
                     <option value="all">{isAr ? 'كل المتاجر' : 'All Stores'}</option>
                     <option value="m-01">Talieska Studio</option>
@@ -566,7 +712,7 @@ export default function AdminDashboard() {
                   <select
                     value={orderStatusFilter}
                     onChange={e => setOrderStatusFilter(e.target.value)}
-                    className="px-3 py-1.5 rounded-xl border border-gray-200 bg-gray-50 text-xs font-bold text-gray-700 cursor-pointer focus:outline-none"
+                  className="h-10 px-3 rounded-lg border border-gray-200 bg-gray-50 text-xs font-bold text-gray-700 cursor-pointer focus:outline-none"
                   >
                     <option value="all">{isAr ? 'كل الحالات' : 'All Statuses'}</option>
                     <option value="pending">{isAr ? 'قيد التجهيز' : 'Pending'}</option>
@@ -574,6 +720,51 @@ export default function AdminDashboard() {
                     <option value="completed">{isAr ? 'مكتمل التوصيل' : 'Delivered'}</option>
                     <option value="returned">{isAr ? 'مرتجع' : 'Returned'}</option>
                   </select>
+                <select
+                  value={orderPaymentFilter}
+                  onChange={e => setOrderPaymentFilter(e.target.value)}
+                  className="h-10 px-3 rounded-lg border border-gray-200 bg-gray-50 text-xs font-bold text-gray-700 cursor-pointer focus:outline-none"
+                >
+                  <option value="all">{isAr ? 'كل طرق الدفع' : 'All Payments'}</option>
+                  <option value="paid">{isAr ? 'مدفوع مسبقاً' : 'Paid'}</option>
+                  <option value="cod">{isAr ? 'الدفع عند الاستلام' : 'COD'}</option>
+                  <option value="pending">{isAr ? 'بانتظار الدفع' : 'Pending'}</option>
+                </select>
+                <select
+                  value={orderSortMode}
+                  onChange={e => setOrderSortMode(e.target.value)}
+                  className="h-10 px-3 rounded-lg border border-gray-200 bg-gray-50 text-xs font-bold text-gray-700 cursor-pointer focus:outline-none"
+                >
+                  <option value="newest">{isAr ? 'الأحدث أولاً' : 'Newest first'}</option>
+                  <option value="oldest">{isAr ? 'الأقدم أولاً' : 'Oldest first'}</option>
+                  <option value="highest">{isAr ? 'الأعلى قيمة' : 'Highest value'}</option>
+                  <option value="lowest">{isAr ? 'الأقل قيمة' : 'Lowest value'}</option>
+                </select>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-slate-50 border border-slate-100 px-3 py-2 text-xs">
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={toggleAllFilteredOrders}
+                    className="h-8 px-3 rounded-lg bg-white border border-gray-200 text-slate-700 font-bold flex items-center gap-1.5"
+                  >
+                    <span className="material-symbols-outlined text-[15px]">{allFilteredSelected ? 'check_box' : 'check_box_outline_blank'}</span>
+                    <span>{allFilteredSelected ? (isAr ? 'إلغاء تحديد الكل' : 'Clear all') : (isAr ? 'تحديد الكل' : 'Select all')}</span>
+                  </button>
+                  <span className="text-gray-500 font-semibold">{selectedOrders.length} {isAr ? 'محدد' : 'selected'}</span>
+                  <span className="text-gray-300">|</span>
+                  <span className="text-gray-500">{isAr ? 'COD' : 'COD'}: <strong className="text-amber-700">{codCount}</strong></span>
+                  <span className="text-gray-500">{isAr ? 'مدفوع' : 'Paid'}: <strong className="text-emerald-700">{paidCount}</strong></span>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button disabled={selectedOrders.length === 0} onClick={() => handleBulkStatusUpdate('in_transit')} className="h-8 px-3 rounded-lg bg-blue-600 text-white font-bold disabled:opacity-40 flex items-center gap-1">
+                    <span className="material-symbols-outlined text-[15px]">local_shipping</span>
+                    <span>{isAr ? 'شحن المحدد' : 'Ship selected'}</span>
+                  </button>
+                  <button disabled={selectedOrders.length === 0} onClick={() => handleBulkStatusUpdate('delivered')} className="h-8 px-3 rounded-lg bg-emerald-600 text-white font-bold disabled:opacity-40 flex items-center gap-1">
+                    <span className="material-symbols-outlined text-[15px]">check_circle</span>
+                    <span>{isAr ? 'تسليم المحدد' : 'Deliver selected'}</span>
+                  </button>
                 </div>
               </div>
 
@@ -583,10 +774,76 @@ export default function AdminDashboard() {
                   <p className="text-sm font-bold">{isAr ? 'لا توجد طلبات بهذه المعايير' : 'No orders match the selected filters'}</p>
                 </div>
               ) : (
-                <div className="overflow-x-auto">
+                <>
+                <div className="lg:hidden space-y-3">
+                  {filtered.map(o => {
+                    const badge = getStatusBadge(o.shippingStatus);
+                    const commission = Math.round((o.amount || 0) * COMMISSION_RATE);
+                    const payout = (o.amount || 0) - commission;
+                    return (
+                      <div key={o.id} className="rounded-xl border border-gray-200 bg-white p-3 shadow-sm space-y-3">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-start gap-2 min-w-0">
+                            <button onClick={() => toggleOrderSelection(o.id)} className="mt-0.5 text-slate-500">
+                              <span className="material-symbols-outlined text-[19px]">{selectedOrderIds.includes(o.id) ? 'check_box' : 'check_box_outline_blank'}</span>
+                            </button>
+                            <div className="min-w-0">
+                              <p className="font-mono font-black text-slate-900 text-sm">{o.id}</p>
+                              <p className="text-[11px] text-gray-500 truncate">{o.merchantName?.split(' • ')[0] || o.merchantId}</p>
+                            </div>
+                          </div>
+                          <span className={`px-2 py-1 rounded-full text-[10px] font-bold border flex items-center gap-1 shrink-0 ${badge.color}`}>
+                            <span className="material-symbols-outlined text-[13px]">{badge.icon}</span>
+                            {badge.label}
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2 text-xs">
+                          <div className="rounded-lg bg-gray-50 p-2">
+                            <span className="block text-[10px] text-gray-400 font-bold">{isAr ? 'العميل' : 'Customer'}</span>
+                            <span className="block font-bold text-slate-800 truncate">{o.customerName}</span>
+                            <span className="block text-[10px] text-gray-500 font-mono" dir="ltr">{o.phone}</span>
+                          </div>
+                          <div className="rounded-lg bg-gray-50 p-2">
+                            <span className="block text-[10px] text-gray-400 font-bold">{isAr ? 'الإجمالي / الصافي' : 'Total / Payout'}</span>
+                            <span className="block font-mono font-black text-slate-900">{(o.amount || 0).toLocaleString()} ج.م</span>
+                            <span className="block text-[10px] text-gray-500">{payout.toLocaleString()} ج.م</span>
+                          </div>
+                        </div>
+
+                        <p className="text-xs text-slate-700 leading-5 line-clamp-2">{o.productTitle}</p>
+
+                        <div className="flex items-center gap-2">
+                          <select
+                            className="flex-1 h-9 bg-white border border-gray-200 text-slate-700 text-xs rounded-lg px-2 cursor-pointer focus:outline-none"
+                            value={o.shippingStatus}
+                            onChange={e => handlePlatformOrderStatusUpdate(o.id, e.target.value)}
+                          >
+                            <option value="ready_for_pickup">قيد التجهيز</option>
+                            <option value="in_transit">تم الشحن (بوسطة)</option>
+                            <option value="delivered">مكتمل التوصيل</option>
+                            <option value="returned">مرتجع</option>
+                          </select>
+                          <button onClick={() => openWhatsApp(o)} className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
+                            <span className="material-symbols-outlined text-[17px]">chat</span>
+                          </button>
+                          <button onClick={() => copyOrderText(o)} className="w-9 h-9 rounded-lg bg-slate-50 text-slate-700 flex items-center justify-center">
+                            <span className="material-symbols-outlined text-[17px]">content_copy</span>
+                          </button>
+                          <button onClick={() => printOrder(o)} className="w-9 h-9 rounded-lg bg-slate-900 text-white flex items-center justify-center">
+                            <span className="material-symbols-outlined text-[17px]">print</span>
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="hidden lg:block overflow-x-auto">
                   <table className="w-full text-start text-xs">
                     <thead className="bg-gray-50 text-gray-500 uppercase tracking-wider font-bold border-y border-gray-100">
                       <tr>
+                        <th className="px-3 py-3 text-start w-10"></th>
                         <th className="px-3 py-3 text-start">{isAr ? 'رقم الطلب' : 'Order ID'}</th>
                         <th className="px-3 py-3 text-start">{isAr ? 'المتجر' : 'Store'}</th>
                         <th className="px-3 py-3 text-start">{isAr ? 'العميل' : 'Customer'}</th>
@@ -595,6 +852,7 @@ export default function AdminDashboard() {
                         <th className="px-3 py-3 text-start">{isAr ? 'عمولة المنصة' : 'Commission'}</th>
                         <th className="px-3 py-3 text-start">{isAr ? 'الدفع' : 'Payment'}</th>
                         <th className="px-3 py-3 text-start w-36">{isAr ? 'حالة الشحن' : 'Status'}</th>
+                        <th className="px-3 py-3 text-start">{isAr ? 'إجراءات' : 'Actions'}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
@@ -605,8 +863,13 @@ export default function AdminDashboard() {
                         return (
                           <tr key={o.id} className="hover:bg-gray-50/60 transition-colors">
                             <td className="px-3 py-3">
+                              <button onClick={() => toggleOrderSelection(o.id)} className="text-slate-500">
+                                <span className="material-symbols-outlined text-[18px]">{selectedOrderIds.includes(o.id) ? 'check_box' : 'check_box_outline_blank'}</span>
+                              </button>
+                            </td>
+                            <td className="px-3 py-3">
                               <span className="font-bold text-slate-900 block font-mono">{o.id}</span>
-                              <span className="text-[10px] text-gray-400">{o.date}</span>
+                              <span className="text-[10px] text-gray-400">{o.date || new Date(o.createdAt || Date.now()).toLocaleDateString()}</span>
                             </td>
                             <td className="px-3 py-3">
                               <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[10px] font-bold whitespace-nowrap">
@@ -634,13 +897,16 @@ export default function AdminDashboard() {
                               <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold font-mono ${
                                 o.paymentStatus === 'paid' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
                               }`}>
-                                {o.paymentStatus === 'paid' ? '✓ مدفوع' : '○ COD'}
+                                {getPaymentLabel(o)}
                               </span>
                             </td>
                             <td className="px-3 py-3">
                               <div className="flex flex-col gap-1">
                                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border w-fit ${badge.color}`}>
-                                  {badge.label}
+                                  <span className="inline-flex items-center gap-1">
+                                    <span className="material-symbols-outlined text-[13px]">{badge.icon}</span>
+                                    {badge.label}
+                                  </span>
                                 </span>
                                 <select
                                   className="bg-white border border-gray-200 text-slate-700 text-[10px] rounded px-1 py-1 cursor-pointer focus:outline-none w-full shadow-sm"
@@ -654,12 +920,26 @@ export default function AdminDashboard() {
                                 </select>
                               </div>
                             </td>
+                            <td className="px-3 py-3">
+                              <div className="flex items-center gap-1.5">
+                                <button onClick={() => openWhatsApp(o)} className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center" title={isAr ? 'واتساب العميل' : 'WhatsApp customer'}>
+                                  <span className="material-symbols-outlined text-[16px]">chat</span>
+                                </button>
+                                <button onClick={() => copyOrderText(o)} className="w-8 h-8 rounded-lg bg-slate-50 text-slate-700 flex items-center justify-center" title={isAr ? 'نسخ الطلب' : 'Copy order'}>
+                                  <span className="material-symbols-outlined text-[16px]">content_copy</span>
+                                </button>
+                                <button onClick={() => printOrder(o)} className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center" title={isAr ? 'طباعة' : 'Print'}>
+                                  <span className="material-symbols-outlined text-[16px]">print</span>
+                                </button>
+                              </div>
+                            </td>
                           </tr>
                         );
                       })}
                     </tbody>
                   </table>
                 </div>
+                </>
               )}
             </div>
           </div>

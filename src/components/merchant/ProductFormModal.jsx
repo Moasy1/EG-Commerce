@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 
 export default function ProductFormModal({ isOpen, onClose, productToEdit = null }) {
-  const { addProduct, updateProduct, selectedMerchantId, merchants } = useApp();
+  const { addProduct, updateProduct, selectedMerchantId, merchants, user } = useApp();
   const currentMerchant = merchants.find(m => m.id === selectedMerchantId) || merchants[0];
 
   const [activeFormTab, setActiveFormTab] = useState('general'); // 'general' | 'pricing' | 'inventory' | 'syndication'
@@ -89,6 +89,8 @@ export default function ProductFormModal({ isOpen, onClose, productToEdit = null
       title: title.trim(),
       merchant: currentMerchant.name,
       merchantId: currentMerchant.id,
+      merchantSlug: currentMerchant.slug,
+      createdBy: user?.id || null,
       merchantVerified: true,
       price: numPrice,
       originalPrice: numOriginal,

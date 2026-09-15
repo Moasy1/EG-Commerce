@@ -1,6 +1,38 @@
-import { supabase } from '../lib/supabase';
+import { supabase } from '../lib/supabase.js';
 
-// Fallback logic uses localStorage for now to avoid IndexedDB complexity while migrating
+const DEFAULT_SEED_COMMENTS = [
+  {
+    id: 'c-seed-1',
+    userId: 'b0000000-0000-0000-0000-000000000001',
+    userName: 'مريم الشافعي',
+    userAvatar: '/images/reels/reel_1.jpg',
+    userRole: 'buyer',
+    text: 'الكتان باين عليه تحفة وتفصيله يجنن! هل متاح شحن سريع لإسكندرية؟ ❤️',
+    timeAgo: 'منذ ساعتين',
+    likes: 14
+  },
+  {
+    id: 'c-seed-2',
+    userId: 'u-ahmed',
+    userName: 'أحمد سامي',
+    userAvatar: '/images/reels/reel_2.jpg',
+    userRole: 'buyer',
+    text: 'التطريز متقن جداً.. طلبت الأسبوع الماضي واستلمت في 48 ساعة عبر بوسطة 🚀',
+    timeAgo: 'منذ 5 ساعات',
+    likes: 9
+  },
+  {
+    id: 'c-seed-3',
+    userId: 'c0000000-0000-0000-0000-000000000001',
+    userName: 'ياسمين السيد',
+    userAvatar: '/images/reels/reel_2.jpg',
+    userRole: 'creator',
+    text: 'تنسيق رهيب مع الإكسسوارات النحاسية! الخامة باردة ومريحة جداً في الصيف ✨',
+    timeAgo: 'منذ يوم',
+    likes: 31
+  }
+];
+
 export const ReelsService = {
   async getReels() {
     let dbReels = [];
@@ -37,21 +69,21 @@ export const ReelsService = {
       return dbReels;
     }
 
-    // Return empty so DiscoverReels will populate and save fresh DEFAULT_REELS
     return [];
   },
 
   async saveReel(reelData) {
     const formattedReel = {
       id: reelData.id || `reel-${Date.now()}`,
-      creatorHandle: reelData.creatorHandle || '@talieska_official',
-      creatorName: reelData.creatorName || 'Talieska Studio • تاليسكا ستوديو',
-      avatar: reelData.avatar || '/images/products/linen_abaya.jpg',
+      creatorId: reelData.creatorId || reelData.userId || null,
+      creatorHandle: reelData.creatorHandle || '@egyptian_creator',
+      creatorName: reelData.creatorName || 'صانع محتوى مصري',
+      avatar: reelData.avatar || '/images/reels/reel_1.jpg',
       videoBg: reelData.videoBg || reelData.video || '/images/reels/linen_abaya.mp4',
-      caption: reelData.caption || 'إطلالة حصرية جديدة من كولكشن 2026 🇪🇬✨ #موضة_مصرية #ريلز',
-      music: reelData.music || 'Summer Aesthetic Vibes • Instrumental',
+      caption: reelData.caption || 'إطلالة حصرية جديدة متوفرة الآن في egyptian-commerce.com 🇪🇬✨ #موضة_مصرية #ريلز',
+      music: reelData.music || 'Egyptian Aesthetic Vibes • Instrumental',
       likes: reelData.likes || 120,
-      comments: reelData.comments || 8,
+      comments: reelData.comments || 3,
       saves: reelData.saves || 45,
       products: reelData.products || []
     };
@@ -68,7 +100,7 @@ export const ReelsService = {
       console.warn('DB Save Reel skipped (using synchronized local storage):', err.message);
     }
 
-    // 2. Always prepend to local storage at the very top (index 0)
+    // 2. Always prepend to local storage at the very top
     try {
       let local = [];
       const localStr = localStorage.getItem('eg_reels_mock_v3');
@@ -107,14 +139,12 @@ export const ReelsService = {
   },
 
   async updateReel(reelId, updates) {
-    // 1. Update in Supabase
     try {
       await supabase.from('reels').update(updates).eq('id', reelId);
     } catch (err) {
       console.warn('DB update reel skipped/failed:', err.message);
     }
 
-    // 2. Update in local storage
     try {
       const localStr = localStorage.getItem('eg_reels_mock_v3');
       if (localStr) {
@@ -128,6 +158,89 @@ export const ReelsService = {
     return true;
   },
 
+  // ----------------------------------------------------
+  // Interactive Comments Management
+  // ----------------------------------------------------
+  getComments(reelId) {
+    try {
+      const key = `eg_reel_comments_${reelId}`;
+      const stored = localStorage.getItem(key);
+      if (stored) {
+        return JSON.parse(stored);
+      }
+    } catch (e) {
+      console.warn('Failed reading reel comments:', e);
+    }
+    // Return default seed comments for this reel
+    return DEFAULT_SEED_COMMENTS;
+  },
+
+  addComment(reelId, commentPayload) {
+    const key = `eg_reel_comments_${reelId}`;
+    const current = this.getComments(reelId);
+    const newComment = {
+      id: `c-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      reelId,
+      userId: commentPayload.userId || null,
+      userName: commentPayload.userName || 'مستخدم المنصة',
+      userAvatar: commentPayload.userAvatar || '/images/reels/reel_1.jpg',
+      userRole: commentPayload.userRole || 'buyer',
+      text: commentPayload.text.trim(),
+      timeAgo: 'الآن',
+      likes: 0,
+      createdAt: new Date().toISOString()
+    };
+
+    const updated = [newComment, ...current];
+    try {
+      localStorage.setItem(key, JSON.stringify(updated));
+    } catch (e) {
+      console.warn('Failed to save comment to localStorage:', e);
+    }
+
+    // Increment comment count in reel
+    try {
+      const localStr = localStorage.getItem('eg_reels_mock_v3');
+      if (localStr) {
+        const list = JSON.parse(localStr);
+        const newReels = list.map(r => {
+          if (r.id === reelId) {
+            return { ...r, comments: (Number(r.comments) || 0) + 1 };
+          }
+          return r;
+        });
+        localStorage.setItem('eg_reels_mock_v3', JSON.stringify(newReels));
+      }
+    } catch (e) {}
+
+    return newComment;
+  },
+
+  deleteComment(reelId, commentId) {
+    const key = `eg_reel_comments_${reelId}`;
+    const current = this.getComments(reelId);
+    const updated = current.filter(c => c.id !== commentId);
+    try {
+      localStorage.setItem(key, JSON.stringify(updated));
+    } catch (e) {}
+    return updated;
+  },
+
+  likeComment(reelId, commentId) {
+    const key = `eg_reel_comments_${reelId}`;
+    const current = this.getComments(reelId);
+    const updated = current.map(c => {
+      if (c.id === commentId) {
+        return { ...c, likes: (c.likes || 0) + 1 };
+      }
+      return c;
+    });
+    try {
+      localStorage.setItem(key, JSON.stringify(updated));
+    } catch (e) {}
+    return updated;
+  },
+
   async reportReel(reelId, reason, details = '') {
     const reportItem = {
       id: `report-${Date.now()}`,
@@ -137,7 +250,6 @@ export const ReelsService = {
       createdAt: new Date().toISOString()
     };
 
-    // 1. Persist to Supabase reel_reports table if available
     try {
       await supabase.from('reel_reports').insert({
         reel_id: reelId,
@@ -148,7 +260,6 @@ export const ReelsService = {
       console.warn('DB report insert skipped/failed:', err.message);
     }
 
-    // 2. Persist to local storage
     try {
       const existingStr = localStorage.getItem('eg_reel_reports');
       const list = existingStr ? JSON.parse(existingStr) : [];

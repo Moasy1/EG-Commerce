@@ -914,8 +914,8 @@ export default function DesktopSellerDashboard() {
                   <div className="space-y-1">
                     <label className="text-[11px] font-bold text-gray-600">الرابط الفرعي (Subdomain)</label>
                     <div className="flex items-center">
-                      <input type="text" defaultValue={currentMerchant?.subdomain?.replace('.eg-commerce.com', '')} className="flex-1 px-3 py-2 rounded-r-xl border border-gray-200 bg-gray-50 text-xs text-slate-700 focus:border-[#d00000] focus:ring-1 focus:ring-[#d00000] outline-none text-left" dir="ltr" />
-                      <span className="px-3 py-2 bg-gray-100 border border-r-0 border-gray-200 rounded-l-xl text-xs text-gray-500 font-mono" dir="ltr">.eg-commerce.com</span>
+                      <input type="text" defaultValue={currentMerchant?.subdomain?.replace('.egyptian-commerce.com', '').replace('.eg-commerce.com', '')} className="flex-1 px-3 py-2 rounded-r-xl border border-gray-200 bg-gray-50 text-xs text-slate-700 focus:border-[#d00000] focus:ring-1 focus:ring-[#d00000] outline-none text-left" dir="ltr" />
+                      <span className="px-3 py-2 bg-gray-100 border border-r-0 border-gray-200 rounded-l-xl text-xs text-gray-500 font-mono" dir="ltr">.egyptian-commerce.com</span>
                     </div>
                   </div>
 

@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import EgLogo from '../common/EgLogo';
 import { UgcService } from '../../services/UgcService';
+import { ReelsService } from '../../services/ReelsService';
 
 export default function DesktopCreatorAnalytics() {
-  const { setActiveTab, language } = useApp();
+  const { setActiveTab, language, user, role } = useApp();
   const isAr = language === 'ar';
 
   const [activeNav, setActiveNav] = useState('studio'); // 'studio' | 'analytics' | 'campaigns' | 'content' | 'profile' | 'settings'
@@ -109,14 +110,36 @@ export default function DesktopCreatorAnalytics() {
     showToast(isAr ? 'تم إرسال مسودة الريلز لمراجعة البراند! 🎬' : 'Reel draft submitted for brand review!');
   };
 
-  // Handler: Create new reel
+  // Handler: Create new reel linked to profile
   const handleCreateNewReel = async (e) => {
     e.preventDefault();
     if (!newReelForm.title) return;
+
+    const authorName = user?.name || profile?.name || 'ياسمين السيد';
+    const authorHandle = user?.handle || profile?.handle || '@yasmin_style';
+    const authorAvatar = user?.avatar_url || profile?.avatar || '/images/reels/reel_2.jpg';
+
     await UgcService.createContent({
       ...newReelForm,
+      creatorId: user?.id || profile?.id || 'c0000000-0000-0000-0000-000000000001',
+      creatorName: authorName,
+      creatorHandle: authorHandle,
       status: 'published'
     });
+
+    // Also persist in ReelsService so it displays live in Discover Reels feed
+    await ReelsService.saveReel({
+      id: `reel-${Date.now()}`,
+      creatorId: user?.id || null,
+      creatorHandle: authorHandle,
+      creatorName: authorName,
+      avatar: authorAvatar,
+      videoBg: newReelForm.videoUrl || '/images/reels/linen_abaya.mp4',
+      caption: `${newReelForm.title} • تجربة وتنسيق خاص مع ${newReelForm.taggedProduct || 'المنتجات المصرية'} 🇪🇬✨ #موضة_مصرية`,
+      likes: 15,
+      comments: 0
+    });
+
     const updated = await UgcService.getContent();
     setContent(updated);
     setShowNewReelModal(false);

@@ -13,7 +13,7 @@ export const MERCHANTS_DATA = [
     name: 'Talieska Studio • تاليسكا ستوديو',
     shortName: 'Talieska',
     slug: 'talieska',
-    subdomain: 'talieska.eg-commerce.com',
+    subdomain: 'talieska.egyptian-commerce.com',
     customDomain: 'shop.talieskastudio.com',
     customDomainStatus: 'Active (SSL)',
     category: 'Haute Egyptian Linen & Resort Wear',
@@ -82,7 +82,7 @@ export const MERCHANTS_DATA = [
     name: 'Khan El Khalili Craft • ورشة خان الخليلي',
     shortName: 'Khan Craft',
     slug: 'khan-craft',
-    subdomain: 'khan-craft.eg-commerce.com',
+    subdomain: 'khan-craft.egyptian-commerce.com',
     customDomain: 'khancraft-eg.com',
     customDomainStatus: 'Active (SSL)',
     category: 'Handmade Leather & Brass',
@@ -151,7 +151,7 @@ export const MERCHANTS_DATA = [
     name: 'Tiba Jewelry • مجوهرات طيبة',
     shortName: 'Tiba',
     slug: 'tiba-jewelry',
-    subdomain: 'tiba-jewelry.eg-commerce.com',
+    subdomain: 'tiba-jewelry.egyptian-commerce.com',
     customDomain: 'tibajewelry.com',
     customDomainStatus: 'Pending DNS',
     category: 'Gold Plated & Egyptian Heritage Jewelry',
@@ -691,18 +691,34 @@ export function AppProvider({ children }) {
   };
 
   const addProduct = async (newProd) => {
-    // 1. Persist product via ProductService
-    const created = await ProductService.createProduct(newProd);
+    const activeMerchant = merchants.find(m => m.id === selectedMerchantId) || merchants[0];
+    const merchantName = newProd.merchant || activeMerchant?.name || user?.name || 'Talieska Studio • تاليسكا ستوديو';
+    const merchantId = newProd.merchantId || activeMerchant?.id || 'm0000000-0000-0000-0000-000000000001';
 
-    // 2. If product has video, also create a Reel in ReelsService!
+    const enrichedProd = {
+      ...newProd,
+      merchant: merchantName,
+      merchantId: merchantId,
+      createdBy: user?.id || null
+    };
+
+    // 1. Persist product via ProductService
+    const created = await ProductService.createProduct(enrichedProd);
+
+    // 2. If product has video, also create a Reel in ReelsService linked to profile!
     if (newProd.video) {
+      const creatorHandle = newProd.creatorHandle || (user?.role === 'creator' ? `@${(user.name || 'creator').replace(/\s+/g, '_')}` : `@${activeMerchant?.slug || 'talieska'}_official`);
+      const creatorName = newProd.creatorName || user?.name || merchantName;
+      const creatorAvatar = newProd.creatorAvatar || user?.avatar_url || created.image;
+
       await ReelsService.saveReel({
         id: `reel-${created.id}`,
-        creatorHandle: '@talieska_official',
-        creatorName: 'Talieska Studio • تاليسكا ستوديو',
-        avatar: created.image,
+        creatorId: user?.id || null,
+        creatorHandle: creatorHandle,
+        creatorName: creatorName,
+        avatar: creatorAvatar,
         videoBg: newProd.video,
-        caption: `${created.title} • إطلالة جديدة وحصرية متوفرة للطلب الآن! ✨ #موضة_مصرية`,
+        caption: `${created.title} • متوفر حصرياً عبر egyptian-commerce.com 🇪🇬✨ #موضة_مصرية`,
         music: 'Summer Aesthetic Vibes • Instrumental',
         products: [created]
       });

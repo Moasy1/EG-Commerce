@@ -109,7 +109,7 @@ const DEFAULT_SIZE_CHART = [
 ];
 
 export default function AddProductStudio() {
-  const { setActiveTab, addProduct } = useApp();
+  const { setActiveTab, addProduct, user, role, merchants, selectedMerchantId } = useApp();
 
   // Form State
   const [productName, setProductName] = useState('فستان مطرز مصري فاخر');
@@ -485,12 +485,20 @@ export default function AddProductStudio() {
       .filter(Boolean);
     const selectedColorNames = selectedColorObjects.map(c => c.name);
 
+    const activeMerchant = (merchants && merchants.find(m => m.id === selectedMerchantId)) || merchants?.[0];
     const newProdPayload = {
       id: `p-${Date.now()}`,
       sku: `EG-${Date.now().toString().slice(-6)}`,
       title: productName,
       price: Number(price),
       originalPrice: Number(originalPrice) || Math.round(Number(price) * 1.3),
+      merchant: activeMerchant?.name || user?.name || 'Talieska Studio • تاليسكا ستوديو',
+      merchantId: activeMerchant?.id || 'm0000000-0000-0000-0000-000000000001',
+      merchantSlug: activeMerchant?.slug || 'talieska',
+      createdBy: user?.id || null,
+      creatorName: user?.name || activeMerchant?.name || 'مبدع مصري',
+      creatorHandle: user?.role === 'creator' ? `@${(user.name || 'creator').replace(/\s+/g, '_')}` : `@${activeMerchant?.slug || 'talieska'}_official`,
+      creatorAvatar: user?.avatar_url || activeMerchant?.logo || photos[0],
       category: category,
       image: photos[0] || '/images/products/linen_abaya.jpg',
       images: photos,

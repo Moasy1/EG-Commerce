@@ -103,7 +103,7 @@ export default function DiscoverReels() {
     fetchReels();
   }, []);
 
-  const { openQuickBuy, openProductDetail, products, setActiveTab, language } = useApp();
+  const { openQuickBuy, openProductDetail, products, setActiveTab, language, user, role, setIsAuthModalOpen } = useApp();
   const [activeTabSub, setActiveTabSub] = useState('foryou');
   const [currentReelIndex, setCurrentReelIndex] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
@@ -111,6 +111,8 @@ export default function DiscoverReels() {
   const [isSaved, setIsSaved] = useState(false);
   const [isFollowed, setIsFollowed] = useState(false);
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
+  const [commentsList, setCommentsList] = useState([]);
+  const [newCommentText, setNewCommentText] = useState('');
   const [isShopTheLookOpen, setIsShopTheLookOpen] = useState(false);
   const [desktopViewMode, setDesktopViewMode] = useState('player'); // 'player' or 'grid'
   const [isGlobalMuted, setIsGlobalMuted] = useState(true);
@@ -219,6 +221,52 @@ export default function DiscoverReels() {
   const [isEditReelModalOpen, setIsEditReelModalOpen] = useState(false);
   const [editCaption, setEditCaption] = useState('');
   const [toastMessage, setToastMessage] = useState(null);
+
+  // Load interactive comments when drawer opens or active reel changes
+  useEffect(() => {
+    if (currentReel?.id) {
+      const fetched = ReelsService.getComments(currentReel.id);
+      setCommentsList(fetched);
+    }
+  }, [currentReel?.id, isCommentsOpen]);
+
+  const handlePostComment = (e) => {
+    if (e) e.preventDefault();
+    if (!newCommentText.trim() || !currentReel?.id) return;
+
+    const authorName = user?.name || user?.profile?.name || user?.email?.split('@')[0] || (isAr ? 'متسوق مصري' : 'Shopper');
+    const authorAvatar = user?.avatar_url || (user?.role === 'merchant' ? '/images/brands/talieska_logo.jpg' : '/images/reels/reel_1.jpg');
+    const authorRole = user?.role || 'buyer';
+
+    const newComment = ReelsService.addComment(currentReel.id, {
+      userId: user?.id || null,
+      userName: authorName,
+      userAvatar: authorAvatar,
+      userRole: authorRole,
+      text: newCommentText.trim()
+    });
+
+    setCommentsList(prev => [newComment, ...prev]);
+    setNewCommentText('');
+
+    // Dynamically increment reel comments count in state
+    setReels(prev => prev.map(r => r.id === currentReel.id ? { ...r, comments: (Number(r.comments) || 0) + 1 } : r));
+    showToast(isAr ? 'تم نشر تعليقك بنجاح! 💬' : 'Comment posted successfully! 💬');
+  };
+
+  const handleLikeCommentItem = (commentId) => {
+    if (!currentReel?.id) return;
+    const updated = ReelsService.likeComment(currentReel.id, commentId);
+    setCommentsList(updated);
+  };
+
+  const handleDeleteCommentItem = (commentId) => {
+    if (!currentReel?.id) return;
+    const updated = ReelsService.deleteComment(currentReel.id, commentId);
+    setCommentsList(updated);
+    setReels(prev => prev.map(r => r.id === currentReel.id ? { ...r, comments: Math.max(0, (Number(r.comments) || 1) - 1) } : r));
+    showToast(isAr ? 'تم حذف التعليق' : 'Comment deleted');
+  };
 
   const showToast = (msg) => {
     setToastMessage(msg);
@@ -1334,67 +1382,140 @@ export default function DiscoverReels() {
         </div>
       </div>
 
-      {/* Interactive Comments Drawer */}
+      {/* Interactive Comments Drawer Linked to Profiles */}
       {isCommentsOpen && (
         <div 
           className="fixed inset-0 bg-black/70 backdrop-blur-xs z-50 flex flex-col justify-end"
           onClick={() => setIsCommentsOpen(false)}
         >
           <div 
-            className="w-full max-w-[500px] mx-auto bg-white text-slate-900 rounded-t-3xl p-5 max-h-[70vh] flex flex-col shadow-2xl animate-fade-in text-right"
+            className="w-full max-w-[500px] mx-auto bg-white text-slate-900 rounded-t-3xl p-4 sm:p-5 max-h-[75vh] flex flex-col shadow-2xl animate-fade-in text-right"
             dir={isAr ? 'rtl' : 'ltr'}
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Header */}
             <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-3">
-              <h3 className="text-sm font-bold text-slate-900">
-                {isAr ? `التعليقات (${currentReel?.comments || 0})` : `Comments (${currentReel?.comments || 0})`}
-              </h3>
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-[#d00000] text-[20px]">chat</span>
+                <h3 className="text-sm font-bold text-slate-900">
+                  {isAr ? `التعليقات (${commentsList.length})` : `Comments (${commentsList.length})`}
+                </h3>
+              </div>
               <button 
                 onClick={() => setIsCommentsOpen(false)} 
-                className="p-1 hover:text-[#d00000] rounded-full hover:bg-gray-100"
+                className="p-1 hover:text-[#d00000] rounded-full hover:bg-gray-100 transition-colors"
+                aria-label="Close"
               >
                 <span className="material-symbols-outlined text-[22px]">close</span>
               </button>
             </div>
 
-            {/* Comment Items */}
-            <div className="space-y-3.5 overflow-y-auto flex-1 pr-1">
-              <div className="flex items-start gap-2.5">
-                <img src="/images/reels/reel_2.jpg" alt="User" className="w-8 h-8 rounded-full object-cover shadow-xs" />
-                <div className="bg-gray-100 p-2.5 rounded-2xl flex-1 text-xs">
-                  <span className="font-bold block text-slate-800">مريم الشافعي</span>
-                  <span className="text-slate-600">الكتان باين عليه تحفة! هل في شحن لإسكندرية؟ ❤️</span>
-                </div>
+            {/* Profile Status Banner */}
+            <div className="mb-3 px-3 py-2 bg-gray-50 border border-gray-100 rounded-xl flex items-center justify-between gap-2 text-xs">
+              <div className="flex items-center gap-2">
+                <img 
+                  src={user?.avatar_url || (user?.role === 'merchant' ? '/images/brands/talieska_logo.jpg' : '/images/reels/reel_1.jpg')} 
+                  alt="Avatar" 
+                  className="w-6 h-6 rounded-full object-cover border border-gray-200" 
+                />
+                <span className="text-slate-700 font-bold truncate max-w-[160px]">
+                  {user?.name || user?.email?.split('@')[0] || (isAr ? 'متسوق (غير مسجل)' : 'Guest User')}
+                </span>
+                {user?.role && (
+                  <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase bg-red-100 text-red-700">
+                    {user.role}
+                  </span>
+                )}
               </div>
+              {!user && (
+                <button 
+                  onClick={() => setIsAuthModalOpen(true)}
+                  className="text-[#d00000] font-bold text-[11px] hover:underline"
+                >
+                  {isAr ? 'تسجيل الدخول' : 'Sign In'}
+                </button>
+              )}
+            </div>
 
-              <div className="flex items-start gap-2.5">
-                <img src="/images/reels/reel_1.jpg" alt="User" className="w-8 h-8 rounded-full object-cover shadow-xs" />
-                <div className="bg-gray-100 p-2.5 rounded-2xl flex-1 text-xs">
-                  <span className="font-bold block text-slate-800">أحمد سامي</span>
-                  <span className="text-slate-600">التطريز ممتاز جداً.. طلبت واحدة ووصلتني في 48 ساعة مع بوسطة 🚀</span>
+            {/* Comment Items List */}
+            <div className="space-y-3 overflow-y-auto flex-1 pr-1 pl-1">
+              {commentsList.length === 0 ? (
+                <div className="py-8 text-center text-gray-400 text-xs">
+                  {isAr ? 'كن أول من يترك تعليقاً على هذا الفيديو! ✨' : 'Be the first to comment on this reel! ✨'}
                 </div>
-              </div>
-
-              <div className="flex items-start gap-2.5">
-                <img src="/images/products/linen_abaya.jpg" alt="User" className="w-8 h-8 rounded-full object-cover shadow-xs" />
-                <div className="bg-gray-100 p-2.5 rounded-2xl flex-1 text-xs">
-                  <span className="font-bold block text-slate-800">هدى طارق</span>
-                  <span className="text-slate-600">المقاس مظبوط بالظبط ولا اطلب نمرة أكبر؟</span>
-                </div>
-              </div>
+              ) : (
+                commentsList.map((c) => (
+                  <div key={c.id} className="flex items-start gap-2.5 group">
+                    <img 
+                      src={c.userAvatar || '/images/reels/reel_1.jpg'} 
+                      alt={c.userName} 
+                      className="w-8 h-8 rounded-full object-cover shadow-2xs shrink-0 border border-gray-200" 
+                    />
+                    <div className="bg-gray-100/90 hover:bg-gray-100 p-2.5 sm:p-3 rounded-2xl flex-1 text-xs transition-colors">
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="font-bold text-slate-900">{c.userName}</span>
+                          {c.userRole === 'merchant' && (
+                            <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-100 text-amber-800">
+                              {isAr ? 'تاجر موثق' : 'Merchant'}
+                            </span>
+                          )}
+                          {c.userRole === 'creator' && (
+                            <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-purple-100 text-purple-800">
+                              {isAr ? 'صانع محتوى' : 'Creator'}
+                            </span>
+                          )}
+                          {c.userRole === 'buyer' && (
+                            <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800">
+                              {isAr ? 'متسوق' : 'Shopper'}
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-[10px] text-gray-400 shrink-0">{c.timeAgo || 'الآن'}</span>
+                      </div>
+                      <p className="text-slate-700 leading-relaxed break-words">{c.text}</p>
+                      
+                      <div className="flex items-center justify-between pt-1.5 mt-1 border-t border-gray-200/50 text-[10px] text-gray-500">
+                        <button 
+                          onClick={() => handleLikeCommentItem(c.id)}
+                          className="flex items-center gap-1 hover:text-[#d00000] font-bold transition-colors"
+                        >
+                          <span className="material-symbols-outlined text-[13px] fill-current">favorite</span>
+                          <span>{c.likes || 0}</span>
+                        </button>
+                        
+                        {(user?.id === c.userId || user?.role === 'admin') && (
+                          <button 
+                            onClick={() => handleDeleteCommentItem(c.id)}
+                            className="text-gray-400 hover:text-red-600 font-bold transition-colors text-[10px]"
+                          >
+                            {isAr ? 'حذف' : 'Delete'}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
 
             {/* Comment Input */}
-            <div className="pt-3 border-t border-gray-100 flex items-center gap-2 mt-3">
+            <form onSubmit={handlePostComment} className="pt-3 border-t border-gray-100 flex items-center gap-2 mt-2">
               <input 
                 type="text" 
-                placeholder={isAr ? "أضف تعليقاً لطيفاً..." : "Add a comment..."}
-                className="flex-1 bg-gray-100 px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-[#d00000]"
+                value={newCommentText}
+                onChange={(e) => setNewCommentText(e.target.value)}
+                placeholder={isAr ? "أضف تعليقاً على هذا الريلز..." : "Add a comment on this reel..."}
+                className="flex-1 bg-gray-100 px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[#d00000] focus:bg-white transition-all text-slate-800"
               />
-              <button className="px-4 py-2.5 rounded-xl bg-[#d00000] text-white text-xs font-bold shadow-md hover:brightness-110 active:scale-95 transition-all">
+              <button 
+                type="submit"
+                disabled={!newCommentText.trim()}
+                className="px-4 py-2.5 rounded-xl bg-[#d00000] text-white text-xs font-bold shadow-md hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 disabled:active:scale-100"
+              >
                 {isAr ? 'إرسال' : 'Post'}
               </button>
-            </div>
+            </form>
           </div>
         </div>
       )}

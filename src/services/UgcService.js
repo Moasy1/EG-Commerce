@@ -45,7 +45,7 @@ const DEFAULT_CAMPAIGNS = [
     status: 'active',
     applied: true,
     applicationStatus: 'approved', // 'applied' | 'approved' | 'draft_submitted' | 'completed'
-    submittedUrl: 'https://eg-commerce.eg/reels/talieska-summer-look',
+    submittedUrl: 'https://egyptian-commerce.com/reels/talieska-summer-look',
     guidelines: 'تصوير ريلز عالي الجودة يبرز خامة الكتان في ضوء النهار، مع توضيح كود الخصم في الوصف.'
   },
   {

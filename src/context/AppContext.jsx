@@ -684,6 +684,37 @@ export function AppProvider({ children }) {
     loadData();
   }, []);
 
+  // Automatic Subdomain & Storefront Route Detection (e.g. talieska.egyptian-commerce.com, demo.egyptian-commerce.com, ?subdomain=talieska)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const hostname = window.location.hostname || '';
+    const params = new URLSearchParams(window.location.search);
+    const querySubdomain = params.get('subdomain') || params.get('store');
+    
+    let detectedSlug = querySubdomain;
+    if (!detectedSlug && hostname) {
+      const parts = hostname.split('.');
+      if (parts.length >= 3 && !['www', 'app', 'shop', 'api', 'admin'].includes(parts[0].toLowerCase())) {
+        detectedSlug = parts[0];
+      }
+    }
+
+    if (detectedSlug) {
+      const cleanSlug = detectedSlug.toLowerCase().trim();
+      const targetSlug = cleanSlug === 'demo' ? 'talieska' : cleanSlug;
+      const matched = merchants.find(m => 
+        m.slug === targetSlug || 
+        m.id === targetSlug ||
+        m.subdomain?.toLowerCase().includes(targetSlug)
+      );
+
+      if (matched) {
+        setSelectedMerchantId(matched.id);
+        setActiveTab('storefront');
+      }
+    }
+  }, [merchants]);
+
   const updateProductSyndication = (productId) => {
     setProducts(prev => prev.map(p => 
       p.id === productId ? { ...p, isSyndicated: !p.isSyndicated } : p

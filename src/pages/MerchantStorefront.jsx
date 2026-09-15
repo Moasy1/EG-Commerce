@@ -13,8 +13,16 @@ export default function MerchantStorefront() {
     setActiveTab
   } = useApp();
 
-  const currentMerchant = merchants.find(m => m.id === selectedMerchantId) || merchants[0];
-  const merchantProducts = products.filter(p => p.merchantId === currentMerchant.id);
+  const currentMerchant = (merchants && merchants.length > 0)
+    ? (merchants.find(m => m.id === selectedMerchantId) || merchants[0])
+    : {};
+  const merchantProducts = (products || []).filter(p => 
+    (currentMerchant.id && p.merchantId === currentMerchant.id) || 
+    (currentMerchant.slug && p.merchantId?.includes(currentMerchant.slug)) ||
+    (currentMerchant.shortName && p.merchant?.toLowerCase().includes(currentMerchant.shortName.toLowerCase())) ||
+    (currentMerchant.slug && p.merchant?.toLowerCase().includes(currentMerchant.slug)) ||
+    (!p.merchantId && currentMerchant.id === 'm-01')
+  );
   
   // Extract dynamic theme and layout configurations with sensible fallbacks
   const themeConfig = currentMerchant.themeConfig || {};

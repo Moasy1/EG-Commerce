@@ -53,18 +53,21 @@ function MainContent() {
       case 'merchant':
         return <MerchantDashboard />;
       case 'add_product':
+      case 'add-product':
         return <AddProductStudio />;
       case 'studio':
       case 'creator':
         return <CreatorStudio />;
 
       case 'admin':
+      case 'superadmin':
         return <AdminDashboard />;
       case 'delivery':
         return <DeliveryDashboard />;
       case 'settings':
         return <Settings />;
       case 'storefront':
+      case 'merchant-storefront':
         return <MerchantStorefront />;
       case 'merchant_campaign':
         return <MerchantCampaign />;

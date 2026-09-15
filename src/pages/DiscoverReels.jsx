@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import EgLogo from '../components/common/EgLogo';
 import { ReelsService } from '../services/ReelsService';
@@ -68,292 +68,7 @@ const ReelVideoPlayer = ({ reel, isActive, isAdjacent, isGlobalMuted, toggleMute
   );
 };
 
-export default function DiscoverReels() {
-  const [reelsList, setReelsList] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchReels = async () => {
-      try {
-        const storedReels = await ReelsService.getReels();
-        if (storedReels && storedReels.length > 0) {
-          const processedReels = storedReels.map(item => {
-            if (typeof item.product === 'string') {
-              try { item.product = JSON.parse(item.product); } catch(e) {}
-            }
-            if (typeof item.products === 'string') {
-              try { item.products = JSON.parse(item.products); } catch(e) {}
-            }
-            return item;
-          });
-          setReelsList(processedReels);
-        } else {
-          for (const reel of DEFAULT_REELS) {
-            await ReelsService.saveReel(reel);
-          }
-          setReelsList(DEFAULT_REELS);
-        }
-      } catch (err) {
-        console.error("Failed to load reels", err);
-        setReelsList(DEFAULT_REELS);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchReels();
-  }, []);
-
-  const { openQuickBuy, openProductDetail, products, setActiveTab, language, user, role, setIsAuthModalOpen } = useApp();
-  const [activeTabSub, setActiveTabSub] = useState('foryou');
-  const [currentReelIndex, setCurrentReelIndex] = useState(0);
-  const [isLiked, setIsLiked] = useState(false);
-  const [likesCount, setLikesCount] = useState(14200);
-  const [isSaved, setIsSaved] = useState(false);
-  const [isFollowed, setIsFollowed] = useState(false);
-  const [isCommentsOpen, setIsCommentsOpen] = useState(false);
-  const [commentsList, setCommentsList] = useState([]);
-  const [newCommentText, setNewCommentText] = useState('');
-  const [isShopTheLookOpen, setIsShopTheLookOpen] = useState(false);
-  const [desktopViewMode, setDesktopViewMode] = useState('player'); // 'player' or 'grid'
-  const [isGlobalMuted, setIsGlobalMuted] = useState(true);
-  
-  // Gesture & Swipe Tracking
-  const [touchStartY, setTouchStartY] = useState(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStartY, setDragStartY] = useState(0);
-  const [dragOffset, setDragOffset] = useState(0);
-  const [isCaptionExpanded, setIsCaptionExpanded] = useState(false);
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const lastScrollTime = useRef(0);
-
-  // Shop the Look Drawer Slide-Down Gesture State
-  const [drawerDragY, setDrawerDragY] = useState(0);
-  const [isDrawerDragging, setIsDrawerDragging] = useState(false);
-  const drawerStartY = useRef(0);
-  const currentDragY = useRef(0);
-  const drawerListRef = useRef(null);
-  const listTouchStartY = useRef(0);
-  const isListDragging = useRef(false);
-
-  // Close Shop the Look drawer helper
-  const closeShopTheLook = () => {
-    setIsShopTheLookOpen(false);
-    setDrawerDragY(0);
-    currentDragY.current = 0;
-    setIsDrawerDragging(false);
-  };
-
-  const handleDrawerPointerDown = (e) => {
-    if (e.button !== undefined && e.button !== 0) return;
-    drawerStartY.current = e.clientY;
-    currentDragY.current = 0;
-    setIsDrawerDragging(true);
-    e.currentTarget.setPointerCapture(e.pointerId);
-  };
-
-  const handleDrawerPointerMove = (e) => {
-    if (!isDrawerDragging) return;
-    const deltaY = e.clientY - drawerStartY.current;
-    if (deltaY > 0) {
-      currentDragY.current = deltaY;
-      setDrawerDragY(deltaY);
-    } else {
-      currentDragY.current = 0;
-      setDrawerDragY(0);
-    }
-  };
-
-  const handleDrawerPointerUp = (e) => {
-    if (!isDrawerDragging) return;
-    setIsDrawerDragging(false);
-    try {
-      if (e.currentTarget?.hasPointerCapture?.(e.pointerId)) {
-        e.currentTarget.releasePointerCapture(e.pointerId);
-      }
-    } catch (err) {}
-
-    if (currentDragY.current > 70) {
-      closeShopTheLook();
-    } else {
-      setDrawerDragY(0);
-      currentDragY.current = 0;
-    }
-  };
-
-  const handleListTouchStart = (e) => {
-    listTouchStartY.current = e.touches[0].clientY;
-    isListDragging.current = false;
-  };
-
-  const handleListTouchMove = (e) => {
-    const currentY = e.touches[0].clientY;
-    const deltaY = currentY - listTouchStartY.current;
-
-    if (drawerListRef.current && drawerListRef.current.scrollTop <= 0 && deltaY > 0) {
-      isListDragging.current = true;
-      setIsDrawerDragging(true);
-      currentDragY.current = deltaY;
-      setDrawerDragY(deltaY);
-    } else if (isListDragging.current && deltaY > 0) {
-      currentDragY.current = deltaY;
-      setDrawerDragY(deltaY);
-    }
-  };
-
-  const handleListTouchEnd = () => {
-    if (isListDragging.current) {
-      isListDragging.current = false;
-      setIsDrawerDragging(false);
-      if (currentDragY.current > 70) {
-        closeShopTheLook();
-      } else {
-        setDrawerDragY(0);
-        currentDragY.current = 0;
-      }
-    }
-  };
-
-  // Three Dots Options Menu & Backend States
-  const [isOptionsMenuOpen, setIsOptionsMenuOpen] = useState(false);
-  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
-  const [reportReason, setReportReason] = useState('inappropriate');
-  const [reportDetails, setReportDetails] = useState('');
-  const [isEditReelModalOpen, setIsEditReelModalOpen] = useState(false);
-  const [editCaption, setEditCaption] = useState('');
-  const [toastMessage, setToastMessage] = useState(null);
-
-  // Load interactive comments when drawer opens or active reel changes
-  useEffect(() => {
-    if (currentReel?.id) {
-      const fetched = ReelsService.getComments(currentReel.id);
-      setCommentsList(fetched);
-    }
-  }, [currentReel?.id, isCommentsOpen]);
-
-  const handlePostComment = (e) => {
-    if (e) e.preventDefault();
-    if (!newCommentText.trim() || !currentReel?.id) return;
-
-    const authorName = user?.name || user?.profile?.name || user?.email?.split('@')[0] || (isAr ? 'متسوق مصري' : 'Shopper');
-    const authorAvatar = user?.avatar_url || (user?.role === 'merchant' ? '/images/brands/talieska_logo.jpg' : '/images/reels/reel_1.jpg');
-    const authorRole = user?.role || 'buyer';
-
-    const newComment = ReelsService.addComment(currentReel.id, {
-      userId: user?.id || null,
-      userName: authorName,
-      userAvatar: authorAvatar,
-      userRole: authorRole,
-      text: newCommentText.trim()
-    });
-
-    setCommentsList(prev => [newComment, ...prev]);
-    setNewCommentText('');
-
-    // Dynamically increment reel comments count in state
-    setReels(prev => prev.map(r => r.id === currentReel.id ? { ...r, comments: (Number(r.comments) || 0) + 1 } : r));
-    showToast(isAr ? 'تم نشر تعليقك بنجاح! 💬' : 'Comment posted successfully! 💬');
-  };
-
-  const handleLikeCommentItem = (commentId) => {
-    if (!currentReel?.id) return;
-    const updated = ReelsService.likeComment(currentReel.id, commentId);
-    setCommentsList(updated);
-  };
-
-  const handleDeleteCommentItem = (commentId) => {
-    if (!currentReel?.id) return;
-    const updated = ReelsService.deleteComment(currentReel.id, commentId);
-    setCommentsList(updated);
-    setReels(prev => prev.map(r => r.id === currentReel.id ? { ...r, comments: Math.max(0, (Number(r.comments) || 1) - 1) } : r));
-    showToast(isAr ? 'تم حذف التعليق' : 'Comment deleted');
-  };
-
-  const showToast = (msg) => {
-    setToastMessage(msg);
-    setTimeout(() => {
-      setToastMessage(null);
-    }, 3000);
-  };
-
-  const handleShareLink = async () => {
-    const url = `${window.location.origin}${window.location.pathname}?reel=${currentReel?.id || ''}`;
-    try {
-      await navigator.clipboard.writeText(url);
-      showToast(isAr ? 'تم نسخ رابط الفيديو إلى الحافظة 📋' : 'Reel link copied to clipboard! 📋');
-    } catch (err) {
-      showToast(isAr ? 'تم نسخ الرابط بنجاح' : 'Link copied');
-    }
-    setIsOptionsMenuOpen(false);
-  };
-
-  const handleToggleSaveReel = async () => {
-    if (!currentReel) return;
-    const newSaved = await ReelsService.toggleSaveReel(currentReel.id);
-    setIsSaved(newSaved);
-    showToast(
-      newSaved 
-        ? (isAr ? 'تم حفظ الفيديو في المفضلة بنجاح 📌' : 'Saved to favorites! 📌')
-        : (isAr ? 'تمت إزالة الفيديو من المفضلة' : 'Removed from favorites')
-    );
-    setIsOptionsMenuOpen(false);
-  };
-
-  const handleHideReel = async () => {
-    if (!currentReel) return;
-    await ReelsService.hideReel(currentReel.id);
-    const updated = reelsList.filter(r => r.id !== currentReel.id);
-    setReelsList(updated);
-    if (currentReelIndex >= updated.length) {
-      setCurrentReelIndex(Math.max(0, updated.length - 1));
-    }
-    showToast(isAr ? 'تم إخفاء هذا المحتوى من خلاصتك 👍' : 'Video hidden from your feed 👍');
-    setIsOptionsMenuOpen(false);
-  };
-
-  const handleSubmitReport = async (e) => {
-    if (e) e.preventDefault();
-    if (!currentReel) return;
-    await ReelsService.reportReel(currentReel.id, reportReason, reportDetails);
-    setIsReportModalOpen(false);
-    setIsOptionsMenuOpen(false);
-    setReportDetails('');
-    showToast(isAr ? 'شكراً لك، تم إرسال البلاغ وسيقوم فريق المراجعة بفحصه فوراً 🛡️' : 'Report submitted successfully. We will review it shortly. 🛡️');
-  };
-
-  const handleSaveEditReel = async (e) => {
-    if (e) e.preventDefault();
-    if (!currentReel) return;
-    await ReelsService.updateReel(currentReel.id, { caption: editCaption });
-    setReelsList(prev => prev.map(r => r.id === currentReel.id ? { ...r, caption: editCaption } : r));
-    setIsEditReelModalOpen(false);
-    setIsOptionsMenuOpen(false);
-    showToast(isAr ? 'تم حفظ تعديلات الفيديو بنجاح ✅' : 'Reel updated successfully ✅');
-  };
-
-  const handleDeleteReel = async () => {
-    if (!currentReel) return;
-    if (window.confirm(isAr ? 'هل أنت متأكد من حذف هذا الفيديو نهائياً؟' : 'Are you sure you want to delete this reel?')) {
-      await ReelsService.deleteReel(currentReel.id);
-      const updated = reelsList.filter(r => r.id !== currentReel.id);
-      setReelsList(updated);
-      if (currentReelIndex >= updated.length) {
-        setCurrentReelIndex(Math.max(0, updated.length - 1));
-      }
-      setIsOptionsMenuOpen(false);
-      showToast(isAr ? 'تم حذف الفيديو بنجاح 🗑️' : 'Reel deleted successfully 🗑️');
-    }
-  };
-
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  const isAr = language === 'ar';
-
-  const DEFAULT_REELS = [
+const getDefaultReels = (isAr = true) => [
     {
       id: 'reel-fashion-blazer',
       creatorHandle: '@cairo_chic',
@@ -764,7 +479,293 @@ export default function DiscoverReels() {
     }
   ];
 
-  const currentReel = reelsList[currentReelIndex] || reelsList[0] || DEFAULT_REELS[0];
+export default function DiscoverReels() {
+  const { openQuickBuy, openProductDetail, products, setActiveTab, language, user, role, setIsAuthModalOpen } = useApp();
+  const isAr = language === 'ar';
+  const defaultReels = useMemo(() => getDefaultReels(isAr), [isAr]);
+
+  const [reelsList, setReelsList] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentReelIndex, setCurrentReelIndex] = useState(0);
+
+  const currentReel = reelsList[currentReelIndex] || reelsList[0] || defaultReels[0] || null;
+
+  useEffect(() => {
+    const fetchReels = async () => {
+      try {
+        const storedReels = await ReelsService.getReels();
+        if (storedReels && storedReels.length > 0) {
+          const processedReels = storedReels.map(item => {
+            if (typeof item.product === 'string') {
+              try { item.product = JSON.parse(item.product); } catch(e) {}
+            }
+            if (typeof item.products === 'string') {
+              try { item.products = JSON.parse(item.products); } catch(e) {}
+            }
+            return item;
+          });
+          setReelsList(processedReels);
+        } else {
+          for (const reel of defaultReels) {
+            await ReelsService.saveReel(reel);
+          }
+          setReelsList(defaultReels);
+        }
+      } catch (err) {
+        console.error("Failed to load reels", err);
+        setReelsList(defaultReels);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchReels();
+  }, [defaultReels]);
+  const [activeTabSub, setActiveTabSub] = useState('foryou');
+  const [isLiked, setIsLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(14200);
+  const [isSaved, setIsSaved] = useState(false);
+  const [isFollowed, setIsFollowed] = useState(false);
+  const [isCommentsOpen, setIsCommentsOpen] = useState(false);
+  const [commentsList, setCommentsList] = useState([]);
+  const [newCommentText, setNewCommentText] = useState('');
+  const [isShopTheLookOpen, setIsShopTheLookOpen] = useState(false);
+  const [desktopViewMode, setDesktopViewMode] = useState('player'); // 'player' or 'grid'
+  const [isGlobalMuted, setIsGlobalMuted] = useState(true);
+  
+  // Gesture & Swipe Tracking
+  const [touchStartY, setTouchStartY] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStartY, setDragStartY] = useState(0);
+  const [dragOffset, setDragOffset] = useState(0);
+  const [isCaptionExpanded, setIsCaptionExpanded] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const lastScrollTime = useRef(0);
+
+  // Shop the Look Drawer Slide-Down Gesture State
+  const [drawerDragY, setDrawerDragY] = useState(0);
+  const [isDrawerDragging, setIsDrawerDragging] = useState(false);
+  const drawerStartY = useRef(0);
+  const currentDragY = useRef(0);
+  const drawerListRef = useRef(null);
+  const listTouchStartY = useRef(0);
+  const isListDragging = useRef(false);
+
+  // Close Shop the Look drawer helper
+  const closeShopTheLook = () => {
+    setIsShopTheLookOpen(false);
+    setDrawerDragY(0);
+    currentDragY.current = 0;
+    setIsDrawerDragging(false);
+  };
+
+  const handleDrawerPointerDown = (e) => {
+    if (e.button !== undefined && e.button !== 0) return;
+    drawerStartY.current = e.clientY;
+    currentDragY.current = 0;
+    setIsDrawerDragging(true);
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+
+  const handleDrawerPointerMove = (e) => {
+    if (!isDrawerDragging) return;
+    const deltaY = e.clientY - drawerStartY.current;
+    if (deltaY > 0) {
+      currentDragY.current = deltaY;
+      setDrawerDragY(deltaY);
+    } else {
+      currentDragY.current = 0;
+      setDrawerDragY(0);
+    }
+  };
+
+  const handleDrawerPointerUp = (e) => {
+    if (!isDrawerDragging) return;
+    setIsDrawerDragging(false);
+    try {
+      if (e.currentTarget?.hasPointerCapture?.(e.pointerId)) {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      }
+    } catch (err) {}
+
+    if (currentDragY.current > 70) {
+      closeShopTheLook();
+    } else {
+      setDrawerDragY(0);
+      currentDragY.current = 0;
+    }
+  };
+
+  const handleListTouchStart = (e) => {
+    listTouchStartY.current = e.touches[0].clientY;
+    isListDragging.current = false;
+  };
+
+  const handleListTouchMove = (e) => {
+    const currentY = e.touches[0].clientY;
+    const deltaY = currentY - listTouchStartY.current;
+
+    if (drawerListRef.current && drawerListRef.current.scrollTop <= 0 && deltaY > 0) {
+      isListDragging.current = true;
+      setIsDrawerDragging(true);
+      currentDragY.current = deltaY;
+      setDrawerDragY(deltaY);
+    } else if (isListDragging.current && deltaY > 0) {
+      currentDragY.current = deltaY;
+      setDrawerDragY(deltaY);
+    }
+  };
+
+  const handleListTouchEnd = () => {
+    if (isListDragging.current) {
+      isListDragging.current = false;
+      setIsDrawerDragging(false);
+      if (currentDragY.current > 70) {
+        closeShopTheLook();
+      } else {
+        setDrawerDragY(0);
+        currentDragY.current = 0;
+      }
+    }
+  };
+
+  // Three Dots Options Menu & Backend States
+  const [isOptionsMenuOpen, setIsOptionsMenuOpen] = useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [reportReason, setReportReason] = useState('inappropriate');
+  const [reportDetails, setReportDetails] = useState('');
+  const [isEditReelModalOpen, setIsEditReelModalOpen] = useState(false);
+  const [editCaption, setEditCaption] = useState('');
+  const [toastMessage, setToastMessage] = useState(null);
+
+  // Load interactive comments when drawer opens or active reel changes
+  useEffect(() => {
+    if (currentReel?.id) {
+      const fetched = ReelsService.getComments(currentReel.id);
+      setCommentsList(fetched);
+    }
+  }, [currentReel?.id, isCommentsOpen]);
+
+  const handlePostComment = (e) => {
+    if (e) e.preventDefault();
+    if (!newCommentText.trim() || !currentReel?.id) return;
+
+    const authorName = user?.name || user?.profile?.name || user?.email?.split('@')[0] || (isAr ? 'متسوق مصري' : 'Shopper');
+    const authorAvatar = user?.avatar_url || (user?.role === 'merchant' ? '/images/brands/talieska_logo.jpg' : '/images/reels/reel_1.jpg');
+    const authorRole = user?.role || 'buyer';
+
+    const newComment = ReelsService.addComment(currentReel.id, {
+      userId: user?.id || null,
+      userName: authorName,
+      userAvatar: authorAvatar,
+      userRole: authorRole,
+      text: newCommentText.trim()
+    });
+
+    setCommentsList(prev => [newComment, ...prev]);
+    setNewCommentText('');
+
+    // Dynamically increment reel comments count in state
+    setReelsList(prev => prev.map(r => r.id === currentReel.id ? { ...r, comments: (Number(r.comments) || 0) + 1 } : r));
+    showToast(isAr ? 'تم نشر تعليقك بنجاح! 💬' : 'Comment posted successfully! 💬');
+  };
+
+  const handleLikeCommentItem = (commentId) => {
+    if (!currentReel?.id) return;
+    const updated = ReelsService.likeComment(currentReel.id, commentId);
+    setCommentsList(updated);
+  };
+
+  const handleDeleteCommentItem = (commentId) => {
+    if (!currentReel?.id) return;
+    const updated = ReelsService.deleteComment(currentReel.id, commentId);
+    setCommentsList(updated);
+    setReelsList(prev => prev.map(r => r.id === currentReel.id ? { ...r, comments: Math.max(0, (Number(r.comments) || 1) - 1) } : r));
+    showToast(isAr ? 'تم حذف التعليق' : 'Comment deleted');
+  };
+
+  const showToast = (msg) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 3000);
+  };
+
+  const handleShareLink = async () => {
+    const url = `${window.location.origin}${window.location.pathname}?reel=${currentReel?.id || ''}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      showToast(isAr ? 'تم نسخ رابط الفيديو إلى الحافظة 📋' : 'Reel link copied to clipboard! 📋');
+    } catch (err) {
+      showToast(isAr ? 'تم نسخ الرابط بنجاح' : 'Link copied');
+    }
+    setIsOptionsMenuOpen(false);
+  };
+
+  const handleToggleSaveReel = async () => {
+    if (!currentReel) return;
+    const newSaved = await ReelsService.toggleSaveReel(currentReel.id);
+    setIsSaved(newSaved);
+    showToast(
+      newSaved 
+        ? (isAr ? 'تم حفظ الفيديو في المفضلة بنجاح 📌' : 'Saved to favorites! 📌')
+        : (isAr ? 'تمت إزالة الفيديو من المفضلة' : 'Removed from favorites')
+    );
+    setIsOptionsMenuOpen(false);
+  };
+
+  const handleHideReel = async () => {
+    if (!currentReel) return;
+    await ReelsService.hideReel(currentReel.id);
+    const updated = reelsList.filter(r => r.id !== currentReel.id);
+    setReelsList(updated);
+    if (currentReelIndex >= updated.length) {
+      setCurrentReelIndex(Math.max(0, updated.length - 1));
+    }
+    showToast(isAr ? 'تم إخفاء هذا المحتوى من خلاصتك 👍' : 'Video hidden from your feed 👍');
+    setIsOptionsMenuOpen(false);
+  };
+
+  const handleSubmitReport = async (e) => {
+    if (e) e.preventDefault();
+    if (!currentReel) return;
+    await ReelsService.reportReel(currentReel.id, reportReason, reportDetails);
+    setIsReportModalOpen(false);
+    setIsOptionsMenuOpen(false);
+    setReportDetails('');
+    showToast(isAr ? 'شكراً لك، تم إرسال البلاغ وسيقوم فريق المراجعة بفحصه فوراً 🛡️' : 'Report submitted successfully. We will review it shortly. 🛡️');
+  };
+
+  const handleSaveEditReel = async (e) => {
+    if (e) e.preventDefault();
+    if (!currentReel) return;
+    await ReelsService.updateReel(currentReel.id, { caption: editCaption });
+    setReelsList(prev => prev.map(r => r.id === currentReel.id ? { ...r, caption: editCaption } : r));
+    setIsEditReelModalOpen(false);
+    setIsOptionsMenuOpen(false);
+    showToast(isAr ? 'تم حفظ تعديلات الفيديو بنجاح ✅' : 'Reel updated successfully ✅');
+  };
+
+  const handleDeleteReel = async () => {
+    if (!currentReel) return;
+    if (window.confirm(isAr ? 'هل أنت متأكد من حذف هذا الفيديو نهائياً؟' : 'Are you sure you want to delete this reel?')) {
+      await ReelsService.deleteReel(currentReel.id);
+      const updated = reelsList.filter(r => r.id !== currentReel.id);
+      setReelsList(updated);
+      if (currentReelIndex >= updated.length) {
+        setCurrentReelIndex(Math.max(0, updated.length - 1));
+      }
+      setIsOptionsMenuOpen(false);
+      showToast(isAr ? 'تم حذف الفيديو بنجاح 🗑️' : 'Reel deleted successfully 🗑️');
+    }
+  };
+
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
 
   // Navigation functions
   const handleNextReel = () => {

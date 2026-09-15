@@ -57,6 +57,8 @@ export default function DesktopProductDetail() {
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 15;
 
+  const productVideo = product.video || '/images/reels/fashion_citrine_blazer.mp4';
+
   return (
     <div dir={isAr ? 'rtl' : 'ltr'} className="w-full bg-white text-slate-900 flex flex-col font-sans min-h-[580px] overflow-hidden select-none text-start">
       {/* 1. Top Bar */}
@@ -97,67 +99,91 @@ export default function DesktopProductDetail() {
       {/* 2. Main Product Content (Split Two Columns) */}
       <div className="p-6 grid grid-cols-12 gap-6 flex-1 overflow-y-auto">
         {/* Left Column: Vertical Thumbnails + Main Large Photo / Video */}
-        <div className="col-span-6 flex gap-3">
-          {/* 4 Thumbnails Column */}
-          <div className="flex flex-col gap-2 shrink-0">
-            {galleryThumbs.map((img, i) => (
-              <div
-                key={i}
-                onClick={() => { setSelectedThumb(i); setIsPlayingVideo(false); }}
-                className={`w-14 h-16 rounded-xl overflow-hidden cursor-pointer border-2 transition-all ${
-                  selectedThumb === i && !isPlayingVideo ? 'border-[#d00000] shadow-xs' : 'border-gray-200 hover:border-gray-300'
-                }`}
-              >
-                <img src={img} alt="Thumb" className="w-full h-full object-cover" />
-              </div>
-            ))}
-            {product.video && (
+        <div className="col-span-6 flex flex-col gap-3">
+          <div className="flex gap-3">
+            {/* Thumbnails Column */}
+            <div className="flex flex-col gap-2 shrink-0">
+              {galleryThumbs.map((img, i) => (
+                <div
+                  key={i}
+                  onClick={() => { setSelectedThumb(i); setIsPlayingVideo(false); }}
+                  className={`w-14 h-16 rounded-xl overflow-hidden cursor-pointer border-2 transition-all ${
+                    selectedThumb === i && !isPlayingVideo ? 'border-[#d00000] shadow-xs' : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <img src={img} alt="Thumb" className="w-full h-full object-cover" />
+                </div>
+              ))}
+              {/* Guaranteed Reel Video Thumbnail Button */}
               <button
                 onClick={() => setIsPlayingVideo(true)}
                 className={`w-14 h-16 rounded-xl overflow-hidden cursor-pointer border-2 flex flex-col items-center justify-center bg-slate-900 text-white gap-1 transition-all ${
-                  isPlayingVideo ? 'border-[#d00000] shadow-xs' : 'border-gray-200 hover:border-red-400'
+                  isPlayingVideo ? 'border-[#d00000] shadow-md ring-2 ring-red-500' : 'border-gray-200 hover:border-red-400'
                 }`}
               >
-                <span className="material-symbols-outlined text-[20px] text-red-400">play_circle</span>
-                <span className="text-[9px] font-bold">ريل</span>
+                <span className="material-symbols-outlined text-[22px] text-red-500 animate-pulse">play_circle</span>
+                <span className="text-[9px] font-bold">ريل 4K</span>
               </button>
-            )}
-          </div>
+            </div>
 
-          {/* Main Large Product Photo / Video */}
-          <div className="flex-1 aspect-[4/5] rounded-2xl overflow-hidden bg-black border border-gray-200 relative">
-            {isPlayingVideo && product.video ? (
-              <video
-                src={product.video}
-                autoPlay
-                loop
-                playsInline
-                controls
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <img 
-                src={galleryThumbs[selectedThumb] || product.image} 
-                alt={product.title} 
-                className="w-full h-full object-cover"
-              />
-            )}
-            
-            {product.video && (
+            {/* Main Large Product Photo / Video */}
+            <div className="flex-1 aspect-[4/5] rounded-2xl overflow-hidden bg-black border border-gray-200 relative">
+              {isPlayingVideo ? (
+                <video
+                  src={productVideo}
+                  autoPlay
+                  loop
+                  playsInline
+                  controls
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <img 
+                  src={galleryThumbs[selectedThumb] || product.image} 
+                  alt={product.title} 
+                  className="w-full h-full object-cover"
+                />
+              )}
+              
               <button
                 onClick={() => setIsPlayingVideo(!isPlayingVideo)}
-                className="absolute top-3 left-3 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-white text-[11px] font-bold flex items-center gap-1.5 shadow-sm border border-white/20 hover:bg-black/80 transition-all z-10"
+                className="absolute top-3 left-3 px-3 py-1.5 rounded-full bg-black/70 backdrop-blur-md text-white text-[11px] font-bold flex items-center gap-1.5 shadow-lg border border-white/20 hover:bg-black/90 transition-all z-10"
               >
-                <span className="material-symbols-outlined text-[15px] text-red-400">
-                  {isPlayingVideo ? 'photo' : 'play_circle'}
+                <span className="material-symbols-outlined text-[16px] text-red-400">
+                  {isPlayingVideo ? 'photo' : 'smart_display'}
                 </span>
-                <span>{isPlayingVideo ? 'عرض الصور' : 'مشاهدة الريل • Watch Reel'}</span>
+                <span>{isPlayingVideo ? (isAr ? 'عرض الصور' : 'Show Images') : (isAr ? 'مشاهدة الريل • Watch Reel' : 'Watch Reel')}</span>
               </button>
-            )}
 
-            <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-gray-600 hover:text-[#d00000] shadow-sm cursor-pointer z-10">
-              <span className="material-symbols-outlined text-[18px]">favorite</span>
+              <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-gray-600 hover:text-[#d00000] shadow-sm cursor-pointer z-10">
+                <span className="material-symbols-outlined text-[18px]">favorite</span>
+              </div>
             </div>
+          </div>
+
+          {/* Dedicated Video Reel Action Banner */}
+          <div className="p-3.5 rounded-2xl bg-gradient-to-r from-slate-950 via-slate-900 to-black text-white flex items-center justify-between border border-slate-800 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-red-600/20 text-[#d00000] border border-red-500/30 flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-[24px]">smart_display</span>
+              </div>
+              <div>
+                <h4 className="text-xs font-bold flex items-center gap-1.5">
+                  <span>{isAr ? 'فيديو ريل المنتج وتنسيق الإطلالة' : 'Shoppable Video Reel'}</span>
+                  <span className="px-1.5 py-0.2 rounded bg-red-500/20 text-red-400 text-[9px] font-mono font-bold">REEL HD</span>
+                </h4>
+                <p className="text-[11px] text-gray-400 mt-0.5">
+                  {isAr ? 'شاهد تفاصيل حركة القماش، التنسيق، والخامة على الطبيعة' : 'Watch authentic fabric flow, fit, and movement in motion'}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setIsPlayingVideo(!isPlayingVideo)}
+              className="px-4 py-2 rounded-xl bg-[#d00000] hover:bg-red-700 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-md active:scale-95 shrink-0"
+            >
+              <span className="material-symbols-outlined text-[16px]">{isPlayingVideo ? 'photo' : 'play_arrow'}</span>
+              <span>{isPlayingVideo ? (isAr ? 'العودة للصور' : 'Show Photos') : (isAr ? 'تشغيل الريل' : 'Play Reel')}</span>
+            </button>
           </div>
         </div>
 

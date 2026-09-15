@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import { AdminService } from '../services/AdminService';
 
 export default function AdminDashboard() {
-  const { language, user, setIsAuthModalOpen, setActiveTab: setAppTab, products, merchants } = useApp();
+  const { language, user, setIsAuthModalOpen, setActiveTab: setAppTab } = useApp();
   const isAr = language === 'ar';
   
   // Superadmin Tabs: overview | stores | creators | users | catalog
@@ -15,11 +15,17 @@ export default function AdminDashboard() {
   const [catalogItems, setCatalogItems] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // Modals & Action States
-  const [editingUser, setEditingUser] = useState(null);
-  const [toastMessage, setToastMessage] = useState(null);
+  // Filter States
   const [roleFilter, setRoleFilter] = useState('all');
   const [storeFilter, setStoreFilter] = useState('all');
+  const [toastMessage, setToastMessage] = useState(null);
+
+  // Modal Dialog States
+  const [modalType, setModalType] = useState(null); // 'addStore' | 'editStore' | 'addUser' | 'editUser' | 'addProduct' | 'editProduct' | 'addCreator' | 'editCreator'
+  const [activeItem, setActiveItem] = useState(null);
+
+  // Form Field States
+  const [formData, setFormData] = useState({});
 
   const showToast = (msg) => {
     setToastMessage(msg);
@@ -36,30 +42,106 @@ export default function AdminDashboard() {
     { name: 'Sun', labelAr: 'الأحد', GMV: 24000 },
   ];
 
-  useEffect(() => {
-    const loadAllData = async () => {
-      setLoading(true);
-      const [statsData, storesData, creatorsData, usersData] = await Promise.all([
-        AdminService.getPlatformStats(),
-        AdminService.getStores(),
-        AdminService.getCreators(),
-        AdminService.getUsers()
-      ]);
-      setStats(statsData);
-      setStores(storesData);
-      setCreators(creatorsData);
-      setUsers(usersData);
-      setCatalogItems(products || []);
-      setLoading(false);
-    };
-    loadAllData();
-  }, [products]);
+  const loadAllData = async () => {
+    setLoading(true);
+    const [statsData, storesData, creatorsData, usersData, catalogData] = await Promise.all([
+      AdminService.getPlatformStats(),
+      AdminService.getStores(),
+      AdminService.getCreators(),
+      AdminService.getUsers(),
+      AdminService.getDemoCatalog()
+    ]);
+    setStats(statsData);
+    setStores(storesData);
+    setCreators(creatorsData);
+    setUsers(usersData);
+    setCatalogItems(catalogData);
+    setLoading(false);
+  };
 
-  // Actions
+  useEffect(() => {
+    loadAllData();
+  }, []);
+
+  // Modal Open Handlers
+  const openModal = (type, item = null) => {
+    setModalType(type);
+    setActiveItem(item);
+    if (item) {
+      setFormData({ ...item });
+    } else {
+      setFormData({});
+    }
+  };
+
+  const closeModal = () => {
+    setModalType(null);
+    setActiveItem(null);
+    setFormData({});
+  };
+
+  // ==========================================
+  // STORES ACTIONS (CRUD)
+  // ==========================================
+  const handleSaveStore = async (e) => {
+    e.preventDefault();
+    if (!formData.name || !formData.subdomain) {
+      alert(isAr ? 'يرجى إدخال اسم المتجر والساب دومين' : 'Please enter store name and subdomain');
+      return;
+    }
+    if (modalType === 'addStore') {
+      const updated = await AdminService.createStore(formData);
+      setStores(updated);
+      showToast(isAr ? 'تم إنشاء المتجر وتخصيص الساب دومين بنجاح' : 'Store created and subdomain assigned');
+    } else if (modalType === 'editStore') {
+      const updated = await AdminService.updateStore(activeItem.id, formData);
+      setStores(updated);
+      showToast(isAr ? 'تم حفظ تعديلات المتجر' : 'Store updated successfully');
+    }
+    closeModal();
+  };
+
+  const handleDeleteStore = async (storeId) => {
+    if (confirm(isAr ? 'هل أنت متأكد من حذف هذا المتجر؟' : 'Are you sure you want to delete this store?')) {
+      const updated = await AdminService.deleteStore(storeId);
+      setStores(updated);
+      showToast(isAr ? 'تم حذف المتجر بنجاح' : 'Store deleted successfully');
+    }
+  };
+
   const handleToggleStoreStatus = async (storeId) => {
     const updated = await AdminService.toggleStoreStatus(storeId);
     setStores(updated);
-    showToast(isAr ? 'تم تحديث حالة المتجر بنجاح' : 'Store status updated successfully');
+    showToast(isAr ? 'تم تحديث حالة المتجر' : 'Store status updated');
+  };
+
+  // ==========================================
+  // USERS ACTIONS (CRUD)
+  // ==========================================
+  const handleSaveUser = async (e) => {
+    e.preventDefault();
+    if (!formData.name || !formData.email) {
+      alert(isAr ? 'يرجى إدخال الاسم والبريد الإلكتروني' : 'Please enter name and email');
+      return;
+    }
+    if (modalType === 'addUser') {
+      const updated = await AdminService.createUser(formData);
+      setUsers(updated);
+      showToast(isAr ? 'تمت إضافة المستخدم بنجاح' : 'User added successfully');
+    } else if (modalType === 'editUser') {
+      const updated = await AdminService.updateUser(activeItem.id, formData);
+      setUsers(updated);
+      showToast(isAr ? 'تم حفظ بيانات المستخدم وتعيين الصلاحيات' : 'User updated successfully');
+    }
+    closeModal();
+  };
+
+  const handleDeleteUser = async (userId) => {
+    if (confirm(isAr ? 'هل أنت متأكد من حذف هذا المستخدم؟' : 'Are you sure you want to delete this user?')) {
+      const updated = await AdminService.deleteUser(userId);
+      setUsers(updated);
+      showToast(isAr ? 'تم حذف المستخدم بنجاح' : 'User deleted');
+    }
   };
 
   const handleUpdateRole = async (userId, newRole) => {
@@ -74,23 +156,76 @@ export default function AdminDashboard() {
     showToast(isAr ? 'تم تحديث حالة الحساب' : 'User account status updated');
   };
 
-  const handleAssignUserStore = async (userId, storeName) => {
-    const updated = await AdminService.assignUserStore(userId, storeName);
-    setUsers(updated);
-    showToast(isAr ? `تم تعيين المستخدم إلى ${storeName}` : `User assigned to ${storeName}`);
+  // ==========================================
+  // CATALOG / DEMO ITEMS ACTIONS (CRUD)
+  // ==========================================
+  const handleSaveProduct = async (e) => {
+    e.preventDefault();
+    if (!formData.title || !formData.price) {
+      alert(isAr ? 'يرجى إدخال اسم المنتج وسعره' : 'Please enter product title and price');
+      return;
+    }
+    if (modalType === 'addProduct') {
+      const updated = await AdminService.createDemoProduct(formData);
+      setCatalogItems(updated);
+      showToast(isAr ? 'تمت إضافة المنتج التجريبي بنجاح' : 'Demo product created');
+    } else if (modalType === 'editProduct') {
+      const updated = await AdminService.updateDemoProduct(activeItem.id, formData);
+      setCatalogItems(updated);
+      showToast(isAr ? 'تم حفظ تعديلات المنتج' : 'Product updated successfully');
+    }
+    closeModal();
+  };
+
+  const handleDeleteProduct = async (productId) => {
+    if (confirm(isAr ? 'هل أنت متأكد من حذف هذا المنتج؟' : 'Are you sure you want to delete this product?')) {
+      const updated = await AdminService.deleteDemoProduct(productId);
+      setCatalogItems(updated);
+      showToast(isAr ? 'تم حذف المنتج من الكتالوج' : 'Product deleted from catalog');
+    }
+  };
+
+  const handleToggleProductVisibility = async (productId) => {
+    const item = catalogItems.find(p => p.id === productId);
+    if (!item) return;
+    const updated = await AdminService.updateDemoProduct(productId, { isHidden: !item.isHidden });
+    setCatalogItems(updated);
+    showToast(isAr ? 'تم تعديل ظهور المنتج في المتجر' : 'Product visibility toggled');
+  };
+
+  // ==========================================
+  // CREATORS ACTIONS (CRUD)
+  // ==========================================
+  const handleSaveCreator = async (e) => {
+    e.preventDefault();
+    if (!formData.name || !formData.handle) {
+      alert(isAr ? 'يرجى إدخال اسم المبدع وحسابه' : 'Please enter creator name and handle');
+      return;
+    }
+    if (modalType === 'addCreator') {
+      const updated = await AdminService.createCreator(formData);
+      setCreators(updated);
+      showToast(isAr ? 'تمت إضافة المبدع وتحديد نسبة العمولة' : 'Creator added successfully');
+    } else if (modalType === 'editCreator') {
+      const updated = await AdminService.updateCreator(activeItem.id, formData);
+      setCreators(updated);
+      showToast(isAr ? 'تم حفظ بيانات المبدع' : 'Creator updated');
+    }
+    closeModal();
+  };
+
+  const handleDeleteCreator = async (creatorId) => {
+    if (confirm(isAr ? 'هل أنت متأكد من حذف هذا المبدع؟' : 'Are you sure you want to delete this creator?')) {
+      const updated = await AdminService.deleteCreator(creatorId);
+      setCreators(updated);
+      showToast(isAr ? 'تم حذف المبدع' : 'Creator deleted');
+    }
   };
 
   const handleUpdateCommission = async (creatorId, rate) => {
     const updated = await AdminService.updateCreatorCommission(creatorId, rate);
     setCreators(updated);
     showToast(isAr ? `تم تحديث نسبة العمولة إلى %${rate}` : `Commission rate updated to ${rate}%`);
-  };
-
-  const handleToggleProductVisibility = (productId) => {
-    setCatalogItems(prev => prev.map(p => 
-      p.id === productId ? { ...p, isHidden: !p.isHidden } : p
-    ));
-    showToast(isAr ? 'تم تعديل ظهور المنتج في السوق' : 'Product visibility updated');
   };
 
   if (loading) {
@@ -159,11 +294,10 @@ export default function AdminDashboard() {
             </span>
           </div>
           <p className="text-xs text-gray-500 mt-1">
-            {isAr ? 'إدارة المتاجر وساب دومينات التجار، المبدعين، صلاحيات المستخدمين، وعناصر الكتالوج' : 'Control stores & subdomains, creators, user role assignments, and catalog items'}
+            {isAr ? 'التحكم الشامل: إضافة وتعديل وحذف المتاجر، الساب دومين، المبدعين، صلاحيات المستخدمين، والمنتجات' : 'Full CRUD control: add, edit, and delete stores, subdomains, creators, user roles, and catalog items'}
           </p>
         </div>
 
-        {/* Action Pills */}
         <div className="flex items-center gap-2">
           <span className="text-xs text-gray-500 hidden sm:inline font-mono">
             {user?.email || 'superadmin@egyptian-commerce.com'}
@@ -215,7 +349,6 @@ export default function AdminDashboard() {
       {/* ========================================================================= */}
       {activeTab === 'overview' && (
         <div className="space-y-6">
-          {/* Top 4 KPI Metrics */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
               <div className="w-8 h-8 rounded-lg bg-red-50 text-[#d00000] flex items-center justify-center mb-3">
@@ -241,7 +374,7 @@ export default function AdminDashboard() {
               <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mb-3">
                 <span className="material-symbols-outlined text-[18px]">domain</span>
               </div>
-              <span className="text-xs text-gray-400 font-medium block">{isAr ? 'المتاجر النشطة (Subdomains)' : 'Active Subdomain Stores'}</span>
+              <span className="text-xs text-gray-400 font-medium block">{isAr ? 'المتاجر والساب دومينات' : 'Active Subdomains'}</span>
               <span className="text-xl font-bold font-mono text-slate-900 mt-1 block">{stores.length} متاجر</span>
             </div>
 
@@ -254,7 +387,6 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* SVG Responsive GMV Chart */}
           <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
             <div className="flex items-center justify-between mb-6">
               <div>
@@ -270,7 +402,7 @@ export default function AdminDashboard() {
               <div className="min-w-[640px] h-64 relative flex flex-col justify-between pt-4 pb-2">
                 <svg className="w-full h-44 overflow-visible" viewBox="0 0 700 160" preserveAspectRatio="none">
                   <defs>
-                    <linearGradient id="superadminGmvGrad" x1="0" y1="0" x2="0" y2="1">
+                    <linearGradient id="superadminGmvGrad2" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="#d00000" stopOpacity="0.28" />
                       <stop offset="100%" stopColor="#d00000" stopOpacity="0.0" />
                     </linearGradient>
@@ -283,7 +415,7 @@ export default function AdminDashboard() {
 
                   <path
                     d="M 50 115 C 100 95, 120 90, 150 88 C 180 86, 220 101, 250 103 C 280 105, 320 80, 350 76 C 380 72, 420 56, 450 52 C 480 48, 520 30, 550 28 C 580 26, 620 62, 650 68 L 650 140 L 50 140 Z"
-                    fill="url(#superadminGmvGrad)"
+                    fill="url(#superadminGmvGrad2)"
                   />
 
                   <path
@@ -328,7 +460,7 @@ export default function AdminDashboard() {
       )}
 
       {/* ========================================================================= */}
-      {/* 2. STORES & SUBDOMAINS TAB */}
+      {/* 2. STORES & SUBDOMAINS TAB (With Add, Edit, Delete) */}
       {/* ========================================================================= */}
       {activeTab === 'stores' && (
         <div className="space-y-4">
@@ -336,12 +468,16 @@ export default function AdminDashboard() {
             <div>
               <h3 className="font-bold text-slate-900">{isAr ? 'متاجر المنصة والساب دومينات (Shopify-Style Subdomains)' : 'Subdomain Stores Directory'}</h3>
               <p className="text-xs text-gray-500 mt-0.5">
-                {isAr ? 'لكل تاجر واجهة متجر مستقلة معزولة تعمل على الساب دومين الخاص به' : 'Each merchant operates an isolated branded boutique on their designated subdomain'}
+                {isAr ? 'إمكانية إضافة متجر جديد بساب دومين فوري، تعديل البيانات، أو حذف المتجر' : 'Add new stores with automatic subdomain provision, edit details, or remove stores'}
               </p>
             </div>
-            <span className="px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold font-mono">
-              {stores.length} {isAr ? 'متاجر مسجلة' : 'Registered Boutiques'}
-            </span>
+            <button
+              onClick={() => openModal('addStore')}
+              className="px-4 py-2 rounded-xl bg-[#d00000] hover:bg-red-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-md active:scale-95 transition-all"
+            >
+              <span className="material-symbols-outlined text-[16px]">add_business</span>
+              <span>{isAr ? 'إضافة متجر ساب دومين جديد' : 'Add New Store'}</span>
+            </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -363,7 +499,6 @@ export default function AdminDashboard() {
                     </span>
                   </div>
 
-                  {/* Subdomain & Custom Domain Badges */}
                   <div className="p-3 bg-gray-50 rounded-xl border border-gray-100 space-y-2 text-xs">
                     <div className="flex items-center justify-between">
                       <span className="text-gray-500 text-[11px] font-medium">{isAr ? 'الساب دومين المعتمد:' : 'Subdomain:'}</span>
@@ -392,7 +527,6 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
-                  {/* Products & Revenue Row */}
                   <div className="grid grid-cols-2 gap-3 text-xs">
                     <div className="p-2.5 rounded-xl bg-slate-50">
                       <span className="text-[10px] text-gray-400 block font-bold">{isAr ? 'المنتجات في الكتالوج' : 'Active Products'}</span>
@@ -405,7 +539,7 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                {/* Action Buttons */}
+                {/* Store Action Bar: Visit, Edit, Toggle, Delete */}
                 <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
                   <a
                     href={`https://${st.subdomain}`}
@@ -413,9 +547,15 @@ export default function AdminDashboard() {
                     rel="noreferrer"
                     className="flex-1 py-2 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold text-center flex items-center justify-center gap-1 transition-all"
                   >
-                    <span className="material-symbols-outlined text-[15px]">store</span>
-                    <span>{isAr ? 'زيارة المتجر المستقل' : 'Visit Boutique'}</span>
+                    <span className="material-symbols-outlined text-[15px]">open_in_new</span>
+                    <span>{isAr ? 'زيارة المتجر' : 'Visit'}</span>
                   </a>
+                  <button
+                    onClick={() => openModal('editStore', st)}
+                    className="px-3 py-2 rounded-xl border border-gray-200 bg-white text-slate-700 hover:bg-gray-50 text-xs font-bold transition-colors"
+                  >
+                    {isAr ? 'تعديل' : 'Edit'}
+                  </button>
                   <button
                     onClick={() => handleToggleStoreStatus(st.id)}
                     className={`px-3 py-2 rounded-xl text-xs font-bold border transition-colors ${
@@ -424,7 +564,14 @@ export default function AdminDashboard() {
                         : 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
                     }`}
                   >
-                    {st.status === 'active' ? (isAr ? 'إيقاف مؤقت' : 'Pause') : (isAr ? 'تفعيل' : 'Activate')}
+                    {st.status === 'active' ? (isAr ? 'إيقاف' : 'Pause') : (isAr ? 'تفعيل' : 'Activate')}
+                  </button>
+                  <button
+                    onClick={() => handleDeleteStore(st.id)}
+                    className="p-2 rounded-xl border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
+                    title={isAr ? 'حذف المتجر' : 'Delete Store'}
+                  >
+                    <span className="material-symbols-outlined text-[16px]">delete</span>
                   </button>
                 </div>
               </div>
@@ -434,7 +581,7 @@ export default function AdminDashboard() {
       )}
 
       {/* ========================================================================= */}
-      {/* 3. CREATORS & AFFILIATES TAB */}
+      {/* 3. CREATORS & AFFILIATES TAB (With Add, Edit, Delete) */}
       {/* ========================================================================= */}
       {activeTab === 'creators' && (
         <div className="space-y-4">
@@ -442,26 +589,48 @@ export default function AdminDashboard() {
             <div>
               <h3 className="font-bold text-slate-900">{isAr ? 'صناع المحتوى والمسوقين بالعمولة (Creators & Affiliates)' : 'Content Creators & Affiliates'}</h3>
               <p className="text-xs text-gray-500 mt-0.5">
-                {isAr ? 'إدارة شراكات المبدعين مع البراندات ونسب العمولات على مبيعات الريلز' : 'Manage creator affiliations, video reels conversion, and take-rate commissions'}
+                {isAr ? 'إضافة مبدعين، ربطهم بالبراندات، وتعديل نسب العمولات والأرباح' : 'Add creators, assign to brands, and manage commission rates'}
               </p>
             </div>
-            <span className="px-3 py-1 rounded-full bg-purple-50 text-purple-700 text-xs font-bold font-mono">
-              {creators.length} {isAr ? 'مبدعين معتمدين' : 'Active Creators'}
-            </span>
+            <button
+              onClick={() => openModal('addCreator')}
+              className="px-4 py-2 rounded-xl bg-[#d00000] hover:bg-red-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-md active:scale-95 transition-all"
+            >
+              <span className="material-symbols-outlined text-[16px]">person_add</span>
+              <span>{isAr ? 'إضافة مبدع جديد' : 'Add Creator'}</span>
+            </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {creators.map(c => (
               <div key={c.id} className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between space-y-3">
-                <div className="flex items-start gap-3">
-                  <img src={c.avatar} alt={c.name} className="w-12 h-12 rounded-full object-cover border-2 border-[#d00000] p-0.5" />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <h4 className="font-bold text-slate-900 text-sm truncate">{c.name}</h4>
-                      <span className="material-symbols-outlined text-[15px] text-sky-500 fill-current">verified</span>
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start gap-3">
+                    <img src={c.avatar} alt={c.name} className="w-12 h-12 rounded-full object-cover border-2 border-[#d00000] p-0.5" />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <h4 className="font-bold text-slate-900 text-sm truncate">{c.name}</h4>
+                        <span className="material-symbols-outlined text-[15px] text-sky-500 fill-current">verified</span>
+                      </div>
+                      <span className="text-xs font-mono text-[#d00000] font-bold block">{c.handle}</span>
+                      <span className="text-[11px] text-gray-400 block mt-0.5">{c.specialty}</span>
                     </div>
-                    <span className="text-xs font-mono text-[#d00000] font-bold block">{c.handle}</span>
-                    <span className="text-[11px] text-gray-400 block mt-0.5">{c.specialty}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => openModal('editCreator', c)}
+                      className="p-1.5 rounded-lg border border-gray-200 text-slate-700 hover:bg-gray-100"
+                      title={isAr ? 'تعديل' : 'Edit'}
+                    >
+                      <span className="material-symbols-outlined text-[16px]">edit</span>
+                    </button>
+                    <button
+                      onClick={() => handleDeleteCreator(c.id)}
+                      className="p-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50"
+                      title={isAr ? 'حذف' : 'Delete'}
+                    >
+                      <span className="material-symbols-outlined text-[16px]">delete</span>
+                    </button>
                   </div>
                 </div>
 
@@ -480,9 +649,8 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                {/* Commission Rate Control */}
                 <div className="flex items-center justify-between pt-2 border-t border-gray-100 text-xs">
-                  <span className="font-bold text-slate-700">{isAr ? 'نسبة العمولة (Commission):' : 'Commission Rate:'}</span>
+                  <span className="font-bold text-slate-700">{isAr ? 'نسبة العمولة:' : 'Commission:'}</span>
                   <div className="flex items-center gap-1.5">
                     {[10, 12, 15, 20].map(rate => (
                       <button
@@ -506,7 +674,7 @@ export default function AdminDashboard() {
       )}
 
       {/* ========================================================================= */}
-      {/* 4. USERS & ROLE ASSIGNMENT TAB */}
+      {/* 4. USERS & ROLE ASSIGNMENT TAB (With Add, Edit, Delete) */}
       {/* ========================================================================= */}
       {activeTab === 'users' && (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden space-y-4 p-4">
@@ -514,26 +682,36 @@ export default function AdminDashboard() {
             <div>
               <h3 className="font-bold text-slate-900">{isAr ? 'إدارة المستخدمين وتعيين الصلاحيات (Role Assignment)' : 'Users Management & Permissions'}</h3>
               <p className="text-xs text-gray-500 mt-0.5">
-                {isAr ? 'صلاحية المشرف العام الكاملة لتعيين الأدوار، ربط التجار بالمتاجر، وتجميد الحسابات' : 'Superadmin controls to assign roles, link merchants to boutiques, and manage permissions'}
+                {isAr ? 'إضافة مستخدم جديد، ترقية الحسابات، وربط التجار بالمتاجر' : 'Add users, elevate permissions, and assign merchants to boutiques'}
               </p>
             </div>
 
-            {/* Filter by Role */}
-            <div className="flex items-center gap-1.5 flex-wrap">
-              {['all', 'superadmin', 'admin', 'merchant', 'creator', 'driver', 'buyer'].map(r => (
-                <button
-                  key={r}
-                  onClick={() => setRoleFilter(r)}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold font-mono transition-all ${
-                    roleFilter === r 
-                      ? 'bg-slate-900 text-white shadow-xs' 
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                >
-                  {r.toUpperCase()}
-                </button>
-              ))}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => openModal('addUser')}
+                className="px-3.5 py-1.5 rounded-xl bg-[#d00000] hover:bg-red-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-md active:scale-95 transition-all"
+              >
+                <span className="material-symbols-outlined text-[16px]">person_add</span>
+                <span>{isAr ? 'إضافة مستخدم جديد' : 'Add User'}</span>
+              </button>
             </div>
+          </div>
+
+          {/* Filter Pills */}
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {['all', 'superadmin', 'admin', 'merchant', 'creator', 'driver', 'buyer'].map(r => (
+              <button
+                key={r}
+                onClick={() => setRoleFilter(r)}
+                className={`px-3 py-1 rounded-lg text-xs font-bold font-mono transition-all ${
+                  roleFilter === r 
+                    ? 'bg-slate-900 text-white shadow-xs' 
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                {r.toUpperCase()}
+              </button>
+            ))}
           </div>
 
           <div className="overflow-x-auto">
@@ -542,10 +720,10 @@ export default function AdminDashboard() {
                 <tr>
                   <th className="px-4 py-3 text-start">{isAr ? 'المستخدم' : 'User'}</th>
                   <th className="px-4 py-3 text-start">{isAr ? 'البريد الإلكتروني' : 'Email'}</th>
-                  <th className="px-4 py-3 text-start">{isAr ? 'الدور الحالي (Role)' : 'Role'}</th>
-                  <th className="px-4 py-3 text-start">{isAr ? 'المتجر / المركز المعين' : 'Assigned Entity'}</th>
+                  <th className="px-4 py-3 text-start">{isAr ? 'الدور (Role)' : 'Role'}</th>
+                  <th className="px-4 py-3 text-start">{isAr ? 'المتجر المعين' : 'Assigned Entity'}</th>
                   <th className="px-4 py-3 text-start">{isAr ? 'الحالة' : 'Status'}</th>
-                  <th className="px-4 py-3 text-end">{isAr ? 'إجراءات المشرف' : 'Actions'}</th>
+                  <th className="px-4 py-3 text-end">{isAr ? 'الإجراءات' : 'Actions'}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -582,22 +760,8 @@ export default function AdminDashboard() {
                         <option value="buyer">BUYER (مشتري عادي)</option>
                       </select>
                     </td>
-                    <td className="px-4 py-3 text-gray-600">
-                      {u.role === 'merchant' ? (
-                        <select
-                          value={u.assignedStore || 'Talieska Studio (talieska)'}
-                          onChange={(e) => handleAssignUserStore(u.id, e.target.value)}
-                          className="px-2 py-0.5 rounded border border-gray-200 text-[11px] bg-white font-medium focus:outline-none"
-                        >
-                          {stores.map(st => (
-                            <option key={st.id} value={`${st.name} (${st.subdomain.split('.')[0]})`}>
-                              {st.name}
-                            </option>
-                          ))}
-                        </select>
-                      ) : (
-                        <span className="text-[11px] text-gray-500 font-mono">{u.assignedStore || '—'}</span>
-                      )}
+                    <td className="px-4 py-3 text-gray-600 font-mono text-[11px]">
+                      {u.assignedStore || '—'}
                     </td>
                     <td className="px-4 py-3">
                       <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold font-mono ${
@@ -607,16 +771,31 @@ export default function AdminDashboard() {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-end">
-                      <button
-                        onClick={() => handleToggleUserStatus(u.id)}
-                        className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition-all ${
-                          u.status === 'active' 
-                            ? 'border-red-200 bg-red-50 text-red-600 hover:bg-red-100' 
-                            : 'border-emerald-200 bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
-                        }`}
-                      >
-                        {u.status === 'active' ? (isAr ? 'تجميد الحساب' : 'Suspend') : (isAr ? 'تفعيل' : 'Reactivate')}
-                      </button>
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          onClick={() => openModal('editUser', u)}
+                          className="px-2 py-1 rounded border border-gray-200 text-slate-700 hover:bg-gray-100 font-bold"
+                        >
+                          {isAr ? 'تعديل' : 'Edit'}
+                        </button>
+                        <button
+                          onClick={() => handleToggleUserStatus(u.id)}
+                          className={`px-2 py-1 rounded font-bold ${
+                            u.status === 'active' 
+                              ? 'bg-amber-50 text-amber-700 hover:bg-amber-100' 
+                              : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                          }`}
+                        >
+                          {u.status === 'active' ? (isAr ? 'تجميد' : 'Suspend') : (isAr ? 'تنشيط' : 'Activate')}
+                        </button>
+                        <button
+                          onClick={() => handleDeleteUser(u.id)}
+                          className="p-1 rounded text-red-600 hover:bg-red-50"
+                          title={isAr ? 'حذف المستخدم' : 'Delete'}
+                        >
+                          <span className="material-symbols-outlined text-[16px]">delete</span>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -627,7 +806,7 @@ export default function AdminDashboard() {
       )}
 
       {/* ========================================================================= */}
-      {/* 5. CATALOG & DEMO ITEMS TAB */}
+      {/* 5. CATALOG & DEMO ITEMS TAB (With Add, Edit, Delete) */}
       {/* ========================================================================= */}
       {activeTab === 'catalog' && (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden space-y-4 p-4">
@@ -635,13 +814,11 @@ export default function AdminDashboard() {
             <div>
               <h3 className="font-bold text-slate-900">{isAr ? 'إدارة العناصر والمنتجات التجريبية (Demo Catalog Items)' : 'Demo Products & Catalog Control'}</h3>
               <p className="text-xs text-gray-500 mt-0.5">
-                {isAr ? 'التحكم في المنتجات المعروضة في المتاجر، إخفاء/إظهار القطع، وتتبع المخزون' : 'Control items distributed across merchant stores, toggle visibility, and monitor inventory'}
+                {isAr ? 'إضافة منتجات جديدة، تعديل الأسعار، إخفاء المنتجات أو حذفها' : 'Add new items, adjust pricing, toggle visibility, and delete products'}
               </p>
             </div>
 
-            {/* Filter by Store */}
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-500 font-bold">{isAr ? 'تصفية حسب المتجر:' : 'Filter by Store:'}</span>
+            <div className="flex items-center gap-3">
               <select
                 value={storeFilter}
                 onChange={(e) => setStoreFilter(e.target.value)}
@@ -652,6 +829,14 @@ export default function AdminDashboard() {
                   <option key={st.id} value={st.id}>{st.name}</option>
                 ))}
               </select>
+
+              <button
+                onClick={() => openModal('addProduct')}
+                className="px-3.5 py-1.5 rounded-xl bg-[#d00000] hover:bg-red-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-md active:scale-95 transition-all"
+              >
+                <span className="material-symbols-outlined text-[16px]">add</span>
+                <span>{isAr ? 'إضافة منتج تجريبي' : 'Add Product'}</span>
+              </button>
             </div>
           </div>
 
@@ -660,18 +845,18 @@ export default function AdminDashboard() {
               <thead className="bg-gray-50 text-gray-500 uppercase tracking-wider font-bold border-y border-gray-100">
                 <tr>
                   <th className="px-4 py-3 text-start">{isAr ? 'المنتج' : 'Product'}</th>
-                  <th className="px-4 py-3 text-start">{isAr ? 'المتجر المالك' : 'Store / Merchant'}</th>
+                  <th className="px-4 py-3 text-start">{isAr ? 'المتجر المالك' : 'Store'}</th>
                   <th className="px-4 py-3 text-start">{isAr ? 'السعر (EGP)' : 'Price'}</th>
                   <th className="px-4 py-3 text-start">{isAr ? 'التصنيف' : 'Category'}</th>
                   <th className="px-4 py-3 text-start">{isAr ? 'الحالة' : 'Visibility'}</th>
-                  <th className="px-4 py-3 text-end">{isAr ? 'إجراءات' : 'Actions'}</th>
+                  <th className="px-4 py-3 text-end">{isAr ? 'الإجراءات' : 'Actions'}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {filteredCatalog.map(prod => (
                   <tr key={prod.id} className="hover:bg-gray-50/60 transition-colors">
                     <td className="px-4 py-3 flex items-center gap-3">
-                      <img src={prod.image} alt={prod.title} className="w-10 h-10 rounded-xl object-cover border border-gray-100" />
+                      <img src={prod.image} alt={prod.title} className="w-10 h-10 rounded-xl object-cover border border-gray-100 shrink-0" />
                       <div>
                         <span className="font-bold text-slate-900 block truncate max-w-xs">{prod.title}</span>
                         <span className="text-[10px] text-gray-400 font-mono">{prod.id}</span>
@@ -688,25 +873,305 @@ export default function AdminDashboard() {
                       <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold font-mono ${
                         !prod.isHidden ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
                       }`}>
-                        {!prod.isHidden ? '● معروض في المتجر' : '○ مخفي مؤقتاً'}
+                        {!prod.isHidden ? '● معروض' : '○ مخفي'}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-end">
-                      <button
-                        onClick={() => handleToggleProductVisibility(prod.id)}
-                        className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition-all ${
-                          !prod.isHidden 
-                            ? 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100' 
-                            : 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-                        }`}
-                      >
-                        {!prod.isHidden ? (isAr ? 'إخفاء من المتجر' : 'Hide') : (isAr ? 'إظهار' : 'Unhide')}
-                      </button>
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          onClick={() => openModal('editProduct', prod)}
+                          className="px-2 py-1 rounded border border-gray-200 text-slate-700 hover:bg-gray-100 font-bold"
+                        >
+                          {isAr ? 'تعديل' : 'Edit'}
+                        </button>
+                        <button
+                          onClick={() => handleToggleProductVisibility(prod.id)}
+                          className={`px-2 py-1 rounded font-bold ${
+                            !prod.isHidden 
+                              ? 'bg-amber-50 text-amber-700 hover:bg-amber-100' 
+                              : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                          }`}
+                        >
+                          {!prod.isHidden ? (isAr ? 'إخفاء' : 'Hide') : (isAr ? 'إظهار' : 'Unhide')}
+                        </button>
+                        <button
+                          onClick={() => handleDeleteProduct(prod.id)}
+                          className="p-1 rounded text-red-600 hover:bg-red-50"
+                          title={isAr ? 'حذف المنتج' : 'Delete'}
+                        >
+                          <span className="material-symbols-outlined text-[16px]">delete</span>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* UNIVERSAL MODAL (ADD / EDIT FOR STORES, USERS, PRODUCTS, CREATORS) */}
+      {/* ========================================================================= */}
+      {modalType && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-fade-in text-start">
+            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+              <h3 className="font-bold text-slate-900 text-base">
+                {modalType === 'addStore' && (isAr ? 'إضافة متجر ساب دومين جديد' : 'Add New Subdomain Store')}
+                {modalType === 'editStore' && (isAr ? 'تعديل بيانات المتجر' : 'Edit Store Details')}
+                {modalType === 'addUser' && (isAr ? 'إضافة مستخدم جديد' : 'Add New Platform User')}
+                {modalType === 'editUser' && (isAr ? 'تعديل المستخدم وتعيين الصلاحيات' : 'Edit User & Permissions')}
+                {modalType === 'addProduct' && (isAr ? 'إضافة منتج تجريبي جديد' : 'Add Demo Product')}
+                {modalType === 'editProduct' && (isAr ? 'تعديل بيانات المنتج' : 'Edit Product')}
+                {modalType === 'addCreator' && (isAr ? 'إضافة صانع محتوى' : 'Add Content Creator')}
+                {modalType === 'editCreator' && (isAr ? 'تعديل بيانات المبدع' : 'Edit Creator')}
+              </h3>
+              <button onClick={closeModal} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200">
+                <span className="material-symbols-outlined text-[18px]">close</span>
+              </button>
+            </div>
+
+            {/* Form Content Depending on Modal Type */}
+            <form onSubmit={
+              modalType.includes('Store') ? handleSaveStore :
+              modalType.includes('User') ? handleSaveUser :
+              modalType.includes('Product') ? handleSaveProduct :
+              handleSaveCreator
+            } className="p-6 space-y-4 text-xs">
+              {/* STORES FORM */}
+              {modalType.includes('Store') && (
+                <>
+                  <div>
+                    <label className="block font-bold text-gray-700 mb-1">{isAr ? 'اسم المتجر (البراند)' : 'Store Name'}</label>
+                    <input 
+                      type="text" 
+                      required 
+                      value={formData.name || ''} 
+                      onChange={e => setFormData({ ...formData, name: e.target.value })} 
+                      className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:border-slate-900 outline-none" 
+                      placeholder="e.g. Cairo Linen Studio"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-gray-700 mb-1">{isAr ? 'الساب دومين المخصص' : 'Subdomain'}</label>
+                    <div className="flex items-center">
+                      <input 
+                        type="text" 
+                        required 
+                        value={formData.subdomain || ''} 
+                        onChange={e => setFormData({ ...formData, subdomain: e.target.value })} 
+                        className="flex-1 px-3 py-2 rounded-xl border border-gray-200 focus:border-slate-900 outline-none font-mono" 
+                        placeholder="e.g. linen.egyptian-commerce.com"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block font-bold text-gray-700 mb-1">{isAr ? 'الدومين المخصص (اختياري)' : 'Custom Domain (Optional)'}</label>
+                    <input 
+                      type="text" 
+                      value={formData.customDomain || ''} 
+                      onChange={e => setFormData({ ...formData, customDomain: e.target.value })} 
+                      className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:border-slate-900 outline-none font-mono" 
+                      placeholder="e.g. linenatelier.eg"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-gray-700 mb-1">{isAr ? 'البريد الإلكتروني للمالك' : 'Owner Email'}</label>
+                    <input 
+                      type="email" 
+                      required 
+                      value={formData.ownerEmail || ''} 
+                      onChange={e => setFormData({ ...formData, ownerEmail: e.target.value })} 
+                      className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:border-slate-900 outline-none font-mono" 
+                      placeholder="merchant@egyptian-commerce.com"
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* USERS FORM */}
+              {modalType.includes('User') && (
+                <>
+                  <div>
+                    <label className="block font-bold text-gray-700 mb-1">{isAr ? 'الاسم الكامل' : 'Full Name'}</label>
+                    <input 
+                      type="text" 
+                      required 
+                      value={formData.name || ''} 
+                      onChange={e => setFormData({ ...formData, name: e.target.value })} 
+                      className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:border-slate-900 outline-none" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-gray-700 mb-1">{isAr ? 'البريد الإلكتروني' : 'Email'}</label>
+                    <input 
+                      type="email" 
+                      required 
+                      value={formData.email || ''} 
+                      onChange={e => setFormData({ ...formData, email: e.target.value })} 
+                      className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:border-slate-900 outline-none font-mono" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-gray-700 mb-1">{isAr ? 'الدور والصلاحية (Role)' : 'Role'}</label>
+                    <select 
+                      value={formData.role || 'buyer'} 
+                      onChange={e => setFormData({ ...formData, role: e.target.value })} 
+                      className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:border-slate-900 outline-none font-bold"
+                    >
+                      <option value="superadmin">SUPERADMIN (مشرف عام)</option>
+                      <option value="admin">ADMIN (مسؤول منصة)</option>
+                      <option value="merchant">MERCHANT (تاجر معتمد)</option>
+                      <option value="creator">CREATOR (صانع محتوى)</option>
+                      <option value="driver">DRIVER (مندوب شحن)</option>
+                      <option value="buyer">BUYER (مشتري عادي)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block font-bold text-gray-700 mb-1">{isAr ? 'المتجر أو الكيان المعين له' : 'Assigned Store'}</label>
+                    <input 
+                      type="text" 
+                      value={formData.assignedStore || ''} 
+                      onChange={e => setFormData({ ...formData, assignedStore: e.target.value })} 
+                      className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:border-slate-900 outline-none font-mono" 
+                      placeholder="e.g. Talieska Studio (talieska)"
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* PRODUCTS FORM */}
+              {modalType.includes('Product') && (
+                <>
+                  <div>
+                    <label className="block font-bold text-gray-700 mb-1">{isAr ? 'اسم المنتج' : 'Product Title'}</label>
+                    <input 
+                      type="text" 
+                      required 
+                      value={formData.title || ''} 
+                      onChange={e => setFormData({ ...formData, title: e.target.value })} 
+                      className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:border-slate-900 outline-none" 
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block font-bold text-gray-700 mb-1">{isAr ? 'السعر الحالي (ج.م)' : 'Price (EGP)'}</label>
+                      <input 
+                        type="number" 
+                        required 
+                        value={formData.price || ''} 
+                        onChange={e => setFormData({ ...formData, price: Number(e.target.value) })} 
+                        className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:border-slate-900 outline-none font-mono" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block font-bold text-gray-700 mb-1">{isAr ? 'السعر قبل الخصم (اختياري)' : 'Original Price'}</label>
+                      <input 
+                        type="number" 
+                        value={formData.originalPrice || ''} 
+                        onChange={e => setFormData({ ...formData, originalPrice: Number(e.target.value) })} 
+                        className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:border-slate-900 outline-none font-mono" 
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block font-bold text-gray-700 mb-1">{isAr ? 'المتجر التابع له' : 'Assign to Store'}</label>
+                    <select 
+                      value={formData.merchantId || stores[0]?.id} 
+                      onChange={e => {
+                        const st = stores.find(s => s.id === e.target.value);
+                        setFormData({ 
+                          ...formData, 
+                          merchantId: e.target.value,
+                          merchant: st?.name || 'Talieska Studio'
+                        });
+                      }} 
+                      className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:border-slate-900 outline-none"
+                    >
+                      {stores.map(st => (
+                        <option key={st.id} value={st.id}>{st.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block font-bold text-gray-700 mb-1">{isAr ? 'رابط ريل الفيديو (MP4 Reel)' : 'Video Reel URL'}</label>
+                    <input 
+                      type="text" 
+                      value={formData.video || ''} 
+                      onChange={e => setFormData({ ...formData, video: e.target.value })} 
+                      className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:border-slate-900 outline-none font-mono text-[11px]" 
+                      placeholder="/images/reels/fashion_citrine_blazer.mp4"
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* CREATORS FORM */}
+              {modalType.includes('Creator') && (
+                <>
+                  <div>
+                    <label className="block font-bold text-gray-700 mb-1">{isAr ? 'اسم صانع المحتوى' : 'Creator Name'}</label>
+                    <input 
+                      type="text" 
+                      required 
+                      value={formData.name || ''} 
+                      onChange={e => setFormData({ ...formData, name: e.target.value })} 
+                      className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:border-slate-900 outline-none" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-gray-700 mb-1">{isAr ? 'حساب السوشيال ميديا' : 'Handle'}</label>
+                    <input 
+                      type="text" 
+                      required 
+                      value={formData.handle || ''} 
+                      onChange={e => setFormData({ ...formData, handle: e.target.value })} 
+                      className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:border-slate-900 outline-none font-mono" 
+                      placeholder="@handle"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block font-bold text-gray-700 mb-1">{isAr ? 'عدد المتابعين' : 'Followers'}</label>
+                      <input 
+                        type="text" 
+                        value={formData.followers || ''} 
+                        onChange={e => setFormData({ ...formData, followers: e.target.value })} 
+                        className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:border-slate-900 outline-none font-mono" 
+                        placeholder="100K"
+                      />
+                    </div>
+                    <div>
+                      <label className="block font-bold text-gray-700 mb-1">{isAr ? 'نسبة العمولة (%)' : 'Commission (%)'}</label>
+                      <input 
+                        type="number" 
+                        value={formData.commissionRate || 12} 
+                        onChange={e => setFormData({ ...formData, commissionRate: Number(e.target.value) })} 
+                        className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:border-slate-900 outline-none font-mono" 
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              <div className="pt-3 flex items-center justify-end gap-2 border-t border-gray-100">
+                <button 
+                  type="button" 
+                  onClick={closeModal} 
+                  className="px-4 py-2.5 rounded-xl border border-gray-200 text-slate-700 font-bold hover:bg-gray-50"
+                >
+                  {isAr ? 'إلغاء' : 'Cancel'}
+                </button>
+                <button 
+                  type="submit" 
+                  className="px-6 py-2.5 rounded-xl bg-[#d00000] hover:bg-red-700 text-white font-bold shadow-md transition-all active:scale-95"
+                >
+                  {isAr ? 'حفظ البيانات' : 'Save'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

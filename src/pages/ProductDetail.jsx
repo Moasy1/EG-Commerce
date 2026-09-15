@@ -109,9 +109,9 @@ export default function ProductDetail() {
 
         {/* Big Product Image with Slider Dots / Video Toggle */}
         <div className="relative w-full aspect-[4/5] bg-black overflow-hidden">
-          {isPlayingVideo && product.video ? (
+          {isPlayingVideo ? (
             <video 
-              src={product.video} 
+              src={product.video || '/images/reels/fashion_citrine_blazer.mp4'} 
               autoPlay 
               loop 
               playsInline 
@@ -140,18 +140,16 @@ export default function ProductDetail() {
             </div>
           )}
 
-          {/* Watch Reel / Photo Badge */}
-          {product.video && (
-            <button 
-              onClick={() => setIsPlayingVideo(!isPlayingVideo)}
-              className="absolute top-3 left-3 px-3 py-1.5 rounded-full bg-black/65 backdrop-blur-md text-white text-[11px] font-bold flex items-center gap-1.5 shadow-lg border border-white/20 hover:bg-black/85 transition-all z-10"
-            >
-              <span className="material-symbols-outlined text-[16px] text-red-400">
-                {isPlayingVideo ? 'photo' : 'play_circle'}
-              </span>
-              <span>{isPlayingVideo ? 'عرض الصورة' : 'مشاهدة الريل • Watch Reel'}</span>
-            </button>
-          )}
+          {/* Watch Reel / Photo Badge (Always Accessible) */}
+          <button 
+            onClick={() => setIsPlayingVideo(!isPlayingVideo)}
+            className="absolute top-3 left-3 px-3 py-1.5 rounded-full bg-black/70 backdrop-blur-md text-white text-[11px] font-bold flex items-center gap-1.5 shadow-lg border border-white/20 hover:bg-black/90 transition-all z-10"
+          >
+            <span className="material-symbols-outlined text-[16px] text-red-400">
+              {isPlayingVideo ? 'photo' : 'smart_display'}
+            </span>
+            <span>{isPlayingVideo ? (isAr ? 'عرض الصور' : 'Show Photos') : (isAr ? 'مشاهدة الريل • Watch Reel' : 'Watch Reel')}</span>
+          </button>
 
           {!isPlayingVideo && (
             <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-black/30 backdrop-blur-md px-2 py-1 rounded-full">
@@ -252,21 +250,46 @@ export default function ProductDetail() {
             </div>
           </div>
 
-          {/* Merchant Profile Card */}
+          {/* Dedicated Shoppable Reel Card */}
+          <div className="p-3.5 rounded-2xl bg-gradient-to-r from-slate-950 via-slate-900 to-black text-white flex items-center justify-between border border-slate-800 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-red-600/20 text-[#d00000] border border-red-500/30 flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-[22px]">smart_display</span>
+              </div>
+              <div>
+                <h4 className="text-xs font-bold flex items-center gap-1.5">
+                  <span>{isAr ? 'فيديو ريل المنتج وتنسيقه' : 'Shoppable Video Reel'}</span>
+                  <span className="px-1.5 py-0.2 rounded bg-red-500/20 text-red-400 text-[9px] font-mono">HD</span>
+                </h4>
+                <p className="text-[10px] text-gray-400 mt-0.5">
+                  {isAr ? 'شاهد حركة القماش وتنسيق اللوك بالصوت والصورة' : 'Watch fabric motion and styling in action'}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                setIsPlayingVideo(true);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="px-3.5 py-1.5 rounded-xl bg-[#d00000] hover:bg-red-700 text-white text-xs font-bold flex items-center gap-1 transition-all shadow-md active:scale-95 shrink-0"
+            >
+              <span className="material-symbols-outlined text-[15px]">play_arrow</span>
+              <span>{isAr ? 'تشغيل' : 'Play'}</span>
+            </button>
+          </div>
+
+          {/* Seller Profile Card */}
           <div 
-            onClick={() => setActiveTab('storefront')}
-            className="flex items-center justify-between p-3 rounded-2xl bg-gray-50 border border-gray-200/80 cursor-pointer hover:bg-gray-100 transition-colors"
+            onClick={() => setActiveTab(isSubdomainMode ? 'storefront' : 'merchant-storefront')}
+            className="p-3 bg-gray-50 border border-gray-100 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors"
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 border border-gray-300">
-                <img src="/images/brands/talieska_logo.jpg" alt="Merchant" className="w-full h-full object-cover" />
+              <div className="w-10 h-10 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold text-xs border border-gray-200 overflow-hidden">
+                <img src="/images/brands/talieska_logo.jpg" alt="Logo" className="w-full h-full object-cover" />
               </div>
-              <div className="text-start">
-                <div className="flex items-center gap-1">
-                  <span className="text-xs font-bold text-slate-900">{product.merchant || 'Talieska Studio'}</span>
-                  <span className="material-symbols-outlined text-[14px] text-blue-500">verified</span>
-                </div>
-                <span className="text-[10px] text-gray-500">Cairo, Egypt • 4.9 ★ (180 orders)</span>
+              <div>
+                <h4 className="text-xs font-bold text-slate-900">{product.merchant || 'Talieska Studio'}</h4>
+                <span className="text-[10px] text-gray-500">Cairo, Egypt • مصمم محلي معتمد</span>
               </div>
             </div>
             <button className="px-3 py-1 rounded-full border border-gray-300 text-xs font-bold text-slate-800 hover:border-[#d00000] hover:text-[#d00000]">

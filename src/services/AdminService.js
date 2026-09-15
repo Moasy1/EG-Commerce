@@ -1,9 +1,11 @@
 import { supabase } from '../lib/supabase';
+import { INITIAL_PRODUCTS } from '../context/AppContext';
 
 // Persistent local storage cache keys for Superadmin actions
 const STORAGE_STORES_KEY = 'eg_admin_stores';
 const STORAGE_USERS_KEY = 'eg_admin_users';
 const STORAGE_CREATORS_KEY = 'eg_admin_creators';
+const STORAGE_CATALOG_KEY = 'eg_admin_demo_catalog';
 
 const DEFAULT_STORES = [
   {
@@ -199,7 +201,9 @@ export const AdminService = {
     }
   },
 
-  // 1. STORES MANAGEMENT
+  // ==========================================
+  // 1. STORES MANAGEMENT (CRUD)
+  // ==========================================
   async getStores() {
     try {
       const cached = localStorage.getItem(STORAGE_STORES_KEY);
@@ -208,6 +212,58 @@ export const AdminService = {
       // LocalStorage fallback
     }
     return DEFAULT_STORES;
+  },
+
+  async createStore(storeData) {
+    try {
+      const stores = await this.getStores();
+      const slug = storeData.subdomain.split('.')[0].toLowerCase().replace(/[^a-z0-9-]/g, '');
+      const newStore = {
+        id: `m-${Date.now().toString().slice(-4)}`,
+        name: storeData.name,
+        subdomain: storeData.subdomain.includes('.') ? storeData.subdomain : `${slug}.egyptian-commerce.com`,
+        customDomain: storeData.customDomain || null,
+        owner: storeData.owner || storeData.ownerEmail,
+        ownerEmail: storeData.ownerEmail,
+        status: 'active',
+        productsCount: 0,
+        revenue: 0,
+        themeMode: storeData.themeMode || 'dark',
+        category: storeData.category || 'أزياء وموضة'
+      };
+      const updated = [newStore, ...stores];
+      localStorage.setItem(STORAGE_STORES_KEY, JSON.stringify(updated));
+      return updated;
+    } catch {
+      return DEFAULT_STORES;
+    }
+  },
+
+  async updateStore(storeId, storeData) {
+    try {
+      const stores = await this.getStores();
+      const updated = stores.map(s => {
+        if (s.id === storeId) {
+          return { ...s, ...storeData };
+        }
+        return s;
+      });
+      localStorage.setItem(STORAGE_STORES_KEY, JSON.stringify(updated));
+      return updated;
+    } catch {
+      return DEFAULT_STORES;
+    }
+  },
+
+  async deleteStore(storeId) {
+    try {
+      const stores = await this.getStores();
+      const updated = stores.filter(s => s.id !== storeId);
+      localStorage.setItem(STORAGE_STORES_KEY, JSON.stringify(updated));
+      return updated;
+    } catch {
+      return DEFAULT_STORES;
+    }
   },
 
   async toggleStoreStatus(storeId) {
@@ -226,7 +282,9 @@ export const AdminService = {
     }
   },
 
-  // 2. CREATORS & AFFILIATES MANAGEMENT
+  // ==========================================
+  // 2. CREATORS & AFFILIATES MANAGEMENT (CRUD)
+  // ==========================================
   async getCreators() {
     try {
       const cached = localStorage.getItem(STORAGE_CREATORS_KEY);
@@ -235,6 +293,53 @@ export const AdminService = {
       // LocalStorage fallback
     }
     return DEFAULT_CREATORS;
+  },
+
+  async createCreator(creatorData) {
+    try {
+      const creators = await this.getCreators();
+      const newCreator = {
+        id: `c-${Date.now().toString().slice(-4)}`,
+        name: creatorData.name,
+        handle: creatorData.handle.startsWith('@') ? creatorData.handle : `@${creatorData.handle}`,
+        followers: creatorData.followers || '10K',
+        brandAffiliation: creatorData.brandAffiliation || 'Talieska Studio',
+        commissionRate: Number(creatorData.commissionRate) || 12,
+        totalEarnings: 0,
+        status: 'verified',
+        avatar: creatorData.avatar || '/images/reels/reel_1.jpg',
+        specialty: creatorData.specialty || 'تنسيق أزياء'
+      };
+      const updated = [newCreator, ...creators];
+      localStorage.setItem(STORAGE_CREATORS_KEY, JSON.stringify(updated));
+      return updated;
+    } catch {
+      return DEFAULT_CREATORS;
+    }
+  },
+
+  async updateCreator(creatorId, creatorData) {
+    try {
+      const creators = await this.getCreators();
+      const updated = creators.map(c => 
+        c.id === creatorId ? { ...c, ...creatorData } : c
+      );
+      localStorage.setItem(STORAGE_CREATORS_KEY, JSON.stringify(updated));
+      return updated;
+    } catch {
+      return DEFAULT_CREATORS;
+    }
+  },
+
+  async deleteCreator(creatorId) {
+    try {
+      const creators = await this.getCreators();
+      const updated = creators.filter(c => c.id !== creatorId);
+      localStorage.setItem(STORAGE_CREATORS_KEY, JSON.stringify(updated));
+      return updated;
+    } catch {
+      return DEFAULT_CREATORS;
+    }
   },
 
   async updateCreatorCommission(creatorId, newRate) {
@@ -250,7 +355,9 @@ export const AdminService = {
     }
   },
 
-  // 3. USERS & ROLE ASSIGNMENT CONTROL (Super Admin Capability)
+  // ==========================================
+  // 3. USERS & ROLE ASSIGNMENT CONTROL (CRUD)
+  // ==========================================
   async getUsers() {
     try {
       const cached = localStorage.getItem(STORAGE_USERS_KEY);
@@ -259,6 +366,53 @@ export const AdminService = {
       // LocalStorage fallback
     }
     return DEFAULT_USERS;
+  },
+
+  async createUser(userData) {
+    try {
+      const users = await this.getUsers();
+      const newUser = {
+        id: `u-${Date.now().toString().slice(-6)}`,
+        name: userData.name,
+        email: userData.email,
+        role: userData.role || 'buyer',
+        assignedStore: userData.assignedStore || null,
+        status: 'active',
+        created_at: new Date().toISOString()
+      };
+      const updated = [newUser, ...users];
+      localStorage.setItem(STORAGE_USERS_KEY, JSON.stringify(updated));
+      return updated;
+    } catch {
+      return DEFAULT_USERS;
+    }
+  },
+
+  async updateUser(userId, userData) {
+    try {
+      const users = await this.getUsers();
+      const updated = users.map(u => {
+        if (u.id === userId) {
+          return { ...u, ...userData };
+        }
+        return u;
+      });
+      localStorage.setItem(STORAGE_USERS_KEY, JSON.stringify(updated));
+      return updated;
+    } catch {
+      return DEFAULT_USERS;
+    }
+  },
+
+  async deleteUser(userId) {
+    try {
+      const users = await this.getUsers();
+      const updated = users.filter(u => u.id !== userId);
+      localStorage.setItem(STORAGE_USERS_KEY, JSON.stringify(updated));
+      return updated;
+    } catch {
+      return DEFAULT_USERS;
+    }
   },
 
   async updateUserRole(userId, newRole) {
@@ -272,7 +426,6 @@ export const AdminService = {
       });
       localStorage.setItem(STORAGE_USERS_KEY, JSON.stringify(updated));
 
-      // Attempt Supabase role update if available
       try {
         await supabase.from('profiles').update({ role: newRole }).eq('id', userId);
       } catch {
@@ -314,6 +467,67 @@ export const AdminService = {
       return updated;
     } catch {
       return DEFAULT_USERS;
+    }
+  },
+
+  // ==========================================
+  // 4. DEMO CATALOG ITEMS MANAGEMENT (CRUD)
+  // ==========================================
+  async getDemoCatalog() {
+    try {
+      const cached = localStorage.getItem(STORAGE_CATALOG_KEY);
+      if (cached) return JSON.parse(cached);
+    } catch {}
+    return INITIAL_PRODUCTS;
+  },
+
+  async createDemoProduct(prodData) {
+    try {
+      const catalog = await this.getDemoCatalog();
+      const newProd = {
+        id: `p-${Date.now().toString().slice(-6)}`,
+        title: prodData.title,
+        price: Number(prodData.price) || 950,
+        originalPrice: Number(prodData.originalPrice) || (Number(prodData.price) * 1.2),
+        image: prodData.image || '/images/products/linen_abaya.jpg',
+        video: prodData.video || '/images/reels/fashion_citrine_blazer.mp4',
+        category: prodData.category || 'Women',
+        merchant: prodData.merchant || 'Talieska Studio • تاليسكا ستوديو',
+        merchantId: prodData.merchantId || 'm-01',
+        rating: 5.0,
+        reviewsCount: 1,
+        sizes: ['S', 'M', 'L', 'XL'],
+        isHidden: false
+      };
+      const updated = [newProd, ...catalog];
+      localStorage.setItem(STORAGE_CATALOG_KEY, JSON.stringify(updated));
+      return updated;
+    } catch {
+      return INITIAL_PRODUCTS;
+    }
+  },
+
+  async updateDemoProduct(prodId, prodData) {
+    try {
+      const catalog = await this.getDemoCatalog();
+      const updated = catalog.map(p => 
+        p.id === prodId ? { ...p, ...prodData } : p
+      );
+      localStorage.setItem(STORAGE_CATALOG_KEY, JSON.stringify(updated));
+      return updated;
+    } catch {
+      return INITIAL_PRODUCTS;
+    }
+  },
+
+  async deleteDemoProduct(prodId) {
+    try {
+      const catalog = await this.getDemoCatalog();
+      const updated = catalog.filter(p => p.id !== prodId);
+      localStorage.setItem(STORAGE_CATALOG_KEY, JSON.stringify(updated));
+      return updated;
+    } catch {
+      return INITIAL_PRODUCTS;
     }
   }
 };

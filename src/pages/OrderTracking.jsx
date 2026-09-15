@@ -9,9 +9,22 @@ export default function OrderTracking() {
 
   useEffect(() => {
     const loadOrders = async () => {
-      if (user) {
-        const data = await OrderService.getOrders(user.id);
-        setOrders(data);
+      const allOrders = await OrderService.getOrders();
+      const lastOrderId = typeof window !== 'undefined' ? sessionStorage.getItem('eg_last_order_id') : null;
+
+      if (lastOrderId) {
+        const found = allOrders.find(o => o.id === lastOrderId);
+        if (found) {
+          setOrders([found, ...allOrders.filter(o => o.id !== lastOrderId)]);
+          return;
+        }
+      }
+
+      if (user?.id) {
+        const userOrders = allOrders.filter(o => o.userId === user.id);
+        setOrders(userOrders.length > 0 ? userOrders : allOrders);
+      } else {
+        setOrders(allOrders);
       }
     };
     loadOrders();
@@ -26,18 +39,25 @@ export default function OrderTracking() {
         <div>
           <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-secondary/10 text-secondary text-xs font-semibold mb-1.5">
             <span className="material-symbols-outlined text-[15px]">check_circle</span>
-            <span>{latestOrder?.status === 'pending' ? 'Order Pending • جاري تأكيد الطلب ⏳' : 'Order Confirmed • تم تأكيد الأوردر بنجاح! 🎉'}</span>
+            <span>{latestOrder?.shippingStatus === 'ready_for_pickup' ? 'جاري تجهيز الشحنة لدى المتجر ⏳' : latestOrder?.shippingStatus === 'in_transit' ? 'الشحنة مع مندوب بوسطة 🚚' : 'تم استلام الأوردر وتأكيده بنجاح! 🎉'}</span>
           </div>
-          <h1 className="font-serif text-lg md:text-xl font-bold text-on-surface">Tracking #{latestOrder ? latestOrder.id.substring(0,8).toUpperCase() : 'EG-984201'} • رقم الشحنة</h1>
+          <h1 className="font-serif text-lg md:text-xl font-bold text-on-surface">
+            تتبع الشحنة #{latestOrder ? latestOrder.id : 'EG-8841'} • {latestOrder?.merchantName || 'Talieska Studio'}
+          </h1>
           <p className="text-xs text-on-surface-variant mt-0.5">
-            البراندات بدأت تجهيز طلبك دلوقتي في مسار الشحن الموحد
+            المتجر بدأ تجهيز طلبك دلوقتي في مسار شحن بوسطة السريع (Bosta Express)
           </p>
         </div>
 
-        {/* Pickup OTP */}
+        {/* Pickup OTP & Tracking Number */}
         <div className="bg-surface-container-low px-4 py-2.5 rounded-xl border border-surface-container-high text-center shrink-0">
-          <span className="text-[10px] text-on-surface-variant font-medium block">Pickup OTP • كود الاستلام</span>
-          <span className="font-serif text-xl font-bold text-secondary tracking-wider">5829</span>
+          <span className="text-[10px] text-on-surface-variant font-medium block">Bosta Tracking • رقم التتبع</span>
+          <span className="font-mono text-xs font-bold text-secondary tracking-wider block">
+            {latestOrder?.trackingNumber || 'BST-77391024'}
+          </span>
+          <span className="text-[10px] text-gray-500 font-mono mt-1 block">
+            OTP: <strong className="text-slate-800 font-bold">5829</strong>
+          </span>
         </div>
       </div>
 
@@ -51,10 +71,10 @@ export default function OrderTracking() {
           <div className="absolute top-1/2 right-4 w-1/2 -translate-y-1/2 h-0.5 bg-secondary z-0" />
 
           {[
-            { label: 'Confirmed • تم التأكيد', icon: 'receipt_long', active: true },
-            { label: 'Preparing • تجهيز', icon: 'inventory_2', active: true },
-            { label: 'Out for Delivery • مع المندوب', icon: 'local_shipping', active: true, current: true },
-            { label: 'Delivered • تم التسليم', icon: 'home', active: false },
+            { label: 'تم التأكيد', icon: 'receipt_long', active: true },
+            { label: 'قيد التجهيز', icon: 'inventory_2', active: true },
+            { label: 'مع المندوب', icon: 'local_shipping', active: latestOrder?.shippingStatus === 'in_transit' || latestOrder?.shippingStatus === 'delivered', current: latestOrder?.shippingStatus === 'in_transit' },
+            { label: 'تم التسليم', icon: 'home', active: latestOrder?.shippingStatus === 'delivered', current: latestOrder?.shippingStatus === 'delivered' },
           ].map((step, idx) => (
             <div key={idx} className="relative z-10 flex flex-col items-center">
               <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold transition-all shadow-xs ${
@@ -76,41 +96,28 @@ export default function OrderTracking() {
       <div className="space-y-3 mb-6">
         <h3 className="text-xs font-bold text-on-surface">Shipment Packages • طرود الطلب من المتاجر</h3>
 
-        {/* Package 1 */}
-        <div className="rounded-xl bg-surface-container-lowest border border-surface-container-high p-4 shadow-sm">
-          <div className="flex items-center justify-between pb-2 mb-2 border-b border-surface-container-high">
-            <div>
-              <span className="text-[11px] font-semibold text-secondary">Package 1 of 2 • طرد 1</span>
-              <h4 className="text-xs font-bold text-on-surface">Talisca Studio • تاليسكا ستوديو</h4>
+        {orders.slice(0, 3).map((ord, idx) => (
+          <div key={ord.id || idx} className="rounded-xl bg-surface-container-lowest border border-surface-container-high p-4 shadow-sm">
+            <div className="flex items-center justify-between pb-2 mb-2 border-b border-surface-container-high">
+              <div>
+                <span className="text-[11px] font-semibold text-secondary font-mono">طرد {idx + 1} • {ord.id}</span>
+                <h4 className="text-xs font-bold text-on-surface">{ord.merchantName || 'متجر مصري معتمد'}</h4>
+              </div>
+              <span className="px-2 py-0.5 rounded-full bg-secondary/10 text-secondary text-[11px] font-semibold flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-secondary" />
+                {ord.shippingStatus === 'in_transit' ? 'مع المندوب' : ord.shippingStatus === 'delivered' ? 'مكتمل التسليم' : 'جاري التجهيز'}
+              </span>
             </div>
-            <span className="px-2 py-0.5 rounded-full bg-secondary/10 text-secondary text-[11px] font-semibold flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-secondary" />
-              Out for Delivery • مع المندوب
-            </span>
-          </div>
-          <div className="flex items-center justify-between text-xs text-on-surface-variant">
-            <span>فستان كتان صيفي بوهيمي (M)</span>
-            <span className="font-semibold text-on-surface">Estimated: Tonight • الليلة</span>
-          </div>
-        </div>
-
-        {/* Package 2 */}
-        <div className="rounded-xl bg-surface-container-lowest border border-surface-container-high p-4 shadow-sm">
-          <div className="flex items-center justify-between pb-2 mb-2 border-b border-surface-container-high">
-            <div>
-              <span className="text-[11px] font-semibold text-secondary">Package 2 of 2 • طرد 2</span>
-              <h4 className="text-xs font-bold text-on-surface">Khan El Khalili Workshop • ورشة خان الخليلي</h4>
+            <div className="flex items-center justify-between text-xs text-on-surface-variant">
+              <span className="font-semibold text-on-surface">{ord.productTitle}</span>
+              <span className="font-bold text-primary font-mono">{ord.amount?.toLocaleString() || ord.total_amount || 0} ج.م</span>
             </div>
-            <span className="px-2 py-0.5 rounded-full bg-surface-container-low text-on-surface-variant text-[11px] font-medium flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-on-surface-variant" />
-              Packaging • جاري التجهيز والتغليف
-            </span>
+            <div className="mt-2 text-[11px] text-gray-500 flex items-center justify-between">
+              <span>طريقة الدفع: {ord.paymentMethod || 'InstaPay'}</span>
+              <span className="font-mono text-[10px]">بواسطة: {ord.courier || 'Bosta Express'}</span>
+            </div>
           </div>
-          <div className="flex items-center justify-between text-xs text-on-surface-variant">
-            <span>حقيبة جلدية كانفاس يدوية</span>
-            <span className="font-semibold text-on-surface">Estimated: Tomorrow • غداً بعد الظهر</span>
-          </div>
-        </div>
+        ))}
       </div>
 
       {/* Action Buttons */}

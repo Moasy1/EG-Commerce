@@ -1,18 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { MerchantService } from '../../services/MerchantService';
-import { useEffect } from 'react';
 import EgLogo from '../common/EgLogo';
+import ProductFormModal from '../merchant/ProductFormModal';
 
 export default function DesktopSellerDashboard() {
-  const { setActiveTab, orders, setOrders, selectedMerchantId, merchants } = useApp();
+  const { 
+    setActiveTab, 
+    orders, 
+    setOrders, 
+    updateOrderStatus, 
+    selectedMerchantId, 
+    setSelectedMerchantId, 
+    merchants, 
+    products, 
+    deleteProduct, 
+    user 
+  } = useApp();
   const [activeNav, setActiveNav] = useState('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
   const [timeframe, setTimeframe] = useState('الأسبوع الماضي');
   const [orderFilter, setOrderFilter] = useState('all');
   const [stats, setStats] = useState({ revenue: 0, orders: 0, reach: 0, engagement: 0 });
 
+  // Product CRUD modal state
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [productToEdit, setProductToEdit] = useState(null);
+
   const currentMerchant = merchants?.find(m => m.id === selectedMerchantId) || merchants?.[0];
+  const merchantProducts = products?.filter(p => p.merchantId === currentMerchant?.id) || [];
   const merchantOrders = orders?.filter(o => o.merchantId === currentMerchant?.id) || [];
 
   useEffect(() => {
@@ -21,58 +37,27 @@ export default function DesktopSellerDashboard() {
     }
   }, [currentMerchant?.id]);
 
-  const productsData = [
-    { 
-      id: 1, 
-      name: 'جلابية بتطريز يدوي', 
-      category: 'ملابس نسائية • جلابيات', 
-      price: '850 ج.م', 
-      stock: 56, 
-      status: 'متاح', 
-      statusColor: 'bg-emerald-50 text-emerald-600 border-emerald-200', 
-      img: '/images/products/linen_abaya.jpg' 
-    },
-    { 
-      id: 2, 
-      name: 'بلوزة قطن مطرزة', 
-      category: 'ملابس نسائية • بلوز', 
-      price: '650 ج.م', 
-      stock: 120, 
-      status: 'متاح', 
-      statusColor: 'bg-emerald-50 text-emerald-600 border-emerald-200', 
-      img: '/images/products/silk_dress.jpg' 
-    },
-    { 
-      id: 3, 
-      name: 'قميص كتان رجالي', 
-      category: 'ملابس رجالية • قمصان', 
-      price: '1,200 ج.م', 
-      stock: 8, 
-      status: 'مخزون منخفض', 
-      statusColor: 'bg-amber-50 text-amber-600 border-amber-200', 
-      img: '/images/products/linen_shirt.jpg' 
-    },
-    { 
-      id: 4, 
-      name: 'عباية كلاسيك', 
-      category: 'ملابس نسائية • عبايات', 
-      price: '980 ج.م', 
-      stock: 34, 
-      status: 'متاح', 
-      statusColor: 'bg-emerald-50 text-emerald-600 border-emerald-200', 
-      img: '/images/products/wool_blazer.jpg' 
-    },
-    { 
-      id: 5, 
-      name: 'جلابية رجالية', 
-      category: 'ملابس رجالية • جلابيات', 
-      price: '1,450 ج.م', 
-      stock: 0, 
-      status: 'غير متاح', 
-      statusColor: 'bg-red-50 text-red-600 border-red-200', 
-      img: '/images/banners/talieska_hero.jpg' 
-    },
-  ];
+  const handleOpenAddProduct = () => {
+    setProductToEdit(null);
+    setIsProductModalOpen(true);
+  };
+
+  const handleOpenEditProduct = (prod) => {
+    setProductToEdit(prod);
+    setIsProductModalOpen(true);
+  };
+
+  const handleDeleteProduct = (prodId) => {
+    if (window.confirm('هل أنت متأكد من حذف هذا المنتج من متجرك نهائياً؟')) {
+      deleteProduct(prodId);
+    }
+  };
+
+  const filteredProducts = merchantProducts.filter(p => 
+    (p.title || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
+    (p.category || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (p.sku || '').toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const topVideos = [
     {
@@ -112,10 +97,6 @@ export default function DesktopSellerDashboard() {
       img: '/images/products/wool_blazer.jpg'
     }
   ];
-
-  const filteredProducts = productsData.filter(p => 
-    p.name.includes(searchQuery) || p.category.includes(searchQuery)
-  );
 
   return (
     <div className="w-full bg-white text-slate-900 flex flex-col md:flex-row font-sans min-h-[640px] md:h-auto overflow-hidden select-none text-right" dir="rtl">
@@ -379,25 +360,24 @@ export default function DesktopSellerDashboard() {
                           <tr key={p.id} className="hover:bg-gray-50/80 transition-colors">
                             <td className="py-3">
                               <div className="flex items-center gap-2.5">
-                                <img src={p.img} alt={p.name} className="w-10 h-10 rounded-xl object-cover border border-gray-200" />
+                                <img src={p.image || p.img} alt={p.title || p.name} className="w-10 h-10 rounded-xl object-cover border border-gray-200" />
                                 <div>
-                                  <span className="font-bold text-slate-900 block leading-tight">{p.name}</span>
+                                  <span className="font-bold text-slate-900 block leading-tight">{p.title || p.name}</span>
                                   <span className="text-[10px] text-gray-400 block">{p.category}</span>
                                 </div>
                               </div>
                             </td>
-                            <td className="py-3 font-bold text-slate-900">{p.price}</td>
-                            <td className="py-3 font-mono font-bold text-gray-600">{p.stock}</td>
+                            <td className="py-3 font-bold text-slate-900">{typeof p.price === 'number' ? `${p.price.toLocaleString()} ج.م` : p.price}</td>
+                            <td className="py-3 font-mono font-bold text-gray-600">{p.stock ?? '∞'}</td>
                             <td className="py-3">
-                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${p.statusColor}`}>
-                                {p.status}
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${p.stock === 0 ? 'bg-red-50 text-red-600 border-red-200' : p.stock && p.stock < 10 ? 'bg-amber-50 text-amber-600 border-amber-200' : 'bg-emerald-50 text-emerald-600 border-emerald-200'}`}>
+                                {p.stock === 0 ? 'نفد المخزون' : p.stock && p.stock < 10 ? 'مخزون منخفض' : 'متاح'}
                               </span>
                             </td>
                             <td className="py-3 text-center">
                               <div className="flex items-center justify-center gap-1 text-gray-400">
-                                <button className="p-1 hover:text-slate-700"><span className="material-symbols-outlined text-[15px]">edit</span></button>
-                                <button className="p-1 hover:text-[#d00000]"><span className="material-symbols-outlined text-[15px]">delete</span></button>
-                                <button className="p-1 hover:text-slate-700"><span className="material-symbols-outlined text-[15px]">more_horiz</span></button>
+                                <button onClick={() => handleOpenEditProduct(p)} className="p-1 hover:text-slate-700" title="تعديل"><span className="material-symbols-outlined text-[15px]">edit</span></button>
+                                <button onClick={() => handleDeleteProduct(p.id)} className="p-1 hover:text-[#d00000]" title="حذف"><span className="material-symbols-outlined text-[15px]">delete</span></button>
                               </div>
                             </td>
                           </tr>
@@ -481,11 +461,11 @@ export default function DesktopSellerDashboard() {
                 </div>
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => setActiveTab('add_product')}
+                    onClick={handleOpenAddProduct}
                     className="px-3.5 py-2 rounded-xl bg-[#d00000] text-white text-xs font-bold shadow-xs hover:brightness-110 transition-all flex items-center gap-1.5"
                   >
-                    <span className="material-symbols-outlined text-[16px]">video_call</span>
-                    <span>رفع فيديو منتج</span>
+                    <span className="material-symbols-outlined text-[16px]">add</span>
+                    <span>+ إضافة منتج</span>
                   </button>
                 </div>
               </div>
@@ -515,25 +495,24 @@ export default function DesktopSellerDashboard() {
                       <tr key={p.id} className="hover:bg-gray-50/80 transition-colors">
                         <td className="py-3">
                           <div className="flex items-center gap-2.5">
-                            <img src={p.img} alt={p.name} className="w-10 h-10 rounded-xl object-cover border border-gray-200" />
+                            <img src={p.image || p.img} alt={p.title || p.name} className="w-10 h-10 rounded-xl object-cover border border-gray-200" />
                             <div>
-                              <span className="font-bold text-slate-900 block leading-tight">{p.name}</span>
+                              <span className="font-bold text-slate-900 block leading-tight">{p.title || p.name}</span>
                               <span className="text-[10px] text-gray-400 block">{p.category}</span>
                             </div>
                           </div>
                         </td>
-                        <td className="py-3 font-bold text-slate-900">{p.price}</td>
-                        <td className="py-3 font-mono font-bold text-gray-600">{p.stock}</td>
+                        <td className="py-3 font-bold text-slate-900">{typeof p.price === 'number' ? `${p.price.toLocaleString()} ج.م` : p.price}</td>
+                        <td className="py-3 font-mono font-bold text-gray-600">{p.stock ?? '∞'}</td>
                         <td className="py-3">
-                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${p.statusColor}`}>
-                            {p.status}
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${p.stock === 0 ? 'bg-red-50 text-red-600 border-red-200' : p.stock && p.stock < 10 ? 'bg-amber-50 text-amber-600 border-amber-200' : 'bg-emerald-50 text-emerald-600 border-emerald-200'}`}>
+                            {p.stock === 0 ? 'نفد المخزون' : p.stock && p.stock < 10 ? 'مخزون منخفض' : 'متاح'}
                           </span>
                         </td>
                         <td className="py-3 text-center">
                           <div className="flex items-center justify-center gap-1 text-gray-400">
-                            <button className="p-1 hover:text-slate-700"><span className="material-symbols-outlined text-[15px]">edit</span></button>
-                            <button className="p-1 hover:text-[#d00000]"><span className="material-symbols-outlined text-[15px]">delete</span></button>
-                            <button className="p-1 hover:text-slate-700"><span className="material-symbols-outlined text-[15px]">more_horiz</span></button>
+                            <button onClick={() => handleOpenEditProduct(p)} className="p-1 hover:text-slate-700" title="تعديل"><span className="material-symbols-outlined text-[15px]">edit</span></button>
+                            <button onClick={() => handleDeleteProduct(p.id)} className="p-1 hover:text-[#d00000]" title="حذف"><span className="material-symbols-outlined text-[15px]">delete</span></button>
                           </div>
                         </td>
                       </tr>
@@ -970,6 +949,13 @@ export default function DesktopSellerDashboard() {
 
         </div>
       </main>
+
+      {/* Product CRUD Modal */}
+      <ProductFormModal
+        isOpen={isProductModalOpen}
+        onClose={() => { setIsProductModalOpen(false); setProductToEdit(null); }}
+        productToEdit={productToEdit}
+      />
     </div>
   );
 }

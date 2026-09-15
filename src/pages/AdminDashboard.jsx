@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { AdminService } from '../services/AdminService';
+import { OrderService } from '../services/OrderService';
 
 export default function AdminDashboard() {
   const { language, user, setIsAuthModalOpen, setActiveTab: setAppTab } = useApp();
@@ -14,6 +15,9 @@ export default function AdminDashboard() {
   const [users, setUsers] = useState([]);
   const [catalogItems, setCatalogItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [platformOrders, setPlatformOrders] = useState([]);
+  const [orderStoreFilter, setOrderStoreFilter] = useState('all');
+  const [orderStatusFilter, setOrderStatusFilter] = useState('all');
   
   // Filter States
   const [roleFilter, setRoleFilter] = useState('all');
@@ -56,6 +60,9 @@ export default function AdminDashboard() {
     setCreators(creatorsData);
     setUsers(usersData);
     setCatalogItems(catalogData);
+    // Load all platform orders
+    const allOrders = OrderService.getInitialOrders();
+    setPlatformOrders(allOrders);
     setLoading(false);
   };
 
@@ -316,6 +323,7 @@ export default function AdminDashboard() {
       <div className="flex items-center gap-2 mb-6 border-b border-gray-200 pb-2 overflow-x-auto hide-scrollbar">
         {[
           { id: 'overview', icon: 'monitoring', label: isAr ? 'نظرة عامة والتحليلات' : 'Overview & GMV', count: null },
+          { id: 'orders', icon: 'receipt_long', label: isAr ? 'الطلبات والمبيعات المركزية' : 'Platform Orders & Sync', count: platformOrders.length },
           { id: 'stores', icon: 'domain', label: isAr ? 'المتاجر والساب دومين' : 'Stores & Subdomains', count: stores.length },
           { id: 'creators', icon: 'verified', label: isAr ? 'المبدعين والمسوقين' : 'Creators & Affiliates', count: creators.length },
           { id: 'users', icon: 'manage_accounts', label: isAr ? 'المستخدمين وتعيين الصلاحيات' : 'Users & Roles', count: users.length },
@@ -458,6 +466,205 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
+
+      {/* ========================================================================= */}
+      {/* PLATFORM ORDERS & SYNC TAB */}
+      {/* ========================================================================= */}
+      {activeTab === 'orders' && (() => {
+        const COMMISSION_RATE = 0.12;
+        
+        const getStatusBadge = (status) => {
+          switch(status) {
+            case 'ready_for_pickup':
+            case 'pending_cod':
+            case 'processing':
+              return { label: 'قيد التجهيز', color: 'bg-amber-50 text-amber-600 border-amber-200' };
+            case 'in_transit':
+              return { label: 'تم الشحن', color: 'bg-blue-50 text-blue-600 border-blue-200' };
+            case 'delivered':
+              return { label: 'مكتمل التوصيل', color: 'bg-emerald-50 text-emerald-600 border-emerald-200' };
+            case 'returned':
+              return { label: 'مرتجع', color: 'bg-red-50 text-red-600 border-red-200' };
+            default:
+              return { label: status || 'غير محدد', color: 'bg-gray-50 text-gray-600 border-gray-200' };
+          }
+        };
+
+        const filtered = platformOrders.filter(o => {
+          const storeMatch = orderStoreFilter === 'all' || o.merchantId === orderStoreFilter;
+          let statusMatch = true;
+          if (orderStatusFilter === 'pending') statusMatch = ['ready_for_pickup', 'pending_cod', 'processing'].includes(o.shippingStatus);
+          else if (orderStatusFilter === 'shipped') statusMatch = o.shippingStatus === 'in_transit';
+          else if (orderStatusFilter === 'completed') statusMatch = o.shippingStatus === 'delivered';
+          else if (orderStatusFilter === 'returned') statusMatch = o.shippingStatus === 'returned';
+          return storeMatch && statusMatch;
+        });
+
+        const totalGMV = filtered.reduce((sum, o) => sum + (o.amount || 0), 0);
+        const platformCommission = Math.round(totalGMV * COMMISSION_RATE);
+        const merchantPayout = totalGMV - platformCommission;
+
+        const handlePlatformOrderStatusUpdate = (orderId, newStatus) => {
+          setPlatformOrders(prev => prev.map(o => o.id === orderId ? { ...o, shippingStatus: newStatus } : o));
+          OrderService.updateOrderStatus(orderId, newStatus);
+        };
+
+        return (
+          <div className="space-y-4">
+            {/* Summary KPIs */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+                <div className="w-7 h-7 rounded-lg bg-red-50 text-[#d00000] flex items-center justify-center mb-2">
+                  <span className="material-symbols-outlined text-[16px]">receipt_long</span>
+                </div>
+                <span className="text-[11px] text-gray-400 font-medium block">{isAr ? 'إجمالي الطلبات المعروضة' : 'Filtered Orders'}</span>
+                <span className="text-lg font-bold font-mono text-slate-900 block">{filtered.length} <span className="text-xs font-normal">طلب</span></span>
+              </div>
+              <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+                <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center mb-2">
+                  <span className="material-symbols-outlined text-[16px]">payments</span>
+                </div>
+                <span className="text-[11px] text-gray-400 font-medium block">{isAr ? 'إجمالي المعاملات (GMV)' : 'Total GMV'}</span>
+                <span className="text-lg font-bold font-mono text-slate-900 block">{totalGMV.toLocaleString()} <span className="text-xs font-normal">ج.م</span></span>
+              </div>
+              <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+                <div className="w-7 h-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center mb-2">
+                  <span className="material-symbols-outlined text-[16px]">account_balance_wallet</span>
+                </div>
+                <span className="text-[11px] text-gray-400 font-medium block">{isAr ? `عمولة المنصة (${COMMISSION_RATE * 100}%)` : `Commission (${COMMISSION_RATE * 100}%)`}</span>
+                <span className="text-lg font-bold font-mono text-purple-600 block">{platformCommission.toLocaleString()} <span className="text-xs font-normal">ج.م</span></span>
+              </div>
+              <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+                <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mb-2">
+                  <span className="material-symbols-outlined text-[16px]">storefront</span>
+                </div>
+                <span className="text-[11px] text-gray-400 font-medium block">{isAr ? 'صافي مستحقات التجار' : 'Merchant Payout'}</span>
+                <span className="text-lg font-bold font-mono text-blue-600 block">{merchantPayout.toLocaleString()} <span className="text-xs font-normal">ج.م</span></span>
+              </div>
+            </div>
+
+            {/* Filters & Table */}
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden p-4 space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-gray-100">
+                <div>
+                  <h3 className="font-bold text-slate-900">{isAr ? 'الطلبات والمبيعات المركزية (Platform Orders & Sync)' : 'Central Platform Orders'}</h3>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {isAr ? 'جميع الطلبات عبر كل المتاجر مع حساب العمولات والتوزيع' : 'All orders across all stores with commission split and sync status'}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <select
+                    value={orderStoreFilter}
+                    onChange={e => setOrderStoreFilter(e.target.value)}
+                    className="px-3 py-1.5 rounded-xl border border-gray-200 bg-gray-50 text-xs font-bold text-gray-700 cursor-pointer focus:outline-none"
+                  >
+                    <option value="all">{isAr ? 'كل المتاجر' : 'All Stores'}</option>
+                    <option value="m-01">Talieska Studio</option>
+                    <option value="m-02">Khan El Khalili Craft</option>
+                    <option value="m-03">Tiba Jewelry</option>
+                  </select>
+                  <select
+                    value={orderStatusFilter}
+                    onChange={e => setOrderStatusFilter(e.target.value)}
+                    className="px-3 py-1.5 rounded-xl border border-gray-200 bg-gray-50 text-xs font-bold text-gray-700 cursor-pointer focus:outline-none"
+                  >
+                    <option value="all">{isAr ? 'كل الحالات' : 'All Statuses'}</option>
+                    <option value="pending">{isAr ? 'قيد التجهيز' : 'Pending'}</option>
+                    <option value="shipped">{isAr ? 'تم الشحن' : 'Shipped'}</option>
+                    <option value="completed">{isAr ? 'مكتمل التوصيل' : 'Delivered'}</option>
+                    <option value="returned">{isAr ? 'مرتجع' : 'Returned'}</option>
+                  </select>
+                </div>
+              </div>
+
+              {filtered.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+                  <span className="material-symbols-outlined text-5xl mb-3">inbox</span>
+                  <p className="text-sm font-bold">{isAr ? 'لا توجد طلبات بهذه المعايير' : 'No orders match the selected filters'}</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-start text-xs">
+                    <thead className="bg-gray-50 text-gray-500 uppercase tracking-wider font-bold border-y border-gray-100">
+                      <tr>
+                        <th className="px-3 py-3 text-start">{isAr ? 'رقم الطلب' : 'Order ID'}</th>
+                        <th className="px-3 py-3 text-start">{isAr ? 'المتجر' : 'Store'}</th>
+                        <th className="px-3 py-3 text-start">{isAr ? 'العميل' : 'Customer'}</th>
+                        <th className="px-3 py-3 text-start">{isAr ? 'المنتج' : 'Product'}</th>
+                        <th className="px-3 py-3 text-start">{isAr ? 'الإجمالي' : 'Total'}</th>
+                        <th className="px-3 py-3 text-start">{isAr ? 'عمولة المنصة' : 'Commission'}</th>
+                        <th className="px-3 py-3 text-start">{isAr ? 'الدفع' : 'Payment'}</th>
+                        <th className="px-3 py-3 text-start w-36">{isAr ? 'حالة الشحن' : 'Status'}</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {filtered.map(o => {
+                        const badge = getStatusBadge(o.shippingStatus);
+                        const commission = Math.round((o.amount || 0) * COMMISSION_RATE);
+                        const payout = (o.amount || 0) - commission;
+                        return (
+                          <tr key={o.id} className="hover:bg-gray-50/60 transition-colors">
+                            <td className="px-3 py-3">
+                              <span className="font-bold text-slate-900 block font-mono">{o.id}</span>
+                              <span className="text-[10px] text-gray-400">{o.date}</span>
+                            </td>
+                            <td className="px-3 py-3">
+                              <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[10px] font-bold whitespace-nowrap">
+                                {o.merchantName?.split(' • ')[0] || o.merchantId}
+                              </span>
+                            </td>
+                            <td className="px-3 py-3">
+                              <span className="font-bold text-slate-800 block text-[11px]">{o.customerName}</span>
+                              <span className="text-[10px] text-gray-500 font-mono" dir="ltr">{o.phone}</span>
+                            </td>
+                            <td className="px-3 py-3 text-gray-600 max-w-[140px] truncate text-[11px]" title={o.productTitle}>
+                              {o.productTitle}
+                            </td>
+                            <td className="px-3 py-3 font-bold font-mono text-slate-900">
+                              {(o.amount || 0).toLocaleString()}
+                              <span className="text-[10px] font-normal text-gray-400"> ج.م</span>
+                            </td>
+                            <td className="px-3 py-3">
+                              <div className="space-y-0.5">
+                                <span className="text-purple-600 font-mono font-bold block">{commission.toLocaleString()} ج.م</span>
+                                <span className="text-[10px] text-gray-400">صافي: {payout.toLocaleString()} ج.م</span>
+                              </div>
+                            </td>
+                            <td className="px-3 py-3">
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold font-mono ${
+                                o.paymentStatus === 'paid' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
+                              }`}>
+                                {o.paymentStatus === 'paid' ? '✓ مدفوع' : '○ COD'}
+                              </span>
+                            </td>
+                            <td className="px-3 py-3">
+                              <div className="flex flex-col gap-1">
+                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border w-fit ${badge.color}`}>
+                                  {badge.label}
+                                </span>
+                                <select
+                                  className="bg-white border border-gray-200 text-slate-700 text-[10px] rounded px-1 py-1 cursor-pointer focus:outline-none w-full shadow-sm"
+                                  value={o.shippingStatus}
+                                  onChange={e => handlePlatformOrderStatusUpdate(o.id, e.target.value)}
+                                >
+                                  <option value="ready_for_pickup">قيد التجهيز</option>
+                                  <option value="in_transit">تم الشحن (بوسطة)</option>
+                                  <option value="delivered">مكتمل التوصيل</option>
+                                  <option value="returned">مرتجع</option>
+                                </select>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ========================================================================= */}
       {/* 2. STORES & SUBDOMAINS TAB (With Add, Edit, Delete) */}

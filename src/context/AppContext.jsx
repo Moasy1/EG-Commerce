@@ -4,6 +4,7 @@ import { ReelsService } from '../services/ReelsService';
 import { CartService } from '../services/CartService';
 import { AuthService } from '../services/AuthService';
 import { RewardService } from '../services/RewardService';
+import { OrderService } from '../services/OrderService';
 
 const AppContext = createContext();
 
@@ -813,7 +814,12 @@ export function AppProvider({ children }) {
   });
   const [merchants, setMerchants] = useState(MERCHANTS_DATA);
   const [selectedMerchantId, setSelectedMerchantId] = useState(() => initialSubdomain.merchantId);
-  const [orders, setOrders] = useState(INITIAL_ORDERS);
+  const [orders, setOrders] = useState(() => OrderService.getInitialOrders());
+
+  const updateOrderStatus = async (orderId, newStatus) => {
+    const updated = await OrderService.updateOrderStatus(orderId, newStatus);
+    setOrders(updated);
+  };
   const [role, setRole] = useState('buyer');
   const [deviceMode, setDeviceMode] = useState('responsive');
   const [language, setLanguage] = useState('ar'); // 'ar' | 'en'
@@ -1115,6 +1121,7 @@ export function AppProvider({ children }) {
       setSelectedMerchantId,
       orders,
       setOrders,
+      updateOrderStatus,
       updateProductSyndication,
       addProduct,
       updateProduct,

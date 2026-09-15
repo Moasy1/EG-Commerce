@@ -5,6 +5,8 @@ import { OrderService } from '../services/OrderService';
 export default function Checkout() {
   const { cartItems, grandTotal, discountFromPoints, shippingTotal, subtotal, setActiveTab, setOrders, user } = useApp();
   const [paymentMethod, setPaymentMethod] = useState('instapay');
+  const [customerName, setCustomerName] = useState(user?.name || 'سلمى الأحمدي');
+  const [phone, setPhone] = useState(user?.phone || '+20 102 345 6789');
   const [address, setAddress] = useState('القاهرة، مصر الجديدة، شارع الثورة عمارة 14');
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -13,23 +15,29 @@ export default function Checkout() {
     
     // Simulate Paymob / Stripe Gateway redirection & processing delay
     if (paymentMethod === 'card') {
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulating 3D secure
+      await new Promise(resolve => setTimeout(resolve, 1200)); // Simulating 3D secure
     } else if (paymentMethod === 'instapay') {
-      await new Promise(resolve => setTimeout(resolve, 800)); // Simulating Instapay deep link verification
+      await new Promise(resolve => setTimeout(resolve, 700)); // Simulating Instapay deep link verification
     }
     
     try {
-      const order = await OrderService.createOrder(
+      const created = await OrderService.createOrder({
         cartItems,
         subtotal,
-        discountFromPoints,
-        shippingTotal,
-        grandTotal,
-        user?.id || null
-      );
+        discount: discountFromPoints,
+        shipping: shippingTotal,
+        total: grandTotal,
+        user,
+        userId: user?.id || null,
+        customerName: customerName.trim() || user?.name || 'عميل تجارة مصرية',
+        phone: phone.trim() || '+20 102 345 6789',
+        address: address.trim() || 'القاهرة، مصر الجديدة، شارع الثورة عمارة 14',
+        paymentMethod
+      });
       
-      // Update local orders list conceptually
-      setOrders(prev => [order, ...prev]);
+      const newOrders = Array.isArray(created) ? created : [created];
+      // Update local orders list conceptually across platform and merchant dashboard
+      setOrders(prev => [...newOrders, ...prev]);
       
       setIsProcessing(false);
       setActiveTab('tracking');
@@ -56,18 +64,45 @@ export default function Checkout() {
       </p>
 
       <div className="space-y-4">
-        {/* Shipping Address */}
-        <div className="rounded-xl bg-surface-container-lowest border border-surface-container-high p-4 shadow-sm">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-secondary text-[18px]">location_on</span>
-              <h2 className="text-xs font-bold text-on-surface">Shipping Address • عنوان التوصيل</h2>
-            </div>
-            <button className="text-[11px] text-secondary font-semibold hover:underline">Edit • تعديل</button>
+        {/* Shipping Address & Recipient Info */}
+        <div className="rounded-xl bg-surface-container-lowest border border-surface-container-high p-4 shadow-sm space-y-3">
+          <div className="flex items-center gap-1.5 mb-1">
+            <span className="material-symbols-outlined text-secondary text-[18px]">location_on</span>
+            <h2 className="text-xs font-bold text-on-surface">Recipient & Shipping • بيانات المستلم والشحن</h2>
           </div>
-          <p className="text-xs text-on-surface-variant bg-surface-container-low p-2.5 rounded-lg border border-surface-container-high">
-            {address}
-          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+            <div>
+              <label className="block text-[11px] text-gray-500 font-bold mb-1">اسم المستلم</label>
+              <input
+                type="text"
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+                placeholder="الاسم ثلاثي"
+                className="w-full bg-surface-container-low border border-surface-container-high rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-secondary"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] text-gray-500 font-bold mb-1">رقم الهاتف (للتواصل مع المندوب)</label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="+20 10X XXX XXXX"
+                dir="ltr"
+                className="w-full bg-surface-container-low border border-surface-container-high rounded-lg px-3 py-2 text-xs text-on-surface text-right focus:outline-none focus:border-secondary"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-[11px] text-gray-500 font-bold mb-1">عنوان التوصيل بالتفصيل</label>
+            <input
+              type="text"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="المحافظة، المنطقة، اسم الشارع، رقم العمارة والشقة"
+              className="w-full bg-surface-container-low border border-surface-container-high rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-secondary"
+            />
+          </div>
         </div>
 
         {/* Merchant Deliveries Breakdown */}

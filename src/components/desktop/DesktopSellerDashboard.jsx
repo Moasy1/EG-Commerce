@@ -598,7 +598,8 @@ export default function DesktopSellerDashboard() {
                           <th className="pb-2.5">العميل</th>
                           <th className="pb-2.5">المنتج / الكمية</th>
                           <th className="pb-2.5">الإجمالي</th>
-                          <th className="pb-2.5 w-40">تحديث الحالة</th>
+                          <th className="pb-2.5 w-36">تحديث الحالة</th>
+                          <th className="pb-2.5 text-center w-28">إجراءات سريعة</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-50">
@@ -626,8 +627,12 @@ export default function DesktopSellerDashboard() {
                                   <select 
                                     className="bg-white border border-gray-200 text-slate-700 text-[10px] rounded px-1 py-1 cursor-pointer focus:outline-none w-full shadow-sm"
                                     value={o.shippingStatus}
-                                    onChange={(e) => {
-                                      setOrders(prev => prev.map(order => order.id === o.id ? { ...order, shippingStatus: e.target.value } : order));
+                                    onChange={async (e) => {
+                                      const newStatus = e.target.value;
+                                      setOrders(prev => prev.map(order => order.id === o.id ? { ...order, shippingStatus: newStatus } : order));
+                                      if (updateOrderStatus) {
+                                        await updateOrderStatus(o.id, newStatus);
+                                      }
                                     }}
                                   >
                                     <option value="ready_for_pickup">قيد التجهيز</option>
@@ -635,6 +640,68 @@ export default function DesktopSellerDashboard() {
                                     <option value="delivered">مكتمل التوصيل</option>
                                     <option value="returned">مرتجع</option>
                                   </select>
+                                </div>
+                              </td>
+                              <td className="py-3 text-center">
+                                <div className="flex items-center justify-center gap-1">
+                                  <button
+                                    onClick={() => {
+                                      const phone = (o.phone || '').replace(/[^\d+]/g, '');
+                                      const msg = encodeURIComponent(`مرحباً ${o.customerName || ''}، بخصوص طلبك ${o.id} من متجر ${currentMerchant?.name || ''}`);
+                                      window.open(`https://wa.me/${phone.replace(/^\+/, '')}?text=${msg}`, '_blank', 'noopener,noreferrer');
+                                    }}
+                                    className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center hover:bg-emerald-100 transition-colors"
+                                    title="واتساب العميل"
+                                  >
+                                    <span className="material-symbols-outlined text-[15px]">chat</span>
+                                  </button>
+                                  <button
+                                    onClick={async () => {
+                                      const lines = [
+                                        `Order: ${o.id}`,
+                                        `Store: ${currentMerchant?.name || ''}`,
+                                        `Customer: ${o.customerName}`,
+                                        `Phone: ${o.phone}`,
+                                        `Address: ${o.address}`,
+                                        `Items: ${o.productTitle}`,
+                                        `Total: ${o.amount} EGP`,
+                                        `Tracking: ${o.trackingNumber || '-'}`
+                                      ];
+                                      try {
+                                        await navigator.clipboard.writeText(lines.join('\n'));
+                                        alert('تم نسخ تفاصيل الطلب!');
+                                      } catch (e) {}
+                                    }}
+                                    className="w-7 h-7 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center hover:bg-slate-200 transition-colors"
+                                    title="نسخ بيانات الطلب"
+                                  >
+                                    <span className="material-symbols-outlined text-[15px]">content_copy</span>
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      const printable = `
+                                        <html dir="rtl">
+                                          <head><title>${o.id}</title><style>body{font-family:Arial,sans-serif;padding:24px;line-height:1.7} h1{font-size:18px}.row{border-bottom:1px solid #eee;padding:8px 0}.label{color:#666;font-size:12px}.value{font-weight:700}</style></head>
+                                          <body>
+                                            <h1>فاتورة وبوليصة شحن: ${o.id}</h1>
+                                            <div class="row"><div class="label">المتجر</div><div class="value">${currentMerchant?.name || ''}</div></div>
+                                            <div class="row"><div class="label">العميل</div><div class="value">${o.customerName || ''}</div></div>
+                                            <div class="row"><div class="label">الهاتف</div><div class="value">${o.phone || ''}</div></div>
+                                            <div class="row"><div class="label">العنوان</div><div class="value">${o.address || ''}</div></div>
+                                            <div class="row"><div class="label">المنتج</div><div class="value">${o.productTitle || ''}</div></div>
+                                            <div class="row"><div class="label">الإجمالي</div><div class="value">${(o.amount || 0).toLocaleString()} ج.م</div></div>
+                                            <div class="row"><div class="label">رقم تتبع بوسطة</div><div class="value">${o.trackingNumber || ''}</div></div>
+                                          </body>
+                                        </html>
+                                      `;
+                                      const w = window.open('', '_blank');
+                                      if (w) { w.document.write(printable); w.document.close(); w.print(); }
+                                    }}
+                                    className="w-7 h-7 rounded-lg bg-slate-900 text-white flex items-center justify-center hover:bg-black transition-colors"
+                                    title="طباعة البوليصة والفاتورة"
+                                  >
+                                    <span className="material-symbols-outlined text-[15px]">print</span>
+                                  </button>
                                 </div>
                               </td>
                             </tr>

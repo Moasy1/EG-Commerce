@@ -24,9 +24,10 @@ import AdminDashboard from './pages/AdminDashboard';
 import DeliveryDashboard from './pages/DeliveryDashboard';
 import Settings from './pages/Settings';
 import AuthModal from './components/AuthModal';
+import { AuthService } from './services/AuthService';
 
 function ProtectedRoute({ requiredRole, title, description, children }) {
-  const { user, setIsAuthModalOpen, language, setActiveTab } = useApp();
+  const { user, setUser, setRole, setSelectedMerchantId, setIsAuthModalOpen, language, setActiveTab } = useApp();
   const isAr = language === 'ar';
 
   const isSuperadmin = user?.role === 'superadmin' || user?.role === 'admin';
@@ -35,6 +36,15 @@ function ProtectedRoute({ requiredRole, title, description, children }) {
       ? requiredRole.includes(user?.role) 
       : user?.role === requiredRole
   );
+
+  const handleQuickDemoLogin = async () => {
+    const targetRole = Array.isArray(requiredRole) ? requiredRole[0] : (requiredRole || 'admin');
+    const roleKey = (targetRole === 'superadmin' || targetRole === 'admin') ? 'admin' : targetRole;
+    const demoUser = await AuthService.loginAsDemo(roleKey);
+    setUser(demoUser);
+    setRole(demoUser.role);
+    if (demoUser.role === 'merchant') setSelectedMerchantId('m-01');
+  };
 
   if (!user) {
     return (
@@ -50,10 +60,17 @@ function ProtectedRoute({ requiredRole, title, description, children }) {
             ? 'هذا القسم مخصص فقط للمستخدمين المصرح لهم. يرجى تسجيل الدخول بحساب مصرح للوصول إلى لوحة التحكم.' 
             : 'This section requires authorized credentials. Please sign in to proceed.')}
         </p>
-        <div className="flex items-center gap-3 pt-2">
+        <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+          <button
+            onClick={handleQuickDemoLogin}
+            className="px-5 py-2.5 rounded-full bg-slate-900 hover:bg-black text-white text-xs font-bold shadow-md transition-all flex items-center gap-1.5 active:scale-95"
+          >
+            <span className="material-symbols-outlined text-[15px]">bolt</span>
+            <span>{isAr ? 'دخول فوري كمسؤول تجريبي (1-Click)' : '1-Click Demo Login'}</span>
+          </button>
           <button
             onClick={() => setIsAuthModalOpen(true)}
-            className="px-6 py-2.5 rounded-full bg-[#d00000] hover:bg-red-700 text-white text-xs font-bold shadow-md active:scale-95 transition-all"
+            className="px-5 py-2.5 rounded-full bg-[#d00000] hover:bg-red-700 text-white text-xs font-bold shadow-md active:scale-95 transition-all"
           >
             {isAr ? 'تسجيل الدخول الآن' : 'Sign In Now'}
           </button>
@@ -82,10 +99,17 @@ function ProtectedRoute({ requiredRole, title, description, children }) {
             ? `أنت مسجل حالياً كـ (${user.role}). هذا القسم متاح فقط للمشرفين أو الحسابات المصرح لها.` 
             : `You are signed in as (${user.role}). This section requires elevated permissions.`}
         </p>
-        <div className="flex items-center gap-3 pt-2">
+        <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+          <button
+            onClick={handleQuickDemoLogin}
+            className="px-5 py-2.5 rounded-full bg-[#d00000] hover:bg-red-700 text-white text-xs font-bold shadow-md transition-all flex items-center gap-1.5 active:scale-95"
+          >
+            <span className="material-symbols-outlined text-[15px]">bolt</span>
+            <span>{isAr ? 'ترقية الصلاحية فوراً (1-Click)' : '1-Click Elevate Role'}</span>
+          </button>
           <button
             onClick={() => setIsAuthModalOpen(true)}
-            className="px-6 py-2.5 rounded-full bg-[#d00000] hover:bg-red-700 text-white text-xs font-bold shadow-md active:scale-95 transition-all"
+            className="px-5 py-2.5 rounded-full border border-gray-300 hover:bg-gray-100 text-slate-700 text-xs font-bold transition-all"
           >
             {isAr ? 'تبديل الحساب' : 'Switch Account'}
           </button>
@@ -134,6 +158,28 @@ function MainContent() {
           return <Checkout />;
         case 'tracking':
           return <OrderTracking />;
+        case 'admin':
+        case 'superadmin':
+          return (
+            <ProtectedRoute 
+              requiredRole={['superadmin', 'admin']}
+              title="لوحة الإدارة المركزية • Superadmin Platform Portal"
+              description="لوحة الإدارة والتحكم في المستخدمين والمتاجر ومراقبة المعاملات مخصصة فقط للمشرف العام."
+            >
+              <AdminDashboard />
+            </ProtectedRoute>
+          );
+        case 'dashboard':
+        case 'merchant':
+          return (
+            <ProtectedRoute 
+              requiredRole={['merchant', 'superadmin', 'admin']}
+              title="لوحة التاجر • Merchant Seller Hub"
+              description="لوحة التحكم والطلبات والمبيعات خاصة بالتجار المعتمدين والمشرف العام فقط."
+            >
+              <MerchantDashboard />
+            </ProtectedRoute>
+          );
         case 'storefront':
         default:
           return <MerchantStorefront />;

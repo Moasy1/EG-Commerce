@@ -4,7 +4,7 @@ import { AdminService } from '../services/AdminService';
 import { OrderService } from '../services/OrderService';
 
 export default function AdminDashboard() {
-  const { language, user, setIsAuthModalOpen, setActiveTab: setAppTab } = useApp();
+  const { language, user, setIsAuthModalOpen, setActiveTab: setAppTab, orders: appOrders, updateOrderStatus: updateAppOrderStatus } = useApp();
   const isAr = language === 'ar';
   
   // Superadmin Tabs: overview | stores | creators | users | catalog
@@ -73,6 +73,12 @@ export default function AdminDashboard() {
   useEffect(() => {
     loadAllData();
   }, []);
+
+  useEffect(() => {
+    if (appOrders && appOrders.length > 0) {
+      setPlatformOrders(appOrders);
+    }
+  }, [appOrders]);
 
   // Modal Open Handlers
   const openModal = (type, item = null) => {
@@ -540,9 +546,13 @@ export default function AdminDashboard() {
         const selectedOrders = filtered.filter(o => selectedOrderIds.includes(o.id));
         const allFilteredSelected = filtered.length > 0 && filtered.every(o => selectedOrderIds.includes(o.id));
 
-        const handlePlatformOrderStatusUpdate = (orderId, newStatus) => {
+        const handlePlatformOrderStatusUpdate = async (orderId, newStatus) => {
           setPlatformOrders(prev => prev.map(o => o.id === orderId ? { ...o, shippingStatus: newStatus } : o));
-          OrderService.updateOrderStatus(orderId, newStatus);
+          if (updateAppOrderStatus) {
+            await updateAppOrderStatus(orderId, newStatus);
+          } else {
+            await OrderService.updateOrderStatus(orderId, newStatus);
+          }
           showToast(isAr ? 'تم تحديث حالة الطلب' : 'Order status updated');
         };
 
@@ -562,7 +572,11 @@ export default function AdminDashboard() {
         };
 
         const handleBulkStatusUpdate = async (newStatus) => {
-          await Promise.all(selectedOrders.map(order => OrderService.updateOrderStatus(order.id, newStatus)));
+          await Promise.all(selectedOrders.map(order => 
+            updateAppOrderStatus 
+              ? updateAppOrderStatus(order.id, newStatus) 
+              : OrderService.updateOrderStatus(order.id, newStatus)
+          ));
           setPlatformOrders(prev => prev.map(order => selectedOrderIds.includes(order.id) ? { ...order, shippingStatus: newStatus } : order));
           setSelectedOrderIds([]);
           showToast(isAr ? `تم تحديث ${selectedOrders.length} طلب` : `${selectedOrders.length} orders updated`);

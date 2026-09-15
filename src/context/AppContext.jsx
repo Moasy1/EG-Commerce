@@ -682,14 +682,20 @@ export function detectSubdomain() {
     };
   }
 
-  // 3. Subdomain on localhost or production domain
+  // 3. Skip pure IP addresses and plain localhost
+  const isIp = /^(\d{1,3}\.){3}\d{1,3}$/.test(hostname) || hostname === '::1';
+  if (isIp || hostname === 'localhost') {
+    return { isSubdomain: false, merchantSlug: null, merchantId: 'm-01' };
+  }
+
+  // 4. Subdomain on localhost (e.g. talieska.localhost) or production domain (e.g. talieska.egyptian-commerce.com)
   const parts = hostname.split('.');
-  const isLocalhost = hostname.includes('localhost') || hostname.includes('127.0.0.1');
-  const minParts = isLocalhost ? 2 : 3;
+  const isLocalhostDomain = hostname.endsWith('.localhost');
+  const minParts = isLocalhostDomain ? 2 : 3;
 
   if (parts.length >= minParts) {
     const prefix = parts[0].toLowerCase().trim();
-    const ignored = ['www', 'app', 'shop', 'api', 'admin', 'stage', 'staging', 'mail', 'cpanel', 'webmail'];
+    const ignored = ['www', 'app', 'shop', 'api', 'admin', 'stage', 'staging', 'mail', 'cpanel', 'webmail', 'eg-commerce'];
     if (!ignored.includes(prefix)) {
       const slug = prefix === 'demo' ? 'talieska' : prefix;
       const found = MERCHANTS_DATA.find(m => 
@@ -697,11 +703,13 @@ export function detectSubdomain() {
         m.id.toLowerCase() === slug || 
         m.subdomain?.toLowerCase().includes(slug)
       );
-      return {
-        isSubdomain: true,
-        merchantSlug: slug,
-        merchantId: found ? found.id : 'm-01'
-      };
+      if (found) {
+        return {
+          isSubdomain: true,
+          merchantSlug: slug,
+          merchantId: found.id
+        };
+      }
     }
   }
 

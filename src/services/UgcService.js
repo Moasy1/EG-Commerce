@@ -787,7 +787,12 @@ export const UgcService = {
       date: new Date().toISOString().split('T')[0],
       status: contentData.status || 'published',
       thumbnail: contentData.thumbnail || '/images/products/linen_abaya.jpg',
-      taggedProduct: contentData.taggedProduct || 'منتج مميز'
+      taggedProduct: contentData.taggedProduct || 'منتج مميز',
+      videoUrl: contentData.videoUrl || '/images/reels/linen_abaya.mp4',
+      music: contentData.music || 'Egyptian Aesthetic Vibes',
+      duration: contentData.duration || '0:15',
+      category: contentData.category || 'fashion',
+      taggedProductObj: contentData.taggedProductObj || null
     };
 
     const updated = [newItem, ...content];

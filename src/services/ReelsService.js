@@ -73,6 +73,10 @@ export const ReelsService = {
   },
 
   async saveReel(reelData) {
+    const formattedProducts = Array.isArray(reelData.products) && reelData.products.length > 0
+      ? reelData.products
+      : (reelData.product ? [reelData.product] : []);
+
     const formattedReel = {
       id: reelData.id || `reel-${Date.now()}`,
       creatorId: reelData.creatorId || reelData.userId || null,
@@ -82,10 +86,15 @@ export const ReelsService = {
       videoBg: reelData.videoBg || reelData.video || '/images/reels/linen_abaya.mp4',
       caption: reelData.caption || 'إطلالة حصرية جديدة متوفرة الآن في egyptian-commerce.com 🇪🇬✨ #موضة_مصرية #ريلز',
       music: reelData.music || 'Egyptian Aesthetic Vibes • Instrumental',
-      likes: reelData.likes || 120,
-      comments: reelData.comments || 3,
-      saves: reelData.saves || 45,
-      products: reelData.products || []
+      likes: reelData.likes !== undefined ? reelData.likes : 15,
+      comments: reelData.comments !== undefined ? reelData.comments : 0,
+      saves: reelData.saves !== undefined ? reelData.saves : 5,
+      products: formattedProducts,
+      product: formattedProducts[0] || null,
+      categoryId: reelData.categoryId || 'fashion',
+      qualityScore: reelData.qualityScore || 0.95,
+      trendScore: reelData.trendScore || 0.85,
+      createdAt: reelData.createdAt || new Date().toISOString()
     };
 
     // 1. Try to persist to Supabase

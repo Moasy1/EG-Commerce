@@ -1,11 +1,82 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import EgLogo from '../common/EgLogo';
 import { UgcService } from '../../services/UgcService';
 import { ReelsService } from '../../services/ReelsService';
 
+// Egyptian Fashion Video Presets for 1-click test publishing
+const FASHION_VIDEO_PRESETS = [
+  {
+    id: 'linen-abaya',
+    title: 'عباية كتان بوهيمي ناعمة',
+    titleEn: 'Bohemian Linen Abaya',
+    url: '/images/reels/linen_abaya.mp4',
+    thumb: '/images/products/linen_abaya.jpg',
+    duration: '0:15',
+    size: '14.2 MB',
+    category: 'fashion'
+  },
+  {
+    id: 'citrine-blazer',
+    title: 'بليزر سيترين أصفر فاقع',
+    titleEn: 'Citrine Yellow Blazer',
+    url: '/images/reels/fashion_citrine_blazer.mp4',
+    thumb: '/images/reels/fashion_citrine_blazer_thumb.jpg',
+    duration: '0:12',
+    size: '18.6 MB',
+    category: 'fashion'
+  },
+  {
+    id: 'oversized-shirt',
+    title: 'قميص كتان بيج أوفرسايز',
+    titleEn: 'Oversized Linen Shirt',
+    url: '/images/reels/fashion_oversized_shirt.mp4',
+    thumb: '/images/reels/fashion_oversized_shirt_thumb.jpg',
+    duration: '0:10',
+    size: '11.4 MB',
+    category: 'fashion'
+  },
+  {
+    id: 'suede-jacket',
+    title: 'جاكيت شمواه وسويد توباكو',
+    titleEn: 'Tobacco Suede Jacket',
+    url: '/images/reels/fashion_suede_jacket.mp4',
+    thumb: '/images/reels/fashion_suede_jacket_thumb.jpg',
+    duration: '0:14',
+    size: '16.1 MB',
+    category: 'fashion'
+  },
+  {
+    id: 'vintage-watch',
+    title: 'ساعة يد كلاسيكية ذهب وردي',
+    titleEn: 'Vintage Rose Gold Watch',
+    url: '/images/reels/fashion_vintage_watch.mp4',
+    thumb: '/images/reels/fashion_vintage_watch_thumb.jpg',
+    duration: '0:11',
+    size: '9.8 MB',
+    category: 'accessories'
+  }
+];
+
+const SOUND_TRACKS = [
+  { id: 'sound-1', name: 'Egyptian Aesthetic Vibes • Instrumental', nameAr: 'ألحان إيقاعية هادئة • صيف القاهرة' },
+  { id: 'sound-2', name: 'Amr Diab Remixed Beats • Chill', nameAr: 'ريمكس صيفي • إيقاع مصري مبهج' },
+  { id: 'sound-3', name: 'Traditional Oud & Modern Lo-Fi • El-Moez', nameAr: 'عود أصيل مع لو-فاي معاصر' },
+  { id: 'sound-4', name: 'Desert Soul • Acoustic Chords', nameAr: 'أوتار هادئة • نغمات شرقية' },
+  { id: 'sound-5', name: 'Original Sound • صوت أصلي للمنشئ', nameAr: 'صوت الفيديو الأصلي' }
+];
+
+const HASHTAG_SUGGESTIONS = [
+  '#موضة_مصرية',
+  '#صنع_في_مصر',
+  '#أزياء_القاهرة',
+  '#تنسيقات_صيفية',
+  '#ستايل_يومي',
+  '#تسوق_اللوك'
+];
+
 export default function DesktopCreatorAnalytics() {
-  const { setActiveTab, language, user, role } = useApp();
+  const { setActiveTab, language, user, role, products } = useApp();
   const isAr = language === 'ar';
 
   const [activeNav, setActiveNav] = useState('studio'); // 'studio' | 'analytics' | 'campaigns' | 'content' | 'profile' | 'settings'
@@ -35,12 +106,33 @@ export default function DesktopCreatorAnalytics() {
   const [draftUrl, setDraftUrl] = useState('');
   const [draftNotes, setDraftNotes] = useState('');
 
+  // Enhanced Shoppable Reel Upload State
   const [showNewReelModal, setShowNewReelModal] = useState(false);
-  const [newReelForm, setNewReelForm] = useState({
-    title: '',
-    taggedProduct: 'عباية كتان ناعمة وتوب عصري',
-    thumbnail: '/images/products/linen_abaya.jpg'
-  });
+  const [reelVideoSourceType, setReelVideoSourceType] = useState('preset'); // 'preset' | 'upload'
+  const [reelVideoUrl, setReelVideoUrl] = useState(FASHION_VIDEO_PRESETS[0].url);
+  const [reelVideoName, setReelVideoName] = useState(FASHION_VIDEO_PRESETS[0].title);
+  const [reelVideoSize, setReelVideoSize] = useState(FASHION_VIDEO_PRESETS[0].size);
+  const [reelVideoDuration, setReelVideoDuration] = useState(FASHION_VIDEO_PRESETS[0].duration);
+  const [reelThumbnail, setReelThumbnail] = useState(FASHION_VIDEO_PRESETS[0].thumb);
+  const [isDraggingReelVideo, setIsDraggingReelVideo] = useState(false);
+  const [isCustomReelVideo, setIsCustomReelVideo] = useState(false);
+  
+  // Reel Form Fields
+  const [reelTitle, setReelTitle] = useState('تنسيق لوك صيفي أنيق مع أقمشة مصرية 🇪🇬✨ #موضة_مصرية #تسوق_اللوك');
+  const [reelSelectedProductId, setReelSelectedProductId] = useState('');
+  const [reelMusicTrack, setReelMusicTrack] = useState(SOUND_TRACKS[0].name);
+  const [reelCategory, setReelCategory] = useState('fashion');
+  const [isPublishingReel, setIsPublishingReel] = useState(false);
+  const [publishReelProgress, setPublishReelProgress] = useState(0);
+
+  // Video Player Controls for 9:16 Preview
+  const reelVideoPlayerRef = useRef(null);
+  const reelFileInputRef = useRef(null);
+  const [reelIsPlaying, setReelIsPlaying] = useState(true);
+  const [reelIsMuted, setReelIsMuted] = useState(true);
+
+  // Preview Reel in Content Tab
+  const [activePreviewReel, setActivePreviewReel] = useState(null);
 
   const [campaignFilter, setCampaignFilter] = useState('all'); // 'all' | 'applied' | 'approved'
   const [contentFilter, setContentFilter] = useState('all'); // 'all' | 'published' | 'under_review'
@@ -110,45 +202,231 @@ export default function DesktopCreatorAnalytics() {
     showToast(isAr ? 'تم إرسال مسودة الريلز لمراجعة البراند! 🎬' : 'Reel draft submitted for brand review!');
   };
 
-  // Handler: Create new reel linked to profile
-  const handleCreateNewReel = async (e) => {
+  // Products available for tagging from marketplace catalog
+  const availableProducts = useMemo(() => {
+    if (products && products.length > 0) return products;
+    return [
+      {
+        id: 'p-fashion-blazer',
+        title: 'بليزر أوفرسايز أصفر ليموني راقي',
+        price: 2200,
+        originalPrice: 2750,
+        merchant: 'كايرو شيك • Cairo Chic',
+        image: '/images/reels/fashion_citrine_blazer_thumb.jpg'
+      },
+      {
+        id: 'p-fashion-abaya',
+        title: 'عباية كتان بوهيمي ناعمة وتوب عصري',
+        price: 1850,
+        originalPrice: 2300,
+        merchant: 'تاليسكا ستوديو • Talieska',
+        image: '/images/products/linen_abaya.jpg'
+      },
+      {
+        id: 'p-fashion-shirt',
+        title: 'قميص كتان بيج طبيعي أوفرسايز',
+        price: 980,
+        originalPrice: 1250,
+        merchant: 'نايلوتيك • NileTech',
+        image: '/images/reels/fashion_oversized_shirt_thumb.jpg'
+      },
+      {
+        id: 'p-fashion-watch',
+        title: 'ساعة كلاسيكية راقية ذهب وردي',
+        price: 2400,
+        originalPrice: 3000,
+        merchant: 'مجوهرات طيبة • Tiba',
+        image: '/images/reels/fashion_vintage_watch_thumb.jpg'
+      }
+    ];
+  }, [products]);
+
+  // Selected tagged product
+  const selectedProduct = useMemo(() => {
+    if (reelSelectedProductId) {
+      const found = availableProducts.find(p => p.id === reelSelectedProductId);
+      if (found) return found;
+    }
+    return availableProducts[0] || null;
+  }, [availableProducts, reelSelectedProductId]);
+
+  // Video processing & drag/drop
+  const processVideoFile = (file) => {
+    if (!file) return;
+    if (!file.type.startsWith('video/') && !file.name.match(/\.(mp4|webm|mov|mkv)$/i)) {
+      alert(isAr ? 'يرجى اختيار ملف فيديو بصيغة صحيحة (MP4, WebM, MOV)' : 'Please select a valid video format (MP4, WebM, MOV)');
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+    setReelVideoUrl(objectUrl);
+    setReelVideoName(file.name);
+    setReelVideoSize((file.size / (1024 * 1024)).toFixed(1) + ' MB');
+    setIsCustomReelVideo(true);
+
+    if (reelVideoPlayerRef.current) {
+      reelVideoPlayerRef.current.src = objectUrl;
+      reelVideoPlayerRef.current.load();
+      reelVideoPlayerRef.current.play().then(() => setReelIsPlaying(true)).catch(() => {});
+    }
+  };
+
+  const handleVideoInputChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) processVideoFile(file);
+  };
+
+  const handleDragOver = (e) => {
     e.preventDefault();
-    if (!newReelForm.title) return;
+    setIsDraggingReelVideo(true);
+  };
 
-    const authorName = user?.name || profile?.name || 'ياسمين السيد';
-    const authorHandle = user?.handle || profile?.handle || '@yasmin_style';
-    const authorAvatar = user?.avatar_url || profile?.avatar || '/images/reels/reel_2.jpg';
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDraggingReelVideo(false);
+  };
 
-    await UgcService.createContent({
-      ...newReelForm,
-      creatorId: user?.id || profile?.id || 'c0000000-0000-0000-0000-000000000001',
-      creatorName: authorName,
-      creatorHandle: authorHandle,
-      status: 'published'
-    });
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDraggingReelVideo(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) processVideoFile(file);
+  };
 
-    // Also persist in ReelsService so it displays live in Discover Reels feed
-    await ReelsService.saveReel({
-      id: `reel-${Date.now()}`,
-      creatorId: user?.id || null,
-      creatorHandle: authorHandle,
-      creatorName: authorName,
-      avatar: authorAvatar,
-      videoBg: newReelForm.videoUrl || '/images/reels/linen_abaya.mp4',
-      caption: `${newReelForm.title} • تجربة وتنسيق خاص مع ${newReelForm.taggedProduct || 'المنتجات المصرية'} 🇪🇬✨ #موضة_مصرية`,
-      likes: 15,
-      comments: 0
-    });
+  const handleSelectPreset = (preset) => {
+    setReelVideoUrl(preset.url);
+    setReelVideoName(preset.title);
+    setReelVideoSize(preset.size);
+    setReelVideoDuration(preset.duration);
+    setReelThumbnail(preset.thumb);
+    setIsCustomReelVideo(false);
 
-    const updated = await UgcService.getContent();
-    setContent(updated);
-    setShowNewReelModal(false);
-    setNewReelForm({
-      title: '',
-      taggedProduct: 'عباية كتان ناعمة وتوب عصري',
-      thumbnail: '/images/products/linen_abaya.jpg'
-    });
-    showToast(isAr ? 'تم نشر الريلز بنجاح في المنصة! 🚀' : 'Reel published successfully!');
+    if (preset.category) {
+      setReelCategory(preset.category);
+    }
+
+    if (reelVideoPlayerRef.current) {
+      reelVideoPlayerRef.current.src = preset.url;
+      reelVideoPlayerRef.current.load();
+      reelVideoPlayerRef.current.play().then(() => setReelIsPlaying(true)).catch(() => {});
+    }
+  };
+
+  const toggleReelPlayPause = (e) => {
+    e?.stopPropagation();
+    if (!reelVideoPlayerRef.current) return;
+    if (reelVideoPlayerRef.current.paused) {
+      reelVideoPlayerRef.current.play().then(() => setReelIsPlaying(true)).catch(() => {});
+    } else {
+      reelVideoPlayerRef.current.pause();
+      setReelIsPlaying(false);
+    }
+  };
+
+  const toggleReelMute = (e) => {
+    e?.stopPropagation();
+    if (!reelVideoPlayerRef.current) return;
+    const newMuted = !reelIsMuted;
+    reelVideoPlayerRef.current.muted = newMuted;
+    setReelIsMuted(newMuted);
+  };
+
+  // Handler: Create & publish new reel linked to profile and live feeds
+  const handleCreateNewReel = async (e) => {
+    e?.preventDefault();
+    if (!reelTitle.trim()) {
+      showToast(isAr ? 'يرجى كتابة عنوان أو كابشن للريلز ✍️' : 'Please provide a caption for your reel ✍️');
+      return;
+    }
+
+    setIsPublishingReel(true);
+    setPublishReelProgress(20);
+
+    try {
+      const authorName = user?.name || profile?.name || 'ياسمين السيد';
+      const authorHandle = user?.handle || profile?.handle || '@yasmin_style';
+      const authorAvatar = user?.avatar_url || profile?.avatar || '/images/reels/reel_2.jpg';
+      const authorId = user?.id || profile?.id || 'cr-01';
+
+      setPublishReelProgress(50);
+
+      // Package tagged product details
+      const taggedProd = selectedProduct ? {
+        id: selectedProduct.id,
+        sku: selectedProduct.sku || `SKU-${selectedProduct.id}`,
+        title: selectedProduct.title || selectedProduct.name,
+        price: selectedProduct.price || 1200,
+        originalPrice: selectedProduct.originalPrice || Math.round((selectedProduct.price || 1200) * 1.25),
+        discount: selectedProduct.discount || '20% OFF',
+        image: selectedProduct.image || selectedProduct.images?.[0] || reelThumbnail,
+        merchant: selectedProduct.merchant || selectedProduct.merchantName || 'براند مصري معتمد',
+        merchantId: selectedProduct.merchantId || selectedProduct.merchant_id || 'm-01'
+      } : null;
+
+      const reelId = `reel-creator-${Date.now()}`;
+
+      // 1. Create content item in UGC Creator Studio storage
+      await UgcService.createContent({
+        id: `cnt-${Date.now()}`,
+        title: reelTitle,
+        titleEn: reelTitle,
+        taggedProduct: taggedProd ? taggedProd.title : 'منتج مصري مميز',
+        taggedProductObj: taggedProd,
+        thumbnail: taggedProd?.image || reelThumbnail,
+        videoUrl: reelVideoUrl,
+        music: reelMusicTrack,
+        duration: reelVideoDuration,
+        category: reelCategory,
+        creatorId: authorId,
+        creatorName: authorName,
+        creatorHandle: authorHandle,
+        status: 'published'
+      });
+
+      setPublishReelProgress(75);
+
+      // 2. Persist in ReelsService so it displays in Discover Reels feed
+      await ReelsService.saveReel({
+        id: reelId,
+        creatorId: authorId,
+        creatorHandle: authorHandle,
+        creatorName: authorName,
+        avatar: authorAvatar,
+        videoBg: reelVideoUrl,
+        caption: reelTitle,
+        music: reelMusicTrack,
+        likes: 12,
+        comments: 0,
+        saves: 3,
+        products: taggedProd ? [taggedProd] : [],
+        product: taggedProd,
+        categoryId: reelCategory,
+        qualityScore: 0.98,
+        trendScore: 0.92,
+        createdAt: new Date().toISOString()
+      });
+
+      setPublishReelProgress(100);
+
+      // 3. Refresh content library
+      const updatedContent = await UgcService.getContent();
+      setContent(updatedContent);
+
+      // 4. Clean up state and close modal
+      setTimeout(() => {
+        setIsPublishingReel(false);
+        setPublishReelProgress(0);
+        setShowNewReelModal(false);
+        setActiveNav('content');
+        showToast(isAr ? 'تم نشر الريلز بنجاح في المنصة! متاح الآن في خلاصة الاستكشاف 🚀' : 'Reel published successfully! Now live in Discover feed 🚀');
+      }, 500);
+
+    } catch (err) {
+      console.error('Error publishing reel:', err);
+      setIsPublishingReel(false);
+      setPublishReelProgress(0);
+      showToast(isAr ? 'حدث خطأ أثناء رفع الريلز، يرجى المحاولة مرة أخرى' : 'Failed to publish reel. Please try again.');
+    }
   };
 
   // Handler: Update settings
@@ -749,8 +1027,19 @@ export default function DesktopCreatorAnalytics() {
                 })
                 .map((item) => (
                   <div key={item.id} className="rounded-3xl border border-gray-200 bg-white overflow-hidden shadow-xs hover:border-gray-300 transition-all flex flex-col justify-between">
-                    <div className="relative aspect-[4/3] bg-gray-100 overflow-hidden">
-                      <img src={item.thumbnail} alt={item.title} className="w-full h-full object-cover" />
+                    <div 
+                      onClick={() => setActivePreviewReel(item)}
+                      className="relative aspect-[4/3] bg-gray-100 overflow-hidden cursor-pointer group"
+                    >
+                      <img src={item.thumbnail} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                      
+                      {/* Play overlay on hover */}
+                      <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <div className="w-12 h-12 rounded-full bg-white/90 text-slate-900 flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
+                          <span className="material-symbols-outlined text-[26px] translate-x-0.5">play_arrow</span>
+                        </div>
+                      </div>
+
                       <span className={`absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-black ${
                         item.status === 'published' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'
                       }`}>
@@ -784,12 +1073,23 @@ export default function DesktopCreatorAnalytics() {
 
                       <div className="flex items-center justify-between pt-1 border-t border-gray-100 text-[11px]">
                         <span className="text-emerald-700 font-bold">{isAr ? 'أرباحك:' : 'Earned:'} {item.commissionEarned}</span>
-                        <button 
-                          onClick={() => setActiveTab('reels')}
-                          className="font-bold text-[#d00000] hover:underline"
-                        >
-                          {isAr ? 'مشاهدة في الريلز ←' : 'Watch →'}
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button 
+                            type="button"
+                            onClick={() => setActivePreviewReel(item)}
+                            className="font-bold text-gray-500 hover:text-slate-900 cursor-pointer"
+                          >
+                            {isAr ? 'معاينة 👁️' : 'Preview 👁️'}
+                          </button>
+                          <span className="text-gray-300">•</span>
+                          <button 
+                            type="button"
+                            onClick={() => setActiveTab('reels')}
+                            className="font-bold text-[#d00000] hover:underline cursor-pointer"
+                          >
+                            {isAr ? 'الريلز ←' : 'Reels →'}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1160,59 +1460,505 @@ export default function DesktopCreatorAnalytics() {
         </div>
       )}
 
-      {/* MODAL 4: NEW REEL MODAL */}
+      {/* MODAL 4: FULL SHOPPABLE REEL CREATOR STUDIO MODAL */}
       {showNewReelModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 w-full max-w-md space-y-4 shadow-2xl animate-page-enter">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-black text-slate-900">{isAr ? 'نشر فيديو ريلز جديد' : 'Upload New Reel'}</h3>
-              <button onClick={() => setShowNewReelModal(false)} className="text-gray-400 hover:text-slate-800">✕</button>
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
+          <div className="bg-white rounded-3xl w-full max-w-5xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden animate-page-enter border border-gray-100">
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/70">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-red-100 text-[#d00000] flex items-center justify-center shadow-xs">
+                  <span className="material-symbols-outlined text-[24px]">movie</span>
+                </div>
+                <div>
+                  <h3 className="text-sm md:text-base font-black text-slate-900">
+                    {isAr ? 'استوديو نشر الريلز والمنتجات • Creator Reels Studio' : 'Creator Reels Studio • Upload & Tag Products'}
+                  </h3>
+                  <p className="text-[11px] text-gray-500">
+                    {isAr 
+                      ? 'ارفع فيديو رأسي (9:16)، اربط منتجات المتجر للشراء السريع، واربح عمولة بيع مباشرة 🇪🇬✨' 
+                      : 'Upload vertical 9:16 video, tag marketplace products & earn sales commissions'}
+                  </p>
+                </div>
+              </div>
+              <button 
+                type="button"
+                onClick={() => setShowNewReelModal(false)} 
+                className="w-9 h-9 rounded-full bg-gray-200/60 hover:bg-gray-200 text-gray-600 flex items-center justify-center transition-colors cursor-pointer text-sm font-bold"
+              >
+                ✕
+              </button>
             </div>
 
-            <form onSubmit={handleCreateNewReel} className="space-y-3">
-              <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">{isAr ? 'عنوان الريلز / الكابشن:' : 'Reel Title / Caption:'}</label>
-                <input
-                  type="text"
-                  required
-                  value={newReelForm.title}
-                  onChange={(e) => setNewReelForm({ ...newReelForm, title: e.target.value })}
-                  placeholder={isAr ? 'تنسيق لوك صيفي أنيق مع قطن مصري 🇪🇬✨' : 'Summer chic style with Egyptian cotton...'}
-                  className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs focus:outline-none focus:border-[#d00000]"
-                />
+            {/* Modal Body - 2 Columns */}
+            <div className="flex-1 overflow-y-auto p-5 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              {/* LEFT COLUMN: 9:16 LIVE PHONE PREVIEW */}
+              <div className="lg:col-span-5 flex flex-col items-center justify-center bg-gray-100/70 rounded-3xl p-4 border border-gray-200/70">
+                <div className="text-center mb-2">
+                  <span className="text-[11px] font-bold text-slate-700 flex items-center gap-1 justify-center">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span>{isAr ? 'معاينة الريلز المباشرة (9:16 Live Preview)' : 'Live 9:16 Video Player Preview'}</span>
+                  </span>
+                </div>
+
+                {/* Phone Mockup Frame */}
+                <div className="w-full max-w-[280px] sm:max-w-[290px] aspect-[9/16] rounded-[34px] bg-black border-[5px] border-slate-900 shadow-2xl relative overflow-hidden flex flex-col justify-between select-none">
+                  {/* Speaker Notch */}
+                  <div className="absolute top-2 left-1/2 -translate-x-1/2 w-20 h-3.5 bg-slate-900 rounded-full z-30" />
+
+                  {/* Video Element */}
+                  <video
+                    ref={reelVideoPlayerRef}
+                    src={reelVideoUrl}
+                    poster={reelThumbnail}
+                    loop
+                    playsInline
+                    autoPlay
+                    muted={reelIsMuted}
+                    className="absolute inset-0 w-full h-full object-cover cursor-pointer"
+                    onClick={toggleReelPlayPause}
+                  />
+
+                  {/* Play Indicator if Paused */}
+                  {!reelIsPlaying && (
+                    <div 
+                      onClick={toggleReelPlayPause}
+                      className="absolute inset-0 bg-black/40 flex items-center justify-center cursor-pointer z-20"
+                    >
+                      <div className="w-13 h-13 rounded-full bg-white/90 text-slate-900 flex items-center justify-center shadow-lg">
+                        <span className="material-symbols-outlined text-[30px] translate-x-0.5">play_arrow</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Top Bar on Video: Category + Mute Toggle */}
+                  <div className="relative z-20 p-3 pt-6 flex items-center justify-between text-white text-xs">
+                    <span className="px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-[10px] font-black border border-white/10">
+                      {reelCategory === 'fashion' ? '👗 أزياء' : reelCategory === 'beauty' ? '💄 تجميل' : reelCategory === 'accessories' ? '💍 إكسسوارات' : '✨ ستايل'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={toggleReelMute}
+                      className="w-7 h-7 rounded-full bg-black/60 backdrop-blur-md flex items-center justify-center hover:bg-black/90 cursor-pointer text-white"
+                      title={reelIsMuted ? 'كتم الصوت' : 'تشغيل الصوت'}
+                    >
+                      <span className="material-symbols-outlined text-[16px]">{reelIsMuted ? 'volume_off' : 'volume_up'}</span>
+                    </button>
+                  </div>
+
+                  {/* Right Edge Social Actions Mock */}
+                  <div className="absolute right-2.5 bottom-24 flex flex-col items-center gap-2.5 z-20 text-white pointer-events-none">
+                    <div className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center">
+                      <span className="material-symbols-outlined text-[18px] text-red-500">favorite</span>
+                    </div>
+                    <span className="text-[9px] font-bold -mt-1.5">1.4K</span>
+                    <div className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center">
+                      <span className="material-symbols-outlined text-[18px]">chat_bubble</span>
+                    </div>
+                    <span className="text-[9px] font-bold -mt-1.5">36</span>
+                    <div className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center">
+                      <span className="material-symbols-outlined text-[18px]">bookmark</span>
+                    </div>
+                    <span className="text-[9px] font-bold -mt-1.5">120</span>
+                  </div>
+
+                  {/* Bottom Video Overlays */}
+                  <div className="relative z-20 p-3 pb-4 flex flex-col gap-2 bg-gradient-to-t from-black/95 via-black/60 to-transparent text-white">
+                    {/* Interactive Tagged Product Pill (Live preview!) */}
+                    {selectedProduct && (
+                      <div className="p-2 rounded-2xl bg-white/95 text-slate-900 backdrop-blur-md shadow-lg flex items-center gap-2 border border-white/20 animate-fade-in">
+                        <div className="w-9 h-9 rounded-xl overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
+                          <img src={selectedProduct.image || selectedProduct.images?.[0] || reelThumbnail} alt="" className="w-full h-full object-cover" />
+                        </div>
+                        <div className="min-w-0 flex-1 text-start">
+                          <div className="flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[13px] text-[#d00000]">shopping_bag</span>
+                            <span className="text-[10px] font-black truncate block">{selectedProduct.title || selectedProduct.name}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <span className="text-[11px] font-black text-[#d00000]">{selectedProduct.price} ج.م</span>
+                            {selectedProduct.originalPrice && (
+                              <span className="text-[9px] text-gray-400 line-through">{selectedProduct.originalPrice} ج.م</span>
+                            )}
+                          </div>
+                        </div>
+                        <span className="text-[9px] font-bold px-2 py-1 rounded-lg bg-[#d00000] text-white shrink-0 shadow-xs">
+                          {isAr ? 'تسوق' : 'Shop'}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Creator Info */}
+                    <div className="flex items-center gap-2">
+                      <img src={user?.avatar_url || profile?.avatar || '/images/reels/reel_2.jpg'} alt="" className="w-6 h-6 rounded-full object-cover ring-1 ring-white" />
+                      <span className="text-[11px] font-bold truncate">{user?.handle || profile?.handle || '@yasmin_style'}</span>
+                      <span className="text-[8px] bg-white/20 px-1.5 py-0.5 rounded-full font-bold">صانع معتمد ✓</span>
+                    </div>
+
+                    {/* Dynamic Caption */}
+                    <p className="text-[10px] text-gray-100 line-clamp-2 leading-relaxed text-start">
+                      {reelTitle || (isAr ? 'اكتب كابشن للريلز...' : 'Add your caption...')}
+                    </p>
+
+                    {/* Music Track Rotating Pill */}
+                    <div className="flex items-center gap-1.5 text-[9px] text-gray-300">
+                      <span className="material-symbols-outlined text-[13px] text-amber-400 animate-spin" style={{ animationDuration: '6s' }}>music_note</span>
+                      <span className="truncate">{reelMusicTrack}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-3 flex items-center justify-between w-full max-w-[290px] px-2 text-[10px] text-gray-500 font-mono">
+                  <span>{reelVideoDuration} • {reelVideoSize}</span>
+                  <button 
+                    type="button" 
+                    onClick={toggleReelPlayPause}
+                    className="text-slate-800 font-bold hover:underline flex items-center gap-1"
+                  >
+                    <span className="material-symbols-outlined text-[14px]">{reelIsPlaying ? 'pause' : 'play_arrow'}</span>
+                    <span>{reelIsPlaying ? (isAr ? 'إيقاف' : 'Pause') : (isAr ? 'تشغيل' : 'Play')}</span>
+                  </button>
+                </div>
               </div>
 
-              <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">{isAr ? 'المنتج الموسوم للشراء (Tagged Product):' : 'Tagged Product:'}</label>
-                <select
-                  value={newReelForm.taggedProduct}
-                  onChange={(e) => setNewReelForm({ ...newReelForm, taggedProduct: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs focus:outline-none bg-white"
-                >
-                  <option value="عباية كتان ناعمة وتوب عصري">عباية كتان ناعمة وتوب عصري (تاليسكا)</option>
-                  <option value="فستان حرير بوهيمي ناعم">فستان حرير بوهيمي ناعم (رَواس)</option>
-                  <option value="قميص كتان بيج طبيعي">قميص كتان بيج طبيعي (نايلوتيك)</option>
-                  <option value="إكسسوارات نحاسية يدوية">إكسسوارات نحاسية يدوية (خان الخليلي)</option>
-                  <option value="بليزر سيترين أصفر فاقع">بليزر سيترين أصفر فاقع (كايرو شيك)</option>
-                </select>
-              </div>
+              {/* RIGHT COLUMN: REEL CONFIGURATION FORM */}
+              <div className="lg:col-span-7 space-y-4">
+                {/* 1. Video Source Picker Tabs */}
+                <div>
+                  <label className="text-xs font-bold text-slate-800 block mb-2 flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[16px] text-[#d00000]">video_library</span>
+                    <span>{isAr ? 'مصدر الفيديو (Video Source):' : 'Video Source:'}</span>
+                  </label>
 
-              <div className="flex gap-2 pt-2">
+                  <div className="grid grid-cols-2 gap-2 p-1 bg-gray-100 rounded-2xl mb-3">
+                    <button
+                      type="button"
+                      onClick={() => setReelVideoSourceType('preset')}
+                      className={`py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                        reelVideoSourceType === 'preset'
+                          ? 'bg-white text-[#d00000] shadow-xs'
+                          : 'text-gray-600 hover:text-slate-900'
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-[16px]">bolt</span>
+                      <span>{isAr ? 'نماذج أزياء مصرية جاهزة' : 'Ready Presets'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setReelVideoSourceType('upload');
+                        reelFileInputRef.current?.click();
+                      }}
+                      className={`py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                        reelVideoSourceType === 'upload'
+                          ? 'bg-white text-[#d00000] shadow-xs'
+                          : 'text-gray-600 hover:text-slate-900'
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-[16px]">upload_file</span>
+                      <span>{isAr ? 'رفع فيديو من جهازك' : 'Upload Video File'}</span>
+                    </button>
+                  </div>
+
+                  {/* Preset Selector Grid */}
+                  {reelVideoSourceType === 'preset' ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
+                      {FASHION_VIDEO_PRESETS.map((preset) => {
+                        const isSelected = reelVideoUrl === preset.url;
+                        return (
+                          <button
+                            key={preset.id}
+                            type="button"
+                            onClick={() => handleSelectPreset(preset)}
+                            className={`flex items-center gap-2.5 p-2 rounded-2xl border text-start transition-all cursor-pointer ${
+                              isSelected
+                                ? 'border-[#d00000] bg-red-50/50 shadow-2xs'
+                                : 'border-gray-200 hover:border-gray-300 bg-gray-50/50'
+                            }`}
+                          >
+                            <div className="w-9 h-11 rounded-xl overflow-hidden shrink-0 border border-gray-200 bg-black">
+                              <img src={preset.thumb} alt={preset.title} className="w-full h-full object-cover" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <span className="text-xs font-bold text-slate-900 block truncate">{preset.title}</span>
+                              <span className="text-[10px] text-gray-500 font-mono">{preset.duration} • {preset.size}</span>
+                            </div>
+                            {isSelected && (
+                              <span className="material-symbols-outlined text-[18px] text-[#d00000]">check_circle</span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    /* Upload Dropzone */
+                    <div>
+                      <input
+                        ref={reelFileInputRef}
+                        type="file"
+                        accept="video/mp4,video/webm,video/quicktime,video/*"
+                        onChange={handleVideoInputChange}
+                        className="hidden"
+                      />
+
+                      <div
+                        onClick={() => reelFileInputRef.current?.click()}
+                        onDragOver={handleDragOver}
+                        onDragLeave={handleDragLeave}
+                        onDrop={handleDrop}
+                        className={`border-2 border-dashed rounded-2xl p-5 text-center space-y-2 transition-all cursor-pointer ${
+                          isDraggingReelVideo
+                            ? 'border-[#d00000] bg-red-50 scale-[1.01]'
+                            : 'border-red-200 hover:border-[#d00000] bg-red-50/20 hover:bg-red-50/40'
+                        }`}
+                      >
+                        <div className="w-12 h-12 rounded-full bg-red-100 text-[#d00000] mx-auto flex items-center justify-center shadow-xs">
+                          <span className="material-symbols-outlined text-[26px]">
+                            {isDraggingReelVideo ? 'file_download' : 'cloud_upload'}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-slate-900">
+                            {isDraggingReelVideo ? 'أفلت الفيديو هنا للرفع!' : 'اسحب الفيديو هنا أو اضغط للاختيار من جهازك'}
+                          </p>
+                          <p className="text-[10px] text-gray-500 mt-0.5">يدعم MP4, MOV, WebM عمودي (9:16) حتى 100 ميجابايت</p>
+                        </div>
+
+                        {/* File details card if uploaded */}
+                        {isCustomReelVideo && (
+                          <div className="pt-2 border-t border-red-200/60 flex items-center justify-between text-start bg-white p-2 rounded-xl">
+                            <div className="flex items-center gap-2 truncate">
+                              <span className="material-symbols-outlined text-[18px] text-emerald-600 shrink-0">check_circle</span>
+                              <div className="truncate">
+                                <span className="text-xs font-bold text-slate-900 block truncate">{reelVideoName}</span>
+                                <span className="text-[9px] text-gray-500 font-mono">{reelVideoSize}</span>
+                              </div>
+                            </div>
+                            <span className="px-2 py-1 text-[10px] font-bold text-[#d00000] hover:bg-red-50 rounded-lg shrink-0">
+                              {isAr ? 'تغيير' : 'Change'}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* 2. Reel Title & Caption */}
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-bold text-slate-800 flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[16px] text-gray-500">edit_note</span>
+                      <span>{isAr ? 'عنوان الريلز والكابشن:' : 'Reel Caption & Description:'}</span>
+                    </label>
+                    <span className="text-[10px] text-gray-400 font-mono">{reelTitle.length}/160</span>
+                  </div>
+
+                  <textarea
+                    rows={2}
+                    required
+                    value={reelTitle}
+                    onChange={(e) => setReelTitle(e.target.value)}
+                    placeholder={isAr ? 'تنسيق لوك صيفي أنيق مع قطن مصري 🇪🇬✨ #موضة_مصرية' : 'Styling an elegant Egyptian look...'}
+                    className="w-full px-3 py-2 rounded-2xl border border-gray-200 text-xs focus:outline-none focus:border-[#d00000] bg-gray-50/50"
+                  />
+
+                  {/* Hashtag Quick Chips */}
+                  <div className="flex items-center gap-1.5 flex-wrap mt-1.5">
+                    <span className="text-[10px] text-gray-400 font-bold">{isAr ? 'هاشتاجات شائعة:' : 'Quick tags:'}</span>
+                    {HASHTAG_SUGGESTIONS.map((tag) => (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => {
+                          if (!reelTitle.includes(tag)) {
+                            setReelTitle(prev => `${prev} ${tag}`.trim());
+                          }
+                        }}
+                        className="px-2 py-0.5 rounded-lg bg-gray-100 hover:bg-red-50 hover:text-[#d00000] text-[10px] font-bold text-gray-600 transition-colors"
+                      >
+                        {tag}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 3. Product Tagging & Commission */}
+                <div className="p-3.5 rounded-2xl bg-amber-50/40 border border-amber-200/60 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-[16px] text-amber-600">sell</span>
+                      <span>{isAr ? 'المنتج الموسوم للشراء (Tagged Product):' : 'Tagged Product for Quick Buy:'}</span>
+                    </label>
+                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded-full">
+                      {isAr ? 'عمولة بيع 10%' : '10% Commission'}
+                    </span>
+                  </div>
+
+                  <select
+                    value={selectedProduct?.id || ''}
+                    onChange={(e) => setReelSelectedProductId(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-amber-200 text-xs focus:outline-none bg-white font-medium text-slate-800"
+                  >
+                    {availableProducts.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.title || p.name} — {p.price} ج.م ({p.merchant || p.merchantName || 'براند مصري'})
+                      </option>
+                    ))}
+                  </select>
+
+                  {/* Commission Calculation Display */}
+                  {selectedProduct && (
+                    <div className="flex items-center justify-between pt-1 text-[11px] text-amber-900 bg-white/70 p-2 rounded-xl border border-amber-100">
+                      <div className="flex items-center gap-2">
+                        <img src={selectedProduct.image || selectedProduct.images?.[0] || reelThumbnail} alt="" className="w-7 h-7 rounded-lg object-cover border border-gray-200" />
+                        <span className="font-bold truncate max-w-[200px]">{selectedProduct.title || selectedProduct.name}</span>
+                      </div>
+                      <div className="text-end">
+                        <span className="font-black text-emerald-600 text-xs">
+                          +{(Number(selectedProduct.price || 1000) * 0.10).toFixed(0)} ج.م
+                        </span>
+                        <span className="text-[9px] text-gray-500 block">{isAr ? 'أرباحك لكل بيعة' : 'per sale'}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* 4. Audio / Music Track & Category Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-bold text-slate-800 block mb-1 flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[15px] text-gray-500">audiotrack</span>
+                      <span>{isAr ? 'المقطع الصوتي / الموسيقى:' : 'Sound Track:'}</span>
+                    </label>
+                    <select
+                      value={reelMusicTrack}
+                      onChange={(e) => setReelMusicTrack(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs focus:outline-none bg-white text-slate-800"
+                    >
+                      {SOUND_TRACKS.map((st) => (
+                        <option key={st.id} value={st.name}>
+                          {isAr ? st.nameAr : st.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-bold text-slate-800 block mb-1 flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[15px] text-gray-500">category</span>
+                      <span>{isAr ? 'التصنيف والقناة:' : 'Category:'}</span>
+                    </label>
+                    <select
+                      value={reelCategory}
+                      onChange={(e) => setReelCategory(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs focus:outline-none bg-white text-slate-800"
+                    >
+                      <option value="fashion">{isAr ? '👗 أزياء وموضة (Fashion)' : 'Fashion'}</option>
+                      <option value="beauty">{isAr ? '💄 تجميل ومكياج (Beauty)' : 'Beauty'}</option>
+                      <option value="accessories">{isAr ? '💍 إكسسوارات ومجوهرات (Accessories)' : 'Accessories'}</option>
+                      <option value="lifestyle">{isAr ? '✨ ستايل حياة وتراث (Lifestyle)' : 'Lifestyle'}</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Publishing Progress Bar */}
+                {isPublishingReel && (
+                  <div className="space-y-1.5 p-3 rounded-2xl bg-red-50 border border-red-200 animate-fade-in">
+                    <div className="flex items-center justify-between text-xs font-bold text-[#d00000]">
+                      <span className="flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
+                        <span>{isAr ? 'جاري معالجة ونشر الريلز في المنصة...' : 'Processing and publishing reel...'}</span>
+                      </span>
+                      <span>{publishReelProgress}%</span>
+                    </div>
+                    <div className="w-full h-2 rounded-full bg-red-200/60 overflow-hidden">
+                      <div 
+                        className="h-full bg-[#d00000] rounded-full transition-all duration-300"
+                        style={{ width: `${publishReelProgress}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Modal Action Buttons */}
+                <div className="flex gap-2 pt-2 border-t border-gray-100">
+                  <button
+                    type="button"
+                    disabled={isPublishingReel}
+                    onClick={() => setShowNewReelModal(false)}
+                    className="flex-1 py-3 rounded-2xl border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
+                  >
+                    {isAr ? 'إلغاء' : 'Cancel'}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isPublishingReel || !reelTitle.trim()}
+                    onClick={handleCreateNewReel}
+                    className={`flex-1 py-3 rounded-2xl text-xs font-black transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer ${
+                      isPublishingReel || !reelTitle.trim()
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        : 'bg-[#d00000] hover:bg-[#b00000] text-white hover:shadow-md'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-[18px]">rocket_launch</span>
+                    <span>{isPublishingReel ? (isAr ? 'جاري النشر...' : 'Publishing...') : (isAr ? 'نشر الريلز الآن 🚀' : 'Publish Reel Now 🚀')}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 5: PREVIEW REEL MODAL (FROM CONTENT TAB) */}
+      {activePreviewReel && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in"
+          onClick={() => setActivePreviewReel(null)}
+        >
+          <div 
+            className="relative w-full max-w-[310px] aspect-[9/16] rounded-[36px] overflow-hidden bg-black shadow-2xl border-4 border-slate-800 flex flex-col justify-between select-none"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Camera Notch */}
+            <div className="absolute top-2 left-1/2 -translate-x-1/2 w-20 h-4 bg-slate-900 rounded-full z-30" />
+
+            <video
+              src={activePreviewReel.videoUrl || '/images/reels/linen_abaya.mp4'}
+              poster={activePreviewReel.thumbnail}
+              autoPlay
+              loop
+              controls
+              playsInline
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+
+            {/* Close Button */}
+            <button
+              onClick={() => setActivePreviewReel(null)}
+              className="absolute top-4 right-4 z-30 w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/90 cursor-pointer text-base font-bold"
+            >
+              ✕
+            </button>
+
+            {/* Bottom Details Card */}
+            <div className="relative z-20 mt-auto p-4 bg-gradient-to-t from-black/90 via-black/60 to-transparent text-white space-y-2 pointer-events-auto">
+              <h4 className="text-xs font-black line-clamp-2">{activePreviewReel.title}</h4>
+              <div className="flex items-center justify-between text-[11px] pt-1 border-t border-white/10">
+                <span className="text-amber-300 font-bold truncate">🛍️ {activePreviewReel.taggedProduct}</span>
                 <button
                   type="button"
-                  onClick={() => setShowNewReelModal(false)}
-                  className="flex-1 py-2.5 rounded-xl border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-100"
+                  onClick={() => {
+                    setActivePreviewReel(null);
+                    setActiveTab('reels');
+                  }}
+                  className="px-2.5 py-1 rounded-xl bg-[#d00000] text-white text-[10px] font-black hover:bg-[#b00000] transition-colors"
                 >
-                  {isAr ? 'إلغاء' : 'Cancel'}
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 py-2.5 rounded-xl bg-[#d00000] text-white text-xs font-bold hover:bg-[#b00000] shadow-xs"
-                >
-                  {isAr ? 'نشر الريلز الآن 🚀' : 'Publish Reel 🚀'}
+                  {isAr ? 'عرض بالريلز' : 'In Reels'}
                 </button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}

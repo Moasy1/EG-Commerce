@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import EgLogo from '../components/common/EgLogo';
+import { apiConfig } from '../config/apiConfig.js';
+
 
 // Egyptian Fashion Sample Video Presets for 1-click testing
 const FASHION_VIDEO_PRESETS = [
@@ -255,7 +257,7 @@ export default function AddProductStudio() {
   };
 
   // Drag and drop / video file selection
-  const processVideoFile = (file) => {
+  const processVideoFile = async (file) => {
     if (!file) return;
     if (!file.type.startsWith('video/') && !file.name.match(/\.(mp4|webm|mov|mkv)$/i)) {
       alert('يرجى اختيار ملف فيديو بصيغة صحيحة (MP4, WebM, MOV)');
@@ -272,6 +274,27 @@ export default function AddProductStudio() {
       videoPlayerRef.current.src = objectUrl;
       videoPlayerRef.current.load();
       videoPlayerRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
+    }
+
+    // Upload to Hostinger server for network streaming
+    try {
+      const res = await fetch(apiConfig.getApiUrl('/api/upload-video'), {
+        method: 'POST',
+        headers: {
+          'x-filename': encodeURIComponent(file.name),
+          'content-type': file.type || 'video/mp4'
+        },
+        body: file
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.url) {
+          setVideoUrl(data.url);
+          console.log('[AddProductStudio] Product video uploaded to Hostinger:', data.url);
+        }
+      }
+    } catch (err) {
+      console.warn('Hostinger product video upload skipped, fallback to preview:', err);
     }
   };
 

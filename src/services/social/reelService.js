@@ -1,4 +1,5 @@
 import { supabase } from '../../lib/supabase.js';
+import { apiConfig } from '../../config/apiConfig.js';
 
 const LOCAL_STORAGE_KEY = 'eg_reels_mock_v3';
 const HIDDEN_REELS_KEY = 'eg_hidden_reels';
@@ -6,21 +7,26 @@ const REPORTS_KEY = 'eg_reel_reports';
 
 export const reelService = {
   async getReels() {
-    // 1. Fetch from Cross-Device Shared Backend API (Available across all devices)
+    // 1. Fetch from Hostinger / Shared Backend API
     try {
-      const res = await fetch('/api/reels', { cache: 'no-store' });
+      const res = await fetch(apiConfig.getApiUrl('/api/reels'), { cache: 'no-store' });
       if (res.ok) {
         const shared = await res.json();
         if (Array.isArray(shared) && shared.length > 0) {
+          const normalized = shared.map(r => ({
+            ...r,
+            videoBg: apiConfig.getMediaUrl(r.videoBg || r.video_url),
+            avatar: apiConfig.getMediaUrl(r.avatar || r.thumbnail_url)
+          }));
           try {
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(shared));
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(normalized));
           } catch (e) {}
           const hiddenIds = this.getHiddenReelIds();
-          return shared.filter(r => !hiddenIds.includes(r.id));
+          return normalized.filter(r => !hiddenIds.includes(r.id));
         }
       }
     } catch (err) {
-      console.warn('Cross-device reels query failed, falling back:', err.message);
+      console.warn('Hostinger reels query failed, falling back:', err.message);
     }
 
     let dbReels = [];
@@ -136,15 +142,15 @@ export const reelService = {
       createdAt: reelData.createdAt || new Date().toISOString()
     };
 
-    // 1. Persist to Cross-Device Shared Backend API
+    // 1. Persist to Hostinger / Shared Backend API
     try {
-      await fetch('/api/reels', {
+      await fetch(apiConfig.getApiUrl('/api/reels'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formatted)
       });
     } catch (e) {
-      console.warn('Cross-device API save skipped:', e);
+      console.warn('Hostinger API save skipped:', e);
     }
 
     // 2. Try Supabase
@@ -187,7 +193,7 @@ export const reelService = {
 
   async deleteReel(reelId) {
     try {
-      await fetch(`/api/reels/${reelId}`, { method: 'DELETE' });
+      await fetch(apiConfig.getApiUrl(`/api/reels/${reelId}`), { method: 'DELETE' });
     } catch (e) {}
 
     try {

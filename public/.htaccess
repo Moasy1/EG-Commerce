@@ -1,9 +1,30 @@
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
+
+  # 1. Direct API routes for Hostinger PHP backend
+  RewriteRule ^api/reels(/.*)?$ api/reels.php [L,QSA]
+  RewriteRule ^api/upload-video(/.*)?$ api/upload-video.php [L,QSA]
+  RewriteRule ^api/comments(/.*)?$ api/comments.php [L,QSA]
+  RewriteRule ^api/ugc/content(/.*)?$ api/ugc.php [L,QSA]
+
+  # 2. Allow direct access to existing files, uploads, videos, and directories
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d [OR]
+  RewriteCond %{REQUEST_FILENAME} -l
+  RewriteRule ^ - [L]
+
+  # 3. React SPA Fallback
   RewriteRule ^index\.html$ - [L]
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteCond %{REQUEST_FILENAME} !-l
   RewriteRule . /index.html [L]
 </IfModule>
+
+# Enable large video uploads on Hostinger
+<IfModule mod_php.c>
+  php_value upload_max_filesize 128M
+  php_value post_max_size 128M
+  php_value memory_limit 256M
+  php_value max_execution_time 300
+  php_value max_input_time 300
+</IfModule>
+

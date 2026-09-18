@@ -7,6 +7,8 @@ import { feedService } from '../services/algorithm/feedService.js';
 import { socialService } from '../services/social/socialService.js';
 import { eventTracker } from '../services/analytics/eventTracker.js';
 import { attributionService } from '../services/analytics/attributionService.js';
+import { apiConfig } from '../config/apiConfig.js';
+
 
 const ReelVideoPlayer = ({ reel, isActive, isAdjacent, isGlobalMuted, toggleMute }) => {
   const videoRef = useRef(null);
@@ -84,8 +86,8 @@ const ReelVideoPlayer = ({ reel, isActive, isAdjacent, isGlobalMuted, toggleMute
     <div className="absolute inset-0 bg-black" onClick={togglePlay}>
       <video
         ref={videoRef}
-        src={reel.videoBg}
-        poster={reel.avatar}
+        src={apiConfig.getMediaUrl(reel.videoBg)}
+        poster={apiConfig.getMediaUrl(reel.avatar)}
         className="w-full h-full object-cover"
         loop
         playsInline

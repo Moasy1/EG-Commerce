@@ -1,4 +1,6 @@
 import { supabase } from '../lib/supabase.js';
+import { apiConfig } from '../config/apiConfig.js';
+
 
 const DEFAULT_SEED_COMMENTS = [
   {
@@ -35,20 +37,25 @@ const DEFAULT_SEED_COMMENTS = [
 
 export const ReelsService = {
   async getReels() {
-    // 1. Fetch from Cross-Device Shared Backend API
+    // 1. Fetch from Hostinger / Shared Backend API
     try {
-      const res = await fetch('/api/reels', { cache: 'no-store' });
+      const res = await fetch(apiConfig.getApiUrl('/api/reels'), { cache: 'no-store' });
       if (res.ok) {
         const shared = await res.json();
         if (Array.isArray(shared) && shared.length > 0) {
+          const normalized = shared.map(r => ({
+            ...r,
+            videoBg: apiConfig.getMediaUrl(r.videoBg || r.video_url),
+            avatar: apiConfig.getMediaUrl(r.avatar || r.thumbnail_url)
+          }));
           try {
-            localStorage.setItem('eg_reels_mock_v3', JSON.stringify(shared));
+            localStorage.setItem('eg_reels_mock_v3', JSON.stringify(normalized));
           } catch (e) {}
-          return shared;
+          return normalized;
         }
       }
     } catch (err) {
-      console.warn('Cross-Device API unreachable, falling back:', err.message);
+      console.warn('Hostinger / Shared API unreachable, falling back:', err.message);
     }
 
     let dbReels = [];
@@ -113,18 +120,18 @@ export const ReelsService = {
       createdAt: reelData.createdAt || new Date().toISOString()
     };
 
-    // 1. Persist to Cross-Device Shared Backend API (Accessible by all devices on LAN/Network)
+    // 1. Persist to Hostinger / Shared Backend API
     try {
-      const res = await fetch('/api/reels', {
+      const res = await fetch(apiConfig.getApiUrl('/api/reels'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formattedReel)
       });
       if (res.ok) {
-        console.log('[ReelsService] Reel synced across all devices via /api/reels:', formattedReel.id);
+        console.log('[ReelsService] Reel synced across all devices via Hostinger API:', formattedReel.id);
       }
     } catch (err) {
-      console.warn('Cross-Device API save skipped/failed:', err.message);
+      console.warn('Hostinger API save skipped/failed:', err.message);
     }
 
     // 2. Try to persist to Supabase
@@ -156,11 +163,11 @@ export const ReelsService = {
   },
 
   async deleteReel(reelId) {
-    // 1. Delete from Cross-Device Shared Backend API
+    // 1. Delete from Hostinger / Shared Backend API
     try {
-      await fetch(`/api/reels/${reelId}`, { method: 'DELETE' });
+      await fetch(apiConfig.getApiUrl(`/api/reels/${reelId}`), { method: 'DELETE' });
     } catch (err) {
-      console.warn('Cross-device delete failed:', err.message);
+      console.warn('Hostinger delete failed:', err.message);
     }
 
     // 2. Delete from Supabase
@@ -243,6 +250,15 @@ export const ReelsService = {
     } catch (e) {
       console.warn('Failed to save comment to localStorage:', e);
     }
+
+    // Sync to Hostinger API
+    try {
+      fetch(apiConfig.getApiUrl('/api/comments'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reelId, comment: newComment })
+      }).catch(() => {});
+    } catch (e) {}
 
     // Increment comment count in reel
     try {

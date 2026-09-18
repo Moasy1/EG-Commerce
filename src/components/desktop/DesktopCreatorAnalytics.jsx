@@ -3,6 +3,8 @@ import { useApp } from '../../context/AppContext';
 import EgLogo from '../common/EgLogo';
 import { UgcService } from '../../services/UgcService';
 import { ReelsService } from '../../services/ReelsService';
+import { apiConfig } from '../../config/apiConfig.js';
+
 
 // Egyptian Fashion Video Presets for 1-click test publishing
 const FASHION_VIDEO_PRESETS = [
@@ -272,9 +274,9 @@ export default function DesktopCreatorAnalytics() {
       reelVideoPlayerRef.current.play().then(() => setReelIsPlaying(true)).catch(() => {});
     }
 
-    // Upload to server for cross-device network streaming
+    // Upload to Hostinger server for cross-device network streaming
     setIsUploadingVideo(true);
-    const uploadPromise = fetch('/api/upload-video', {
+    const uploadPromise = fetch(apiConfig.getApiUrl('/api/upload-video'), {
       method: 'POST',
       headers: {
         'x-filename': encodeURIComponent(file.name),

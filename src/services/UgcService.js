@@ -1,5 +1,7 @@
 import { supabase } from '../lib/supabase.js';
 import { ReelsService } from './ReelsService.js';
+import { apiConfig } from '../config/apiConfig.js';
+
 
 const LOCAL_STORAGE_CREATOR_KEY = 'eg_creator_profile_v1';
 const LOCAL_STORAGE_CAMPAIGNS_KEY = 'eg_creator_campaigns_v1';
@@ -761,20 +763,25 @@ export const UgcService = {
 
   // 5. CREATOR CONTENT / REELS
   async getContent() {
-    // 1. Try cross-device shared API
+    // 1. Try Hostinger / shared API
     try {
-      const res = await fetch('/api/ugc/content', { cache: 'no-store' });
+      const res = await fetch(apiConfig.getApiUrl('/api/ugc/content'), { cache: 'no-store' });
       if (res.ok) {
         const shared = await res.json();
         if (Array.isArray(shared) && shared.length > 0) {
+          const normalized = shared.map(c => ({
+            ...c,
+            videoUrl: apiConfig.getMediaUrl(c.videoUrl),
+            thumbnail: apiConfig.getMediaUrl(c.thumbnail)
+          }));
           try {
-            localStorage.setItem(LOCAL_STORAGE_CONTENT_KEY, JSON.stringify(shared));
+            localStorage.setItem(LOCAL_STORAGE_CONTENT_KEY, JSON.stringify(normalized));
           } catch(e) {}
-          return shared;
+          return normalized;
         }
       }
     } catch (e) {
-      console.warn('Cross-device UGC content fetch skipped:', e);
+      console.warn('Hostinger UGC content fetch skipped:', e);
     }
 
     try {
@@ -811,9 +818,9 @@ export const UgcService = {
       taggedProductObj: contentData.taggedProductObj || null
     };
 
-    // 1. Persist to cross-device shared API
+    // 1. Persist to Hostinger / shared API
     try {
-      await fetch('/api/ugc/content', {
+      await fetch(apiConfig.getApiUrl('/api/ugc/content'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newItem)

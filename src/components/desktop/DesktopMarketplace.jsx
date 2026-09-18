@@ -10,6 +10,7 @@ export default function DesktopMarketplace() {
     addToCart, 
     setActiveTab, 
     openCategoryPage,
+    navigateToProfile,
     language 
   } = useApp();
   const isAr = language === 'ar';
@@ -42,17 +43,18 @@ export default function DesktopMarketplace() {
   ];
 
   const topStores = [
-    { id: 'store-1', name: 'Talieska Studio', image: '/images/brands/talieska_logo.jpg' },
-    { id: 'store-2', name: 'ورشة خان الخليلي', image: '/images/banners/khan_hero.jpg' },
-    { id: 'store-3', name: 'مجوهرات طيبة', image: '/images/reels/fashion_vintage_watch_thumb.jpg' },
+    { id: 'store-1', name: 'Talieska Studio', slug: 'talieska', handle: 'talieska', image: '/images/brands/talieska_logo.jpg' },
+    { id: 'store-2', name: 'ورشة خان الخليلي', slug: 'khan-craft', handle: 'khan-craft', image: '/images/banners/khan_hero.jpg' },
+    { id: 'store-3', name: 'مجوهرات طيبة', slug: 'tiba-jewelry', handle: 'tiba-jewelry', image: '/images/reels/fashion_vintage_watch_thumb.jpg' },
   ];
 
   const featuredCreators = [
-    { id: 'c-1', handle: 'cairo_chic', avatar: '/images/reels/fashion_citrine_blazer_thumb.jpg' },
-    { id: 'c-2', handle: 'salma.styles', avatar: '/images/reels/fashion_oversized_shirt_thumb.jpg' },
-    { id: 'c-3', handle: 'karim.editorial', avatar: '/images/reels/fashion_vintage_watch_thumb.jpg' },
-    { id: 'c-4', handle: 'maya_accessories', avatar: '/images/reels/fashion_shoulder_bags_thumb.jpg' },
-    { id: 'c-5', handle: 'zeina_ootd', avatar: '/images/reels/fashion_oneshoulder_top_thumb.jpg' },
+    { id: 'c-1', handle: 'cairo_chic', name: 'Cairo Chic', avatar: '/images/reels/fashion_citrine_blazer_thumb.jpg' },
+    { id: 'c-2', handle: 'salma.styles', name: 'Salma Styles', avatar: '/images/reels/fashion_oversized_shirt_thumb.jpg' },
+    { id: 'c-3', handle: 'yasmin_style', name: 'Yasmin Sayed', avatar: '/images/reels/reel_2.jpg' },
+    { id: 'c-4', handle: 'zeina_ootd', name: 'Zeina OOTD', avatar: '/images/reels/fashion_oneshoulder_top_thumb.jpg' },
+    { id: 'c-5', handle: 'karim.editorial', name: 'Karim Editorial', avatar: '/images/reels/fashion_vintage_watch_thumb.jpg' },
+    { id: 'c-6', handle: 'maya_accessories', name: 'Maya Accessories', avatar: '/images/reels/fashion_shoulder_bags_thumb.jpg' },
   ];
 
   return (
@@ -183,13 +185,14 @@ export default function DesktopMarketplace() {
                 {topStores.map(store => (
                   <div 
                     key={store.id} 
-                    onClick={() => setActiveTab('storefront')}
+                    onClick={() => navigateToProfile(store.slug || store.handle || store.id)}
                     className="flex flex-col items-center gap-1 cursor-pointer group shrink-0"
+                    title={isAr ? `زيارة بروفايل ${store.name}` : `View ${store.name} profile`}
                   >
                     <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-sm ring-2 ring-gray-100 group-hover:ring-[#d00000]/50 transition-all">
                       <img src={store.image} alt={store.name} className="w-full h-full object-cover" />
                     </div>
-                    <span className="text-[9px] font-bold text-slate-700">{store.name}</span>
+                    <span className="text-[9px] font-bold text-slate-700 group-hover:text-[#d00000] transition-colors">{store.name}</span>
                   </div>
                 ))}
               </div>
@@ -198,19 +201,20 @@ export default function DesktopMarketplace() {
             <div className="flex-1 bg-gray-50 border border-gray-100 rounded-2xl p-4">
               <h3 className="text-xs font-bold text-slate-900 mb-3 flex items-center justify-between">
                 <span>Trending Creators</span>
-                <span className="text-[10px] text-[#d00000] cursor-pointer">Discover</span>
+                <span className="text-[10px] text-[#d00000] cursor-pointer hover:underline" onClick={() => setActiveTab('reels')}>Discover</span>
               </h3>
               <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
                 {featuredCreators.map(creator => (
                   <div 
                     key={creator.id} 
-                    onClick={() => setActiveTab('profile')}
-                    className="w-[84px] bg-white border border-gray-200 rounded-xl p-1.5 flex flex-col items-center cursor-pointer hover:shadow-sm shrink-0"
+                    onClick={() => navigateToProfile(creator.handle)}
+                    className="w-[84px] bg-white border border-gray-200 rounded-xl p-1.5 flex flex-col items-center cursor-pointer hover:shadow-sm hover:border-[#d00000]/50 transition-all shrink-0 group"
+                    title={isAr ? `زيارة بروفايل @${creator.handle}` : `View @${creator.handle} profile`}
                   >
-                    <div className="w-10 h-10 rounded-full overflow-hidden mb-1.5">
+                    <div className="w-10 h-10 rounded-full overflow-hidden mb-1.5 border border-gray-100 group-hover:scale-105 transition-transform">
                       <img src={creator.avatar} alt={creator.handle} className="w-full h-full object-cover" />
                     </div>
-                    <span className="text-[9px] font-bold text-slate-900 truncate w-full text-center">@{creator.handle}</span>
+                    <span className="text-[9px] font-bold text-slate-900 truncate w-full text-center group-hover:text-[#d00000] transition-colors">@{creator.handle}</span>
                   </div>
                 ))}
               </div>

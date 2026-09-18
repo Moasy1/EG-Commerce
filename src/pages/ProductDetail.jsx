@@ -5,7 +5,7 @@ import DesktopProductDetail from '../components/desktop/DesktopProductDetail';
 import SizeGuideModal from '../components/common/SizeGuideModal';
 
 export default function ProductDetail() {
-  const { selectedProduct, addToCart, setActiveTab, isAr, language, isSubdomainMode } = useApp();
+  const { selectedProduct, addToCart, setActiveTab, navigateToProfile, isAr, language, isSubdomainMode } = useApp();
 
   // Fallback to Linen Co-ord Set if no product selected
   const product = selectedProduct || {
@@ -280,7 +280,15 @@ export default function ProductDetail() {
 
           {/* Seller Profile Card */}
           <div 
-            onClick={() => setActiveTab(isSubdomainMode ? 'storefront' : 'merchant-storefront')}
+            onClick={() => {
+              if (isSubdomainMode) {
+                setActiveTab('storefront');
+              } else if (navigateToProfile) {
+                navigateToProfile(product.merchantSlug || product.merchantId || product.merchant || 'talieska');
+              } else {
+                setActiveTab('profile');
+              }
+            }}
             className="p-3 bg-gray-50 border border-gray-100 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors"
           >
             <div className="flex items-center gap-3">

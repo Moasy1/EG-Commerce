@@ -4,7 +4,7 @@ import EgLogo from '../common/EgLogo';
 import SizeGuideModal from '../common/SizeGuideModal';
 
 export default function DesktopProductDetail() {
-  const { selectedProduct, products, addToCart, setActiveTab, language, isAr: contextIsAr, isSubdomainMode } = useApp();
+  const { selectedProduct, products, addToCart, setActiveTab, navigateToProfile, language, isAr: contextIsAr, isSubdomainMode } = useApp();
   const isAr = contextIsAr !== undefined ? contextIsAr : (language === 'ar');
 
   // Fallback to first product if none selected
@@ -330,7 +330,15 @@ export default function DesktopProductDetail() {
 
           {/* Seller Card */}
           <div 
-            onClick={() => setActiveTab('storefront')}
+            onClick={() => {
+              if (isSubdomainMode) {
+                setActiveTab('storefront');
+              } else if (navigateToProfile) {
+                navigateToProfile(product.merchantSlug || product.merchantId || product.merchant || 'talieska');
+              } else {
+                setActiveTab('profile');
+              }
+            }}
             className="p-3 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-between cursor-pointer hover:bg-gray-100/80 transition-colors"
           >
             <div className="flex items-center gap-2.5">

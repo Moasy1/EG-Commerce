@@ -12,6 +12,7 @@ export default function Marketplace() {
     setActiveTab, 
     addToCart,
     openCategoryPage,
+    navigateToProfile,
     language
   } = useApp();
   
@@ -61,21 +62,19 @@ export default function Marketplace() {
 
   // Top Stores & Brands
   const topStores = [
-    { id: 'store-1', name: 'Talieska Studio', image: '/images/brands/talieska_logo.jpg' },
-    { id: 'store-2', name: 'ورشة خان الخليلي', image: '/images/banners/khan_hero.jpg' },
-    { id: 'store-3', name: 'مجوهرات طيبة', image: '/images/reels/fashion_vintage_watch_thumb.jpg' },
-    { id: 'store-4', name: 'ZAY Fashion', image: '/images/products/linen_abaya.jpg' },
-    { id: 'store-5', name: 'Dokan Cairo', image: '/images/products/kilim_rug.jpg' },
+    { id: 'store-1', name: 'Talieska Studio', slug: 'talieska', handle: 'talieska', image: '/images/brands/talieska_logo.jpg' },
+    { id: 'store-2', name: 'ورشة خان الخليلي', slug: 'khan-craft', handle: 'khan-craft', image: '/images/banners/khan_hero.jpg' },
+    { id: 'store-3', name: 'مجوهرات طيبة', slug: 'tiba-jewelry', handle: 'tiba-jewelry', image: '/images/reels/fashion_vintage_watch_thumb.jpg' },
   ];
 
   // Featured Creators
   const featuredCreators = [
-    { id: 'c-1', handle: 'cairo_chic', avatar: '/images/reels/fashion_citrine_blazer_thumb.jpg' },
-    { id: 'c-2', handle: 'salma.styles', avatar: '/images/reels/fashion_oversized_shirt_thumb.jpg' },
-    { id: 'c-3', handle: 'karim.editorial', avatar: '/images/reels/fashion_vintage_watch_thumb.jpg' },
-    { id: 'c-4', handle: 'zeina_ootd', avatar: '/images/reels/fashion_oneshoulder_top_thumb.jpg' },
-    { id: 'c-5', handle: 'maya_accessories', avatar: '/images/reels/fashion_shoulder_bags_thumb.jpg' },
-    { id: 'c-6', handle: 'layla_fashion', avatar: '/images/reels/fashion_knit_sweater_thumb.jpg' },
+    { id: 'c-1', handle: 'cairo_chic', name: 'Cairo Chic', avatar: '/images/reels/fashion_citrine_blazer_thumb.jpg' },
+    { id: 'c-2', handle: 'salma.styles', name: 'Salma Styles', avatar: '/images/reels/fashion_oversized_shirt_thumb.jpg' },
+    { id: 'c-3', handle: 'yasmin_style', name: 'Yasmin Sayed', avatar: '/images/reels/reel_2.jpg' },
+    { id: 'c-4', handle: 'zeina_ootd', name: 'Zeina OOTD', avatar: '/images/reels/fashion_oneshoulder_top_thumb.jpg' },
+    { id: 'c-5', handle: 'karim.editorial', name: 'Karim Editorial', avatar: '/images/reels/fashion_vintage_watch_thumb.jpg' },
+    { id: 'c-6', handle: 'maya_accessories', name: 'Maya Accessories', avatar: '/images/reels/fashion_shoulder_bags_thumb.jpg' },
   ];
 
   return (
@@ -116,7 +115,7 @@ export default function Marketplace() {
           {topStores.map(store => (
             <div 
               key={store.id} 
-              onClick={() => setActiveTab('storefront')}
+              onClick={() => navigateToProfile(store.slug || store.handle || store.id)}
               className="flex flex-col items-center gap-1.5 shrink-0 cursor-pointer group"
             >
               <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white shadow-sm ring-2 ring-gray-100 group-hover:ring-[#d00000]/50 transition-all">
@@ -201,7 +200,7 @@ export default function Marketplace() {
           {featuredCreators.map(creator => (
             <div 
               key={creator.id} 
-              onClick={() => setActiveTab('profile')}
+              onClick={() => navigateToProfile(creator.handle)}
               className="w-28 p-2 rounded-xl border border-gray-200/80 bg-white shadow-xs shrink-0 flex flex-col items-center cursor-pointer hover:shadow-md transition-shadow"
             >
               <div className="w-12 h-12 rounded-full overflow-hidden border border-gray-100 mb-2">

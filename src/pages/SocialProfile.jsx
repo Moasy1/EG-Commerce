@@ -46,12 +46,25 @@ export default function SocialProfile() {
 
   // Filter products for this merchant or creator
   const profileProducts = (products || []).filter(p => {
-    if (currentProfile.merchantId) {
-      return (
-        p.merchantId === currentProfile.merchantId ||
-        p.merchant?.toLowerCase().includes('talieska') ||
-        (currentProfile.slug && p.merchantId?.includes(currentProfile.slug))
+    if (currentProfile.role === 'merchant') {
+      const matchId = currentProfile.merchantId && p.merchantId === currentProfile.merchantId;
+      const matchSlug = currentProfile.slug && (
+        p.merchantId?.toLowerCase().includes(currentProfile.slug) ||
+        p.merchantSlug?.toLowerCase() === currentProfile.slug ||
+        p.merchant?.toLowerCase().includes(currentProfile.slug)
       );
+      const matchName = currentProfile.name && p.merchant && (
+        p.merchant.toLowerCase().includes(currentProfile.name.toLowerCase().split(' ')[0]) ||
+        currentProfile.name.toLowerCase().includes(p.merchant.toLowerCase())
+      );
+      return matchId || matchSlug || matchName;
+    }
+    // For creator: show curated or tagged products
+    if (currentProfile.role === 'creator') {
+      const handleClean = currentProfile.handle?.replace('@', '').toLowerCase();
+      if (p.creatorHandle && p.creatorHandle.toLowerCase().includes(handleClean)) return true;
+      if (p.creator && p.creator.toLowerCase().includes(handleClean)) return true;
+      return true;
     }
     return true;
   });
@@ -64,10 +77,11 @@ export default function SocialProfile() {
     { id: 'h4', title: isAr ? 'الشحن والتوصيل' : 'Shipping', icon: 'local_shipping', img: '/images/banners/talieska_hero.jpg' }
   ];
 
-  // Mock reels associated with this profile
-  const profileReels = [
+  // Comprehensive reels associated with different profiles
+  const allMockReels = [
     {
       id: 'pr-1',
+      handles: ['@cairo_chic', 'cairo_chic', '@talieska', 'talieska'],
       title: isAr ? 'تنسيق بليزر السيترين الأوفرسايز' : 'Citrine Oversized Blazer Styling',
       views: '62.4K',
       videoUrl: '/images/reels/fashion_citrine_blazer.mp4',
@@ -79,6 +93,7 @@ export default function SocialProfile() {
     },
     {
       id: 'pr-2',
+      handles: ['@salma.styles', 'salma.styles', '@talieska', 'talieska'],
       title: isAr ? 'قميص كتان سماوي للصيف' : 'Sky Blue Linen Summer Shirt',
       views: '45.1K',
       videoUrl: '/images/reels/fashion_oversized_shirt.mp4',
@@ -90,6 +105,7 @@ export default function SocialProfile() {
     },
     {
       id: 'pr-3',
+      handles: ['@zeina_ootd', 'zeina_ootd'],
       title: isAr ? 'توب بكتف واحد عاجي ناعم' : 'One Shoulder Bodysuit Lookbook',
       views: '38.9K',
       videoUrl: '/images/reels/fashion_oneshoulder_top.mp4',
@@ -101,6 +117,7 @@ export default function SocialProfile() {
     },
     {
       id: 'pr-4',
+      handles: ['@maya_accessories', 'maya_accessories', 'khan-craft'],
       title: isAr ? 'كولكشن شنط الكتف الكلاسيكية' : 'Structured Leather Bag Swatch',
       views: '48.5K',
       videoUrl: '/images/reels/fashion_shoulder_bags.mp4',
@@ -112,6 +129,7 @@ export default function SocialProfile() {
     },
     {
       id: 'pr-5',
+      handles: ['@yasmin_style', 'yasmin_style', 'talieska', '@talieska'],
       title: isAr ? 'إطلالة عباية الكتان المطرزة يدوياً' : 'Hand Embroidered Linen Abaya',
       views: '54.0K',
       videoUrl: '/images/reels/fashion_oversized_shirt.mp4',
@@ -123,6 +141,7 @@ export default function SocialProfile() {
     },
     {
       id: 'pr-6',
+      handles: ['khan-craft', '@khan.craft.eg', '@farida.atelier', 'farida.atelier'],
       title: isAr ? 'تفاصيل نقش النحاس الأصيل' : 'Artisan Handcrafted Brass Details',
       views: '29.3K',
       videoUrl: '/images/reels/fashion_citrine_blazer.mp4',
@@ -131,8 +150,30 @@ export default function SocialProfile() {
       comments: '58',
       productName: isAr ? 'فانوس نحاسي فاطمي' : 'Brass Lantern',
       productPrice: 1450
+    },
+    {
+      id: 'pr-7',
+      handles: ['@karim.editorial', 'karim.editorial', 'tiba-jewelry'],
+      title: isAr ? 'ساعة كلاسيكية وتنسيق أزياء رجالي' : 'Vintage Watch & Menswear Styling',
+      views: '35.7K',
+      videoUrl: '/images/reels/fashion_citrine_blazer.mp4',
+      thumbnail: '/images/reels/fashion_vintage_watch_thumb.jpg',
+      likes: '3.4K',
+      comments: '64',
+      productName: isAr ? 'ساعة يد عتيقة' : 'Vintage Watch',
+      productPrice: 3400
     }
   ];
+
+  // Prioritize reels matching this profile handle/slug, and append other reels for full grid
+  const cleanHandle = currentProfile.handle?.replace('@', '').toLowerCase();
+  const matchedReels = allMockReels.filter(r => 
+    r.handles.includes(currentProfile.handle) || 
+    r.handles.includes(currentProfile.slug) ||
+    r.handles.includes(cleanHandle)
+  );
+  const otherReels = allMockReels.filter(r => !matchedReels.some(mr => mr.id === r.id));
+  const profileReels = matchedReels.length > 0 ? [...matchedReels, ...otherReels] : allMockReels;
 
   // Saved / Tagged lookbooks
   const savedLookbooks = [

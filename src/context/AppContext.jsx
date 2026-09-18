@@ -354,6 +354,90 @@ export const SOCIAL_PROFILES = {
     highlights: [
       { id: 'h1', title: 'تنسيقات أوفرسايز', icon: 'checkroom', img: '/images/reels/fashion_oversized_shirt_thumb.jpg' }
     ]
+  },
+  zeina_ootd: {
+    id: 'p-zeina',
+    handle: '@zeina_ootd',
+    slug: 'zeina_ootd',
+    name: 'زينة أوفت • Zeina OOTD',
+    verified: true,
+    role: 'creator',
+    merchantId: 'm-01',
+    avatar: '/images/reels/fashion_oneshoulder_top_thumb.jpg',
+    category: 'Occasion & Evening Styling',
+    categoryAr: 'أطقم المناسبات وتنسيقات التوبات الراقية',
+    bio: '🤍 أطقم المناسبات والفساتين الكلاسيك | تنسيقات الجينز والتوبات المعاصرة للقاهرة والساحل 🇪🇬',
+    location: 'القاهرة، مصر • Cairo',
+    followersCount: '52.9K',
+    followingCount: '134',
+    productsCount: 4,
+    reelsCount: 9,
+    highlights: [
+      { id: 'h1', title: 'سهرات', icon: 'nightlife', img: '/images/reels/fashion_oneshoulder_top_thumb.jpg' }
+    ]
+  },
+  'karim.editorial': {
+    id: 'p-karim',
+    handle: '@karim.editorial',
+    slug: 'karim.editorial',
+    name: 'كريم إيديتوريال • Karim Editorial',
+    verified: true,
+    role: 'creator',
+    merchantId: 'm-02',
+    avatar: '/images/reels/fashion_vintage_watch_thumb.jpg',
+    category: "Men's Fashion & Vintage Watches",
+    categoryAr: 'أزياء رجالية وتنسيق ساعات كلاسيك',
+    bio: '⌚ تنسيقات الساعات الكلاسيكية والأزياء الرجالية المعاصرة في مصر 🇪🇬',
+    location: 'الزمالك، القاهرة • Zamalek',
+    followersCount: '38.4K',
+    followingCount: '112',
+    productsCount: 4,
+    reelsCount: 7,
+    highlights: [
+      { id: 'h1', title: 'ساعات فاخرة', icon: 'watch', img: '/images/reels/fashion_vintage_watch_thumb.jpg' }
+    ]
+  },
+  maya_accessories: {
+    id: 'p-maya',
+    handle: '@maya_accessories',
+    slug: 'maya_accessories',
+    name: 'مايا إكسسوارات • Maya Accessories',
+    verified: true,
+    role: 'creator',
+    merchantId: 'm-02',
+    avatar: '/images/reels/fashion_shoulder_bags_thumb.jpg',
+    category: 'Bags & Accessories Stylist',
+    categoryAr: 'تنسيق شنط وإكسسوارات جلد طبيعي',
+    bio: '👜 كل ما يخص الشنط الجلدية المصنوعة يدوياً وتنسيق الإكسسوارات الفاخرة ✨',
+    location: 'المعادي، القاهرة • Maadi',
+    followersCount: '29.7K',
+    followingCount: '95',
+    productsCount: 5,
+    reelsCount: 12,
+    highlights: [
+      { id: 'h1', title: 'شنط جلد', icon: 'handbag', img: '/images/reels/fashion_shoulder_bags_thumb.jpg' }
+    ]
+  },
+  'farida.atelier': {
+    id: 'p-farida',
+    handle: '@farida.atelier',
+    slug: 'farida.atelier',
+    name: 'فريدة أتيليه • Farida Atelier',
+    verified: true,
+    role: 'creator',
+    merchantId: 'm-02',
+    avatar: '/images/reels/fashion_woven_bag_thumb.jpg',
+    category: 'Artisan Crafts & Leather',
+    categoryAr: 'حرف يدوية وشنط جلد طبيعي',
+    bio: '🧵 حرف يدوية وتطريز مصري أصيل | شنط جلد طبيعي منسوجة يدوياً بمقبض مضفر 🇪🇬',
+    location: 'خان الخليلي، القاهرة',
+    followersCount: '33.1K',
+    followingCount: '108',
+    productsCount: 4,
+    reelsCount: 8,
+    highlights: [
+      { id: 'h1', title: 'صناعة يدوية', icon: 'brush', img: '/images/reels/fashion_woven_bag_thumb.jpg' }
+    ]
   }
 };
 
@@ -1000,21 +1084,26 @@ export function AppProvider({ children }) {
   const socialProfiles = SOCIAL_PROFILES;
 
   const activeProfile = useMemo(() => {
-    const clean = (activeProfileHandle || 'talieska').replace(/^@/, '').toLowerCase();
+    const rawClean = (activeProfileHandle || 'talieska').replace(/^@/, '').trim();
+    const clean = rawClean.toLowerCase();
+    
+    // Direct key match
     if (socialProfiles[clean]) return socialProfiles[clean];
+    if (socialProfiles[rawClean]) return socialProfiles[rawClean];
 
     // Check by slug or handle match in registry
     const found = Object.values(socialProfiles).find(p => 
       p.slug?.toLowerCase() === clean || 
       p.handle?.toLowerCase() === `@${clean}` ||
+      p.handle?.toLowerCase() === `@${rawClean}` ||
       p.merchantId === clean
     );
     if (found) return found;
 
     // Check if it matches a merchant in merchants array
     const merchantMatch = (merchants || []).find(m => 
-      m.slug === clean || 
-      m.id === clean || 
+      m.slug?.toLowerCase() === clean || 
+      m.id?.toLowerCase() === clean || 
       m.shortName?.toLowerCase() === clean
     );
     if (merchantMatch) {
@@ -1040,8 +1129,38 @@ export function AppProvider({ children }) {
       };
     }
 
-    // Default to Talieska Studio
-    return socialProfiles['talieska'];
+    // If clean is empty or talieska, return Talieska Studio
+    if (!clean || clean === 'talieska') {
+      return socialProfiles['talieska'];
+    }
+
+    // Dynamic Creator Profile for any clicked creator handle!
+    const formattedName = rawClean
+      .split(/[._-]/)
+      .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ');
+
+    return {
+      id: `p-${clean}`,
+      handle: `@${rawClean}`,
+      slug: clean,
+      name: formattedName,
+      verified: true,
+      role: 'creator',
+      merchantId: 'm-01',
+      avatar: '/images/reels/fashion_oneshoulder_top_thumb.jpg',
+      category: 'Fashion Stylist & UGC Creator',
+      categoryAr: 'منسقة أزياء وصانعة محتوى معتمدة',
+      bio: `✨ إطلالات وتنسيقات أزياء عصرية | صانعة محتوى مصرية معتمدة 🇪🇬`,
+      location: 'القاهرة، مصر • Cairo, Egypt',
+      followersCount: '45.8K',
+      followingCount: '124',
+      productsCount: 4,
+      reelsCount: 6,
+      highlights: [
+        { id: 'h1', title: 'إطلالات الصيف', icon: 'style', img: '/images/reels/fashion_citrine_blazer_thumb.jpg' }
+      ]
+    };
   }, [activeProfileHandle, merchants, products, socialProfiles]);
 
   const navigateToProfile = (profileOrHandle) => {

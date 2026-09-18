@@ -16,6 +16,7 @@ import RewardsHub from './pages/RewardsHub';
 import CreatorStudio from './pages/CreatorStudio';
 import MerchantCampaign from './pages/MerchantCampaign';
 import ProfileCloset from './pages/ProfileCloset';
+import SocialProfile from './pages/SocialProfile';
 import MerchantStorefront from './pages/MerchantStorefront';
 import MerchantDashboard from './pages/MerchantDashboard';
 import ScreenShowcase from './pages/ScreenShowcase';
@@ -293,6 +294,8 @@ function MainContent() {
       case 'rewards':
         return <RewardsHub />;
       case 'profile':
+        return <SocialProfile />;
+      case 'closet':
         return <ProfileCloset />;
       case 'showcase':
         return <ScreenShowcase />;

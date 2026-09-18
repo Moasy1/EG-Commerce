@@ -20,7 +20,9 @@ export default function MerchantDashboard() {
     deleteProduct,
     user,
     isAr,
-    setIsAuthModalOpen
+    setIsAuthModalOpen,
+    navigateToProfile,
+    navigateToStorefront
   } = useApp();
 
   const isMerchant = user?.role === 'merchant' || user?.role === 'superadmin' || user?.role === 'admin';
@@ -184,7 +186,16 @@ export default function MerchantDashboard() {
           {/* Quick Action CTAs */}
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setActiveTab('storefront')}
+              onClick={() => navigateToProfile(currentMerchant.slug || 'talieska')}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface border border-surface-container-high text-xs font-bold transition-all shadow-xs"
+              title="معاينة الملف الاجتماعي (Instagram Profile)"
+            >
+              <span className="material-symbols-outlined text-[16px] text-rose-500">account_circle</span>
+              <span className="hidden sm:inline">الملف الاجتماعي</span>
+            </button>
+
+            <button
+              onClick={() => navigateToStorefront(currentMerchant.id)}
               className="hidden md:flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface border border-surface-container-high text-xs font-bold transition-all shadow-xs"
             >
               <span className="material-symbols-outlined text-[16px] text-primary">storefront</span>

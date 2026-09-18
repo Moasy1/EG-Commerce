@@ -12,7 +12,8 @@ export default function MerchantStorefront() {
     openProductDetail,
     openQuickBuy,
     totalCartCount,
-    user
+    user,
+    navigateToProfile
   } = useApp();
 
   const canManageStore = user && (user.role === 'superadmin' || user.role === 'admin' || user.role === 'merchant');
@@ -351,6 +352,15 @@ export default function MerchantStorefront() {
               </select>
 
               <button
+                onClick={() => navigateToProfile(currentMerchant.slug || 'talieska')}
+                className="flex items-center gap-1 px-2.5 py-0.5 rounded-md font-bold text-[11px] transition-all bg-gradient-to-r from-rose-500/20 to-amber-500/20 text-rose-300 border border-rose-500/30 hover:opacity-90 shadow-xs"
+                title="زيارة الملف الاجتماعي للبراند (Social Profile)"
+              >
+                <span className="material-symbols-outlined text-[13px]">person</span>
+                <span>الملف الاجتماعي ({currentMerchant.slug})</span>
+              </button>
+
+              <button
                 onClick={() => setActiveTab('dashboard')}
                 className="flex items-center gap-1 px-2.5 py-0.5 rounded-md font-bold text-[11px] transition-all text-white shadow-xs"
                 style={{ backgroundColor: accentColor }}
@@ -497,6 +507,16 @@ export default function MerchantStorefront() {
 
           {/* Action Icons */}
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigateToProfile(currentMerchant.slug || 'talieska')}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-500/10 hover:bg-red-500/20 text-[#d00000] border border-red-500/30 text-xs font-bold transition-all shadow-xs"
+              title="زيارة الملف الاجتماعي للبراند (Social Profile)"
+            >
+              <span className="material-symbols-outlined text-[15px]">person</span>
+              <span className="hidden sm:inline">الملف الاجتماعي</span>
+              <span className="font-mono text-[11px]">{currentMerchant.instagram || `@${currentMerchant.slug}`}</span>
+            </button>
+
             <a
               href={`https://wa.me/${currentMerchant.whatsapp.replace(/[^0-9]/g, '')}?text=مرحبا، أود الاستفسار عن كولكشن ${encodeURIComponent(currentMerchant.name)}`}
               target="_blank"

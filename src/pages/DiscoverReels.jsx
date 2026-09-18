@@ -480,7 +480,7 @@ const getDefaultReels = (isAr = true) => [
   ];
 
 export default function DiscoverReels() {
-  const { openQuickBuy, openProductDetail, products, setActiveTab, language, user, role, setIsAuthModalOpen } = useApp();
+  const { openQuickBuy, openProductDetail, products, setActiveTab, navigateToProfile, language, user, role, setIsAuthModalOpen } = useApp();
   const isAr = language === 'ar';
   const defaultReels = useMemo(() => getDefaultReels(isAr), [isAr]);
 
@@ -993,7 +993,7 @@ export default function DiscoverReels() {
                 className="flex items-center gap-1.5 cursor-pointer w-fit"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setActiveTab('profile');
+                  navigateToProfile(reel.creatorHandle);
                 }}
               >
                 <span className="font-bold text-[15px] text-white drop-shadow-md hover:underline">{reel.creatorHandle}</span>
@@ -1587,7 +1587,7 @@ export default function DiscoverReels() {
               <button 
                 onClick={() => {
                   setIsOptionsMenuOpen(false);
-                  setActiveTab('profile');
+                  navigateToProfile(currentReel?.creatorHandle || 'talieska');
                 }}
                 className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-gray-50 active:bg-gray-100 transition-colors text-start cursor-pointer"
               >

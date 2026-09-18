@@ -3,7 +3,7 @@ import { useApp } from '../../context/AppContext';
 import EgLogo from '../common/EgLogo';
 
 export default function DesktopFeed() {
-  const { setActiveTab, openProductDetail, openQuickBuy, language } = useApp();
+  const { setActiveTab, openProductDetail, openQuickBuy, language, navigateToProfile } = useApp();
   const [activeCategory, setActiveCategory] = useState(language === 'ar' ? 'الكل' : 'All');
 
   const isAr = language === 'ar';
@@ -267,7 +267,16 @@ export default function DesktopFeed() {
 
               {/* Bottom Card Content */}
               <div className="relative z-10 p-2.5 space-y-1.5 text-white">
-                <div className="flex items-center gap-1.5">
+                <div 
+                  className="flex items-center gap-1.5 cursor-pointer hover:opacity-80 transition-opacity"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const handle = card.creator?.includes('@') 
+                      ? card.creator.split('@')[1]?.replace(')', '').trim() 
+                      : 'talieska';
+                    navigateToProfile(handle);
+                  }}
+                >
                   <img src={card.avatar} alt={card.creator} className="w-6 h-6 rounded-full object-cover ring-1 ring-white/60" />
                   <div className="truncate">
                     <h4 className="text-[11px] font-bold truncate leading-tight">{card.creator}</h4>

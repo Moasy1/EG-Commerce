@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { ProductService } from '../services/ProductService';
 import { ReelsService } from '../services/ReelsService';
 import { CartService } from '../services/CartService';
@@ -217,6 +217,124 @@ export const MERCHANTS_DATA = [
     }
   }
 ];
+
+export const SOCIAL_PROFILES = {
+  talieska: {
+    id: 'p-talieska',
+    handle: '@talieska',
+    slug: 'talieska',
+    name: 'Talieska Studio • تاليسكا ستوديو',
+    verified: true,
+    role: 'merchant',
+    merchantId: 'm-01',
+    avatar: '/images/brands/talieska_logo.jpg',
+    banner: '/images/banners/talieska_hero.jpg',
+    category: 'Haute Egyptian Linen & Fashion',
+    categoryAr: 'دار أزياء الكتان والتطريز المصري المعاصر',
+    bio: '✨ إحياء فخامة الكتان الطبيعي والتطريز اليدوي 100% بأيادٍ مصرية أصيلة بالقاهرة 🇪🇬 | شحن سريع لجميع المحافظات مع بوسطة',
+    location: 'القاهرة، مصر • Cairo, Egypt',
+    website: 'shop.talieskastudio.com',
+    followersCount: '48.2K',
+    followingCount: '142',
+    productsCount: 12,
+    reelsCount: 8,
+    highlights: [
+      { id: 'h1', title: 'صيف 2026', icon: 'flare', img: '/images/products/linen_abaya.jpg' },
+      { id: 'h2', title: 'آراء العملاء', icon: 'rate_review', img: '/images/reels/fashion_citrine_blazer_thumb.jpg' },
+      { id: 'h3', title: 'خامات الكتان', icon: 'dry_cleaning', img: '/images/products/embroidered_blouse.jpg' },
+      { id: 'h4', title: 'توصيل بوسطة', icon: 'local_shipping', img: '/images/banners/talieska_hero.jpg' }
+    ]
+  },
+  'khan-craft': {
+    id: 'p-khan',
+    handle: '@khan.craft.eg',
+    slug: 'khan-craft',
+    name: 'Khan El Khalili Craft • ورشة خان الخليلي',
+    verified: true,
+    role: 'merchant',
+    merchantId: 'm-02',
+    avatar: '/images/products/copper_lantern.jpg',
+    banner: '/images/banners/khan_hero.jpg',
+    category: 'Handmade Leather & Brass Heritage',
+    categoryAr: 'صناعات نحاسية وتحف تراثية فاطمية',
+    bio: '🏮 حرفيون مصريون من قلب القاهرة الفاطمية • فوانيس نحاسية منقوشة يدوياً وسجاد كليم أصيل 100% مع ضمان استبدال مجاني',
+    location: 'حي الجمالية، خان الخليلي • Al-Gamaleya',
+    website: 'khancraft-eg.com',
+    followersCount: '24.8K',
+    followingCount: '98',
+    productsCount: 8,
+    reelsCount: 6,
+    highlights: [
+      { id: 'h1', title: 'فوانيس نحاس', icon: 'emoji_objects', img: '/images/products/copper_lantern.jpg' },
+      { id: 'h2', title: 'كليم يدوي', icon: 'texture', img: '/images/banners/khan_hero.jpg' }
+    ]
+  },
+  'tiba-jewelry': {
+    id: 'p-tiba',
+    handle: '@tiba.jewels',
+    slug: 'tiba-jewelry',
+    name: 'Tiba Jewelry • مجوهرات طيبة',
+    verified: true,
+    role: 'merchant',
+    merchantId: 'm-03',
+    avatar: '/images/brands/talieska_logo.jpg',
+    banner: '/images/banners/talieska_hero.jpg',
+    category: 'Gold Plated & Heritage Jewelry',
+    categoryAr: 'حلي ومجوهرات ملكية مستوحاة من التاريخ',
+    bio: '👑 مجوهرات وحلي فرعونية معاصرة مصوغة من الفضة عيار 925 والذهب عيار 18 المستوحاة من رموز مصر القديمة ✨',
+    location: 'الزمالك، القاهرة • Zamalek, Cairo',
+    website: 'tibajewelry.com',
+    followersCount: '31.5K',
+    followingCount: '84',
+    productsCount: 6,
+    reelsCount: 4,
+    highlights: [
+      { id: 'h1', title: 'كولكشن اللوتس', icon: 'diamond', img: '/images/brands/talieska_logo.jpg' }
+    ]
+  },
+  cairo_chic: {
+    id: 'p-cairo-chic',
+    handle: '@cairo_chic',
+    slug: 'cairo_chic',
+    name: 'كايرو شيك • Cairo Chic',
+    verified: true,
+    role: 'creator',
+    merchantId: 'm-01',
+    avatar: '/images/reels/fashion_citrine_blazer_thumb.jpg',
+    category: 'Fashion Stylist & UGC Creator',
+    categoryAr: 'منسقة أزياء وصانعة محتوى',
+    bio: '💛 تنسيق بليزر السيترين والكولكشنات الصيفية المعاصرة | شراكات مع أفضل البراندات المصرية المستقلة 🇪🇬',
+    location: 'القاهرة، مصر',
+    followersCount: '92.4K',
+    followingCount: '210',
+    productsCount: 4,
+    reelsCount: 14,
+    highlights: [
+      { id: 'h1', title: 'أوتفت الصيف', icon: 'style', img: '/images/reels/fashion_citrine_blazer_thumb.jpg' }
+    ]
+  },
+  yasmin_style: {
+    id: 'p-yasmin',
+    handle: '@yasmin_style',
+    slug: 'yasmin_style',
+    name: 'ياسمين السيد • Yasmin Sayed',
+    verified: true,
+    role: 'creator',
+    merchantId: 'm-01',
+    avatar: '/images/reels/reel_2.jpg',
+    category: 'Digital Creator & Model',
+    categoryAr: 'صانعة محتوى وموديل أزياء',
+    bio: '👗 شغفي بالأزياء التراثية المصرية والألوان الصيفية المبهجة | سفيرة براند تاليسكا ستوديو',
+    location: 'الإسكندرية • Cairo',
+    followersCount: '67.1K',
+    followingCount: '188',
+    productsCount: 5,
+    reelsCount: 18,
+    highlights: [
+      { id: 'h1', title: 'ريلز الكتان', icon: 'movie', img: '/images/reels/reel_2.jpg' }
+    ]
+  }
+};
 
 export const INITIAL_ORDERS = [
   {
@@ -741,9 +859,19 @@ export function parseRouteFromLocation(pathname, search, isSubdomain) {
   if (cleanPath === '/admin' || cleanPath === '/superadmin') return { tab: 'admin' };
   if (cleanPath === '/delivery') return { tab: 'delivery' };
   if (cleanPath === '/settings') return { tab: 'settings' };
-  if (cleanPath === '/profile') return { tab: 'profile' };
+  if (cleanPath === '/merchant/dashboard') return { tab: 'dashboard' };
+
+  if (cleanPath === '/profile' || cleanPath.startsWith('/profile/')) {
+    const handle = cleanPath.startsWith('/profile/') ? cleanPath.replace('/profile/', '').trim() : 'talieska';
+    return { tab: 'profile', profileHandle: handle };
+  }
+
   if (cleanPath === '/showcase') return { tab: 'showcase' };
-  if (cleanPath === '/storefront' || cleanPath.startsWith('/store')) return { tab: 'storefront' };
+
+  if (cleanPath === '/storefront' || cleanPath.startsWith('/store')) {
+    const slug = cleanPath.startsWith('/store/') ? cleanPath.replace('/store/', '').trim() : 'talieska';
+    return { tab: 'storefront', storeSlug: slug };
+  }
 
   if (cleanPath.startsWith('/product/')) {
     const id = cleanPath.replace('/product/', '').trim();
@@ -758,7 +886,7 @@ export function parseRouteFromLocation(pathname, search, isSubdomain) {
   return { tab: isSubdomain ? 'storefront' : 'reels' };
 }
 
-export function getPathForTab(tab, { product, category, isSubdomain } = {}) {
+export function getPathForTab(tab, { product, category, isSubdomain, profileHandle, storeSlug } = {}) {
   switch (tab) {
     case 'reels':
       return isSubdomain ? '/' : '/reels';
@@ -782,7 +910,7 @@ export function getPathForTab(tab, { product, category, isSubdomain } = {}) {
       return '/studio';
     case 'dashboard':
     case 'merchant':
-      return '/dashboard';
+      return '/merchant/dashboard';
     case 'add_product':
     case 'add-product':
       return '/add-product';
@@ -794,11 +922,11 @@ export function getPathForTab(tab, { product, category, isSubdomain } = {}) {
     case 'settings':
       return '/settings';
     case 'profile':
-      return '/profile';
+      return profileHandle ? `/profile/${profileHandle.replace(/^@/, '')}` : '/profile/talieska';
     case 'showcase':
       return '/showcase';
     case 'storefront':
-      return '/';
+      return storeSlug ? `/store/${storeSlug}` : '/store/talieska';
     default:
       return isSubdomain ? '/' : '/';
   }
@@ -846,6 +974,91 @@ export function AppProvider({ children }) {
     };
   });
 
+  // Social Profile State & Navigation Layer
+  const [activeProfileHandle, setActiveProfileHandle] = useState(() => initialRoute.profileHandle || 'talieska');
+  const socialProfiles = SOCIAL_PROFILES;
+
+  const activeProfile = useMemo(() => {
+    const clean = (activeProfileHandle || 'talieska').replace(/^@/, '').toLowerCase();
+    if (socialProfiles[clean]) return socialProfiles[clean];
+
+    // Check by slug or handle match in registry
+    const found = Object.values(socialProfiles).find(p => 
+      p.slug?.toLowerCase() === clean || 
+      p.handle?.toLowerCase() === `@${clean}` ||
+      p.merchantId === clean
+    );
+    if (found) return found;
+
+    // Check if it matches a merchant in merchants array
+    const merchantMatch = (merchants || []).find(m => 
+      m.slug === clean || 
+      m.id === clean || 
+      m.shortName?.toLowerCase() === clean
+    );
+    if (merchantMatch) {
+      return {
+        id: `p-${merchantMatch.slug}`,
+        handle: `@${merchantMatch.slug}`,
+        slug: merchantMatch.slug,
+        name: merchantMatch.name,
+        verified: true,
+        role: 'merchant',
+        merchantId: merchantMatch.id,
+        avatar: merchantMatch.logo,
+        banner: merchantMatch.banner,
+        category: merchantMatch.category,
+        categoryAr: merchantMatch.categoryAr,
+        bio: merchantMatch.bio,
+        location: 'القاهرة، مصر • Cairo, Egypt',
+        website: merchantMatch.customDomain || merchantMatch.subdomain,
+        followersCount: '36.4K',
+        followingCount: '110',
+        productsCount: (products || []).filter(p => p.merchantId === merchantMatch.id).length || 8,
+        reelsCount: 6
+      };
+    }
+
+    // Default to Talieska Studio
+    return socialProfiles['talieska'];
+  }, [activeProfileHandle, merchants, products, socialProfiles]);
+
+  const navigateToProfile = (profileOrHandle) => {
+    let handle = 'talieska';
+    if (typeof profileOrHandle === 'string') {
+      handle = profileOrHandle.replace(/^@/, '');
+    } else if (profileOrHandle?.slug) {
+      handle = profileOrHandle.slug;
+    } else if (profileOrHandle?.handle) {
+      handle = profileOrHandle.handle.replace(/^@/, '');
+    } else if (profileOrHandle?.merchantId) {
+      const match = (merchants || []).find(m => m.id === profileOrHandle.merchantId);
+      if (match) handle = match.slug;
+    }
+    setActiveProfileHandle(handle);
+    setActiveTab('profile', { profileHandle: handle });
+  };
+
+  const navigateToStorefront = (merchantIdOrSlug) => {
+    if (merchantIdOrSlug) {
+      const match = (merchants || []).find(m => 
+        m.id === merchantIdOrSlug || 
+        m.slug === merchantIdOrSlug || 
+        m.shortName?.toLowerCase() === String(merchantIdOrSlug).toLowerCase()
+      );
+      if (match) {
+        setSelectedMerchantId(match.id);
+        setActiveTab('storefront', { storeSlug: match.slug });
+        return;
+      }
+    }
+    setActiveTab('storefront', { storeSlug: 'talieska' });
+  };
+
+  const navigateToDashboard = () => {
+    setActiveTab('dashboard');
+  };
+
   // URL-synchronized navigation function
   const setActiveTab = (tab, options = {}) => {
     setActiveTabState(tab);
@@ -854,7 +1067,17 @@ export function AppProvider({ children }) {
 
     const prod = options.product || selectedProduct;
     const cat = options.category || selectedCategory;
-    const newPath = getPathForTab(tab, { product: prod, category: cat, isSubdomain: isSubdomainMode });
+    const profHandle = options.profileHandle || activeProfileHandle;
+    const curMerchant = (merchants || []).find(m => m.id === selectedMerchantId);
+    const sSlug = options.storeSlug || curMerchant?.slug || 'talieska';
+
+    const newPath = getPathForTab(tab, { 
+      product: prod, 
+      category: cat, 
+      isSubdomain: isSubdomainMode,
+      profileHandle: profHandle,
+      storeSlug: sSlug
+    });
 
     // Preserve existing query params like subdomain=talieska or store=talieska
     const currentParams = new URLSearchParams(window.location.search);
@@ -863,9 +1086,9 @@ export function AppProvider({ children }) {
 
     if (window.location.pathname !== newPath || options.forceUrl) {
       if (options.replace) {
-        window.history.replaceState({ tab, productId: prod?.id, categorySlug: cat?.slug }, '', targetUrl);
+        window.history.replaceState({ tab, productId: prod?.id, categorySlug: cat?.slug, profileHandle: profHandle, storeSlug: sSlug }, '', targetUrl);
       } else {
-        window.history.pushState({ tab, productId: prod?.id, categorySlug: cat?.slug }, '', targetUrl);
+        window.history.pushState({ tab, productId: prod?.id, categorySlug: cat?.slug, profileHandle: profHandle, storeSlug: sSlug }, '', targetUrl);
       }
     }
   };
@@ -917,6 +1140,13 @@ export function AppProvider({ children }) {
         isSubdomainMode
       );
       setActiveTabState(route.tab);
+      if (route.profileHandle) {
+        setActiveProfileHandle(route.profileHandle);
+      }
+      if (route.storeSlug) {
+        const foundM = (merchants || []).find(m => m.slug === route.storeSlug || m.id === route.storeSlug);
+        if (foundM) setSelectedMerchantId(foundM.id);
+      }
       if (route.productId) {
         const found = products.find(p => p.id === route.productId);
         if (found) setSelectedProduct(found);
@@ -929,7 +1159,7 @@ export function AppProvider({ children }) {
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [isSubdomainMode, products]);
+  }, [isSubdomainMode, products, merchants]);
 
   const updateProductSyndication = (productId) => {
     setProducts(prev => prev.map(p => 
@@ -1144,7 +1374,14 @@ export function AppProvider({ children }) {
       unreadNotifications,
       setUnreadNotifications,
       isSubdomainMode,
-      setIsSubdomainMode
+      setIsSubdomainMode,
+      socialProfiles,
+      activeProfile,
+      activeProfileHandle,
+      setActiveProfileHandle,
+      navigateToProfile,
+      navigateToStorefront,
+      navigateToDashboard
     }}>
       {children}
     </AppContext.Provider>

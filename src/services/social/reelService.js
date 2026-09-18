@@ -6,6 +6,23 @@ const REPORTS_KEY = 'eg_reel_reports';
 
 export const reelService = {
   async getReels() {
+    // 1. Fetch from Cross-Device Shared Backend API (Available across all devices)
+    try {
+      const res = await fetch('/api/reels', { cache: 'no-store' });
+      if (res.ok) {
+        const shared = await res.json();
+        if (Array.isArray(shared) && shared.length > 0) {
+          try {
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(shared));
+          } catch (e) {}
+          const hiddenIds = this.getHiddenReelIds();
+          return shared.filter(r => !hiddenIds.includes(r.id));
+        }
+      }
+    } catch (err) {
+      console.warn('Cross-device reels query failed, falling back:', err.message);
+    }
+
     let dbReels = [];
     try {
       const { data, error } = await supabase
@@ -119,7 +136,18 @@ export const reelService = {
       createdAt: reelData.createdAt || new Date().toISOString()
     };
 
-    // 1. Try Supabase
+    // 1. Persist to Cross-Device Shared Backend API
+    try {
+      await fetch('/api/reels', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formatted)
+      });
+    } catch (e) {
+      console.warn('Cross-device API save skipped:', e);
+    }
+
+    // 2. Try Supabase
     try {
       await supabase.from('reels').insert({
         id: formatted.id.includes('-') && formatted.id.length === 36 ? formatted.id : undefined,
@@ -130,7 +158,7 @@ export const reelService = {
       });
     } catch (e) {}
 
-    // 2. Sync to local storage
+    // 3. Sync to local storage
     try {
       const localStr = localStorage.getItem(LOCAL_STORAGE_KEY);
       const list = localStr ? JSON.parse(localStr) : [];
@@ -158,6 +186,10 @@ export const reelService = {
   },
 
   async deleteReel(reelId) {
+    try {
+      await fetch(`/api/reels/${reelId}`, { method: 'DELETE' });
+    } catch (e) {}
+
     try {
       await supabase.from('reels').delete().eq('id', reelId);
     } catch (e) {}

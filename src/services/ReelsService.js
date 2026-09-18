@@ -35,6 +35,22 @@ const DEFAULT_SEED_COMMENTS = [
 
 export const ReelsService = {
   async getReels() {
+    // 1. Fetch from Cross-Device Shared Backend API
+    try {
+      const res = await fetch('/api/reels', { cache: 'no-store' });
+      if (res.ok) {
+        const shared = await res.json();
+        if (Array.isArray(shared) && shared.length > 0) {
+          try {
+            localStorage.setItem('eg_reels_mock_v3', JSON.stringify(shared));
+          } catch (e) {}
+          return shared;
+        }
+      }
+    } catch (err) {
+      console.warn('Cross-Device API unreachable, falling back:', err.message);
+    }
+
     let dbReels = [];
     try {
       const { data, error } = await supabase.from('reels').select('*, creators(*), merchants(*)');
@@ -97,7 +113,21 @@ export const ReelsService = {
       createdAt: reelData.createdAt || new Date().toISOString()
     };
 
-    // 1. Try to persist to Supabase
+    // 1. Persist to Cross-Device Shared Backend API (Accessible by all devices on LAN/Network)
+    try {
+      const res = await fetch('/api/reels', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formattedReel)
+      });
+      if (res.ok) {
+        console.log('[ReelsService] Reel synced across all devices via /api/reels:', formattedReel.id);
+      }
+    } catch (err) {
+      console.warn('Cross-Device API save skipped/failed:', err.message);
+    }
+
+    // 2. Try to persist to Supabase
     try {
       await supabase.from('reels').insert({
         id: formattedReel.id.includes('-') && formattedReel.id.length === 36 ? formattedReel.id : undefined,
@@ -106,10 +136,10 @@ export const ReelsService = {
         status: 'active'
       });
     } catch (err) {
-      console.warn('DB Save Reel skipped (using synchronized local storage):', err.message);
+      console.warn('DB Save Reel skipped (using synchronized storage):', err.message);
     }
 
-    // 2. Always prepend to local storage at the very top
+    // 3. Always prepend to local storage at the very top
     try {
       let local = [];
       const localStr = localStorage.getItem('eg_reels_mock_v3');
@@ -126,14 +156,21 @@ export const ReelsService = {
   },
 
   async deleteReel(reelId) {
-    // 1. Delete from Supabase
+    // 1. Delete from Cross-Device Shared Backend API
+    try {
+      await fetch(`/api/reels/${reelId}`, { method: 'DELETE' });
+    } catch (err) {
+      console.warn('Cross-device delete failed:', err.message);
+    }
+
+    // 2. Delete from Supabase
     try {
       await supabase.from('reels').delete().eq('id', reelId);
     } catch (err) {
       console.warn('DB delete reel skipped/failed:', err.message);
     }
 
-    // 2. Remove from local storage
+    // 3. Remove from local storage
     try {
       const localStr = localStorage.getItem('eg_reels_mock_v3');
       if (localStr) {

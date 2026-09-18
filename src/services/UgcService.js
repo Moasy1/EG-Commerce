@@ -761,6 +761,22 @@ export const UgcService = {
 
   // 5. CREATOR CONTENT / REELS
   async getContent() {
+    // 1. Try cross-device shared API
+    try {
+      const res = await fetch('/api/ugc/content', { cache: 'no-store' });
+      if (res.ok) {
+        const shared = await res.json();
+        if (Array.isArray(shared) && shared.length > 0) {
+          try {
+            localStorage.setItem(LOCAL_STORAGE_CONTENT_KEY, JSON.stringify(shared));
+          } catch(e) {}
+          return shared;
+        }
+      }
+    } catch (e) {
+      console.warn('Cross-device UGC content fetch skipped:', e);
+    }
+
     try {
       const stored = localStorage.getItem(LOCAL_STORAGE_CONTENT_KEY);
       if (stored) return JSON.parse(stored);
@@ -774,7 +790,7 @@ export const UgcService = {
   async createContent(contentData) {
     const content = await this.getContent();
     const newItem = {
-      id: `cnt-${Date.now()}`,
+      id: contentData.id || `cnt-${Date.now()}`,
       title: contentData.title || 'ريلز جديد',
       titleEn: contentData.titleEn || 'New Reel',
       views: '0',
@@ -795,7 +811,17 @@ export const UgcService = {
       taggedProductObj: contentData.taggedProductObj || null
     };
 
-    const updated = [newItem, ...content];
+    // 1. Persist to cross-device shared API
+    try {
+      await fetch('/api/ugc/content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newItem)
+      });
+    } catch (e) {}
+
+    // 2. Persist locally
+    const updated = [newItem, ...content.filter(c => c.id !== newItem.id)];
     localStorage.setItem(LOCAL_STORAGE_CONTENT_KEY, JSON.stringify(updated));
     return newItem;
   },

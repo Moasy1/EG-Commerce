@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
 import { MerchantService } from '../../services/MerchantService';
 import EgLogo from '../common/EgLogo';
 import ProductFormModal from '../merchant/ProductFormModal';
 import InvoiceModal from '../common/InvoiceModal';
+import NotificationCenter from '../common/NotificationCenter';
 import { printOrderInvoice } from '../../utils/invoiceGenerator';
 
 export default function DesktopSellerDashboard() {
@@ -17,12 +18,16 @@ export default function DesktopSellerDashboard() {
     merchants, 
     products, 
     deleteProduct, 
-    user 
+    user,
+    unreadNotifications,
+    refreshNotificationCount
   } = useApp();
   const [activeNav, setActiveNav] = useState('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
   const [timeframe, setTimeframe] = useState('الأسبوع الماضي');
   const [orderFilter, setOrderFilter] = useState('all');
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const notifBtnRef = useRef(null);
   const [stats, setStats] = useState({ revenue: 0, orders: 0, reach: 0, engagement: 0 });
 
   // Product CRUD modal state
@@ -195,12 +200,30 @@ export default function DesktopSellerDashboard() {
             </select>
 
             {/* Notifications & Chat */}
-            <button className="relative p-1 text-gray-500 hover:text-[#d00000]">
-              <span className="material-symbols-outlined text-[20px]">notifications</span>
-              <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-[#d00000] text-white text-[9px] font-bold flex items-center justify-center">
-                1
-              </span>
-            </button>
+            <div className="relative">
+              <button 
+                ref={notifBtnRef}
+                onClick={() => setIsNotifOpen(!isNotifOpen)}
+                className="relative p-1 text-gray-500 hover:text-[#d00000] transition-colors"
+                title="تنبيهات المتجر والطلبات"
+              >
+                <span className="material-symbols-outlined text-[20px]">notifications</span>
+                {unreadNotifications > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-0.5 rounded-full bg-[#d00000] text-white text-[9px] font-bold flex items-center justify-center animate-pulse">
+                    {unreadNotifications > 9 ? '9+' : unreadNotifications}
+                  </span>
+                )}
+              </button>
+
+              <NotificationCenter
+                isOpen={isNotifOpen}
+                onClose={() => {
+                  setIsNotifOpen(false);
+                  refreshNotificationCount();
+                }}
+                anchorRef={notifBtnRef}
+              />
+            </div>
             <button className="p-1 text-gray-500 hover:text-[#d00000]">
               <span className="material-symbols-outlined text-[20px]">chat</span>
             </button>

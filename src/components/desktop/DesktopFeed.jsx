@@ -1,10 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
 import EgLogo from '../common/EgLogo';
+import NotificationCenter from '../common/NotificationCenter';
 
 export default function DesktopFeed() {
-  const { setActiveTab, openProductDetail, openQuickBuy, language, navigateToProfile } = useApp();
+  const { 
+    setActiveTab, 
+    openProductDetail, 
+    openQuickBuy, 
+    language, 
+    navigateToProfile,
+    user,
+    unreadNotifications,
+    refreshNotificationCount
+  } = useApp();
   const [activeCategory, setActiveCategory] = useState(language === 'ar' ? 'الكل' : 'All');
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const notifBtnRef = useRef(null);
 
   const isAr = language === 'ar';
 
@@ -200,11 +212,38 @@ export default function DesktopFeed() {
           </div>
 
           {/* Quick Header Icons */}
-          <div className="flex items-center gap-2.5 text-gray-600">
-            <button className="p-1 hover:text-[#d00000]"><span className="material-symbols-outlined text-[19px]">favorite</span></button>
-            <button className="p-1 hover:text-[#d00000]"><span className="material-symbols-outlined text-[19px]">chat</span></button>
-            <button onClick={() => setActiveTab('cart')} className="p-1 hover:text-[#d00000]"><span className="material-symbols-outlined text-[19px]">shopping_cart</span></button>
-            <img src="/images/reels/reel_2.jpg" alt="User" className="w-6 h-6 rounded-full object-cover ring-1 ring-gray-300" />
+          <div className="flex items-center gap-2 text-gray-600">
+            {/* Notification Center Trigger */}
+            <div className="relative">
+              <button 
+                ref={notifBtnRef}
+                onClick={() => setIsNotifOpen(!isNotifOpen)}
+                className="p-1.5 rounded-full hover:bg-gray-100 hover:text-slate-900 relative transition-colors"
+                title={isAr ? 'مركز الإشعارات' : 'Notification Center'}
+              >
+                <span className="material-symbols-outlined text-[20px]">notifications</span>
+                {unreadNotifications > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[15px] h-[15px] px-0.5 rounded-full bg-[#d00000] text-white text-[9px] font-bold flex items-center justify-center animate-pulse leading-none">
+                    {unreadNotifications > 9 ? '9+' : unreadNotifications}
+                  </span>
+                )}
+              </button>
+
+              <NotificationCenter
+                isOpen={isNotifOpen}
+                onClose={() => {
+                  setIsNotifOpen(false);
+                  refreshNotificationCount();
+                }}
+                anchorRef={notifBtnRef}
+              />
+            </div>
+
+            <button onClick={() => setActiveTab('shop')} className="p-1.5 rounded-full hover:bg-gray-100 hover:text-[#d00000] transition-colors"><span className="material-symbols-outlined text-[19px]">favorite</span></button>
+            <button onClick={() => setActiveTab('cart')} className="p-1.5 rounded-full hover:bg-gray-100 hover:text-[#d00000] transition-colors"><span className="material-symbols-outlined text-[19px]">shopping_cart</span></button>
+            <div onClick={() => setActiveTab('profile')} className="cursor-pointer">
+              <img src={user?.avatar_url || user?.profile?.avatar_url || "/images/reels/reel_2.jpg"} alt="User" className="w-7 h-7 rounded-full object-cover ring-1 ring-gray-300 hover:ring-[#d00000] transition-all" />
+            </div>
           </div>
         </div>
 

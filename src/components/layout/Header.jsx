@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
 import { AuthService } from '../../services/AuthService';
 import EgLogo from '../common/EgLogo';
+import NotificationCenter from '../common/NotificationCenter';
 
 export default function Header() {
   const { 
@@ -12,14 +13,19 @@ export default function Header() {
     setLanguage,
     user,
     setUser,
-    setIsAuthModalOpen
+    setIsAuthModalOpen,
+    unreadNotifications,
+    refreshNotificationCount
   } = useApp();
 
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [isDashboardNotifOpen, setIsDashboardNotifOpen] = useState(false);
   const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false);
 
   const profileMenuRef = useRef(null);
+  const notifBtnRef = useRef(null);
+  const dashboardNotifBtnRef = useRef(null);
   const createMenuRef = useRef(null);
 
   // Close dropdowns on outside click or Escape key
@@ -118,7 +124,34 @@ export default function Header() {
             </nav>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
+            {/* Notification Center Trigger for Seller Hub */}
+            <div className="relative">
+              <button
+                ref={dashboardNotifBtnRef}
+                onClick={() => setIsDashboardNotifOpen(!isDashboardNotifOpen)}
+                aria-label={isAr ? 'تنبيهات المتجر والطلبات' : 'Store & Order Alerts'}
+                title={isAr ? 'تنبيهات المتجر والطلبات' : 'Store & Order Alerts'}
+                className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-200 relative transition-colors"
+              >
+                <span className="material-symbols-outlined text-[19px]">notifications</span>
+                {unreadNotifications > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 rounded-full bg-[#d00000] text-white text-[9px] font-black flex items-center justify-center leading-none shadow-xs animate-pulse">
+                    {unreadNotifications > 9 ? '9+' : unreadNotifications}
+                  </span>
+                )}
+              </button>
+
+              <NotificationCenter
+                isOpen={isDashboardNotifOpen}
+                onClose={() => {
+                  setIsDashboardNotifOpen(false);
+                  refreshNotificationCount();
+                }}
+                anchorRef={dashboardNotifBtnRef}
+              />
+            </div>
+
             <button
               onClick={() => setActiveTab('reels')}
               className="px-3 py-1.5 rounded-full border border-slate-700 text-xs font-bold hover:bg-slate-800 transition-colors hidden sm:block"
@@ -293,6 +326,44 @@ export default function Header() {
               </span>
             )}
           </button>
+
+          {/* Notification Center Trigger (Visible to all user roles) */}
+          <div className="relative">
+            <button
+              ref={notifBtnRef}
+              onClick={() => {
+                setIsNotifOpen(!isNotifOpen);
+                setIsProfileMenuOpen(false);
+                setIsCreateMenuOpen(false);
+              }}
+              aria-label={isAr ? 'مركز الإشعارات' : 'Notification Center'}
+              title={isAr ? 'مركز الإشعارات والتنبيهات' : 'Notification Center'}
+              className={`w-8 h-8 rounded-full flex items-center justify-center relative transition-colors ${
+                isNotifOpen
+                  ? 'bg-slate-900 text-white shadow-xs'
+                  : isReels
+                    ? 'text-gray-300 hover:text-white hover:bg-white/10'
+                    : 'text-gray-600 hover:text-slate-900 hover:bg-gray-100'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[20px]">notifications</span>
+              {unreadNotifications > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] px-1 rounded-full bg-[#d00000] text-white text-[9px] font-black flex items-center justify-center leading-none shadow-xs animate-pulse">
+                  {unreadNotifications > 9 ? '9+' : unreadNotifications}
+                </span>
+              )}
+            </button>
+
+            {/* Dropdown Flyout */}
+            <NotificationCenter
+              isOpen={isNotifOpen}
+              onClose={() => {
+                setIsNotifOpen(false);
+                refreshNotificationCount();
+              }}
+              anchorRef={notifBtnRef}
+            />
+          </div>
 
           {/* Auth Navigation */}
           {user ? (

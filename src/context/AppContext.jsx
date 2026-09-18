@@ -11,6 +11,7 @@ import { eventTracker } from '../services/analytics/eventTracker.js';
 import { sessionTracker } from '../services/analytics/sessionTracker.js';
 import { attributionService } from '../services/analytics/attributionService.js';
 import { interestService } from '../services/algorithm/interestService.js';
+import { NotificationService } from '../services/NotificationService.js';
 
 const AppContext = createContext();
 
@@ -1403,7 +1404,18 @@ export function AppProvider({ children }) {
   const [quickBuyProduct, setQuickBuyProduct] = useState(INITIAL_PRODUCTS[0]);
   const [rewardPoints, setRewardPoints] = useState(2450);
   const [pointsRedeemed, setPointsRedeemed] = useState(500);
-  const [unreadNotifications, setUnreadNotifications] = useState(2);
+  const [unreadNotifications, setUnreadNotifications] = useState(() => 
+    NotificationService.getUnreadCount('buyer', 'guest')
+  );
+
+  const refreshNotificationCount = () => {
+    const count = NotificationService.getUnreadCount(user?.role || 'buyer', user?.id || 'guest');
+    setUnreadNotifications(count);
+  };
+
+  useEffect(() => {
+    refreshNotificationCount();
+  }, [user]);
 
   const openCategoryPage = (categoryOrSlug) => {
     let catObj = categoryOrSlug;
@@ -1535,6 +1547,7 @@ export function AppProvider({ children }) {
       openCategoryPage,
       unreadNotifications,
       setUnreadNotifications,
+      refreshNotificationCount,
       isSubdomainMode,
       setIsSubdomainMode,
       socialProfiles,

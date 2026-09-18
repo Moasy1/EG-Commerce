@@ -4,6 +4,7 @@ import { AdminService } from '../services/AdminService';
 import { OrderService } from '../services/OrderService';
 import InvoiceModal from '../components/common/InvoiceModal';
 import { printOrderInvoice } from '../utils/invoiceGenerator';
+import AlgorithmManagerTab from '../components/admin/AlgorithmManagerTab';
 
 export default function AdminDashboard() {
   const { language, user, setIsAuthModalOpen, setActiveTab: setAppTab, orders: appOrders, updateOrderStatus: updateAppOrderStatus } = useApp();
@@ -348,7 +349,8 @@ export default function AdminDashboard() {
           { id: 'stores', icon: 'domain', label: isAr ? 'المتاجر والساب دومين' : 'Stores & Subdomains', count: stores.length },
           { id: 'creators', icon: 'verified', label: isAr ? 'المبدعين والمسوقين' : 'Creators & Affiliates', count: creators.length },
           { id: 'users', icon: 'manage_accounts', label: isAr ? 'المستخدمين وتعيين الصلاحيات' : 'Users & Roles', count: users.length },
-          { id: 'catalog', icon: 'inventory_2', label: isAr ? 'المنتجات والعناصر التجريبية' : 'Demo Catalog & Items', count: catalogItems.length }
+          { id: 'catalog', icon: 'inventory_2', label: isAr ? 'المنتجات والعناصر التجريبية' : 'Demo Catalog & Items', count: catalogItems.length },
+          { id: 'algorithm', icon: 'neurology', label: isAr ? 'محرك الخوارزمية وتوزيع الفيد' : 'Algorithm Engine & Feed', count: 'Live' }
         ].map(tab => {
           const isActive = activeTab === tab.id;
           return (
@@ -1409,6 +1411,20 @@ export default function AdminDashboard() {
             </table>
           </div>
         </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 6. ALGORITHM ENGINE & FEED CONTROLS TAB */}
+      {/* ========================================================================= */}
+      {activeTab === 'algorithm' && (
+        <AlgorithmManagerTab
+          isAr={isAr}
+          showToast={showToast}
+          user={user}
+          stores={stores}
+          creators={creators}
+          catalogItems={catalogItems}
+        />
       )}
 
       {/* ========================================================================= */}

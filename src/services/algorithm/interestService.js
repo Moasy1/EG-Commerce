@@ -1,25 +1,9 @@
 import { eventTracker } from '../analytics/eventTracker.js';
+import { algorithmConfig, DEFAULT_EVENT_WEIGHTS } from './algorithmConfig.js';
 
 const INTERESTS_STORAGE_KEY = 'eg_user_interests_v1';
 const CREATOR_AFFINITY_KEY = 'eg_creator_affinity_v1';
 const MERCHANT_AFFINITY_KEY = 'eg_merchant_affinity_v1';
-
-// Engineering event weights for interest & affinity
-const EVENT_WEIGHTS = {
-  reel_50_percent: 1,
-  reel_75_percent: 2,
-  reel_complete: 3,
-  reel_rewatch: 4,
-  reel_like: 5,
-  product_click: 6,
-  reel_save: 7,
-  reel_share: 8,
-  quick_buy_open: 8,
-  add_to_cart: 12,
-  purchase: 20,
-  reel_skip: -3,
-  reel_not_interested: -15
-};
 
 // Half-life in days for exponential time decay
 const HALF_LIFE_DAYS = 7;
@@ -51,7 +35,8 @@ class InterestService {
   }
 
   handleEvent(event) {
-    const weight = EVENT_WEIGHTS[event.event_type];
+    const eventWeights = algorithmConfig ? algorithmConfig.getEventWeights() : DEFAULT_EVENT_WEIGHTS;
+    const weight = eventWeights[event.event_type];
     if (weight === undefined) return;
 
     const now = Date.now();

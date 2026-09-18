@@ -1,14 +1,16 @@
+import { algorithmConfig } from './algorithmConfig.js';
+
 export const diversityService = {
   /**
    * Apply sliding window constraints to ensure feed diversity
    * @param {Array} rankedItems - Array of { reel, ranking }
    * @param {Object} options - Diversity configuration
    */
-  applyDiversity(rankedItems = [], {
-    maxConsecutiveSameCategory = 2,
-    minSpacingSameCreator = 3,
-    minSpacingSameMerchant = 3
-  } = {}) {
+  applyDiversity(rankedItems = [], options = {}) {
+    const config = algorithmConfig.getDiversityConfig();
+    const maxConsecutiveSameCategory = options.maxConsecutiveSameCategory ?? config.maxConsecutiveSameCategory ?? 2;
+    const minSpacingSameCreator = options.minSpacingSameCreator ?? config.minSpacingSameCreator ?? 3;
+    const minSpacingSameMerchant = options.minSpacingSameMerchant ?? config.minSpacingSameMerchant ?? 3;
     if (!rankedItems || rankedItems.length <= 2) return rankedItems;
 
     const diversified = [];

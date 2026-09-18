@@ -1,11 +1,14 @@
 import { interestService } from './interestService.js';
 import { eventTracker } from '../analytics/eventTracker.js';
+import { algorithmConfig } from './algorithmConfig.js';
 
 export const rankingService = {
   rankCandidates(candidates = [], userId = null) {
     const recentEvents = eventTracker.getLocalEvents();
     const seenReelMap = this.buildRecentImpressionsMap(recentEvents);
     const skippedReelSet = this.buildSkippedReelSet(recentEvents);
+    const weights = algorithmConfig.getWeights();
+    const penalties = algorithmConfig.getPenalties();
 
     const scored = candidates.map(candidateItem => {
       const reel = candidateItem.reel || candidateItem;
@@ -46,24 +49,24 @@ export const rankingService = {
 
       // Base Weighted Score
       let score = 
-        (interestScore * 0.25) +
-        (creatorAffinity * 0.15) +
-        (engagementQuality * 0.15) +
-        (watchProbability * 0.20) +
-        (commerceProbability * 0.10) +
-        (freshness * 0.10) +
-        (trendScore * 0.05);
+        (interestScore * (weights.interest ?? 0.25)) +
+        (creatorAffinity * (weights.creatorAffinity ?? 0.15)) +
+        (engagementQuality * (weights.engagementQuality ?? 0.15)) +
+        (watchProbability * (weights.watchProbability ?? 0.20)) +
+        (commerceProbability * (weights.commerceProbability ?? 0.10)) +
+        (freshness * (weights.freshness ?? 0.10)) +
+        (trendScore * (weights.trend ?? 0.05));
 
       // Penalties:
       // Seen recently penalty
       if (seenReelMap.has(reel.id)) {
         const timesSeen = seenReelMap.get(reel.id);
-        score -= Math.min(0.35, timesSeen * 0.15);
+        score -= Math.min(0.40, timesSeen * (penalties.recentSeen ?? 0.15));
       }
 
       // Fast skip penalty
       if (skippedReelSet.has(reel.id)) {
-        score -= 0.30;
+        score -= (penalties.skip ?? 0.30);
       }
 
       return {

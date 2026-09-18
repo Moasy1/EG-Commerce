@@ -3,18 +3,27 @@ import { useApp } from '../context/AppContext';
 import EgLogo from '../components/common/EgLogo';
 import { ReelsService } from '../services/ReelsService';
 import DesktopFeed from '../components/desktop/DesktopFeed';
+import { feedService } from '../services/algorithm/feedService.js';
+import { socialService } from '../services/social/socialService.js';
+import { eventTracker } from '../services/analytics/eventTracker.js';
+import { attributionService } from '../services/analytics/attributionService.js';
 
 const ReelVideoPlayer = ({ reel, isActive, isAdjacent, isGlobalMuted, toggleMute }) => {
   const videoRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const trackedMilestones = useRef({ 25: false, 50: false, 75: false, 100: false });
 
   useEffect(() => {
     if (!videoRef.current) return;
+    trackedMilestones.current = { 25: false, 50: false, 75: false, 100: false };
     
     // Play only if active
     if (isActive) {
       videoRef.current.play()
-        .then(() => setIsPlaying(true))
+        .then(() => {
+          setIsPlaying(true);
+          eventTracker.trackReelStart(reel);
+        })
         .catch(err => {
           console.log("Autoplay prevented:", err);
           setIsPlaying(false);
@@ -23,7 +32,7 @@ const ReelVideoPlayer = ({ reel, isActive, isAdjacent, isGlobalMuted, toggleMute
       videoRef.current.pause();
       setIsPlaying(false);
     }
-  }, [isActive]);
+  }, [isActive, reel.id]);
 
   // Sync mute state changes
   useEffect(() => {
@@ -31,6 +40,32 @@ const ReelVideoPlayer = ({ reel, isActive, isAdjacent, isGlobalMuted, toggleMute
       videoRef.current.muted = isGlobalMuted;
     }
   }, [isGlobalMuted]);
+
+  const handleTimeUpdate = () => {
+    if (!videoRef.current) return;
+    const { currentTime, duration } = videoRef.current;
+    if (!duration || duration <= 0) return;
+
+    const progress = (currentTime / duration) * 100;
+    const watchMs = Math.round(currentTime * 1000);
+
+    if (progress >= 25 && !trackedMilestones.current[25]) {
+      trackedMilestones.current[25] = true;
+      eventTracker.trackReelProgress(reel, 25, watchMs);
+    }
+    if (progress >= 50 && !trackedMilestones.current[50]) {
+      trackedMilestones.current[50] = true;
+      eventTracker.trackReelProgress(reel, 50, watchMs);
+    }
+    if (progress >= 75 && !trackedMilestones.current[75]) {
+      trackedMilestones.current[75] = true;
+      eventTracker.trackReelProgress(reel, 75, watchMs);
+    }
+    if (progress >= 95 && !trackedMilestones.current[100]) {
+      trackedMilestones.current[100] = true;
+      eventTracker.trackReelComplete(reel, watchMs);
+    }
+  };
 
   const togglePlay = (e) => {
     e.stopPropagation();
@@ -55,12 +90,13 @@ const ReelVideoPlayer = ({ reel, isActive, isAdjacent, isGlobalMuted, toggleMute
         loop
         playsInline
         muted={isGlobalMuted}
+        onTimeUpdate={handleTimeUpdate}
         preload={isActive ? "auto" : isAdjacent ? "metadata" : "none"}
       />
       {/* Mute Button */}
       <button 
         onClick={(e) => { e.stopPropagation(); toggleMute(); }}
-        className="absolute top-20 right-4 z-50 w-10 h-10 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center text-white"
+        className="absolute top-20 right-4 z-50 w-10 h-10 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center text-white cursor-pointer hover:bg-black/60 transition-colors"
       >
         <span className="material-symbols-outlined">{isGlobalMuted ? 'volume_off' : 'volume_up'}</span>
       </button>
@@ -490,41 +526,71 @@ export default function DiscoverReels() {
 
   const currentReel = reelsList[currentReelIndex] || reelsList[0] || defaultReels[0] || null;
 
-  useEffect(() => {
-    const fetchReels = async () => {
-      try {
-        const storedReels = await ReelsService.getReels();
-        if (storedReels && storedReels.length > 0) {
-          const processedReels = storedReels.map(item => {
-            if (typeof item.product === 'string') {
-              try { item.product = JSON.parse(item.product); } catch(e) {}
-            }
-            if (typeof item.products === 'string') {
-              try { item.products = JSON.parse(item.products); } catch(e) {}
-            }
-            return item;
-          });
-          setReelsList(processedReels);
-        } else {
-          for (const reel of defaultReels) {
-            await ReelsService.saveReel(reel);
-          }
-          setReelsList(defaultReels);
-        }
-      } catch (err) {
-        console.error("Failed to load reels", err);
-        setReelsList(defaultReels);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchReels();
-  }, [defaultReels]);
   const [activeTabSub, setActiveTabSub] = useState('foryou');
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(14200);
   const [isSaved, setIsSaved] = useState(false);
   const [isFollowed, setIsFollowed] = useState(false);
+  const reelMountTime = useRef(Date.now());
+
+  useEffect(() => {
+    const fetchPersonalizedReels = async () => {
+      setIsLoading(true);
+      try {
+        const feedResult = await feedService.getPersonalizedFeed({
+          userId: user?.id || null,
+          tab: activeTabSub,
+          cursor: 0,
+          limit: 20,
+          fallbackReels: defaultReels
+        });
+
+        if (feedResult && feedResult.items && feedResult.items.length > 0) {
+          const processedReels = feedResult.items.map(item => {
+            const r = item.reel || item;
+            if (typeof r.product === 'string') {
+              try { r.product = JSON.parse(r.product); } catch(e) {}
+            }
+            if (typeof r.products === 'string') {
+              try { r.products = JSON.parse(r.products); } catch(e) {}
+            }
+            return r;
+          });
+          setReelsList(processedReels);
+        } else {
+          setReelsList(defaultReels);
+        }
+      } catch (err) {
+        console.warn("Failed to load personalized reels, using fallback", err);
+        setReelsList(defaultReels);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchPersonalizedReels();
+  }, [defaultReels, activeTabSub, user?.id]);
+
+  // Sync likes, saves, follow status, and impression tracking when current reel changes
+  useEffect(() => {
+    if (currentReel?.id) {
+      reelMountTime.current = Date.now();
+      eventTracker.trackReelImpression(currentReel, currentReelIndex);
+
+      socialService.engagement.isReelLiked(currentReel.id, user?.id).then(liked => {
+        setIsLiked(liked);
+      });
+      socialService.engagement.isReelSaved(currentReel.id, user?.id).then(saved => {
+        setIsSaved(saved);
+      });
+      const creatorTarget = currentReel.creatorId || currentReel.creatorHandle;
+      if (creatorTarget) {
+        socialService.follow.isFollowing(creatorTarget, user?.id).then(followed => {
+          setIsFollowed(followed);
+        });
+      }
+      setLikesCount(Number(currentReel.likes) || 120);
+    }
+  }, [currentReel?.id, currentReelIndex, user?.id]);
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
   const [commentsList, setCommentsList] = useState([]);
   const [newCommentText, setNewCommentText] = useState('');
@@ -640,12 +706,13 @@ export default function DiscoverReels() {
   // Load interactive comments when drawer opens or active reel changes
   useEffect(() => {
     if (currentReel?.id) {
-      const fetched = ReelsService.getComments(currentReel.id);
-      setCommentsList(fetched);
+      socialService.comments.getComments(currentReel.id).then(fetched => {
+        setCommentsList(fetched);
+      });
     }
   }, [currentReel?.id, isCommentsOpen]);
 
-  const handlePostComment = (e) => {
+  const handlePostComment = async (e) => {
     if (e) e.preventDefault();
     if (!newCommentText.trim() || !currentReel?.id) return;
 
@@ -653,7 +720,7 @@ export default function DiscoverReels() {
     const authorAvatar = user?.avatar_url || (user?.role === 'merchant' ? '/images/brands/talieska_logo.jpg' : '/images/reels/reel_1.jpg');
     const authorRole = user?.role || 'buyer';
 
-    const newComment = ReelsService.addComment(currentReel.id, {
+    const newComment = await socialService.postComment(currentReel, {
       userId: user?.id || null,
       userName: authorName,
       userAvatar: authorAvatar,
@@ -669,16 +736,16 @@ export default function DiscoverReels() {
     showToast(isAr ? 'تم نشر تعليقك بنجاح! 💬' : 'Comment posted successfully! 💬');
   };
 
-  const handleLikeCommentItem = (commentId) => {
+  const handleLikeCommentItem = async (commentId) => {
     if (!currentReel?.id) return;
-    const updated = ReelsService.likeComment(currentReel.id, commentId);
-    setCommentsList(updated);
+    await socialService.comments.likeComment(currentReel.id, commentId, user?.id);
+    setCommentsList(prev => prev.map(c => c.id === commentId ? { ...c, likes: (c.likes || 0) + 1 } : c));
   };
 
-  const handleDeleteCommentItem = (commentId) => {
+  const handleDeleteCommentItem = async (commentId) => {
     if (!currentReel?.id) return;
-    const updated = ReelsService.deleteComment(currentReel.id, commentId);
-    setCommentsList(updated);
+    await socialService.comments.deleteComment(currentReel.id, commentId);
+    setCommentsList(prev => prev.filter(c => c.id !== commentId));
     setReelsList(prev => prev.map(r => r.id === currentReel.id ? { ...r, comments: Math.max(0, (Number(r.comments) || 1) - 1) } : r));
     showToast(isAr ? 'تم حذف التعليق' : 'Comment deleted');
   };
@@ -690,10 +757,13 @@ export default function DiscoverReels() {
     }, 3000);
   };
 
-  const handleShareLink = async () => {
+  const handleShareLink = async (e) => {
+    if (e) e.stopPropagation();
+    if (!currentReel) return;
     const url = `${window.location.origin}${window.location.pathname}?reel=${currentReel?.id || ''}`;
     try {
       await navigator.clipboard.writeText(url);
+      await socialService.shareReel(currentReel, 'copy_link', user?.id);
       showToast(isAr ? 'تم نسخ رابط الفيديو إلى الحافظة 📋' : 'Reel link copied to clipboard! 📋');
     } catch (err) {
       showToast(isAr ? 'تم نسخ الرابط بنجاح' : 'Link copied');
@@ -701,9 +771,10 @@ export default function DiscoverReels() {
     setIsOptionsMenuOpen(false);
   };
 
-  const handleToggleSaveReel = async () => {
+  const handleToggleSaveReel = async (e) => {
+    if (e) e.stopPropagation();
     if (!currentReel) return;
-    const newSaved = await ReelsService.toggleSaveReel(currentReel.id);
+    const newSaved = await socialService.saveReel(currentReel, user?.id);
     setIsSaved(newSaved);
     showToast(
       newSaved 
@@ -713,9 +784,27 @@ export default function DiscoverReels() {
     setIsOptionsMenuOpen(false);
   };
 
+  const handleLikeReel = async (e) => {
+    if (e) e.stopPropagation();
+    if (!currentReel) return;
+    const res = await socialService.likeReel(currentReel, user?.id);
+    setIsLiked(res.isLiked);
+    setLikesCount(prev => prev + res.likesDelta);
+  };
+
+  const handleFollowCreator = async (e) => {
+    if (e) e.stopPropagation();
+    if (!currentReel) return;
+    const targetId = currentReel.creatorId || currentReel.creatorHandle;
+    const newFollowed = await socialService.toggleFollow(targetId, user?.id, currentReel.creatorHandle);
+    setIsFollowed(newFollowed);
+    showToast(newFollowed ? (isAr ? 'تمت المتابعة بنجاح ✨' : 'Followed creator! ✨') : (isAr ? 'تم إلغاء المتابعة' : 'Unfollowed'));
+  };
+
   const handleHideReel = async () => {
     if (!currentReel) return;
-    await ReelsService.hideReel(currentReel.id);
+    await eventTracker.trackNotInterested(currentReel);
+    await socialService.reels.hideReel(currentReel.id);
     const updated = reelsList.filter(r => r.id !== currentReel.id);
     setReelsList(updated);
     if (currentReelIndex >= updated.length) {
@@ -728,7 +817,8 @@ export default function DiscoverReels() {
   const handleSubmitReport = async (e) => {
     if (e) e.preventDefault();
     if (!currentReel) return;
-    await ReelsService.reportReel(currentReel.id, reportReason, reportDetails);
+    await eventTracker.trackReportContent(currentReel, reportReason);
+    await socialService.reels.reportReel(currentReel.id, reportReason, reportDetails);
     setIsReportModalOpen(false);
     setIsOptionsMenuOpen(false);
     setReportDetails('');
@@ -738,7 +828,7 @@ export default function DiscoverReels() {
   const handleSaveEditReel = async (e) => {
     if (e) e.preventDefault();
     if (!currentReel) return;
-    await ReelsService.updateReel(currentReel.id, { caption: editCaption });
+    await socialService.reels.updateReel(currentReel.id, { caption: editCaption });
     setReelsList(prev => prev.map(r => r.id === currentReel.id ? { ...r, caption: editCaption } : r));
     setIsEditReelModalOpen(false);
     setIsOptionsMenuOpen(false);
@@ -748,7 +838,7 @@ export default function DiscoverReels() {
   const handleDeleteReel = async () => {
     if (!currentReel) return;
     if (window.confirm(isAr ? 'هل أنت متأكد من حذف هذا الفيديو نهائياً؟' : 'Are you sure you want to delete this reel?')) {
-      await ReelsService.deleteReel(currentReel.id);
+      await socialService.reels.deleteReel(currentReel.id);
       const updated = reelsList.filter(r => r.id !== currentReel.id);
       setReelsList(updated);
       if (currentReelIndex >= updated.length) {
@@ -770,6 +860,11 @@ export default function DiscoverReels() {
   // Navigation functions
   const handleNextReel = () => {
     if (isTransitioning) return;
+    const watchMs = Date.now() - reelMountTime.current;
+    if (watchMs < 2500 && currentReel) {
+      eventTracker.trackReelSkip(currentReel, watchMs);
+    }
+    reelMountTime.current = Date.now();
     setIsTransitioning(true);
     setCurrentReelIndex((prev) => (prev + 1) % reelsList.length);
     setIsLiked(false);
@@ -875,12 +970,8 @@ export default function DiscoverReels() {
         <div className="absolute right-4 bottom-6 flex flex-col gap-6 z-20 pointer-events-none items-center">
           <div className="flex flex-col items-center gap-1">
             <button 
-              className="pointer-events-auto"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsLiked(!isLiked);
-                setLikesCount(prev => isLiked ? prev - 1 : prev + 1);
-              }}
+              className="pointer-events-auto cursor-pointer"
+              onClick={handleLikeReel}
             >
               <div className="w-[42px] h-[42px] rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center transition-transform hover:scale-110">
                 <span className={`material-symbols-outlined text-[24px] transition-colors ${isLiked ? 'text-[#d00000] drop-shadow-md' : 'text-white'}`} style={{ fontVariationSettings: isLiked ? "'FILL' 1" : "'FILL' 0" }}>favorite</span>
@@ -890,7 +981,7 @@ export default function DiscoverReels() {
           </div>
 
           <div className="flex flex-col items-center gap-1">
-            <button className="pointer-events-auto" onClick={(e) => { e.stopPropagation(); setIsCommentsOpen(true); }}>
+            <button className="pointer-events-auto cursor-pointer" onClick={(e) => { e.stopPropagation(); setIsCommentsOpen(true); }}>
               <div className="w-[42px] h-[42px] rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center transition-transform hover:scale-110">
                 <span className="material-symbols-outlined text-[24px] text-white">chat_bubble</span>
               </div>
@@ -900,11 +991,8 @@ export default function DiscoverReels() {
 
           <div className="flex flex-col items-center gap-1">
             <button 
-              className="pointer-events-auto"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsSaved(!isSaved);
-              }}
+              className="pointer-events-auto cursor-pointer"
+              onClick={handleToggleSaveReel}
             >
               <div className="w-[42px] h-[42px] rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center transition-transform hover:scale-110">
                 <span className={`material-symbols-outlined text-[24px] ${isSaved ? 'text-yellow-400' : 'text-white'}`} style={{ fontVariationSettings: isSaved ? "'FILL' 1" : "'FILL' 0" }}>bookmark</span>
@@ -914,7 +1002,7 @@ export default function DiscoverReels() {
           </div>
 
           <div className="flex flex-col items-center gap-1">
-            <button className="pointer-events-auto" onClick={(e) => { e.stopPropagation(); }}>
+            <button className="pointer-events-auto cursor-pointer" onClick={handleShareLink}>
               <div className="w-[42px] h-[42px] rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center transition-transform hover:scale-110">
                 <span className="material-symbols-outlined text-[24px] text-white">share</span>
               </div>
@@ -940,10 +1028,25 @@ export default function DiscoverReels() {
                 e.stopPropagation();
                 if (allProducts.length > 1) {
                   setIsShopTheLookOpen(true);
+                  eventTracker.trackEvent('shop_the_look_open', {
+                    entityType: 'reel',
+                    reelId: reel.id,
+                    creatorId: reel.creatorId
+                  });
                 } else {
                   const singleProd = allProducts[0];
                   const matched = products?.find(p => p.id === singleProd?.id) || singleProd;
-                  if (matched) openQuickBuy(matched);
+                  if (matched) {
+                    attributionService.registerTouchpoint({
+                      reelId: reel.id,
+                      productId: matched.id,
+                      creatorId: reel.creatorId,
+                      merchantId: matched.merchantId || matched.merchant_id,
+                      userId: user?.id
+                    });
+                    eventTracker.trackQuickBuyOpen(matched, reel);
+                    openQuickBuy(matched);
+                  }
                 }
               };
 
@@ -969,9 +1072,9 @@ export default function DiscoverReels() {
                         <img key={i} src={p.image} alt={p.title || ''} className="w-7 h-7 rounded-full border-2 border-white object-cover shadow-xs shrink-0" />
                       ))}
                     </div>
-                    <div className="flex flex-col">
-                      <span className="text-[12px] font-black text-slate-900 leading-tight">
-                        {isAr ? 'تسوق الآن' : 'Shop Now'}
+                    <div className="flex flex-col text-left rtl:text-right">
+                      <span className="text-[11px] font-bold text-slate-900 leading-tight line-clamp-1 max-w-[130px]">
+                        {allProducts.length > 1 ? (isAr ? 'تسوق التنسيق بالكامل' : 'Shop Complete Look') : allProducts[0]?.title}
                       </span>
                       <span className="text-[10px] font-bold text-gray-500 leading-tight">
                         {allProducts.length > 1 
@@ -989,15 +1092,27 @@ export default function DiscoverReels() {
 
             {/* Creator Info */}
             <div className={`space-y-1 ${isAr ? 'text-right' : 'text-left'}`}>
-              <div 
-                className="flex items-center gap-1.5 cursor-pointer w-fit"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigateToProfile(reel.creatorHandle);
-                }}
-              >
-                <span className="font-bold text-[15px] text-white drop-shadow-md hover:underline">{reel.creatorHandle}</span>
-                <span className="material-symbols-outlined text-[16px] text-blue-500 bg-white rounded-full">check_circle</span>
+              <div className="flex items-center gap-2">
+                <div 
+                  className="flex items-center gap-1.5 cursor-pointer w-fit"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigateToProfile(reel.creatorHandle);
+                  }}
+                >
+                  <span className="font-bold text-[15px] text-white drop-shadow-md hover:underline">{reel.creatorHandle}</span>
+                  <span className="material-symbols-outlined text-[16px] text-blue-500 bg-white rounded-full">check_circle</span>
+                </div>
+                <button
+                  onClick={handleFollowCreator}
+                  className={`px-3 py-0.5 rounded-full text-[11px] font-bold transition-all border cursor-pointer ${
+                    isFollowed 
+                      ? 'bg-white/20 text-white border-white/30 backdrop-blur-sm' 
+                      : 'bg-[#d00000] text-white border-transparent shadow-sm hover:brightness-110'
+                  }`}
+                >
+                  {isFollowed ? (isAr ? 'مُتابع' : 'Following') : (isAr ? 'متابعة' : 'Follow')}
+                </button>
               </div>
               
               <div 
@@ -1121,6 +1236,52 @@ export default function DiscoverReels() {
                 </button>
               </div>
 
+              {/* Algorithm Feed Tabs */}
+              <div className="flex items-center gap-4 text-xs font-bold pointer-events-auto">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveTabSub('foryou');
+                    setCurrentReelIndex(0);
+                  }}
+                  className={`pb-1 transition-all cursor-pointer ${
+                    activeTabSub === 'foryou'
+                      ? 'text-white border-b-2 border-[#d00000] drop-shadow-md'
+                      : 'text-white/60 hover:text-white'
+                  }`}
+                >
+                  {isAr ? 'لك' : 'For You'}
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveTabSub('following');
+                    setCurrentReelIndex(0);
+                  }}
+                  className={`pb-1 transition-all cursor-pointer ${
+                    activeTabSub === 'following'
+                      ? 'text-white border-b-2 border-[#d00000] drop-shadow-md'
+                      : 'text-white/60 hover:text-white'
+                  }`}
+                >
+                  {isAr ? 'أتابعهم' : 'Following'}
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveTabSub('trending');
+                    setCurrentReelIndex(0);
+                  }}
+                  className={`pb-1 transition-all cursor-pointer ${
+                    activeTabSub === 'trending'
+                      ? 'text-white border-b-2 border-[#d00000] drop-shadow-md'
+                      : 'text-white/60 hover:text-white'
+                  }`}
+                >
+                  {isAr ? 'الرائج' : 'Trending'}
+                </button>
+              </div>
+
               <div 
                 className="flex items-center cursor-pointer hover:opacity-90 transition-opacity"
                 onClick={(e) => {
@@ -1182,6 +1343,53 @@ export default function DiscoverReels() {
                 <span className="material-symbols-outlined text-[22px] drop-shadow-md">more_vert</span>
               </button>
             </div>
+
+            {/* Mobile Algorithm Feed Tabs */}
+            <div className="flex items-center gap-3 text-xs font-bold pointer-events-auto">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveTabSub('foryou');
+                  setCurrentReelIndex(0);
+                }}
+                className={`pb-1 transition-all cursor-pointer ${
+                  activeTabSub === 'foryou'
+                    ? 'text-white border-b-2 border-[#d00000] drop-shadow-md'
+                    : 'text-white/60 hover:text-white'
+                }`}
+              >
+                {isAr ? 'لك' : 'For You'}
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveTabSub('following');
+                  setCurrentReelIndex(0);
+                }}
+                className={`pb-1 transition-all cursor-pointer ${
+                  activeTabSub === 'following'
+                    ? 'text-white border-b-2 border-[#d00000] drop-shadow-md'
+                    : 'text-white/60 hover:text-white'
+                }`}
+              >
+                {isAr ? 'أتابعهم' : 'Following'}
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveTabSub('trending');
+                  setCurrentReelIndex(0);
+                }}
+                className={`pb-1 transition-all cursor-pointer ${
+                  activeTabSub === 'trending'
+                    ? 'text-white border-b-2 border-[#d00000] drop-shadow-md'
+                    : 'text-white/60 hover:text-white'
+                }`}
+              >
+                {isAr ? 'الرائج' : 'Trending'}
+              </button>
+            </div>
+
             <div 
               className="flex items-center cursor-pointer hover:opacity-90 transition-opacity"
               onClick={(e) => {

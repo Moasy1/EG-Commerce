@@ -5,6 +5,12 @@ import { CartService } from '../services/CartService';
 import { AuthService } from '../services/AuthService';
 import { RewardService } from '../services/RewardService';
 import { OrderService } from '../services/OrderService';
+import { socialService } from '../services/social/socialService.js';
+import { feedService } from '../services/algorithm/feedService.js';
+import { eventTracker } from '../services/analytics/eventTracker.js';
+import { sessionTracker } from '../services/analytics/sessionTracker.js';
+import { attributionService } from '../services/analytics/attributionService.js';
+import { interestService } from '../services/algorithm/interestService.js';
 
 const AppContext = createContext();
 
@@ -1243,6 +1249,7 @@ export function AppProvider({ children }) {
       if (currentUser) {
         setUser(currentUser);
         if (currentUser.role) setRole(currentUser.role);
+        sessionTracker.setAuthenticatedUser(currentUser.id);
       }
       
       const fetchedProducts = await ProductService.getProducts();
@@ -1521,7 +1528,13 @@ export function AppProvider({ children }) {
       setActiveProfileHandle,
       navigateToProfile,
       navigateToStorefront,
-      navigateToDashboard
+      navigateToDashboard,
+      // Engine Services
+      socialService,
+      feedService,
+      eventTracker,
+      attributionService,
+      interestService
     }}>
       {children}
     </AppContext.Provider>

@@ -502,6 +502,14 @@ export default function SocialProfile() {
             </div>
             <div className="flex items-center gap-1.5">
               <button
+                onClick={() => setActiveTab('settings')}
+                className="px-2.5 py-1 rounded-lg bg-white/20 hover:bg-white/30 text-white text-[11px] font-bold transition-colors flex items-center gap-1"
+                title={isAr ? 'تعديل بيانات الملف الشخصي' : 'Edit Profile Information'}
+              >
+                <span className="material-symbols-outlined text-[13px]">edit</span>
+                <span>{isAr ? 'تعديل البروفايل' : 'Edit Profile'}</span>
+              </button>
+              <button
                 onClick={() => setActiveTab('dashboard')}
                 className="px-3 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white text-[11px] font-bold transition-colors flex items-center gap-1"
               >

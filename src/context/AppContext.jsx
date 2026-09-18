@@ -1267,6 +1267,20 @@ export function AppProvider({ children }) {
     loadData();
   }, []);
 
+  const updateUserProfile = async (updates) => {
+    try {
+      const res = await AuthService.updateCurrentUser(updates);
+      if (res?.user) {
+        setUser(res.user);
+        if (res.user.role) setRole(res.user.role);
+        return res.user;
+      }
+    } catch (e) {
+      console.error('Failed to update user profile in context:', e);
+      throw e;
+    }
+  };
+
   // Sync Subdomain & Storefront if window location or merchants change
   useEffect(() => {
     const detected = detectSubdomain();
@@ -1482,6 +1496,7 @@ export function AppProvider({ children }) {
       setLanguage,
       user,
       setUser,
+      updateUserProfile,
       isAuthModalOpen,
       setIsAuthModalOpen,
       cartItems,

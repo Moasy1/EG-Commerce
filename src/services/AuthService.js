@@ -278,6 +278,87 @@ export const AuthService = {
     return { user: newDemoUser };
   },
 
+  async updateCurrentUser(updates = {}) {
+    try {
+      const currentUser = await this.getCurrentUser();
+      if (!currentUser) throw new Error('No authenticated user to update');
+
+      const userId = currentUser.id;
+      const sanitizedUsername = updates.username ? updates.username.replace(/^@/, '').trim() : currentUser.username;
+      
+      const updatedFields = {
+        name: updates.name !== undefined ? updates.name : currentUser.name,
+        display_name: updates.name !== undefined ? updates.name : (currentUser.display_name || currentUser.name),
+        phone: updates.phone !== undefined ? updates.phone : currentUser.phone,
+        bio: updates.bio !== undefined ? updates.bio : currentUser.bio,
+        avatar_url: updates.avatar_url !== undefined ? updates.avatar_url : currentUser.avatar_url,
+        username: sanitizedUsername,
+        location: updates.location !== undefined ? updates.location : currentUser.location,
+        website: updates.website !== undefined ? updates.website : currentUser.website,
+        updated_at: new Date().toISOString()
+      };
+
+      // 1. If real Supabase auth session, sync with Supabase
+      try {
+        const { data: { user: supaUser } } = await supabase.auth.getUser();
+        if (supaUser && supaUser.id === userId) {
+          // Update auth user metadata
+          await supabase.auth.updateUser({
+            data: {
+              name: updatedFields.name,
+              avatar_url: updatedFields.avatar_url,
+              phone: updatedFields.phone,
+              username: updatedFields.username
+            }
+          });
+
+          // Update profiles database table
+          const { error: supaErr } = await supabase
+            .from('profiles')
+            .update({
+              name: updatedFields.name,
+              display_name: updatedFields.display_name,
+              phone: updatedFields.phone,
+              bio: updatedFields.bio,
+              avatar_url: updatedFields.avatar_url,
+              username: updatedFields.username,
+              location: updatedFields.location,
+              website: updatedFields.website,
+              updated_at: updatedFields.updated_at
+            })
+            .eq('id', userId);
+
+          if (supaErr) {
+            console.warn('Supabase profile update warning:', supaErr.message);
+          }
+        }
+      } catch (authErr) {
+        console.warn('Supabase auth sync warning:', authErr.message);
+      }
+
+      // 2. Update local storage session cache
+      const mergedUser = {
+        ...currentUser,
+        ...updatedFields,
+        user_metadata: {
+          ...(currentUser.user_metadata || {}),
+          ...updatedFields
+        },
+        profile: {
+          ...(currentUser.profile || {}),
+          ...updatedFields
+        }
+      };
+
+      localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(mergedUser));
+
+      return { success: true, user: mergedUser };
+    } catch (error) {
+      console.error('Error updating user profile:', error);
+      throw error;
+    }
+  },
+
   async signOut() {
     localStorage.removeItem(DEMO_STORAGE_KEY);
     try {

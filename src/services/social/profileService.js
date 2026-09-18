@@ -65,22 +65,33 @@ export const profileService = {
 
   async updateProfile(userId, updates) {
     try {
+      const payload = {
+        name: updates.name || updates.displayName,
+        display_name: updates.displayName || updates.name,
+        username: updates.username ? updates.username.replace(/^@/, '').trim() : undefined,
+        bio: updates.bio,
+        phone: updates.phone,
+        location: updates.location,
+        website: updates.website,
+        avatar_url: updates.avatarUrl || updates.avatar_url,
+        cover_url: updates.coverUrl || updates.cover_url,
+        updated_at: new Date().toISOString()
+      };
+
+      // Clean undefined values
+      Object.keys(payload).forEach(key => payload[key] === undefined && delete payload[key]);
+
       const { data, error } = await supabase
         .from('profiles')
-        .update({
-          display_name: updates.displayName,
-          username: updates.username,
-          bio: updates.bio,
-          avatar_url: updates.avatarUrl,
-          cover_url: updates.coverUrl,
-          updated_at: new Date().toISOString()
-        })
+        .update(payload)
         .eq('id', userId)
         .select()
         .single();
 
       if (!error && data) return data;
-    } catch (e) {}
+    } catch (e) {
+      console.warn('profileService.updateProfile warning:', e);
+    }
 
     return updates;
   }

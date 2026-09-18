@@ -52,13 +52,23 @@ export default function ProfileCloset() {
           <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-gray-100 text-gray-600">
             egyptian-commerce.com
           </span>
-          <button 
-            onClick={handleSignOut}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-50 text-gray-600 text-xs font-bold hover:bg-gray-100 transition-colors"
-          >
-            <span className="material-symbols-outlined text-[14px]">logout</span>
-            {isAr ? 'خروج' : 'Sign Out'}
-          </button>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setActiveTab('settings')}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-bold hover:bg-black transition-all shadow-xs"
+              title={isAr ? 'تعديل الملف الشخصي' : 'Edit Profile'}
+            >
+              <span className="material-symbols-outlined text-[14px]">edit</span>
+              {isAr ? 'تعديل الملف' : 'Edit Profile'}
+            </button>
+            <button 
+              onClick={handleSignOut}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-50 text-gray-600 text-xs font-bold hover:bg-gray-100 transition-colors"
+            >
+              <span className="material-symbols-outlined text-[14px]">logout</span>
+              {isAr ? 'خروج' : 'Sign Out'}
+            </button>
+          </div>
         </div>
 
         {/* Circular Avatar with Verified Badge */}
@@ -82,6 +92,11 @@ export default function ProfileCloset() {
         {/* Name & Title */}
         <div>
           <h1 className="text-base font-bold text-slate-900">{user.name || user.email?.split('@')[0]}</h1>
+          {user.username && (
+            <div className="text-xs font-mono text-gray-500 mt-0.5">
+              @{user.username.replace(/^@/, '')}
+            </div>
+          )}
           <div className="flex items-center justify-center gap-2 mt-1">
             <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-red-100 text-red-700">
               {user.role}
@@ -90,6 +105,36 @@ export default function ProfileCloset() {
               {user.email}
             </span>
           </div>
+
+          {/* User Bio if present */}
+          {user.bio && (
+            <p className="text-xs text-gray-600 mt-2 max-w-sm mx-auto leading-relaxed">
+              {user.bio}
+            </p>
+          )}
+
+          {/* Location & Website badges if present */}
+          {(user.location || user.website) && (
+            <div className="flex items-center justify-center gap-3 mt-2 text-[11px] text-gray-500">
+              {user.location && (
+                <div className="flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[13px] text-red-500">location_on</span>
+                  <span>{user.location}</span>
+                </div>
+              )}
+              {user.website && (
+                <a 
+                  href={user.website.startsWith('http') ? user.website : `https://${user.website}`} 
+                  target="_blank" 
+                  rel="noreferrer" 
+                  className="flex items-center gap-1 text-[#d00000] hover:underline font-bold"
+                >
+                  <span className="material-symbols-outlined text-[13px]">link</span>
+                  <span>{user.website}</span>
+                </a>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Role Quick Navigation Shortcuts */}

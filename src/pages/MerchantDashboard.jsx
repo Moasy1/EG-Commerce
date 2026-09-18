@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useApp } from '../context/AppContext';
+import { useApp, MERCHANTS_DATA } from '../context/AppContext';
 import ProductFormModal from '../components/merchant/ProductFormModal';
 import StorefrontThemeCustomizer from '../components/merchant/StorefrontThemeCustomizer';
 import DesktopSellerDashboard from '../components/desktop/DesktopSellerDashboard';
@@ -19,11 +19,12 @@ export default function MerchantDashboard() {
     updateProduct,
     deleteProduct,
     user,
-    isAr,
+    language,
     setIsAuthModalOpen,
     navigateToProfile,
     navigateToStorefront
   } = useApp();
+  const isAr = language === 'ar';
 
   const isMerchant = user?.role === 'merchant' || user?.role === 'superadmin' || user?.role === 'admin';
   if (!isMerchant) {
@@ -50,9 +51,13 @@ export default function MerchantDashboard() {
     );
   }
 
-  const currentMerchant = merchants.find(m => m.id === selectedMerchantId) || merchants[0];
-  const merchantProducts = products.filter(p => p.merchantId === currentMerchant.id);
-  const merchantOrders = orders.filter(o => o.merchantId === currentMerchant.id);
+  const fallbackMerchant = (merchants && merchants.length > 0) ? merchants[0] : (MERCHANTS_DATA?.[0] || {});
+  const currentMerchant = (merchants && merchants.length > 0)
+    ? (merchants.find(m => m.id === selectedMerchantId || m.id === user?.merchant_id || m.user_id === user?.id) || fallbackMerchant)
+    : fallbackMerchant;
+
+  const merchantProducts = (products || []).filter(p => p && (p.merchantId === currentMerchant?.id || p.merchant_id === currentMerchant?.id));
+  const merchantOrders = (orders || []).filter(o => o && (o.merchantId === currentMerchant?.id || o.merchant_id === currentMerchant?.id));
 
   // Subtab navigation: overview, products, orders, theme, campaigns
   const [activeSubTab, setActiveSubTab] = useState('overview');
@@ -74,22 +79,25 @@ export default function MerchantDashboard() {
   const [approvedDrafts, setApprovedDrafts] = useState([]);
 
   // Theme Settings
-  const [announcementInput, setAnnouncementInput] = useState(currentMerchant.announcement);
-  const [promoCodeInput, setPromoCodeInput] = useState(currentMerchant.promoCode);
-  const [customDomainInput, setCustomDomainInput] = useState(currentMerchant.customDomain || '');
-  const [themeColor, setThemeColor] = useState(currentMerchant.themeColor || '#ff4646');
+  const [announcementInput, setAnnouncementInput] = useState(currentMerchant?.announcement || '');
+  const [promoCodeInput, setPromoCodeInput] = useState(currentMerchant?.promoCode || '');
+  const [customDomainInput, setCustomDomainInput] = useState(currentMerchant?.customDomain || '');
+  const [themeColor, setThemeColor] = useState(currentMerchant?.themeColor || '#ff4646');
   const [themeSavedToast, setThemeSavedToast] = useState(false);
 
   // Filtered Products
-  const displayedProducts = merchantProducts.filter(p => 
-    p.title.toLowerCase().includes(productSearch.toLowerCase()) || 
-    (p.sku && p.sku.toLowerCase().includes(productSearch.toLowerCase()))
-  );
+  const displayedProducts = merchantProducts.filter(p => {
+    if (!p) return false;
+    const q = (productSearch || '').toLowerCase();
+    const titleMatch = (p.title || p.name || '').toLowerCase().includes(q);
+    const skuMatch = p.sku && String(p.sku).toLowerCase().includes(q);
+    return titleMatch || skuMatch;
+  });
 
   // Filtered Orders
   const displayedOrders = orderFilter === 'all'
     ? merchantOrders
-    : merchantOrders.filter(o => o.shippingStatus === orderFilter);
+    : merchantOrders.filter(o => o && o.shippingStatus === orderFilter);
 
   // Handlers
   const handleOpenAddProduct = () => {
@@ -153,21 +161,21 @@ export default function MerchantDashboard() {
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-surface-container-high border border-surface-container-highest p-1 flex items-center justify-center shadow-xs">
               <img 
-                src={currentMerchant.logo} 
-                alt={currentMerchant.name} 
+                src={currentMerchant?.logo || '/images/brands/talieska_logo.jpg'} 
+                alt={currentMerchant?.name || 'Store'} 
                 className="w-full h-full object-cover rounded-lg"
               />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <select
-                  value={currentMerchant.id}
+                  value={currentMerchant?.id || ''}
                   onChange={(e) => setSelectedMerchantId(e.target.value)}
                   className="bg-transparent font-bold text-sm md:text-base text-on-surface cursor-pointer focus:outline-none"
                 >
-                  {merchants.map(m => (
+                  {(merchants || []).map(m => (
                     <option key={m.id} value={m.id} className="bg-surface-container text-on-surface">
-                      {m.name}
+                      {m.name || m.store_name || m.id}
                     </option>
                   ))}
                 </select>
@@ -176,7 +184,7 @@ export default function MerchantDashboard() {
                 </span>
               </div>
               <div className="flex items-center gap-2 text-[11px] text-on-surface-variant font-mono">
-                <span className="text-secondary">{currentMerchant.subdomain}</span>
+                <span className="text-secondary">{currentMerchant?.subdomain || `${currentMerchant?.slug || 'store'}.egyptian-commerce.com`}</span>
                 <span className="hidden md:inline">•</span>
                 <span className="hidden md:inline">باقة Growth 🚀</span>
               </div>
@@ -186,7 +194,7 @@ export default function MerchantDashboard() {
           {/* Quick Action CTAs */}
           <div className="flex items-center gap-2">
             <button
-              onClick={() => navigateToProfile(currentMerchant.slug || 'talieska')}
+              onClick={() => navigateToProfile(currentMerchant?.slug || 'talieska')}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface border border-surface-container-high text-xs font-bold transition-all shadow-xs"
               title="معاينة الملف الاجتماعي (Instagram Profile)"
             >
@@ -195,7 +203,7 @@ export default function MerchantDashboard() {
             </button>
 
             <button
-              onClick={() => navigateToStorefront(currentMerchant.id)}
+              onClick={() => navigateToStorefront(currentMerchant?.id || 'm-01')}
               className="hidden md:flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface border border-surface-container-high text-xs font-bold transition-all shadow-xs"
             >
               <span className="material-symbols-outlined text-[16px] text-primary">storefront</span>
@@ -298,9 +306,9 @@ export default function MerchantDashboard() {
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div className="p-2.5 bg-slate-50 rounded-xl">
                 <span className="text-[10px] text-slate-500 block font-bold">الراسل (Sender Atelier):</span>
-                <strong className="block">{currentMerchant.name}</strong>
+                <strong className="block">{currentMerchant?.name || 'متجر معتمد'}</strong>
                 <span className="text-[11px] text-slate-600 block">14 شارع دجلة، المعادي، القاهرة</span>
-                <span className="text-[11px] font-mono text-slate-600">{currentMerchant.whatsapp}</span>
+                <span className="text-[11px] font-mono text-slate-600">{currentMerchant?.whatsapp || '+20 100 234 5678'}</span>
               </div>
               <div className="p-2.5 bg-slate-50 rounded-xl">
                 <span className="text-[10px] text-slate-500 block font-bold">المرسل إليه (Consignee):</span>
@@ -315,7 +323,7 @@ export default function MerchantDashboard() {
               <div>
                 <span className="text-[10px] text-red-700 block font-bold">المبلغ المطلوب تحصيله (COD Amount):</span>
                 <span className="text-base font-bold text-red-600">
-                  {activeBostaAwbOrder.paymentStatus === 'paid' ? '0 ج.م (مدفوع مسبقاً)' : `${activeBostaAwbOrder.amount.toLocaleString()} ج.م`}
+                  {activeBostaAwbOrder.paymentStatus === 'paid' ? '0 ج.م (مدفوع مسبقاً)' : `${Number(activeBostaAwbOrder.amount ?? activeBostaAwbOrder.total_amount ?? 0).toLocaleString()} ج.م`}
                 </span>
               </div>
               <span className="px-2 py-1 rounded bg-white text-slate-700 font-bold text-[10px] border border-red-200">
@@ -368,11 +376,11 @@ export default function MerchantDashboard() {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-on-surface-variant">الحساب المستلم:</span>
-                <span className="font-mono font-bold text-secondary">{currentMerchant.instapayHandle}</span>
+                <span className="font-mono font-bold text-secondary">{currentMerchant?.instapayHandle || 'talieska@instapay'}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-on-surface-variant">المبلغ المحول:</span>
-                <span className="text-sm font-bold text-emerald-400">{activeInstapayReceipt.amount.toLocaleString()} ج.م</span>
+                <span className="text-sm font-bold text-emerald-400">{Number(activeInstapayReceipt.amount ?? activeInstapayReceipt.total_amount ?? 0).toLocaleString()} ج.م</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-on-surface-variant">حالة التحويل:</span>

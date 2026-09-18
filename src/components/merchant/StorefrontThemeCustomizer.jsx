@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useApp } from '../../context/AppContext';
+import { useApp, MERCHANTS_DATA } from '../../context/AppContext';
 
 export default function StorefrontThemeCustomizer() {
   const { 
@@ -7,10 +7,14 @@ export default function StorefrontThemeCustomizer() {
     selectedMerchantId, 
     updateMerchant, 
     products, 
-    setActiveTab 
+    setActiveTab,
+    user
   } = useApp();
 
-  const currentMerchant = merchants.find(m => m.id === selectedMerchantId) || merchants[0];
+  const fallbackMerchant = (merchants && merchants.length > 0) ? merchants[0] : (MERCHANTS_DATA?.[0] || {});
+  const currentMerchant = (merchants && merchants.length > 0)
+    ? (merchants.find(m => m.id === selectedMerchantId || m.id === user?.merchant_id || m.user_id === user?.id) || fallbackMerchant)
+    : fallbackMerchant;
 
   // Active sub-tab inside theme customizer
   const [activeCustomizerTab, setActiveCustomizerTab] = useState('theme'); // 'theme' | 'layout' | 'hero' | 'brand'

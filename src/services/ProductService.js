@@ -306,16 +306,53 @@ export const ProductService = {
       }
     } catch (e) {}
 
+    // Build map starting from full canonical MERCHANTS_DATA
+    const merchantMap = new Map();
+    MERCHANTS_DATA.forEach(m => merchantMap.set(m.id, { ...m }));
+
+    // Overlay any custom registered merchants
+    custom.forEach(cm => {
+      const id = cm.id;
+      const existing = merchantMap.get(id) || {};
+      merchantMap.set(id, {
+        ...MERCHANTS_DATA[0],
+        ...existing,
+        ...cm,
+        id,
+        name: cm.name || cm.store_name || existing.name || 'متجر معتمد',
+        shortName: cm.shortName || cm.name || 'متجر',
+        slug: cm.slug || 'store',
+        subdomain: cm.subdomain || `${cm.slug || 'store'}.egyptian-commerce.com`,
+        logo: cm.logo || existing.logo || '/images/brands/talieska_logo.jpg',
+        banner: cm.banner || existing.banner || '/images/banners/talieska_hero.jpg'
+      });
+    });
+
+    // Merge Supabase records if online
     try {
       const { data, error } = await supabase.from('merchants').select('*');
       if (!error && data && data.length > 0) {
-        return [...custom, ...data];
+        data.forEach(dbm => {
+          const id = dbm.id;
+          const existing = merchantMap.get(id) || {};
+          merchantMap.set(id, {
+            ...MERCHANTS_DATA[0],
+            ...existing,
+            id,
+            user_id: dbm.user_id,
+            name: dbm.store_name || dbm.name || existing.name || 'متجر معتمد',
+            shortName: dbm.store_name || dbm.name || existing.shortName || 'متجر',
+            slug: dbm.slug || existing.slug || 'store',
+            subdomain: `${dbm.slug || 'store'}.egyptian-commerce.com`,
+            is_verified: dbm.is_verified ?? true
+          });
+        });
       }
     } catch (err) {
-      console.warn('Error fetching merchants:', err.message);
+      console.warn('Error fetching merchants from Supabase:', err.message);
     }
 
-    return [...custom, ...MERCHANTS_DATA];
+    return Array.from(merchantMap.values());
   }
 };
 

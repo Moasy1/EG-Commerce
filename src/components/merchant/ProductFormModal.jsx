@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useApp } from '../../context/AppContext';
+import { useApp, MERCHANTS_DATA } from '../../context/AppContext';
 
 export default function ProductFormModal({ isOpen, onClose, productToEdit = null }) {
   const { addProduct, updateProduct, selectedMerchantId, merchants, user } = useApp();
-  const currentMerchant = merchants.find(m => m.id === selectedMerchantId) || merchants[0];
+  const fallbackMerchant = (merchants && merchants.length > 0) ? merchants[0] : (MERCHANTS_DATA?.[0] || {});
+  const currentMerchant = (merchants && merchants.length > 0)
+    ? (merchants.find(m => m.id === selectedMerchantId || m.id === user?.merchant_id || m.user_id === user?.id) || fallbackMerchant)
+    : fallbackMerchant;
 
   const [activeFormTab, setActiveFormTab] = useState('general'); // 'general' | 'pricing' | 'inventory' | 'syndication'
 
@@ -34,7 +37,7 @@ export default function ProductFormModal({ isOpen, onClose, productToEdit = null
   // Populate when editing
   useEffect(() => {
     if (productToEdit) {
-      setTitle(productToEdit.title || '');
+      setTitle(productToEdit.title || productToEdit.name || '');
       setSku(productToEdit.sku || '');
       setCategory(productToEdit.category || 'Linen كاجوال كتان');
       setDescription(productToEdit.description || '');
@@ -50,7 +53,9 @@ export default function ProductFormModal({ isOpen, onClose, productToEdit = null
     } else {
       // Default new product values
       setTitle('');
-      setSku(`${currentMerchant.shortName.toUpperCase().slice(0, 3)}-${Date.now().toString().slice(-4)}`);
+      const rawPrefix = currentMerchant?.shortName || currentMerchant?.name || 'PRD';
+      const cleanPrefix = (String(rawPrefix).replace(/[^a-zA-Z0-9]/g, '') || 'PRD').toUpperCase().slice(0, 3);
+      setSku(`${cleanPrefix}-${Date.now().toString().slice(-4)}`);
       setCategory('Linen كاجوال كتان');
       setDescription('قطعة صيفية حصرية مصنوعة من أجود أنواع الكتان الطبيعي المصري المنسوج يدوياً في القاهرة.');
       setImage(presetImages[0].url);
@@ -87,9 +92,9 @@ export default function ProductFormModal({ isOpen, onClose, productToEdit = null
       id: productToEdit ? productToEdit.id : `p-${Date.now()}`,
       sku: sku || `SKU-${Date.now().toString().slice(-4)}`,
       title: title.trim(),
-      merchant: currentMerchant.name,
-      merchantId: currentMerchant.id,
-      merchantSlug: currentMerchant.slug,
+      merchant: currentMerchant?.name || 'متجر معتمد',
+      merchantId: currentMerchant?.id || 'm-01',
+      merchantSlug: currentMerchant?.slug || 'store',
       createdBy: user?.id || null,
       merchantVerified: true,
       price: numPrice,
@@ -132,7 +137,7 @@ export default function ProductFormModal({ isOpen, onClose, productToEdit = null
                 {productToEdit ? 'تعديل بيانات المنتج' : 'إضافة قطعة جديدة للكتالوج • New Product'}
               </h3>
               <p className="text-[11px] text-on-surface-variant">
-                متجر {currentMerchant.name} ({currentMerchant.subdomain})
+                متجر {currentMerchant?.name || 'متجر معتمد'} ({currentMerchant?.subdomain || 'store.egyptian-commerce.com'})
               </p>
             </div>
           </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useApp } from '../../context/AppContext';
+import { useApp, MERCHANTS_DATA } from '../../context/AppContext';
 import { MerchantService } from '../../services/MerchantService';
 import EgLogo from '../common/EgLogo';
 import ProductFormModal from '../merchant/ProductFormModal';
@@ -36,9 +36,13 @@ export default function DesktopSellerDashboard() {
   const [productToEdit, setProductToEdit] = useState(null);
   const [activeInvoiceOrder, setActiveInvoiceOrder] = useState(null);
 
-  const currentMerchant = merchants?.find(m => m.id === selectedMerchantId) || merchants?.[0];
-  const merchantProducts = products?.filter(p => p.merchantId === currentMerchant?.id) || [];
-  const merchantOrders = orders?.filter(o => o.merchantId === currentMerchant?.id) || [];
+  const fallbackMerchant = (merchants && merchants.length > 0) ? merchants[0] : (MERCHANTS_DATA?.[0] || {});
+  const currentMerchant = (merchants && merchants.length > 0)
+    ? (merchants.find(m => m.id === selectedMerchantId || m.id === user?.merchant_id || m.user_id === user?.id) || fallbackMerchant)
+    : fallbackMerchant;
+
+  const merchantProducts = (products || []).filter(p => p && (p.merchantId === currentMerchant?.id || p.merchant_id === currentMerchant?.id));
+  const merchantOrders = (orders || []).filter(o => o && (o.merchantId === currentMerchant?.id || o.merchant_id === currentMerchant?.id));
 
   useEffect(() => {
     if (currentMerchant?.id) {
@@ -62,11 +66,14 @@ export default function DesktopSellerDashboard() {
     }
   };
 
-  const filteredProducts = merchantProducts.filter(p => 
-    (p.title || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
-    (p.category || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (p.sku || '').toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredProducts = merchantProducts.filter(p => {
+    if (!p) return false;
+    const q = (searchQuery || '').toLowerCase();
+    const titleMatch = String(p.title || p.name || '').toLowerCase().includes(q);
+    const catMatch = String(p.category || '').toLowerCase().includes(q);
+    const skuMatch = String(p.sku || '').toLowerCase().includes(q);
+    return titleMatch || catMatch || skuMatch;
+  });
 
   const topVideos = [
     {
@@ -146,7 +153,7 @@ export default function DesktopSellerDashboard() {
 
         <div className="p-2.5 rounded-xl bg-gray-100/80 border border-gray-200 text-right">
           <span className="text-[10px] text-gray-500 block">المتجر الحالي:</span>
-          <span className="text-xs font-bold text-slate-800">نيل ثريدز • Nile Threads</span>
+          <span className="text-xs font-bold text-slate-800">{currentMerchant?.name || 'متجري'}</span>
         </div>
       </aside>
 
@@ -232,7 +239,7 @@ export default function DesktopSellerDashboard() {
             {/* Profile */}
             <div className="flex items-center gap-2 pr-2 border-r border-gray-200">
               <div className="text-right">
-                <span className="text-xs font-bold text-slate-900 block leading-tight">أهلاً محمد أحمد</span>
+                <span className="text-xs font-bold text-slate-900 block leading-tight">أهلاً {user?.name || currentMerchant?.name || 'التاجر'}</span>
                 <span className="text-[10px] text-gray-500 block">تاجر معتمد</span>
               </div>
               <img src="/images/reels/reel_1.jpg" alt="User" className="w-8 h-8 rounded-full object-cover ring-1 ring-gray-300" />
@@ -629,16 +636,16 @@ export default function DesktopSellerDashboard() {
                             <tr key={o.id} className="hover:bg-gray-50/80 transition-colors">
                               <td className="py-3">
                                 <span className="font-bold text-slate-900 block">{o.id}</span>
-                                <span className="text-[10px] text-gray-400">{o.date}</span>
+                                <span className="text-[10px] text-gray-400">{o.date || 'مؤخراً'}</span>
                               </td>
                               <td className="py-3">
-                                <span className="font-bold text-slate-800 block">{o.customerName}</span>
-                                <span className="text-[10px] text-gray-500 font-mono" dir="ltr">{o.phone}</span>
+                                <span className="font-bold text-slate-800 block">{o.customerName || 'عميل'}</span>
+                                <span className="text-[10px] text-gray-500 font-mono" dir="ltr">{o.phone || '-'}</span>
                               </td>
                               <td className="py-3 text-gray-600 max-w-[150px] truncate" title={o.productTitle}>
-                                {o.productTitle} <br/> <span className="text-[10px] text-gray-400">({o.quantity} قطعة)</span>
+                                {o.productTitle || 'منتج'} <br/> <span className="text-[10px] text-gray-400">({o.quantity || 1} قطعة)</span>
                               </td>
-                              <td className="py-3 font-bold text-[#d00000]">{o.amount.toLocaleString()} ج.م</td>
+                              <td className="py-3 font-bold text-[#d00000]">{(Number(o.amount ?? o.total_amount ?? 0)).toLocaleString()} ج.م</td>
                               <td className="py-3">
                                 <div className="flex flex-col gap-1.5">
                                   <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border w-fit ${badge.color}`}>
@@ -646,7 +653,7 @@ export default function DesktopSellerDashboard() {
                                   </span>
                                   <select 
                                     className="bg-white border border-gray-200 text-slate-700 text-[10px] rounded px-1 py-1 cursor-pointer focus:outline-none w-full shadow-sm"
-                                    value={o.shippingStatus}
+                                    value={o.shippingStatus || 'ready_for_pickup'}
                                     onChange={async (e) => {
                                       const newStatus = e.target.value;
                                       setOrders(prev => prev.map(order => order.id === o.id ? { ...order, shippingStatus: newStatus } : order));
@@ -666,7 +673,7 @@ export default function DesktopSellerDashboard() {
                                 <div className="flex items-center justify-center gap-1">
                                   <button
                                     onClick={() => {
-                                      const phone = (o.phone || '').replace(/[^\d+]/g, '');
+                                      const phone = String(o.phone || '').replace(/[^\d+]/g, '');
                                       const msg = encodeURIComponent(`مرحباً ${o.customerName || ''}، بخصوص طلبك ${o.id} من متجر ${currentMerchant?.name || ''}`);
                                       window.open(`https://wa.me/${phone.replace(/^\+/, '')}?text=${msg}`, '_blank', 'noopener,noreferrer');
                                     }}
@@ -680,11 +687,11 @@ export default function DesktopSellerDashboard() {
                                       const lines = [
                                         `Order: ${o.id}`,
                                         `Store: ${currentMerchant?.name || ''}`,
-                                        `Customer: ${o.customerName}`,
-                                        `Phone: ${o.phone}`,
-                                        `Address: ${o.address}`,
-                                        `Items: ${o.productTitle}`,
-                                        `Total: ${o.amount} EGP`,
+                                        `Customer: ${o.customerName || 'عميل'}`,
+                                        `Phone: ${o.phone || '-'}`,
+                                        `Address: ${o.address || '-'}`,
+                                        `Items: ${o.productTitle || 'منتج'}`,
+                                        `Total: ${Number(o.amount ?? o.total_amount ?? 0)} EGP`,
                                         `Tracking: ${o.trackingNumber || '-'}`
                                       ];
                                       try {
@@ -787,20 +794,22 @@ export default function DesktopSellerDashboard() {
           {activeNav === 'customers' && (() => {
             const uniqueCustomersMap = new Map();
             merchantOrders.forEach(o => {
-              if (!uniqueCustomersMap.has(o.phone)) {
-                uniqueCustomersMap.set(o.phone, {
-                  name: o.customerName,
-                  phone: o.phone,
+              if (!o) return;
+              const phoneKey = o.phone || o.customerName || `cust-${o.id}`;
+              if (!uniqueCustomersMap.has(phoneKey)) {
+                uniqueCustomersMap.set(phoneKey, {
+                  name: o.customerName || 'عميل تجارة مصرية',
+                  phone: o.phone || '-',
                   address: o.address || 'العنوان غير متوفر',
                   totalOrders: 0,
                   totalSpent: 0,
-                  lastOrderDate: o.date
+                  lastOrderDate: o.date || 'مؤخراً'
                 });
               }
-              const cust = uniqueCustomersMap.get(o.phone);
+              const cust = uniqueCustomersMap.get(phoneKey);
               cust.totalOrders += 1;
-              cust.totalSpent += o.amount;
-              cust.lastOrderDate = o.date;
+              cust.totalSpent += Number(o.amount ?? o.total_amount ?? 0);
+              cust.lastOrderDate = o.date || cust.lastOrderDate;
             });
             const uniqueCustomers = Array.from(uniqueCustomersMap.values());
 
@@ -849,7 +858,7 @@ export default function DesktopSellerDashboard() {
                             </td>
                             <td className="py-3 font-mono text-slate-700" dir="ltr">{c.phone}</td>
                             <td className="py-3 text-slate-700 font-bold">{c.totalOrders} طلب</td>
-                            <td className="py-3 font-bold text-emerald-600">{c.totalSpent.toLocaleString()} ج.م</td>
+                            <td className="py-3 font-bold text-emerald-600">{(Number(c.totalSpent || 0)).toLocaleString()} ج.م</td>
                             <td className="py-3 text-gray-500 text-[11px]">{c.lastOrderDate}</td>
                           </tr>
                         ))}
@@ -862,7 +871,7 @@ export default function DesktopSellerDashboard() {
           })()}
 
           {activeNav === 'analytics' && (() => {
-            const totalRevenue = merchantOrders.reduce((sum, o) => sum + o.amount, 0);
+            const totalRevenue = merchantOrders.reduce((sum, o) => sum + Number(o?.amount ?? o?.total_amount ?? 0), 0);
             const totalOrders = merchantOrders.length;
             const avgOrderValue = totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0;
             const conversionRate = totalOrders > 0 ? ((totalOrders / (totalOrders * 35)) * 100).toFixed(1) : 0;
@@ -880,7 +889,7 @@ export default function DesktopSellerDashboard() {
                       <span className="text-[11px] font-bold">إجمالي المبيعات</span>
                       <span className="material-symbols-outlined text-[16px] text-emerald-500">payments</span>
                     </div>
-                    <div className="text-xl font-black text-slate-900">{totalRevenue.toLocaleString()} <span className="text-xs font-normal text-gray-500">ج.م</span></div>
+                    <div className="text-xl font-black text-slate-900">{(Number(totalRevenue || 0)).toLocaleString()} <span className="text-xs font-normal text-gray-500">ج.م</span></div>
                     <div className="text-[10px] text-emerald-600 font-bold mt-1 flex items-center gap-0.5">
                       <span className="material-symbols-outlined text-[12px]">trending_up</span>
                       <span>+15% من الشهر الماضي</span>
@@ -904,7 +913,7 @@ export default function DesktopSellerDashboard() {
                       <span className="text-[11px] font-bold">متوسط قيمة الطلب</span>
                       <span className="material-symbols-outlined text-[16px] text-amber-500">receipt_long</span>
                     </div>
-                    <div className="text-xl font-black text-slate-900">{avgOrderValue.toLocaleString()} <span className="text-xs font-normal text-gray-500">ج.م</span></div>
+                    <div className="text-xl font-black text-slate-900">{(Number(avgOrderValue || 0)).toLocaleString()} <span className="text-xs font-normal text-gray-500">ج.م</span></div>
                     <div className="text-[10px] text-gray-400 font-bold mt-1 flex items-center gap-0.5">
                       <span className="material-symbols-outlined text-[12px]">trending_flat</span>
                       <span>ثابت نسبياً</span>

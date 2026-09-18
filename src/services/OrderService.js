@@ -181,16 +181,20 @@ function normalizePlatformOrder(row) {
   const data = row?.order_data || row;
   if (!data) return null;
 
+  const rawAmount = data.amount ?? row?.total_amount ?? data.total ?? 0;
+  const numAmount = typeof rawAmount === 'number' ? rawAmount : (Number(rawAmount) || 0);
+
   return {
     ...data,
-    id: data.id || row.display_id,
-    merchantId: data.merchantId || row.merchant_id,
-    customerName: data.customerName || row.customer_name,
-    phone: data.phone || row.phone,
+    id: data.id || row.display_id || `EG-${String(row.id || '').slice(-4)}`,
+    merchantId: data.merchantId || row.merchant_id || 'm-01',
+    customerName: data.customerName || row.customer_name || 'عميل تجارة مصرية',
+    phone: data.phone || row.phone || '+20 102 345 6789',
     shippingStatus: data.shippingStatus || row.shipping_status || 'ready_for_pickup',
     paymentStatus: data.paymentStatus || row.payment_status || 'pending',
-    amount: data.amount ?? Number(row.total_amount || 0),
-    createdAt: data.createdAt || row.created_at,
+    amount: numAmount,
+    total_amount: numAmount,
+    createdAt: data.createdAt || row.created_at || new Date().toISOString(),
     databaseId: data.databaseId || row.id
   };
 }
@@ -376,7 +380,40 @@ export const OrderService = {
       }
       const { data, error } = await query.order('created_at', { ascending: false });
       if (!error && Array.isArray(data) && data.length > 0) {
-        return data;
+        const normalized = data.map(row => {
+          const rawTotal = row.total_amount ?? row.amount ?? 0;
+          const numTotal = typeof rawTotal === 'number' ? rawTotal : (Number(rawTotal) || 0);
+          const firstItem = row.order_items?.[0] || {};
+          return {
+            id: `EG-${String(row.id).replace(/[^a-zA-Z0-9]/g, '').slice(-4)}`,
+            merchantId: row.merchant_id || firstItem.merchant_id || 'm-01',
+            customerName: row.customer_name || 'عميل تجارة مصرية',
+            phone: row.phone || '+20 102 345 6789',
+            address: row.address || 'القاهرة، جمهورية مصر العربية',
+            productTitle: (row.order_items || []).map(it => it.title || it.name).filter(Boolean).join(' + ') || 'منتج أزياء وتراث مصري فاخر',
+            items: (row.order_items || []).map(it => ({
+              productId: it.product_id || it.id,
+              title: it.title || it.name || 'منتج',
+              price: Number(it.price || it.unit_price || 0),
+              quantity: Number(it.quantity || 1),
+              size: it.size || 'M',
+              color: it.color || 'Default'
+            })),
+            quantity: (row.order_items || []).reduce((acc, it) => acc + (it.quantity || 1), 0) || 1,
+            amount: numTotal,
+            subtotal: Number(row.subtotal || numTotal),
+            discount: Number(row.discount_amount || 0),
+            shipping: Number(row.shipping_amount || 60),
+            paymentMethod: row.payment_method || 'الدفع عند الاستلام (COD)',
+            paymentStatus: row.payment_status || (row.status === 'completed' ? 'paid' : 'pending_cod'),
+            shippingStatus: row.shipping_status || row.status || 'ready_for_pickup',
+            trackingNumber: row.tracking_number || `BST-${String(row.id).slice(-8)}`,
+            date: 'مؤخراً',
+            createdAt: row.created_at || new Date().toISOString(),
+            userId: row.user_id
+          };
+        });
+        return normalized;
       }
     } catch (err) {
       // Use synchronized local orders

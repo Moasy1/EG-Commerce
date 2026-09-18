@@ -1061,7 +1061,7 @@ export function AppProvider({ children }) {
     return INITIAL_PRODUCTS[0];
   });
   const [merchants, setMerchants] = useState(MERCHANTS_DATA);
-  const [selectedMerchantId, setSelectedMerchantId] = useState(() => initialSubdomain.merchantId);
+  const [selectedMerchantId, setSelectedMerchantId] = useState(() => initialSubdomain.merchantId || 'm-01');
   const [orders, setOrders] = useState(() => OrderService.getInitialOrders());
 
   const updateOrderStatus = async (orderId, newStatus) => {
@@ -1250,6 +1250,9 @@ export function AppProvider({ children }) {
       if (currentUser) {
         setUser(currentUser);
         if (currentUser.role) setRole(currentUser.role);
+        if (currentUser.merchant_id) {
+          setSelectedMerchantId(prev => prev || currentUser.merchant_id);
+        }
         sessionTracker.setAuthenticatedUser(currentUser.id);
       }
       

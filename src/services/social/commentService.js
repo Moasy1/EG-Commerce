@@ -1,8 +1,9 @@
 import { supabase } from '../../lib/supabase.js';
+import { toCanonicalReelId } from './engagementService.js';
 
 const SEED_COMMENTS = [
   {
-    id: 'c-seed-1',
+    id: 'cc000000-0000-0000-0000-000000000001',
     userId: 'b0000000-0000-0000-0000-000000000001',
     userName: 'مريم الشافعي',
     userAvatar: '/images/reels/reel_1.jpg',
@@ -14,9 +15,9 @@ const SEED_COMMENTS = [
     replies: []
   },
   {
-    id: 'c-seed-2',
-    userId: 'u-ahmed',
-    userName: 'أحمد سامي',
+    id: 'cc000000-0000-0000-0000-000000000002',
+    userId: 'b0000000-0000-0000-0000-000000000002',
+    userName: 'نورهان كريم',
     userAvatar: '/images/reels/reel_2.jpg',
     userRole: 'buyer',
     text: 'التطريز متقن جداً.. طلبت الأسبوع الماضي واستلمت في 48 ساعة عبر بوسطة 🚀',
@@ -26,7 +27,7 @@ const SEED_COMMENTS = [
     replies: []
   },
   {
-    id: 'c-seed-3',
+    id: 'cc000000-0000-0000-0000-000000000003',
     userId: 'c0000000-0000-0000-0000-000000000001',
     userName: 'ياسمين السيد',
     userAvatar: '/images/reels/reel_2.jpg',
@@ -41,12 +42,14 @@ const SEED_COMMENTS = [
 
 export const commentService = {
   async getComments(reelId) {
+    const canonicalId = toCanonicalReelId(reelId);
     let dbComments = [];
+
     try {
       const { data, error } = await supabase
         .from('comments')
         .select('*, profiles(name, avatar_url, role)')
-        .eq('reel_id', reelId)
+        .or(`reel_id.eq.${canonicalId},reel_id.eq.${reelId}`)
         .order('created_at', { ascending: false });
 
       if (!error && data && data.length > 0) {
@@ -59,14 +62,16 @@ export const commentService = {
           text: c.body,
           parentId: c.parent_id,
           timeAgo: 'مؤخراً',
-          likes: 0,
+          likes: c.likes_count || 0,
           createdAt: c.created_at
         }));
       }
-    } catch (e) {}
+    } catch (e) {
+      // Table may not exist or offline
+    }
 
     // Check local storage for quick sync
-    const key = `eg_reel_comments_${reelId}`;
+    const key = `eg_reel_comments_${canonicalId}`;
     let local = [];
     try {
       const stored = localStorage.getItem(key);
@@ -82,7 +87,7 @@ export const commentService = {
       } catch (e) {}
     }
 
-    // Merge if DB has records
+    // Merge DB records and local comments
     if (dbComments.length > 0) {
       const localIds = new Set(local.map(c => c.id));
       const combined = [...local, ...dbComments.filter(c => !localIds.has(c.id))];
@@ -112,10 +117,16 @@ export const commentService = {
   },
 
   async addComment(reelId, { text, userId = null, userName = 'مستخدم', userAvatar = '/images/reels/reel_1.jpg', userRole = 'buyer', parentId = null }) {
-    const key = `eg_reel_comments_${reelId}`;
+    const canonicalId = toCanonicalReelId(reelId);
+    const key = `eg_reel_comments_${canonicalId}`;
+
+    const newCommentId = typeof crypto !== 'undefined' && crypto.randomUUID 
+      ? crypto.randomUUID() 
+      : `cc${Date.now().toString(16).padStart(12, '0')}-${Math.random().toString(16).substr(2, 4)}`;
+
     const commentRecord = {
-      id: `c-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
-      reelId,
+      id: newCommentId,
+      reelId: canonicalId,
       userId,
       userName,
       userAvatar,
@@ -127,7 +138,7 @@ export const commentService = {
       createdAt: new Date().toISOString()
     };
 
-    // 1. Local update
+    // 1. Local cache update immediately
     try {
       const stored = localStorage.getItem(key);
       const list = stored ? JSON.parse(stored) : [...SEED_COMMENTS];
@@ -135,25 +146,28 @@ export const commentService = {
       localStorage.setItem(key, JSON.stringify(list));
     } catch (e) {}
 
-    // 2. DB Insert
-    if (userId) {
-      try {
-        await supabase.from('comments').insert({
-          id: commentRecord.id.includes('-') && commentRecord.id.length === 36 ? commentRecord.id : undefined,
-          user_id: userId,
-          reel_id: reelId,
-          parent_id: parentId,
-          body: text.trim(),
-          status: 'active'
-        });
-      } catch (e) {}
+    // 2. Persist to Supabase comments table
+    const effectiveUserId = userId || 'b0000000-0000-0000-0000-000000000001';
+    try {
+      await supabase.from('comments').insert({
+        id: newCommentId.length === 36 ? newCommentId : undefined,
+        user_id: effectiveUserId,
+        reel_id: canonicalId,
+        parent_id: parentId || null,
+        body: text.trim(),
+        likes_count: 0,
+        status: 'active'
+      });
+    } catch (e) {
+      console.warn('DB Comment insert notice:', e.message);
     }
 
     return commentRecord;
   },
 
   async deleteComment(reelId, commentId) {
-    const key = `eg_reel_comments_${reelId}`;
+    const canonicalId = toCanonicalReelId(reelId);
+    const key = `eg_reel_comments_${canonicalId}`;
     try {
       const stored = localStorage.getItem(key);
       if (stored) {
@@ -167,7 +181,8 @@ export const commentService = {
   },
 
   async likeComment(reelId, commentId, userId = null) {
-    const key = `eg_reel_comments_${reelId}`;
+    const canonicalId = toCanonicalReelId(reelId);
+    const key = `eg_reel_comments_${canonicalId}`;
     try {
       const stored = localStorage.getItem(key);
       if (stored) {

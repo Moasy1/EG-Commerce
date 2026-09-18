@@ -20,9 +20,9 @@ export const socialService = {
    * 3. Update counter locally
    */
   async likeReel(reel, userId = null) {
-    const isNowLiked = await engagementService.toggleLikeReel(reel.id, userId);
+    const res = await engagementService.toggleLikeReel(reel.id, userId);
 
-    await eventTracker.trackEvent(isNowLiked ? 'reel_like' : 'reel_unlike', {
+    await eventTracker.trackEvent(res.isLiked ? 'reel_like' : 'reel_unlike', {
       userId,
       entityType: 'reel',
       reelId: reel.id,
@@ -31,10 +31,7 @@ export const socialService = {
       metadata: { categoryId: reel.categoryId || 'fashion' }
     });
 
-    return {
-      isLiked: isNowLiked,
-      likesDelta: isNowLiked ? 1 : -1
-    };
+    return res;
   },
 
   /**
@@ -43,9 +40,9 @@ export const socialService = {
    * 2. Log user_event ('reel_save' or 'reel_unsave')
    */
   async saveReel(reel, userId = null) {
-    const isNowSaved = await engagementService.toggleSaveReel(reel.id, userId);
+    const res = await engagementService.toggleSaveReel(reel.id, userId);
 
-    await eventTracker.trackEvent(isNowSaved ? 'reel_save' : 'reel_unsave', {
+    await eventTracker.trackEvent(res.isSaved ? 'reel_save' : 'reel_unsave', {
       userId,
       entityType: 'reel',
       reelId: reel.id,
@@ -54,7 +51,7 @@ export const socialService = {
       metadata: { categoryId: reel.categoryId || 'fashion' }
     });
 
-    return isNowSaved;
+    return res;
   },
 
   /**

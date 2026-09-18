@@ -106,7 +106,7 @@ const ReelVideoPlayer = ({ reel, isActive, isAdjacent, isGlobalMuted, toggleMute
 
 const getDefaultReels = (isAr = true) => [
     {
-      id: 'reel-fashion-blazer',
+      id: 'ee000000-0000-0000-0000-000000000001',
       creatorHandle: '@cairo_chic',
       creatorName: 'كايرو شيك • Cairo Chic',
       avatar: '/images/reels/fashion_citrine_blazer_thumb.jpg',
@@ -115,9 +115,9 @@ const getDefaultReels = (isAr = true) => [
         ? 'تنسيق بليزر السيترين الأوفرسايز مع بنطلون جينز كلاسيك ونظارة شمسية 💛 فخامة الصيف وأناقة لا تقاوم! #بليزر #موضة_القاهرة' 
         : 'Styling the oversized Citrine Yellow Blazer with denim and sleek shades 💛 Effortless luxury! #FashionReels #OOTD',
       music: isAr ? 'ألحان إيقاعية هادية • صيف 2026' : 'Summer Aesthetic Vibes • Instrumental',
-      likes: 62400,
-      comments: 2180,
-      saves: 11400,
+      likes: 4820,
+      comments: 218,
+      saves: 1140,
       products: [
         {
           id: 'p-fashion-blazer',
@@ -140,7 +140,7 @@ const getDefaultReels = (isAr = true) => [
       ]
     },
     {
-      id: 'reel-fashion-shirt',
+      id: 'ee000000-0000-0000-0000-000000000002',
       creatorHandle: '@salma.styles',
       creatorName: 'سلمى ستايلز • Salma Styles',
       avatar: '/images/reels/fashion_oversized_shirt_thumb.jpg',
@@ -149,9 +149,9 @@ const getDefaultReels = (isAr = true) => [
         ? 'قميص كتان سماوي أوفرسايز خفيف جداً ومريح مع بنطلون تشينو بيج واسع 🩵 إطلالة كاجوال أنيقة لكل يوم!' 
         : 'Sky blue linen oversized shirt paired with relaxed wide chinos 🩵 Summer perfection! #LinenStyle',
       music: isAr ? 'نغمات كاجوال مصرية' : 'Chill Acoustic Grooves',
-      likes: 45100,
-      comments: 1390,
-      saves: 8200,
+      likes: 3450,
+      comments: 139,
+      saves: 820,
       products: [
         {
           id: 'p-fashion-oversized-shirt',
@@ -174,7 +174,7 @@ const getDefaultReels = (isAr = true) => [
       ]
     },
     {
-      id: 'reel-fashion-top',
+      id: 'ee000000-0000-0000-0000-000000000003',
       creatorHandle: '@zeina_ootd',
       creatorName: 'زينة أوفت • Zeina OOTD',
       avatar: '/images/reels/fashion_oneshoulder_top_thumb.jpg',
@@ -183,9 +183,9 @@ const getDefaultReels = (isAr = true) => [
         ? 'توب بكتف واحد عاجي ناعم مع جينز كلاسيك عالي الخصر وحزام جلد 🤍 "Jeans and a cute top" هو الأساس دايماً!' 
         : 'Asymmetric one-shoulder white bodysuit with high-waist denim 🤍 The classic "jeans and a cute top" equation! ✨',
       music: isAr ? 'صوت تريند عالمي' : 'Trending Pop Rhythm',
-      likes: 38900,
-      comments: 1240,
-      saves: 7300,
+      likes: 2910,
+      comments: 124,
+      saves: 730,
       products: [
         {
           id: 'p-fashion-oneshoulder-top',
@@ -208,7 +208,7 @@ const getDefaultReels = (isAr = true) => [
       ]
     },
     {
-      id: 'reel-fashion-bag',
+      id: 'ee000000-0000-0000-0000-000000000004',
       creatorHandle: '@maya_accessories',
       creatorName: 'مايا إكسسوارات • Maya Accessories',
       avatar: '/images/reels/fashion_shoulder_bags_thumb.jpg',
@@ -217,9 +217,9 @@ const getDefaultReels = (isAr = true) => [
         ? 'سواتش كولكشن شنط الكتف الجلدية الكلاسيك بـ 5 ألوان تخطف العين (عاجي، بني، بوردو، رمادي، جملي) بإبزيم ذهبي فاخر! 👜✨' 
         : 'All 5 iconic colorways of the structured leather shoulder bag with polished gold hardware! 👜✨ #Bags',
       music: isAr ? 'إيقاع إكسسوارات راقي' : 'High Fashion Beats',
-      likes: 48500,
-      comments: 1950,
-      saves: 9800,
+      likes: 5120,
+      comments: 195,
+      saves: 980,
       products: [
         {
           id: 'p-fashion-shoulder-bags',
@@ -242,7 +242,7 @@ const getDefaultReels = (isAr = true) => [
       ]
     },
     {
-      id: 'reel-fashion-knit',
+      id: 'ee000000-0000-0000-0000-000000000005',
       creatorHandle: '@layla_fashion',
       creatorName: 'ليلى فاشن • Layla Fashion',
       avatar: '/images/reels/fashion_knit_sweater_thumb.jpg',
@@ -251,9 +251,9 @@ const getDefaultReels = (isAr = true) => [
         ? 'سويتر تريكو صوف أوفرسايز بياقة عالية مع جيبة صوف صوفية كاروهات 🖤 دفء وأناقة شتوية راقية!' 
         : 'Chunky oversized knit turtleneck sweater paired with wool argyle skirt 🖤 Winter warmth & elegance!',
       music: isAr ? 'موسيقى شتوية دافئة' : 'Cozy Winter Harmony',
-      likes: 33400,
-      comments: 980,
-      saves: 5600,
+      likes: 2140,
+      comments: 98,
+      saves: 560,
       products: [
         {
           id: 'p-fashion-knit-sweater',
@@ -276,7 +276,7 @@ const getDefaultReels = (isAr = true) => [
       ]
     },
     {
-      id: 'reel-fashion-suede',
+      id: 'ee000000-0000-0000-0000-000000000006',
       creatorHandle: '@omar_looks',
       creatorName: 'عمر لوكس • Omar Looks',
       avatar: '/images/reels/fashion_suede_jacket_thumb.jpg',
@@ -285,9 +285,9 @@ const getDefaultReels = (isAr = true) => [
         ? 'ستايل كلاسيكي رجالي راقي: جاكيت شمواه بني فاخر مع بنطلون زيتي وحذاء سويد مريح 🤎 قمة الفخامة الهادية!' 
         : 'Refined menswear styling: Tobacco brown suede Harrington jacket with olive pleated trousers 🤎 #MenStyle',
       music: isAr ? 'جاز مصري حديث' : 'Modern Lo-Fi Beats',
-      likes: 31200,
-      comments: 870,
-      saves: 6100,
+      likes: 3120,
+      comments: 87,
+      saves: 610,
       products: [
         {
           id: 'p-fashion-suede-jacket',
@@ -310,7 +310,7 @@ const getDefaultReels = (isAr = true) => [
       ]
     },
     {
-      id: 'reel-fashion-watch',
+      id: 'ee000000-0000-0000-0000-000000000007',
       creatorHandle: '@karim.editorial',
       creatorName: 'كريم إيديتوريال • Karim Editorial',
       avatar: '/images/reels/fashion_vintage_watch_thumb.jpg',
@@ -319,9 +319,9 @@ const getDefaultReels = (isAr = true) => [
         ? 'تفاصيل الساعة البرميلية الكلاسيكية بطلاء الذهب الوردي وأرقام رومانية مع سويتر صوف عاجي أنيق ⌚✨ تحفة معصم!' 
         : 'Vintage tonneau rose gold watch with roman dial & brown leather strap ⌚✨ Complete quiet luxury!',
       music: isAr ? 'عزف بيانو كلاسيكي' : 'Classical Elegance Sound',
-      likes: 54200,
-      comments: 2310,
-      saves: 12400,
+      likes: 5420,
+      comments: 231,
+      saves: 1240,
       products: [
         {
           id: 'p-fashion-vintage-watch',
@@ -344,7 +344,7 @@ const getDefaultReels = (isAr = true) => [
       ]
     },
     {
-      id: 'reel-fashion-woven',
+      id: 'ee000000-0000-0000-0000-000000000008',
       creatorHandle: '@farida.atelier',
       creatorName: 'فريدة أتيليه • Farida Atelier',
       avatar: '/images/reels/fashion_woven_bag_thumb.jpg',
@@ -353,9 +353,9 @@ const getDefaultReels = (isAr = true) => [
         ? 'حقيبة الجلد المنسوجة يدوياً بحزام مضفر مع بنطلون كتان جملي واسع وميولز بيضاء 🤎 فخامة الحرف اليدوية المصرية!' 
         : 'Handcrafted woven leather bag with braided handle styled with camel linen trousers & white mules! 🤎',
       music: isAr ? 'أنغام ريترو هادية' : 'Aesthetic Retro Beats',
-      likes: 32100,
-      comments: 940,
-      saves: 5900,
+      likes: 3210,
+      comments: 94,
+      saves: 590,
       products: [
         {
           id: 'p-fashion-woven-bag',
@@ -378,7 +378,7 @@ const getDefaultReels = (isAr = true) => [
       ]
     },
     {
-      id: 'reel-fashion-barrel',
+      id: 'ee000000-0000-0000-0000-000000000009',
       creatorHandle: '@huda_leather',
       creatorName: 'هدى ليذر • Huda Leather',
       avatar: '/images/reels/fashion_barrel_bag_thumb.jpg',
@@ -387,9 +387,9 @@ const getDefaultReels = (isAr = true) => [
         ? 'حقائب البولينج الأسطوانية الجلد الطبيعي في 4 ألوان فخمة (بني كروكو، كونياك سويد، نبيذي، أسود) 👜 سعة مذهلة وخياطة دقيقة!' 
         : 'Luxury barrel bowling leather handbags in 4 rich finishes (croc dark brown, suede tan, deep wine, black) 👜',
       music: isAr ? 'إيقاع استوديو القاهرة' : 'Cairo Studio Lounge',
-      likes: 29700,
-      comments: 860,
-      saves: 5100,
+      likes: 2970,
+      comments: 86,
+      saves: 510,
       products: [
         {
           id: 'p-fashion-barrel-bag',
@@ -412,7 +412,7 @@ const getDefaultReels = (isAr = true) => [
       ]
     },
     {
-      id: 'reel-fashion-cuban',
+      id: 'ee000000-0000-0000-0000-000000000010',
       creatorHandle: '@youssef_cairo',
       creatorName: 'يوسف ستايل • Youssef Cairo',
       avatar: '/images/reels/fashion_cuban_shirt_thumb.jpg',
@@ -421,9 +421,9 @@ const getDefaultReels = (isAr = true) => [
         ? 'قميص كوبي بنقشة ريترو مع بنطلون كتان أسود ونظارة كلاسيك 🕶️ إطلالة شبابية رايقة للصيف!' 
         : 'Retro print Cuban collar shirt styled with black linen trousers 🕶️ Smooth summer aesthetic! #MenSummer',
       music: isAr ? 'فانك مصري هادي' : 'Smooth Funk Grooves',
-      likes: 28400,
-      comments: 790,
-      saves: 4300,
+      likes: 2840,
+      comments: 79,
+      saves: 430,
       products: [
         {
           id: 'p-fashion-cuban-shirt',
@@ -446,7 +446,7 @@ const getDefaultReels = (isAr = true) => [
       ]
     },
     {
-      id: 'reel-sheglam-1',
+      id: 'ee000000-0000-0000-0000-000000000011',
       creatorHandle: '@beauty.by.nada',
       creatorName: 'ندى بيوتي • Nada Beauty',
       avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=150&q=80',
@@ -455,9 +455,9 @@ const getDefaultReels = (isAr = true) => [
         ? 'ريفيو جديد لماسكارا شيجلام! رهيبة بتطول وتكثف الرموش، ومعاها مزيل خاص بيها بيشيلها في ثواني! ✨👀 #Sheglam #ماسكارا #تجميل' 
         : 'Testing the new SHEGLAM Ultra Lash Lift Mascara & Easy Lash Removal! Amazing results! ✨👀 #Sheglam #Makeup',
       music: isAr ? 'تريند بيوتي • تيك توك' : 'Trending Beauty Sound',
-      likes: 45200,
-      comments: 1240,
-      saves: 8900,
+      likes: 4520,
+      comments: 124,
+      saves: 890,
       products: [
         {
           id: 'p-sheglam-1',
@@ -480,7 +480,7 @@ const getDefaultReels = (isAr = true) => [
       ]
     },
     {
-      id: 'reel-sheglam-2',
+      id: 'ee000000-0000-0000-0000-000000000012',
       creatorHandle: '@makeup.with.sara',
       creatorName: 'سارة ميكأب • Sara Makeup',
       avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&q=80',
@@ -489,9 +489,9 @@ const getDefaultReels = (isAr = true) => [
         ? 'سواتش لدرجات مرطب ومورد الشفاه والخدود من شيجلام 🍒 درجات تجنن (Cherry Bark, Plum Sauce, Bare Blush) ثبات وترطيب خيالي! 💋 #مكياج #شيجلام' 
         : 'SHEGLAM Jelly Lip Tint & Blusher swatches 🍒 Gorgeous shades (Cherry Bark, Plum Sauce) and amazing hydration! 💋 #LipTint #Sheglam',
       music: isAr ? 'موسيقى ريلز هادية' : 'Chill Aesthetic Vibes',
-      likes: 89100,
-      comments: 3420,
-      saves: 15400,
+      likes: 3870,
+      comments: 98,
+      saves: 650,
       products: [
         {
           id: 'p-sheglam-2',
@@ -515,6 +515,20 @@ const getDefaultReels = (isAr = true) => [
     }
   ];
 
+const formatCount = (count) => {
+  const num = Number(count) || 0;
+  if (num >= 1_000_000) {
+    return (num / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+  }
+  if (num >= 10_000) {
+    return (num / 1_000).toFixed(1).replace(/\.0$/, '') + 'K';
+  }
+  if (num >= 1_000) {
+    return num.toLocaleString();
+  }
+  return num.toString();
+};
+
 export default function DiscoverReels() {
   const { openQuickBuy, openProductDetail, products, setActiveTab, navigateToProfile, language, user, role, setIsAuthModalOpen } = useApp();
   const isAr = language === 'ar';
@@ -528,8 +542,10 @@ export default function DiscoverReels() {
 
   const [activeTabSub, setActiveTabSub] = useState('foryou');
   const [isLiked, setIsLiked] = useState(false);
-  const [likesCount, setLikesCount] = useState(14200);
+  const [likesCount, setLikesCount] = useState(4820);
   const [isSaved, setIsSaved] = useState(false);
+  const [savesCount, setSavesCount] = useState(1140);
+  const [commentsCount, setCommentsCount] = useState(218);
   const [isFollowed, setIsFollowed] = useState(false);
   const reelMountTime = useRef(Date.now());
 
@@ -570,25 +586,36 @@ export default function DiscoverReels() {
     fetchPersonalizedReels();
   }, [defaultReels, activeTabSub, user?.id]);
 
-  // Sync likes, saves, follow status, and impression tracking when current reel changes
+  // Sync likes, saves, comments counts, follow status, and impression tracking when current reel changes
   useEffect(() => {
     if (currentReel?.id) {
       reelMountTime.current = Date.now();
       eventTracker.trackReelImpression(currentReel, currentReelIndex);
 
-      socialService.engagement.isReelLiked(currentReel.id, user?.id).then(liked => {
-        setIsLiked(liked);
-      });
-      socialService.engagement.isReelSaved(currentReel.id, user?.id).then(saved => {
-        setIsSaved(saved);
-      });
+      // Fetch live DB engagement metrics (likes, saves, comments counts + user state)
+      socialService.engagement.getReelEngagement(currentReel.id, user?.id)
+        .then(eng => {
+          if (eng) {
+            setIsLiked(Boolean(eng.isLiked));
+            setIsSaved(Boolean(eng.isSaved));
+            setLikesCount(eng.likesCount ?? (Number(currentReel.likes) || 0));
+            setSavesCount(eng.savesCount ?? (Number(currentReel.saves) || 0));
+            setCommentsCount(eng.commentsCount ?? (Number(currentReel.comments) || 0));
+          }
+        })
+        .catch(err => {
+          console.warn("Error fetching reel engagement from database:", err);
+          setLikesCount(Number(currentReel.likes) || 0);
+          setSavesCount(Number(currentReel.saves) || 0);
+          setCommentsCount(Number(currentReel.comments) || 0);
+        });
+
       const creatorTarget = currentReel.creatorId || currentReel.creatorHandle;
       if (creatorTarget) {
         socialService.follow.isFollowing(creatorTarget, user?.id).then(followed => {
           setIsFollowed(followed);
         });
       }
-      setLikesCount(Number(currentReel.likes) || 120);
     }
   }, [currentReel?.id, currentReelIndex, user?.id]);
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
@@ -730,6 +757,7 @@ export default function DiscoverReels() {
 
     setCommentsList(prev => [newComment, ...prev]);
     setNewCommentText('');
+    setCommentsCount(prev => prev + 1);
 
     // Dynamically increment reel comments count in state
     setReelsList(prev => prev.map(r => r.id === currentReel.id ? { ...r, comments: (Number(r.comments) || 0) + 1 } : r));
@@ -746,6 +774,7 @@ export default function DiscoverReels() {
     if (!currentReel?.id) return;
     await socialService.comments.deleteComment(currentReel.id, commentId);
     setCommentsList(prev => prev.filter(c => c.id !== commentId));
+    setCommentsCount(prev => Math.max(0, prev - 1));
     setReelsList(prev => prev.map(r => r.id === currentReel.id ? { ...r, comments: Math.max(0, (Number(r.comments) || 1) - 1) } : r));
     showToast(isAr ? 'تم حذف التعليق' : 'Comment deleted');
   };
@@ -774,22 +803,56 @@ export default function DiscoverReels() {
   const handleToggleSaveReel = async (e) => {
     if (e) e.stopPropagation();
     if (!currentReel) return;
-    const newSaved = await socialService.saveReel(currentReel, user?.id);
-    setIsSaved(newSaved);
-    showToast(
-      newSaved 
-        ? (isAr ? 'تم حفظ الفيديو في المفضلة بنجاح 📌' : 'Saved to favorites! 📌')
-        : (isAr ? 'تمت إزالة الفيديو من المفضلة' : 'Removed from favorites')
-    );
+
+    // Optimistic UI toggle
+    const prevSaved = isSaved;
+    const optimisticSaved = !prevSaved;
+    setIsSaved(optimisticSaved);
+    setSavesCount(prev => Math.max(0, prev + (optimisticSaved ? 1 : -1)));
+
+    try {
+      const res = await socialService.saveReel(currentReel, user?.id);
+      const newSaved = typeof res === 'object' ? res.isSaved : Boolean(res);
+      setIsSaved(newSaved);
+      if (typeof res === 'object' && typeof res.savesCount === 'number') {
+        setSavesCount(res.savesCount);
+      }
+      showToast(
+        newSaved 
+          ? (isAr ? 'تم حفظ الفيديو في المفضلة بنجاح 📌' : 'Saved to favorites! 📌')
+          : (isAr ? 'تمت إزالة الفيديو من المفضلة' : 'Removed from favorites')
+      );
+    } catch (err) {
+      // Revert on error
+      setIsSaved(prevSaved);
+      setSavesCount(prev => Math.max(0, prev + (prevSaved ? 1 : -1)));
+    }
     setIsOptionsMenuOpen(false);
   };
 
   const handleLikeReel = async (e) => {
     if (e) e.stopPropagation();
     if (!currentReel) return;
-    const res = await socialService.likeReel(currentReel, user?.id);
-    setIsLiked(res.isLiked);
-    setLikesCount(prev => prev + res.likesDelta);
+
+    // Optimistic UI toggle
+    const prevLiked = isLiked;
+    const optimisticLiked = !prevLiked;
+    setIsLiked(optimisticLiked);
+    setLikesCount(prev => Math.max(0, prev + (optimisticLiked ? 1 : -1)));
+
+    try {
+      const res = await socialService.likeReel(currentReel, user?.id);
+      setIsLiked(res.isLiked);
+      if (typeof res.likesCount === 'number') {
+        setLikesCount(res.likesCount);
+      } else {
+        setLikesCount(prev => prev + res.likesDelta);
+      }
+    } catch (err) {
+      // Revert on error
+      setIsLiked(prevLiked);
+      setLikesCount(prev => Math.max(0, prev + (prevLiked ? 1 : -1)));
+    }
   };
 
   const handleFollowCreator = async (e) => {
@@ -972,33 +1035,35 @@ export default function DiscoverReels() {
             <button 
               className="pointer-events-auto cursor-pointer"
               onClick={handleLikeReel}
+              aria-label="Like"
             >
               <div className="w-[42px] h-[42px] rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center transition-transform hover:scale-110">
-                <span className={`material-symbols-outlined text-[24px] transition-colors ${isLiked ? 'text-[#d00000] drop-shadow-md' : 'text-white'}`} style={{ fontVariationSettings: isLiked ? "'FILL' 1" : "'FILL' 0" }}>favorite</span>
+                <span className={`material-symbols-outlined text-[24px] transition-colors ${(isActive ? isLiked : false) ? 'text-[#d00000] drop-shadow-md' : 'text-white'}`} style={{ fontVariationSettings: (isActive ? isLiked : false) ? "'FILL' 1" : "'FILL' 0" }}>favorite</span>
               </div>
             </button>
-            <span className="text-white text-[12px] font-bold drop-shadow-md">{(likesCount / 1000).toFixed(1)}K</span>
+            <span className="text-white text-[12px] font-bold drop-shadow-md">{formatCount(isActive ? likesCount : reel.likes)}</span>
           </div>
 
           <div className="flex flex-col items-center gap-1">
-            <button className="pointer-events-auto cursor-pointer" onClick={(e) => { e.stopPropagation(); setIsCommentsOpen(true); }}>
+            <button className="pointer-events-auto cursor-pointer" onClick={(e) => { e.stopPropagation(); setIsCommentsOpen(true); }} aria-label="Comments">
               <div className="w-[42px] h-[42px] rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center transition-transform hover:scale-110">
                 <span className="material-symbols-outlined text-[24px] text-white">chat_bubble</span>
               </div>
             </button>
-            <span className="text-white text-[12px] font-bold drop-shadow-md">{reel.comments}</span>
+            <span className="text-white text-[12px] font-bold drop-shadow-md">{formatCount(isActive ? commentsCount : reel.comments)}</span>
           </div>
 
           <div className="flex flex-col items-center gap-1">
             <button 
               className="pointer-events-auto cursor-pointer"
               onClick={handleToggleSaveReel}
+              aria-label="Save"
             >
               <div className="w-[42px] h-[42px] rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center transition-transform hover:scale-110">
-                <span className={`material-symbols-outlined text-[24px] ${isSaved ? 'text-yellow-400' : 'text-white'}`} style={{ fontVariationSettings: isSaved ? "'FILL' 1" : "'FILL' 0" }}>bookmark</span>
+                <span className={`material-symbols-outlined text-[24px] ${(isActive ? isSaved : false) ? 'text-yellow-400' : 'text-white'}`} style={{ fontVariationSettings: (isActive ? isSaved : false) ? "'FILL' 1" : "'FILL' 0" }}>bookmark</span>
               </div>
             </button>
-            <span className="text-white text-[12px] font-bold drop-shadow-md">{reel.saves}</span>
+            <span className="text-white text-[12px] font-bold drop-shadow-md">{formatCount(isActive ? savesCount : reel.saves)}</span>
           </div>
 
           <div className="flex flex-col items-center gap-1">

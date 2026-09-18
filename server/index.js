@@ -95,7 +95,31 @@ const server = http.createServer(async (req, res) => {
 
   // 1. Hostinger API: GET /api/reels
   if (req.method === 'GET' && pathname === '/api/reels') {
-    const reels = readJsonFile(sharedReelsFile, []);
+    let reels = readJsonFile(sharedReelsFile, []);
+    const creatorId = parsedUrl.searchParams.get('creatorId');
+    const merchantId = parsedUrl.searchParams.get('merchantId');
+    const publisherId = parsedUrl.searchParams.get('publisherId');
+    const storeSlug = parsedUrl.searchParams.get('storeSlug');
+    const creatorHandle = parsedUrl.searchParams.get('creatorHandle');
+
+    if (creatorId || merchantId || publisherId || storeSlug || creatorHandle) {
+      reels = reels.filter(r => {
+        if (creatorId && (r.creatorId === creatorId || r.publisherId === creatorId)) return true;
+        if (merchantId && (
+          r.merchantId === merchantId || 
+          r.creatorId === merchantId || 
+          (Array.isArray(r.products) && r.products.some(p => p.merchantId === merchantId))
+        )) return true;
+        if (publisherId && r.publisherId === publisherId) return true;
+        if (storeSlug && (
+          (r.storeSlug && r.storeSlug.toLowerCase() === storeSlug.toLowerCase()) ||
+          (r.creatorHandle && r.creatorHandle.toLowerCase().includes(storeSlug.toLowerCase()))
+        )) return true;
+        if (creatorHandle && r.creatorHandle && r.creatorHandle.replace(/^@/, '').toLowerCase() === creatorHandle.replace(/^@/, '').toLowerCase()) return true;
+        return false;
+      });
+    }
+
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
     res.end(JSON.stringify(reels));
     return;
@@ -109,6 +133,13 @@ const server = http.createServer(async (req, res) => {
       res.end(JSON.stringify({ error: 'Reel data with id is required' }));
       return;
     }
+
+    newReel.publisherId = newReel.publisherId || newReel.creatorId || null;
+    newReel.publisherRole = newReel.publisherRole || (newReel.isMerchantReel ? 'merchant' : 'creator');
+    newReel.creatorHandle = newReel.creatorHandle || '@creator';
+    newReel.creatorName = newReel.creatorName || 'صانع محتوى';
+    newReel.isMerchantReel = Boolean(newReel.isMerchantReel) || (newReel.publisherRole === 'merchant');
+
     const current = readJsonFile(sharedReelsFile, []);
     const updated = [newReel, ...current.filter(r => r.id !== newReel.id)];
     writeJsonFile(sharedReelsFile, updated);
@@ -163,13 +194,29 @@ const server = http.createServer(async (req, res) => {
   // 5. Hostinger API: /api/ugc/content
   if (pathname === '/api/ugc/content') {
     if (req.method === 'GET') {
-      const data = readJsonFile(sharedUgcFile, []);
+      let data = readJsonFile(sharedUgcFile, []);
+      const creatorId = parsedUrl.searchParams.get('creatorId');
+      const merchantId = parsedUrl.searchParams.get('merchantId');
+      const publisherId = parsedUrl.searchParams.get('publisherId');
+
+      if (creatorId || merchantId || publisherId) {
+        data = data.filter(item => {
+          if (creatorId && (item.creatorId === creatorId || item.publisherId === creatorId)) return true;
+          if (merchantId && (item.merchantId === merchantId || item.creatorId === merchantId)) return true;
+          if (publisherId && item.publisherId === publisherId) return true;
+          return false;
+        });
+      }
+
       res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
       res.end(JSON.stringify(data));
       return;
     }
     if (req.method === 'POST') {
       const item = await parseBody(req);
+      item.publisherId = item.publisherId || item.creatorId || null;
+      item.publisherRole = item.publisherRole || (item.isMerchantReel ? 'merchant' : 'creator');
+
       const current = readJsonFile(sharedUgcFile, []);
       const updated = [item, ...current.filter(c => c.id !== item.id)];
       writeJsonFile(sharedUgcFile, updated);

@@ -1349,15 +1349,25 @@ export function AppProvider({ children }) {
 
     // 2. If product has video, also create a Reel in ReelsService linked to profile!
     if (newProd.video) {
-      const creatorHandle = newProd.creatorHandle || (user?.role === 'creator' ? `@${(user.name || 'creator').replace(/\s+/g, '_')}` : `@${activeMerchant?.slug || 'talieska'}_official`);
+      const isMerchant = user?.role === 'merchant' || !!user?.storeName || user?.type === 'merchant' || activeMerchant?.id === merchantId;
+      const derivedHandle = user?.handle 
+        || (user?.name ? `@${user.name.trim().toLowerCase().replace(/[^a-z0-9_]/g, '_')}` : null)
+        || (activeMerchant?.slug ? `@${activeMerchant.slug}` : '@store');
+      const creatorHandle = newProd.creatorHandle || (user?.role === 'creator' ? `@${(user.name || 'creator').replace(/\s+/g, '_')}` : derivedHandle);
       const creatorName = newProd.creatorName || user?.name || merchantName;
-      const creatorAvatar = newProd.creatorAvatar || user?.avatar_url || created.image;
+      const creatorAvatar = newProd.creatorAvatar || user?.profile?.avatar_url || user?.avatar_url || user?.avatar || user?.logo || activeMerchant?.logo || created.image;
+      const merchantSlug = activeMerchant?.slug || user?.slug || user?.name?.toLowerCase().replace(/[^a-z0-9_]/g, '_');
 
       await ReelsService.saveReel({
         id: `reel-${created.id}`,
         creatorId: user?.id || null,
         creatorHandle: creatorHandle,
         creatorName: creatorName,
+        publisherId: user?.id || null,
+        publisherRole: isMerchant ? 'merchant' : (user?.role || 'creator'),
+        merchantId: merchantId,
+        storeSlug: merchantSlug,
+        isMerchantReel: isMerchant,
         avatar: creatorAvatar,
         videoBg: newProd.video,
         caption: `${created.title} • متوفر حصرياً عبر egyptian-commerce.com 🇪🇬✨ #موضة_مصرية`,

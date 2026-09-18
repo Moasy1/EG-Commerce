@@ -295,8 +295,53 @@ const DEFAULT_SETTINGS = {
 };
 
 export const UgcService = {
-  // 1. CREATOR PROFILE
-  async getProfile() {
+  // 1. CREATOR / MERCHANT PROFILE
+  async getProfile(user = null) {
+    if (user && (user.id || user.name)) {
+      const userKey = `${LOCAL_STORAGE_CREATOR_KEY}_${user.id || user.name}`;
+      try {
+        const stored = localStorage.getItem(userKey);
+        if (stored) return JSON.parse(stored);
+      } catch (e) {}
+
+      const isMerchant = user.role === 'merchant';
+      const cleanHandle = user.handle 
+        ? user.handle 
+        : (user.name 
+            ? `@${user.name.trim().toLowerCase().replace(/[^a-z0-9_]/g, '_')}` 
+            : (user.slug ? `@${user.slug}` : '@store'));
+      const avatar = user.profile?.avatar_url || user.avatar_url || user.avatar || (isMerchant ? '/images/brands/talieska_logo.jpg' : '/images/reels/reel_2.jpg');
+      
+      const customProfile = {
+        id: user.id || 'cr-01',
+        name: user.name || user.email?.split('@')[0] || (isMerchant ? 'متجر معتمد' : 'صانع محتوى'),
+        handle: cleanHandle,
+        avatar: avatar,
+        cover: '/images/banners/talieska_hero.jpg',
+        bio: isMerchant ? `المتجر الرسمي لـ ${user.name || 'البراند'} في منصة EG-Commerce 🇪🇬✨` : 'صانع محتوى ومبدع معتمد في EG-Commerce 🇪🇬✨',
+        city: 'القاهرة، مصر',
+        cityEn: 'Cairo, Egypt',
+        niche: isMerchant ? 'تجارة وأزياء مصرية (E-Commerce & Brands)' : 'أزياء وستايل حياة (Fashion & Lifestyle)',
+        verified: true,
+        followers: '1.2K',
+        engagementRate: '9.4%',
+        reach: '24.5K',
+        totalSales: '0 ج.م',
+        totalCommission: '0 ج.م',
+        activeDeals: 1,
+        role: user.role || 'creator',
+        merchantId: user.merchant_id || user.merchantId || (isMerchant ? user.id : null),
+        instagram: `https://instagram.com/${cleanHandle.replace('@', '')}`,
+        tiktok: `https://tiktok.com/${cleanHandle}`,
+        youtube: `https://youtube.com/${cleanHandle}`
+      };
+
+      try {
+        localStorage.setItem(userKey, JSON.stringify(customProfile));
+      } catch (e) {}
+      return customProfile;
+    }
+
     try {
       const stored = localStorage.getItem(LOCAL_STORAGE_CREATOR_KEY);
       if (stored) return JSON.parse(stored);
@@ -307,11 +352,12 @@ export const UgcService = {
     return DEFAULT_PROFILE;
   },
 
-  async updateProfile(updates) {
+  async updateProfile(updates, user = null) {
     try {
-      const current = await this.getProfile();
+      const current = await this.getProfile(user);
       const updated = { ...current, ...updates };
-      localStorage.setItem(LOCAL_STORAGE_CREATOR_KEY, JSON.stringify(updated));
+      const key = (user && (user.id || user.name)) ? `${LOCAL_STORAGE_CREATOR_KEY}_${user.id || user.name}` : LOCAL_STORAGE_CREATOR_KEY;
+      localStorage.setItem(key, JSON.stringify(updated));
       return updated;
     } catch (e) {
       console.error('Failed to update creator profile:', e);
@@ -320,9 +366,9 @@ export const UgcService = {
   },
 
   // 2. ANALYTICS & STATS
-  async getAnalytics(timeframe = '7d') {
-    const profile = await this.getProfile();
-    const content = await this.getContent();
+  async getAnalytics(timeframe = '7d', user = null) {
+    const profile = await this.getProfile(user);
+    const content = await this.getContent({ creatorId: user?.id, merchantId: user?.merchant_id || (user?.role === 'merchant' ? user?.id : null) });
 
     const totalViews = content.reduce((acc, c) => acc + (c.viewsCount || 0), 0);
     const totalLikes = content.reduce((acc, c) => acc + parseInt(c.likes || 0) * 1000, 0);
@@ -762,44 +808,87 @@ export const UgcService = {
   },
 
   // 5. CREATOR CONTENT / REELS
-  async getContent() {
-    // 1. Try Hostinger / shared API
+  async getContent(filter = null) {
+    let items = [];
+    // 1. Try Hostinger / shared API with filter query
     try {
-      const res = await fetch(apiConfig.getApiUrl('/api/ugc/content'), { cache: 'no-store' });
+      let url = '/api/ugc/content';
+      if (filter && typeof filter === 'object') {
+        const params = new URLSearchParams();
+        if (filter.creatorId) params.append('creatorId', filter.creatorId);
+        if (filter.merchantId) params.append('merchantId', filter.merchantId);
+        if (filter.publisherId) params.append('publisherId', filter.publisherId);
+        if (params.toString()) url += `?${params.toString()}`;
+      }
+      const res = await fetch(apiConfig.getApiUrl(url), { cache: 'no-store' });
       if (res.ok) {
         const shared = await res.json();
-        if (Array.isArray(shared) && shared.length > 0) {
-          const normalized = shared.map(c => ({
+        if (Array.isArray(shared)) {
+          items = shared.map(c => ({
             ...c,
             videoUrl: apiConfig.getMediaUrl(c.videoUrl),
             thumbnail: apiConfig.getMediaUrl(c.thumbnail)
           }));
-          try {
-            localStorage.setItem(LOCAL_STORAGE_CONTENT_KEY, JSON.stringify(normalized));
-          } catch(e) {}
-          return normalized;
         }
       }
     } catch (e) {
       console.warn('Hostinger UGC content fetch skipped:', e);
     }
 
-    try {
-      const stored = localStorage.getItem(LOCAL_STORAGE_CONTENT_KEY);
-      if (stored) return JSON.parse(stored);
-    } catch (e) {
-      console.warn('Failed to parse stored content:', e);
+    // 2. Also check local storage
+    if (!items || items.length === 0) {
+      try {
+        const stored = localStorage.getItem(LOCAL_STORAGE_CONTENT_KEY);
+        if (stored) items = JSON.parse(stored);
+      } catch (e) {
+        console.warn('Failed to parse stored content:', e);
+      }
     }
-    localStorage.setItem(LOCAL_STORAGE_CONTENT_KEY, JSON.stringify(DEFAULT_CONTENT));
-    return DEFAULT_CONTENT;
+
+    if (!items || items.length === 0) {
+      if (!filter) {
+        items = DEFAULT_CONTENT;
+      } else {
+        items = [];
+      }
+    }
+
+    // Apply strict filtering by user/creator/merchant if filter is specified
+    if (filter) {
+      const targetCreatorId = typeof filter === 'string' ? filter : (filter.creatorId || filter.userId || null);
+      const targetMerchantId = typeof filter === 'object' ? (filter.merchantId || null) : null;
+      const targetHandle = typeof filter === 'object' ? (filter.creatorHandle || filter.handle || null) : null;
+
+      if (targetCreatorId || targetMerchantId || targetHandle) {
+        return items.filter(item => {
+          const matchCreator = targetCreatorId && (item.creatorId === targetCreatorId || item.publisherId === targetCreatorId);
+          const matchMerchant = targetMerchantId && (item.merchantId === targetMerchantId || item.creatorId === targetMerchantId);
+          const matchHandle = targetHandle && (item.creatorHandle?.toLowerCase() === targetHandle.toLowerCase());
+          return matchCreator || matchMerchant || matchHandle;
+        });
+      }
+    }
+
+    return items;
   },
 
   async createContent(contentData) {
-    const content = await this.getContent();
+    const allContent = await this.getContent();
+    const isMerchant = Boolean(contentData.isMerchantReel) || contentData.publisherRole === 'merchant';
+    const publisherRole = contentData.publisherRole || (isMerchant ? 'merchant' : 'creator');
+
     const newItem = {
       id: contentData.id || `cnt-${Date.now()}`,
       title: contentData.title || 'ريلز جديد',
       titleEn: contentData.titleEn || 'New Reel',
+      creatorId: contentData.creatorId || contentData.publisherId || null,
+      creatorName: contentData.creatorName || (isMerchant ? 'متجر معتمد' : 'صانع محتوى مصري'),
+      creatorHandle: contentData.creatorHandle || (isMerchant ? '@store_official' : '@creator'),
+      publisherId: contentData.publisherId || contentData.creatorId || null,
+      publisherRole: publisherRole,
+      merchantId: contentData.merchantId || null,
+      storeSlug: contentData.storeSlug || null,
+      isMerchantReel: isMerchant,
       views: '0',
       viewsCount: 0,
       likes: '0',
@@ -828,7 +917,7 @@ export const UgcService = {
     } catch (e) {}
 
     // 2. Persist locally
-    const updated = [newItem, ...content.filter(c => c.id !== newItem.id)];
+    const updated = [newItem, ...allContent.filter(c => c.id !== newItem.id)];
     localStorage.setItem(LOCAL_STORAGE_CONTENT_KEY, JSON.stringify(updated));
     return newItem;
   },

@@ -30,6 +30,28 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET') {
     $content = getUgcData($ugcFile);
+    $creatorId = isset($_GET['creatorId']) ? trim($_GET['creatorId']) : null;
+    $merchantId = isset($_GET['merchantId']) ? trim($_GET['merchantId']) : null;
+    $publisherId = isset($_GET['publisherId']) ? trim($_GET['publisherId']) : null;
+
+    if ($creatorId || $merchantId || $publisherId) {
+        $content = array_values(array_filter($content, function ($item) use ($creatorId, $merchantId, $publisherId) {
+            if ($creatorId && (
+                (isset($item['creatorId']) && $item['creatorId'] === $creatorId) ||
+                (isset($item['publisherId']) && $item['publisherId'] === $creatorId)
+            )) return true;
+
+            if ($merchantId && (
+                (isset($item['merchantId']) && $item['merchantId'] === $merchantId) ||
+                (isset($item['creatorId']) && $item['creatorId'] === $merchantId)
+            )) return true;
+
+            if ($publisherId && (isset($item['publisherId']) && $item['publisherId'] === $publisherId)) return true;
+
+            return false;
+        }));
+    }
+
     echo json_encode($content, JSON_UNESCAPED_UNICODE);
     exit;
 }
@@ -43,6 +65,9 @@ if ($method === 'POST') {
         echo json_encode(['error' => 'Content payload with id is required']);
         exit;
     }
+
+    $payload['publisherId'] = $payload['publisherId'] ?? $payload['creatorId'] ?? null;
+    $payload['publisherRole'] = $payload['publisherRole'] ?? (!empty($payload['isMerchantReel']) ? 'merchant' : 'creator');
 
     $content = getUgcData($ugcFile);
     $filtered = array_values(array_filter($content, function ($item) use ($payload) {

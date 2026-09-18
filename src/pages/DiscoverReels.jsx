@@ -532,7 +532,7 @@ const formatCount = (count) => {
 };
 
 export default function DiscoverReels() {
-  const { openQuickBuy, openProductDetail, products, setActiveTab, navigateToProfile, language, user, role, setIsAuthModalOpen } = useApp();
+  const { openQuickBuy, openProductDetail, products, setActiveTab, navigateToProfile, language, user, role, setIsAuthModalOpen, setSelectedMerchantId, merchants } = useApp();
   const isAr = language === 'ar';
   const defaultReels = useMemo(() => getDefaultReels(isAr), [isAr]);
 
@@ -1169,26 +1169,62 @@ export default function DiscoverReels() {
             {/* Creator Info */}
             <div className={`space-y-1 ${isAr ? 'text-right' : 'text-left'}`}>
               <div className="flex items-center gap-2">
-                <div 
-                  className="flex items-center gap-1.5 cursor-pointer w-fit"
-                  onClick={(e) => {
+                {(() => {
+                  const isMerchantReel = Boolean(reel.isMerchantReel) || reel.publisherRole === 'merchant' || Boolean(reel.merchantId) || Boolean(reel.storeSlug);
+                  const isOwnReel = user?.id && (user.id === reel.creatorId || user.id === reel.publisherId);
+                  
+                  const handleCreatorClick = (e) => {
                     e.stopPropagation();
-                    navigateToProfile(reel.creatorHandle);
-                  }}
-                >
-                  <span className="font-bold text-[15px] text-white drop-shadow-md hover:underline">{reel.creatorHandle}</span>
-                  <span className="material-symbols-outlined text-[16px] text-blue-500 bg-white rounded-full">check_circle</span>
-                </div>
-                <button
-                  onClick={handleFollowCreator}
-                  className={`px-3 py-0.5 rounded-full text-[11px] font-bold transition-all border cursor-pointer ${
-                    isFollowed 
-                      ? 'bg-white/20 text-white border-white/30 backdrop-blur-sm' 
-                      : 'bg-[#d00000] text-white border-transparent shadow-sm hover:brightness-110'
-                  }`}
-                >
-                  {isFollowed ? (isAr ? 'مُتابع' : 'Following') : (isAr ? 'متابعة' : 'Follow')}
-                </button>
+                    if (isMerchantReel) {
+                      const targetIdentifier = reel.merchantId || reel.storeSlug;
+                      if (targetIdentifier && setSelectedMerchantId) {
+                        const match = merchants?.find(m => m.id === targetIdentifier || m.slug === targetIdentifier);
+                        if (match) {
+                          setSelectedMerchantId(match.id);
+                        } else {
+                          setSelectedMerchantId(targetIdentifier);
+                        }
+                      }
+                      setActiveTab('storefront');
+                    } else {
+                      navigateToProfile(reel.creatorHandle);
+                    }
+                  };
+
+                  return (
+                    <>
+                      <div 
+                        className="flex items-center gap-1.5 cursor-pointer w-fit"
+                        onClick={handleCreatorClick}
+                      >
+                        <span className="font-bold text-[15px] text-white drop-shadow-md hover:underline">
+                          {reel.creatorHandle || (reel.storeSlug ? `@${reel.storeSlug}` : '@creator')}
+                        </span>
+                        {isMerchantReel ? (
+                          <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-emerald-600/90 text-white text-[10px] font-bold shadow-xs">
+                            <span className="material-symbols-outlined text-[12px]">storefront</span>
+                            <span>{isAr ? 'متجر معتمد' : 'Store'}</span>
+                          </span>
+                        ) : (
+                          <span className="material-symbols-outlined text-[16px] text-blue-500 bg-white rounded-full">check_circle</span>
+                        )}
+                      </div>
+
+                      {!isOwnReel && (
+                        <button
+                          onClick={handleFollowCreator}
+                          className={`px-3 py-0.5 rounded-full text-[11px] font-bold transition-all border cursor-pointer ${
+                            isFollowed 
+                              ? 'bg-white/20 text-white border-white/30 backdrop-blur-sm' 
+                              : 'bg-[#d00000] text-white border-transparent shadow-sm hover:brightness-110'
+                          }`}
+                        >
+                          {isFollowed ? (isAr ? 'مُتابع' : 'Following') : (isAr ? 'متابعة' : 'Follow')}
+                        </button>
+                      )}
+                    </>
+                  );
+                })()}
               </div>
               
               <div 

@@ -123,12 +123,22 @@ export const reelService = {
   },
 
   async saveReel(reelData) {
+    const isMerchant = Boolean(reelData.isMerchantReel) || reelData.publisherRole === 'merchant';
+    const creatorHandle = reelData.creatorHandle || (isMerchant ? '@store_official' : '@egyptian_creator');
+    const creatorName = reelData.creatorName || (isMerchant ? 'متجر معتمد' : 'صانع محتوى مصري');
+    const publisherRole = reelData.publisherRole || (isMerchant ? 'merchant' : 'creator');
+
     const formatted = {
       id: reelData.id || `reel-${Date.now()}`,
-      creatorId: reelData.creatorId || reelData.userId || null,
-      creatorHandle: reelData.creatorHandle || '@egyptian_creator',
-      creatorName: reelData.creatorName || 'صانع محتوى مصري',
+      creatorId: reelData.creatorId || reelData.publisherId || reelData.userId || null,
+      creatorHandle: creatorHandle,
+      creatorName: creatorName,
       avatar: reelData.avatar || '/images/reels/reel_1.jpg',
+      publisherId: reelData.publisherId || reelData.creatorId || reelData.userId || null,
+      publisherRole: publisherRole,
+      merchantId: reelData.merchantId || null,
+      storeSlug: reelData.storeSlug || null,
+      isMerchantReel: isMerchant,
       videoBg: reelData.videoBg || reelData.video || '/images/reels/linen_abaya.mp4',
       caption: reelData.caption || '',
       music: reelData.music || 'Egyptian Aesthetic Vibes',

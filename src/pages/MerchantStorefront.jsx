@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
+import { ReelsService } from '../services/ReelsService';
 
 export default function MerchantStorefront() {
   const {
@@ -169,8 +170,8 @@ export default function MerchantStorefront() {
     }
   ];
 
-  // Community Reels Data - Dynamic per Merchant
-  const communityReels = currentMerchant.id === 'm-02' ? [
+  // Community Reels Data - Dynamic per Merchant with Real Hostinger & Local Backend Persistence
+  const defaultCommunityReels = currentMerchant.id === 'm-02' ? [
     { 
       id: 'cr-m2-1', 
       creator: '@maya_accessories', 
@@ -305,6 +306,41 @@ export default function MerchantStorefront() {
       taggedProduct: products.find(p => p.id === 'p-fashion-suede-jacket') || merchantProducts[3] || merchantProducts[0]
     }
   ];
+
+  const [dynamicStoreReels, setDynamicStoreReels] = useState([]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchStoreReels = async () => {
+      try {
+        const fetched = await ReelsService.getMerchantReels(currentMerchant.id, currentMerchant.slug);
+        if (isMounted) {
+          if (fetched && fetched.length > 0) {
+            const mapped = fetched.map(r => ({
+              id: r.id,
+              creator: r.creatorHandle || `@${currentMerchant.slug || 'store'}`,
+              creatorName: r.creatorName || currentMerchant.name || currentMerchant.shortName,
+              caption: r.caption || r.title || 'إطلالة حصرية من متجرنا ✨',
+              views: typeof r.views === 'number' ? (r.views >= 1000 ? `${(r.views/1000).toFixed(1)}K` : r.views.toString()) : (r.views || '1.2K'),
+              likes: typeof r.likes === 'number' ? (r.likes >= 1000 ? `${(r.likes/1000).toFixed(1)}K` : r.likes.toString()) : (r.likes || '320'),
+              image: r.avatar || r.thumbnail || (r.products?.[0]?.image) || currentMerchant.logo || '/images/products/linen_abaya.jpg',
+              video: r.videoBg || r.videoUrl || '/images/reels/linen_abaya.mp4',
+              taggedProduct: r.products?.[0] || r.product || merchantProducts[0]
+            }));
+            setDynamicStoreReels(mapped);
+          } else {
+            setDynamicStoreReels(defaultCommunityReels);
+          }
+        }
+      } catch (e) {
+        if (isMounted) setDynamicStoreReels(defaultCommunityReels);
+      }
+    };
+    fetchStoreReels();
+    return () => { isMounted = false; };
+  }, [currentMerchant.id, currentMerchant.slug]);
+
+  const communityReels = dynamicStoreReels.length > 0 ? dynamicStoreReels : defaultCommunityReels;
 
   // Dynamic grid classes based on merchant's productsGridCols choice
   const gridColsClass = productsGridCols === 2

@@ -36,10 +36,21 @@ const DEFAULT_SEED_COMMENTS = [
 ];
 
 export const ReelsService = {
-  async getReels() {
+  async getReels(filter = null) {
+    let queryUrl = '/api/reels';
+    if (filter && typeof filter === 'object') {
+      const params = new URLSearchParams();
+      if (filter.merchantId) params.append('merchantId', filter.merchantId);
+      if (filter.creatorId) params.append('creatorId', filter.creatorId);
+      if (filter.publisherId) params.append('publisherId', filter.publisherId);
+      if (filter.storeSlug) params.append('storeSlug', filter.storeSlug);
+      if (filter.creatorHandle) params.append('creatorHandle', filter.creatorHandle);
+      if (params.toString()) queryUrl += `?${params.toString()}`;
+    }
+
     // 1. Fetch from Hostinger / Shared Backend API
     try {
-      const res = await fetch(apiConfig.getApiUrl('/api/reels'), { cache: 'no-store' });
+      const res = await fetch(apiConfig.getApiUrl(queryUrl), { cache: 'no-store' });
       if (res.ok) {
         const shared = await res.json();
         if (Array.isArray(shared) && shared.length > 0) {
@@ -48,9 +59,11 @@ export const ReelsService = {
             videoBg: apiConfig.getMediaUrl(r.videoBg || r.video_url),
             avatar: apiConfig.getMediaUrl(r.avatar || r.thumbnail_url)
           }));
-          try {
-            localStorage.setItem('eg_reels_mock_v3', JSON.stringify(normalized));
-          } catch (e) {}
+          if (!filter) {
+            try {
+              localStorage.setItem('eg_reels_mock_v3', JSON.stringify(normalized));
+            } catch (e) {}
+          }
           return normalized;
         }
       }
@@ -82,17 +95,35 @@ export const ReelsService = {
       }
     }
 
-    // If we have custom local reels or DB reels, merge and return
+    let allMerged = [];
     if (localReels.length > 0) {
       const localIds = new Set(localReels.map(r => r.id));
-      return [...localReels, ...dbReels.filter(r => !localIds.has(r.id))];
+      allMerged = [...localReels, ...dbReels.filter(r => !localIds.has(r.id))];
+    } else if (dbReels.length > 0) {
+      allMerged = dbReels;
     }
 
-    if (dbReels.length > 0) {
-      return dbReels;
+    if (filter && typeof filter === 'object') {
+      return allMerged.filter(r => {
+        if (filter.merchantId && (
+          r.merchantId === filter.merchantId || 
+          r.creatorId === filter.merchantId ||
+          (Array.isArray(r.products) && r.products.some(p => p.merchantId === filter.merchantId))
+        )) return true;
+        if (filter.storeSlug && (
+          (r.storeSlug && r.storeSlug.toLowerCase() === filter.storeSlug.toLowerCase()) ||
+          (r.creatorHandle && r.creatorHandle.toLowerCase().includes(filter.storeSlug.toLowerCase()))
+        )) return true;
+        if (filter.creatorId && (r.creatorId === filter.creatorId || r.publisherId === filter.creatorId)) return true;
+        return false;
+      });
     }
 
-    return [];
+    return allMerged;
+  },
+
+  async getMerchantReels(merchantId, storeSlug = null) {
+    return this.getReels({ merchantId, storeSlug });
   },
 
   async saveReel(reelData) {
@@ -100,12 +131,22 @@ export const ReelsService = {
       ? reelData.products
       : (reelData.product ? [reelData.product] : []);
 
+    const isMerchant = Boolean(reelData.isMerchantReel) || reelData.publisherRole === 'merchant';
+    const creatorHandle = reelData.creatorHandle || (isMerchant ? '@store_official' : '@egyptian_creator');
+    const creatorName = reelData.creatorName || (isMerchant ? 'متجر معتمد' : 'صانع محتوى مصري');
+    const publisherRole = reelData.publisherRole || (isMerchant ? 'merchant' : 'creator');
+
     const formattedReel = {
       id: reelData.id || `reel-${Date.now()}`,
-      creatorId: reelData.creatorId || reelData.userId || null,
-      creatorHandle: reelData.creatorHandle || '@egyptian_creator',
-      creatorName: reelData.creatorName || 'صانع محتوى مصري',
+      creatorId: reelData.creatorId || reelData.publisherId || reelData.userId || null,
+      creatorHandle: creatorHandle,
+      creatorName: creatorName,
       avatar: reelData.avatar || '/images/reels/reel_1.jpg',
+      publisherId: reelData.publisherId || reelData.creatorId || reelData.userId || null,
+      publisherRole: publisherRole,
+      merchantId: reelData.merchantId || null,
+      storeSlug: reelData.storeSlug || null,
+      isMerchantReel: isMerchant,
       videoBg: reelData.videoBg || reelData.video || '/images/reels/linen_abaya.mp4',
       caption: reelData.caption || 'إطلالة حصرية جديدة متوفرة الآن في egyptian-commerce.com 🇪🇬✨ #موضة_مصرية #ريلز',
       music: reelData.music || 'Egyptian Aesthetic Vibes • Instrumental',

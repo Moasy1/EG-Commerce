@@ -146,15 +146,19 @@ export default function DesktopCreatorAnalytics() {
     setTimeout(() => setToastMessage(''), 3500);
   };
 
-  // Initial load from UgcService backend
+  // Initial load from UgcService backend scoped to logged-in user/merchant
   const loadAllData = async () => {
     setLoading(true);
     try {
+      const isMerchant = user?.role === 'merchant';
+      const userMerchantId = user?.merchant_id || user?.merchantId || (isMerchant ? user?.id : null);
+      const userFilter = user ? { creatorId: user.id, merchantId: userMerchantId } : null;
+
       const [profData, analData, campData, contData, settData] = await Promise.all([
-        UgcService.getProfile(),
-        UgcService.getAnalytics(timeframe),
-        UgcService.getCampaigns(),
-        UgcService.getContent(),
+        UgcService.getProfile(user),
+        UgcService.getAnalytics(timeframe, user),
+        UgcService.getCampaigns(userMerchantId),
+        UgcService.getContent(userFilter),
         UgcService.getSettings()
       ]);
       setProfile(profData);
@@ -172,7 +176,7 @@ export default function DesktopCreatorAnalytics() {
 
   useEffect(() => {
     loadAllData();
-  }, [timeframe]);
+  }, [timeframe, user?.id, user?.role]);
 
   // Handler: Update profile
   const handleSaveProfile = async (e) => {
@@ -379,10 +383,16 @@ export default function DesktopCreatorAnalytics() {
     setPublishReelProgress(20);
 
     try {
-      const authorName = user?.name || profile?.name || 'ياسمين السيد';
-      const authorHandle = user?.handle || profile?.handle || '@yasmin_style';
-      const authorAvatar = user?.avatar_url || profile?.avatar || '/images/reels/reel_2.jpg';
-      const authorId = user?.id || profile?.id || 'cr-01';
+      const isMerchant = user?.role === 'merchant' || !!user?.storeName || user?.type === 'merchant';
+      const authorName = user?.name || user?.storeName || profile?.name || (isMerchant ? 'متجر معتمد' : 'صانع محتوى');
+      const authorHandle = user?.handle 
+        || (user?.name ? `@${user.name.trim().toLowerCase().replace(/[^a-z0-9_]/g, '_')}` : null)
+        || profile?.handle 
+        || (isMerchant ? '@store' : '@creator');
+      const authorAvatar = user?.profile?.avatar_url || user?.avatar_url || user?.avatar || user?.logo || profile?.avatar || '/images/reels/reel_2.jpg';
+      const authorId = user?.id || profile?.id || 'cr-' + Date.now();
+      const merchantId = isMerchant ? (user?.id || user?.merchantId || 'm-01') : (selectedProduct?.merchantId || null);
+      const storeSlug = isMerchant ? (user?.slug || user?.storeSlug || user?.name?.toLowerCase().replace(/[^a-z0-9_]/g, '_')) : (selectedProduct?.merchantSlug || null);
 
       // Await video upload to server if still in progress
       let finalVideoUrl = reelVideoUrl;
@@ -413,8 +423,9 @@ export default function DesktopCreatorAnalytics() {
         originalPrice: selectedProduct.originalPrice || Math.round((selectedProduct.price || 1200) * 1.25),
         discount: selectedProduct.discount || '20% OFF',
         image: selectedProduct.image || selectedProduct.images?.[0] || reelThumbnail,
-        merchant: selectedProduct.merchant || selectedProduct.merchantName || 'براند مصري معتمد',
-        merchantId: selectedProduct.merchantId || selectedProduct.merchant_id || 'm-01'
+        merchant: selectedProduct.merchant || selectedProduct.merchantName || (isMerchant ? authorName : 'براند مصري معتمد'),
+        merchantId: selectedProduct.merchantId || selectedProduct.merchant_id || merchantId || 'm-01',
+        merchantSlug: selectedProduct.merchantSlug || storeSlug
       } : null;
 
       const reelId = `reel-creator-${Date.now()}`;
@@ -434,6 +445,11 @@ export default function DesktopCreatorAnalytics() {
         creatorId: authorId,
         creatorName: authorName,
         creatorHandle: authorHandle,
+        publisherId: authorId,
+        publisherRole: isMerchant ? 'merchant' : 'creator',
+        merchantId: merchantId,
+        storeSlug: storeSlug,
+        isMerchantReel: isMerchant,
         status: 'published'
       });
 
@@ -446,12 +462,17 @@ export default function DesktopCreatorAnalytics() {
         creatorHandle: authorHandle,
         creatorName: authorName,
         avatar: authorAvatar,
+        publisherId: authorId,
+        publisherRole: isMerchant ? 'merchant' : 'creator',
+        merchantId: merchantId,
+        storeSlug: storeSlug,
+        isMerchantReel: isMerchant,
         videoBg: finalVideoUrl,
         caption: reelTitle,
         music: reelMusicTrack,
-        likes: 12,
+        likes: 1,
         comments: 0,
-        saves: 3,
+        saves: 0,
         products: taggedProd ? [taggedProd] : [],
         product: taggedProd,
         categoryId: reelCategory,
@@ -462,8 +483,9 @@ export default function DesktopCreatorAnalytics() {
 
       setPublishReelProgress(100);
 
-      // 3. Refresh content library
-      const updatedContent = await UgcService.getContent();
+      // 3. Refresh content library with user-scoped filter
+      const userFilter = user ? { creatorId: authorId, merchantId: isMerchant ? authorId : null } : null;
+      const updatedContent = await UgcService.getContent(userFilter);
       setContent(updatedContent);
 
       // 4. Clean up state and close modal
@@ -472,7 +494,7 @@ export default function DesktopCreatorAnalytics() {
         setPublishReelProgress(0);
         setShowNewReelModal(false);
         setActiveNav('content');
-        showToast(isAr ? 'تم نشر الريلز بنجاح في المنصة! متاح الآن في خلاصة الاستكشاف على جميع الأجهزة 🚀' : 'Reel published successfully! Now live across all devices 🚀');
+        showToast(isAr ? 'تم نشر الريلز بنجاح في متجرك والمنصة! متاح الآن على جميع الأجهزة 🚀' : 'Reel published successfully! Live across all devices 🚀');
       }, 500);
 
     } catch (err) {
@@ -574,10 +596,20 @@ export default function DesktopCreatorAnalytics() {
           onClick={() => setActiveNav('profile')}
           className="p-3 rounded-2xl bg-white border border-gray-200 shadow-xs cursor-pointer hover:border-gray-300 transition-colors flex items-center gap-2.5"
         >
-          <img src={profile?.avatar || '/images/reels/reel_1.jpg'} alt="Avatar" className="w-8 h-8 rounded-full object-cover ring-1 ring-[#d00000]/30" />
+          <img 
+            src={user?.profile?.avatar_url || user?.avatar_url || user?.avatar || user?.logo || profile?.avatar || '/images/reels/reel_1.jpg'} 
+            alt="Avatar" 
+            className="w-8 h-8 rounded-full object-cover ring-1 ring-[#d00000]/30" 
+          />
           <div className="min-w-0 flex-1">
-            <span className="text-[10px] text-gray-400 block">{isAr ? 'حساب موثق ✓' : 'Verified Creator'}</span>
-            <span className="text-xs font-bold text-slate-900 truncate block">{profile?.name?.split('•')[0] || 'ياسمين السيد'}</span>
+            <span className="text-[10px] text-emerald-600 font-bold block">
+              {(user?.role === 'merchant' || !!user?.storeName || user?.type === 'merchant')
+                ? (isAr ? 'متجر معتمد ✓' : 'Verified Store ✓')
+                : (isAr ? 'حساب موثق ✓' : 'Verified Creator ✓')}
+            </span>
+            <span className="text-xs font-bold text-slate-900 truncate block">
+              {user?.name || user?.storeName || profile?.name?.split('•')[0] || (isAr ? 'المستخدم' : 'User')}
+            </span>
           </div>
         </div>
       </aside>
@@ -1072,83 +1104,114 @@ export default function DesktopCreatorAnalytics() {
             </div>
 
             {/* Content Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {content
-                .filter((c) => {
-                  if (contentFilter === 'published') return c.status === 'published';
-                  if (contentFilter === 'under_review') return c.status === 'under_review';
-                  return true;
-                })
-                .map((item) => (
-                  <div key={item.id} className="rounded-3xl border border-gray-200 bg-white overflow-hidden shadow-xs hover:border-gray-300 transition-all flex flex-col justify-between">
-                    <div 
-                      onClick={() => setActivePreviewReel(item)}
-                      className="relative aspect-[4/3] bg-gray-100 overflow-hidden cursor-pointer group"
+            {(() => {
+              const filteredList = content.filter((c) => {
+                if (contentFilter === 'published') return c.status === 'published';
+                if (contentFilter === 'under_review') return c.status === 'under_review';
+                return true;
+              });
+
+              if (filteredList.length === 0) {
+                return (
+                  <div className="py-16 px-4 text-center rounded-3xl border border-dashed border-gray-200 bg-gray-50/60 flex flex-col items-center justify-center space-y-3">
+                    <div className="w-14 h-14 rounded-full bg-red-50 text-[#d00000] flex items-center justify-center">
+                      <span className="material-symbols-outlined text-[28px]">smart_display</span>
+                    </div>
+                    <div className="max-w-md space-y-1">
+                      <h4 className="text-sm font-black text-slate-900">
+                        {isAr ? 'لا يوجد فيديوهات منشورة في حسابك حتى الآن' : 'No published reels found yet'}
+                      </h4>
+                      <p className="text-xs text-gray-500">
+                        {isAr 
+                          ? 'قم بنشر فيديوهات ريلز لمنتجاتك لتبدأ في الظهور في خلاصة الاستكشاف وصفحة متجرك' 
+                          : 'Publish reels to showcase your products across discovery feeds and your storefront'}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setShowNewReelModal(true)}
+                      className="px-4 py-2 rounded-2xl bg-[#d00000] text-white text-xs font-bold hover:bg-[#b00000] transition-colors shadow-xs flex items-center gap-1.5 cursor-pointer"
                     >
-                      <img src={item.thumbnail} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                      
-                      {/* Play overlay on hover */}
-                      <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <div className="w-12 h-12 rounded-full bg-white/90 text-slate-900 flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
-                          <span className="material-symbols-outlined text-[26px] translate-x-0.5">play_arrow</span>
-                        </div>
-                      </div>
-
-                      <span className={`absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-black ${
-                        item.status === 'published' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'
-                      }`}>
-                        {item.status === 'published' ? (isAr ? 'منشور ✓' : 'Published') : (isAr ? 'قيد المراجعة' : 'Draft')}
-                      </span>
-
-                      <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-3 text-white">
-                        <span className="text-[10px] bg-white/20 backdrop-blur-xs px-2 py-0.5 rounded-full font-bold">
-                          🛍️ {item.taggedProduct}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="p-4 space-y-3">
-                      <h4 className="text-xs font-black text-slate-900 line-clamp-2 leading-snug">{item.title}</h4>
-
-                      <div className="grid grid-cols-3 gap-2 text-center py-2 bg-gray-50 rounded-2xl text-[10px]">
-                        <div>
-                          <span className="font-black text-slate-800 block">{item.views}</span>
-                          <span className="text-gray-400">{isAr ? 'مشاهدة' : 'Views'}</span>
-                        </div>
-                        <div>
-                          <span className="font-black text-slate-800 block">{item.likes}</span>
-                          <span className="text-gray-400">{isAr ? 'إعجاب' : 'Likes'}</span>
-                        </div>
-                        <div>
-                          <span className="font-black text-emerald-600 block">{item.salesGenerated}</span>
-                          <span className="text-gray-400">{isAr ? 'مبيعات' : 'Sales'}</span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between pt-1 border-t border-gray-100 text-[11px]">
-                        <span className="text-emerald-700 font-bold">{isAr ? 'أرباحك:' : 'Earned:'} {item.commissionEarned}</span>
-                        <div className="flex items-center gap-2">
-                          <button 
-                            type="button"
-                            onClick={() => setActivePreviewReel(item)}
-                            className="font-bold text-gray-500 hover:text-slate-900 cursor-pointer"
-                          >
-                            {isAr ? 'معاينة 👁️' : 'Preview 👁️'}
-                          </button>
-                          <span className="text-gray-300">•</span>
-                          <button 
-                            type="button"
-                            onClick={() => setActiveTab('reels')}
-                            className="font-bold text-[#d00000] hover:underline cursor-pointer"
-                          >
-                            {isAr ? 'الريلز ←' : 'Reels →'}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
+                      <span className="material-symbols-outlined text-[16px]">upload</span>
+                      <span>{isAr ? 'نشر أول ريلز الآن' : 'Upload First Reel'}</span>
+                    </button>
                   </div>
-                ))}
-            </div>
+                );
+              }
+
+              return (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filteredList.map((item) => (
+                    <div key={item.id} className="rounded-3xl border border-gray-200 bg-white overflow-hidden shadow-xs hover:border-gray-300 transition-all flex flex-col justify-between">
+                      <div 
+                        onClick={() => setActivePreviewReel(item)}
+                        className="relative aspect-[4/3] bg-gray-100 overflow-hidden cursor-pointer group"
+                      >
+                        <img src={item.thumbnail} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                        
+                        {/* Play overlay on hover */}
+                        <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <div className="w-12 h-12 rounded-full bg-white/90 text-slate-900 flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
+                            <span className="material-symbols-outlined text-[26px] translate-x-0.5">play_arrow</span>
+                          </div>
+                        </div>
+
+                        <span className={`absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-black ${
+                          item.status === 'published' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'
+                        }`}>
+                          {item.status === 'published' ? (isAr ? 'منشور ✓' : 'Published') : (isAr ? 'قيد المراجعة' : 'Draft')}
+                        </span>
+
+                        <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-3 text-white">
+                          <span className="text-[10px] bg-white/20 backdrop-blur-xs px-2 py-0.5 rounded-full font-bold">
+                            🛍️ {item.taggedProduct}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="p-4 space-y-3">
+                        <h4 className="text-xs font-black text-slate-900 line-clamp-2 leading-snug">{item.title}</h4>
+
+                        <div className="grid grid-cols-3 gap-2 text-center py-2 bg-gray-50 rounded-2xl text-[10px]">
+                          <div>
+                            <span className="font-black text-slate-800 block">{item.views}</span>
+                            <span className="text-gray-400">{isAr ? 'مشاهدة' : 'Views'}</span>
+                          </div>
+                          <div>
+                            <span className="font-black text-slate-800 block">{item.likes}</span>
+                            <span className="text-gray-400">{isAr ? 'إعجاب' : 'Likes'}</span>
+                          </div>
+                          <div>
+                            <span className="font-black text-emerald-600 block">{item.salesGenerated}</span>
+                            <span className="text-gray-400">{isAr ? 'مبيعات' : 'Sales'}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between pt-1 border-t border-gray-100 text-[11px]">
+                          <span className="text-emerald-700 font-bold">{isAr ? 'أرباحك:' : 'Earned:'} {item.commissionEarned}</span>
+                          <div className="flex items-center gap-2">
+                            <button 
+                              type="button"
+                              onClick={() => setActivePreviewReel(item)}
+                              className="font-bold text-gray-500 hover:text-slate-900 cursor-pointer"
+                            >
+                              {isAr ? 'معاينة 👁️' : 'Preview 👁️'}
+                            </button>
+                            <span className="text-gray-300">•</span>
+                            <button 
+                              type="button"
+                              onClick={() => setActiveTab('reels')}
+                              className="font-bold text-[#d00000] hover:underline cursor-pointer"
+                            >
+                              {isAr ? 'الريلز ←' : 'Reels →'}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
           </div>
         )}
 
@@ -1211,13 +1274,13 @@ export default function DesktopCreatorAnalytics() {
 
                 {/* Social Handles */}
                 <div className="flex flex-wrap items-center gap-3 mt-4 pt-4 border-t border-gray-100 text-xs">
-                  <a href={profile?.instagram} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-pink-50 text-pink-700 border border-pink-200 font-bold hover:bg-pink-100 transition-colors">
+                  <a href={profile?.instagram || '#'} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-pink-50 text-pink-700 border border-pink-200 font-bold hover:bg-pink-100 transition-colors">
                     <span>📷 Instagram</span>
-                    <span className="text-[10px]">@cairo_chic</span>
+                    <span className="text-[10px]">{profile?.handle || (user?.name ? `@${user.name.toLowerCase().replace(/[^a-z0-9_]/g, '_')}` : '@user')}</span>
                   </a>
-                  <a href={profile?.tiktok} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-800 border border-slate-200 font-bold hover:bg-slate-200 transition-colors">
+                  <a href={profile?.tiktok || '#'} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-800 border border-slate-200 font-bold hover:bg-slate-200 transition-colors">
                     <span>🎵 TikTok</span>
-                    <span className="text-[10px]">@cairo_chic</span>
+                    <span className="text-[10px]">{profile?.handle || (user?.name ? `@${user.name.toLowerCase().replace(/[^a-z0-9_]/g, '_')}` : '@user')}</span>
                   </a>
                 </div>
               </div>

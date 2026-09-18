@@ -297,16 +297,25 @@ export const ProductService = {
   },
 
   async getMerchants() {
+    let custom = [];
+    try {
+      const stored = localStorage.getItem('eg_custom_merchants');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) custom = parsed;
+      }
+    } catch (e) {}
+
     try {
       const { data, error } = await supabase.from('merchants').select('*');
-      if (error || !data || data.length === 0) {
-        return MERCHANTS_DATA;
+      if (!error && data && data.length > 0) {
+        return [...custom, ...data];
       }
-      return MERCHANTS_DATA; 
     } catch (err) {
       console.warn('Error fetching merchants:', err.message);
-      return MERCHANTS_DATA;
     }
+
+    return [...custom, ...MERCHANTS_DATA];
   }
 };
 

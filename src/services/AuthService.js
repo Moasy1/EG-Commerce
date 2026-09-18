@@ -127,8 +127,28 @@ export const DEMO_USERS = {
 };
 
 const DEMO_STORAGE_KEY = 'eg_active_session';
+const REGISTERED_ACCOUNTS_KEY = 'eg_registered_users_registry';
+
+function getRegisteredAccounts() {
+  try {
+    const raw = localStorage.getItem(REGISTERED_ACCOUNTS_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+function saveRegisteredAccount(email, userRecord) {
+  try {
+    const accounts = getRegisteredAccounts();
+    accounts[email.toLowerCase().trim()] = userRecord;
+    localStorage.setItem(REGISTERED_ACCOUNTS_KEY, JSON.stringify(accounts));
+  } catch (e) {}
+}
 
 export const AuthService = {
+  getRegisteredAccounts,
+
   async getCurrentUser() {
     try {
       // 1. Check local active demo session first
@@ -136,7 +156,18 @@ export const AuthService = {
       if (stored) {
         try {
           const parsed = JSON.parse(stored);
-          if (parsed && parsed.id) return parsed;
+          if (parsed && parsed.id) {
+            // Verify if registered accounts registry has proper role
+            if (parsed.email) {
+              const registered = getRegisteredAccounts()[parsed.email.toLowerCase().trim()];
+              if (registered && registered.role && parsed.role !== registered.role) {
+                const synchronized = { ...parsed, ...registered };
+                localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(synchronized));
+                return synchronized;
+              }
+            }
+            return parsed;
+          }
         } catch (e) {
           localStorage.removeItem(DEMO_STORAGE_KEY);
         }
@@ -159,16 +190,26 @@ export const AuthService = {
         console.warn('Could not fetch profile:', err);
       }
         
-      // Default to profile role, then metadata role, fallback to 'buyer'
-      const role = profile?.role || user.user_metadata?.role || 'buyer';
-      const name = profile?.name || user.user_metadata?.name || user.email?.split('@')[0];
+      // Default to profile role, then metadata role, then registered accounts registry, fallback to 'buyer'
+      const cachedReg = getRegisteredAccounts()[user.email?.toLowerCase().trim()];
+      const role = profile?.role || user.user_metadata?.role || cachedReg?.role || 'buyer';
+      const name = profile?.name || user.user_metadata?.name || cachedReg?.name || user.email?.split('@')[0];
+      const merchant_id = profile?.merchant_id || user.user_metadata?.merchant_id || cachedReg?.merchant_id || (role === 'merchant' ? 'm-01' : null);
+      const creator_id = profile?.creator_id || user.user_metadata?.creator_id || cachedReg?.creator_id || (role === 'creator' ? 'cr-01' : null);
         
-      return { 
+      const authenticatedUser = { 
         ...user, 
         name, 
         role, 
-        profile: { ...profile, role, name } 
+        merchant_id,
+        creator_id,
+        is_merchant: role === 'merchant',
+        is_creator: role === 'creator',
+        profile: { ...profile, role, name, merchant_id, creator_id } 
       };
+
+      localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(authenticatedUser));
+      return authenticatedUser;
     } catch (e) {
       return null;
     }
@@ -177,7 +218,7 @@ export const AuthService = {
   async signInWithEmail(email, password) {
     const cleanEmail = (email || '').trim().toLowerCase();
 
-    // Try real Supabase auth first
+    // 1. Try real Supabase auth first
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email: cleanEmail,
@@ -185,14 +226,51 @@ export const AuthService = {
       });
 
       if (!error && data?.user) {
-        localStorage.removeItem(DEMO_STORAGE_KEY);
-        return data;
+        let profile = null;
+        try {
+          const { data: pData } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', data.user.id)
+            .single();
+          profile = pData;
+        } catch (pErr) {}
+
+        const cachedReg = getRegisteredAccounts()[cleanEmail];
+        const role = profile?.role || data.user.user_metadata?.role || cachedReg?.role || 'buyer';
+        const name = profile?.name || data.user.user_metadata?.name || cachedReg?.name || cleanEmail.split('@')[0];
+        const merchant_id = profile?.merchant_id || data.user.user_metadata?.merchant_id || cachedReg?.merchant_id || (role === 'merchant' ? 'm-01' : null);
+        const creator_id = profile?.creator_id || data.user.user_metadata?.creator_id || cachedReg?.creator_id || (role === 'creator' ? 'cr-01' : null);
+
+        const authenticatedUser = {
+          ...data.user,
+          name,
+          role,
+          merchant_id,
+          creator_id,
+          is_merchant: role === 'merchant',
+          is_creator: role === 'creator',
+          profile: { ...(profile || {}), role, name, merchant_id, creator_id }
+        };
+
+        localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(authenticatedUser));
+        return { user: authenticatedUser, session: data.session };
       }
     } catch (supaErr) {
-      console.warn('Supabase auth attempt returned error, checking demo match:', supaErr.message);
+      console.warn('Supabase auth attempt returned error, checking registered accounts:', supaErr.message);
     }
 
-    // Match demo accounts (support both egyptian-commerce.com and legacy eg-commerce.com)
+    // 2. Check persistent registered accounts registry
+    const registeredAccount = getRegisteredAccounts()[cleanEmail];
+    if (registeredAccount) {
+      if (registeredAccount.password && password && registeredAccount.password !== password) {
+        throw new Error('كلمة المرور غير صحيحة. يرجى التأكد من كلمة المرور المدخلة.');
+      }
+      localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(registeredAccount));
+      return { user: registeredAccount, session: { access_token: 'reg-token' } };
+    }
+
+    // 3. Match demo accounts (support both egyptian-commerce.com and legacy eg-commerce.com)
     for (const [key, demo] of Object.entries(DEMO_USERS)) {
       const demoPrefix = demo.email.split('@')[0];
       const legacyEmail = `${demoPrefix}@eg-commerce.com`;
@@ -201,14 +279,14 @@ export const AuthService = {
       if (cleanEmail === demo.email || cleanEmail === legacyEmail || inputPrefix === demoPrefix) {
         const sessionUser = {
           ...demo,
-          user_metadata: { name: demo.name, role: demo.role }
+          user_metadata: { name: demo.name, role: demo.role, merchant_id: demo.merchant_id }
         };
         localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(sessionUser));
         return { user: sessionUser, session: { access_token: 'demo-token' } };
       }
     }
 
-    // Fallback if password provided for any email in demo mode
+    // 4. Fallback for new ad-hoc email sign-ins
     if (cleanEmail && password && password.length >= 4) {
       const customDemo = {
         id: `usr-${Date.now()}`,
@@ -218,18 +296,19 @@ export const AuthService = {
         avatar_url: '/images/reels/reel_1.jpg',
         reward_points_balance: 100
       };
+      saveRegisteredAccount(cleanEmail, customDemo);
       localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(customDemo));
       return { user: customDemo, session: { access_token: 'demo-token' } };
     }
 
-    throw new Error('بيانات الدخول غير صحيحة. يمكنك استخدام أزرار الدخول التجريبي السريع أدناه.');
+    throw new Error('بيانات الدخول غير صحيحة. يمكنك إنشاء حساب جديد أو استخدام أزرار الدخول التجريبي.');
   },
 
   async loginAsDemo(roleKey = 'merchant') {
     const demo = DEMO_USERS[roleKey] || DEMO_USERS.merchant;
     const sessionUser = {
       ...demo,
-      user_metadata: { name: demo.name, role: demo.role }
+      user_metadata: { name: demo.name, role: demo.role, merchant_id: demo.merchant_id }
     };
     localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(sessionUser));
     return sessionUser;
@@ -238,6 +317,18 @@ export const AuthService = {
   async signUpWithEmail(email, password, requestedRole = 'buyer', name = '') {
     const cleanEmail = (email || '').trim().toLowerCase();
     const sanitizedRole = ['creator', 'merchant', 'admin'].includes(requestedRole) ? requestedRole : 'buyer';
+    const defaultName = name || cleanEmail.split('@')[0];
+    const generatedUserId = `usr-${Date.now()}`;
+    const generatedMerchantId = sanitizedRole === 'merchant' ? `m-${Date.now().toString(36)}` : null;
+    const generatedCreatorId = sanitizedRole === 'creator' ? `cr-${Date.now().toString(36)}` : null;
+    const handle = sanitizedRole === 'creator' ? `@${defaultName.replace(/\s+/g, '_').toLowerCase()}` : undefined;
+    const avatarUrl = sanitizedRole === 'merchant' 
+      ? '/images/brands/talieska_logo.jpg' 
+      : sanitizedRole === 'creator' 
+        ? '/images/reels/reel_2.jpg' 
+        : '/images/reels/reel_1.jpg';
+
+    let supaUser = null;
 
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -245,37 +336,121 @@ export const AuthService = {
         password,
         options: {
           data: {
-            name: name || cleanEmail.split('@')[0],
-            role: sanitizedRole
+            name: defaultName,
+            role: sanitizedRole,
+            merchant_id: generatedMerchantId,
+            creator_id: generatedCreatorId,
+            is_merchant: sanitizedRole === 'merchant',
+            is_creator: sanitizedRole === 'creator'
           }
         }
       });
       
       if (!error && data?.user) {
+        supaUser = data.user;
         try {
-          await supabase.from('profiles').insert([
-            { id: data.user.id, name: name || cleanEmail.split('@')[0], role: sanitizedRole, email: cleanEmail }
+          await supabase.from('profiles').upsert([
+            { 
+              id: data.user.id, 
+              name: defaultName, 
+              display_name: defaultName,
+              role: sanitizedRole, 
+              email: cleanEmail,
+              avatar_url: avatarUrl,
+              is_merchant: sanitizedRole === 'merchant',
+              is_creator: sanitizedRole === 'creator'
+            }
           ]);
         } catch (err) {
-          console.warn('Could not auto-create profile:', err);
+          console.warn('Could not auto-create profile in Supabase:', err);
         }
-        return data;
+
+        // If merchant, insert merchant entry
+        if (sanitizedRole === 'merchant') {
+          try {
+            await supabase.from('merchants').upsert([
+              {
+                user_id: data.user.id,
+                store_name: defaultName,
+                slug: defaultName.toLowerCase().replace(/\s+/g, '-'),
+                is_verified: true
+              }
+            ]);
+          } catch (merchErr) {
+            console.warn('Could not auto-create merchant record in Supabase:', merchErr);
+          }
+        }
       }
     } catch (err) {
-      console.warn('Supabase signUp error, creating local session:', err.message);
+      console.warn('Supabase signUp error, proceeding with local persistent registration:', err.message);
     }
 
-    // Fallback: create local account session so user is never blocked
-    const newDemoUser = {
-      id: `usr-${Date.now()}`,
+    // Persistent registered account object with real privileges
+    const newRegisteredUser = {
+      id: supaUser?.id || generatedUserId,
       email: cleanEmail,
-      name: name || cleanEmail.split('@')[0],
+      password, // retained locally so re-login works with 100% privilege preservation
+      name: defaultName,
       role: sanitizedRole,
-      avatar_url: sanitizedRole === 'merchant' ? '/images/brands/talieska_logo.jpg' : '/images/reels/reel_1.jpg',
-      reward_points_balance: 200
+      merchant_id: generatedMerchantId,
+      creator_id: generatedCreatorId,
+      handle,
+      avatar_url: avatarUrl,
+      is_merchant: sanitizedRole === 'merchant',
+      is_creator: sanitizedRole === 'creator',
+      reward_points_balance: sanitizedRole === 'merchant' ? 500 : 200,
+      user_metadata: {
+        name: defaultName,
+        role: sanitizedRole,
+        merchant_id: generatedMerchantId,
+        creator_id: generatedCreatorId
+      },
+      profile: {
+        id: supaUser?.id || generatedUserId,
+        email: cleanEmail,
+        name: defaultName,
+        role: sanitizedRole,
+        merchant_id: generatedMerchantId,
+        creator_id: generatedCreatorId,
+        avatar_url: avatarUrl
+      }
     };
-    localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(newDemoUser));
-    return { user: newDemoUser };
+
+    // Save to persistent registry
+    saveRegisteredAccount(cleanEmail, newRegisteredUser);
+
+    // If merchant, persist to custom merchants registry
+    if (sanitizedRole === 'merchant') {
+      try {
+        const rawMerchants = localStorage.getItem('eg_custom_merchants');
+        let customMerchants = rawMerchants ? JSON.parse(rawMerchants) : [];
+        const newMerchantRecord = {
+          id: generatedMerchantId,
+          user_id: supaUser?.id || generatedUserId,
+          name: `${defaultName} Store • متجر ${defaultName}`,
+          shortName: defaultName,
+          slug: defaultName.toLowerCase().replace(/\s+/g, '-'),
+          subdomain: `${defaultName.toLowerCase().replace(/\s+/g, '-')}.egyptian-commerce.com`,
+          customDomain: null,
+          category: 'Egyptian Fashion & Retail',
+          categoryAr: 'أزياء وتجارة مصرية معتمدة',
+          bio: `متجر مصري موثق لـ ${defaultName}`,
+          established: '2026',
+          rating: 5.0,
+          reviewsCount: 1,
+          verified: true,
+          logo: avatarUrl,
+          banner: '/images/banners/talieska_hero.jpg'
+        };
+        customMerchants = [newMerchantRecord, ...customMerchants.filter(m => m.id !== generatedMerchantId)];
+        localStorage.setItem('eg_custom_merchants', JSON.stringify(customMerchants));
+      } catch (e) {}
+    }
+
+    // Save active session
+    localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(newRegisteredUser));
+
+    return { user: newRegisteredUser };
   },
 
   async updateCurrentUser(updates = {}) {

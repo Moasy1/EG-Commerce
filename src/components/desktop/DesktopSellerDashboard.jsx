@@ -6,6 +6,7 @@ import ProductFormModal from '../merchant/ProductFormModal';
 import InvoiceModal from '../common/InvoiceModal';
 import NotificationCenter from '../common/NotificationCenter';
 import { printOrderInvoice } from '../../utils/invoiceGenerator';
+import MerchantCampaign from '../../pages/MerchantCampaign';
 
 export default function DesktopSellerDashboard() {
   const { 
@@ -550,15 +551,8 @@ export default function DesktopSellerDashboard() {
           )}
 
           {activeNav === 'marketing' && (
-            <div className="bg-white rounded-3xl border border-gray-200 p-8 shadow-xs text-center flex flex-col items-center justify-center min-h-[400px]">
-              <div className="w-16 h-16 bg-red-50 text-[#d00000] rounded-full flex items-center justify-center mb-4">
-                <span className="material-symbols-outlined text-[32px]">campaign</span>
-              </div>
-              <h3 className="text-lg font-black text-slate-900 mb-2">التسويق وحملات صناع المحتوى</h3>
-              <p className="text-xs text-gray-500 max-w-md mx-auto mb-6">أطلق حملات محتوى جديدة مع أفضل صناع المحتوى لزيادة مبيعاتك.</p>
-              <button onClick={() => setActiveTab('merchant_campaign')} className="px-6 py-3 rounded-xl bg-[#d00000] text-white font-bold text-sm shadow-xs hover:bg-[#b00000] transition-colors">
-                إنشاء حملة جديدة
-              </button>
+            <div className="bg-white rounded-3xl border border-gray-200 p-2 sm:p-4 shadow-xs">
+              <MerchantCampaign />
             </div>
           )}
 

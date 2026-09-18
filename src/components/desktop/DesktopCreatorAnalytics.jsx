@@ -90,7 +90,7 @@ export default function DesktopCreatorAnalytics() {
   // Handler: Apply for campaign
   const handleApplyCampaign = async () => {
     if (!selectedCampaignForApply) return;
-    await UgcService.applyForCampaign(selectedCampaignForApply.id, profile?.id, applyNotes);
+    await UgcService.applyForCampaign(selectedCampaignForApply.id, profile || { id: 'cr-01' }, applyNotes);
     const updated = await UgcService.getCampaigns();
     setCampaigns(updated);
     setShowApplyModal(false);

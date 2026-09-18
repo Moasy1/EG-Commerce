@@ -177,10 +177,12 @@ export default function AuthModal() {
       }
       
       const currentUser = await AuthService.getCurrentUser();
-      const userToSet = currentUser || authRes?.user;
+      const userToSet = authRes?.user || currentUser;
       if (userToSet) {
         setUser(userToSet);
-        if (userToSet.role) setRole(userToSet.role);
+        if (userToSet.role) {
+          setRole(userToSet.role);
+        }
         if (userToSet.role === 'merchant') {
           setSelectedMerchantId(userToSet.merchant_id || 'm-01');
         }

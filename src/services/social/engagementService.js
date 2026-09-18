@@ -38,11 +38,18 @@ export const toCanonicalReelId = (id) => {
 };
 
 export const BASE_REEL_ENGAGEMENT = {
-  'ee000000-0000-0000-0000-000000000001': { likes: 4820, saves: 1140, comments: 218 },
-  'ee000000-0000-0000-0000-000000000002': { likes: 3240, saves: 820, comments: 139 },
-  'ee000000-0000-0000-0000-000000000003': { likes: 2910, saves: 640, comments: 88 },
-  'ee000000-0000-0000-0000-000000000004': { likes: 5130, saves: 980, comments: 195 },
-  'ee000000-0000-0000-0000-000000000005': { likes: 6420, saves: 1530, comments: 312 },
+  'ee000000-0000-0000-0000-000000000001': { likes: 4820, saves: 1140, comments: 3 },
+  'ee000000-0000-0000-0000-000000000002': { likes: 3240, saves: 820, comments: 3 },
+  'ee000000-0000-0000-0000-000000000003': { likes: 2910, saves: 640, comments: 3 },
+  'ee000000-0000-0000-0000-000000000004': { likes: 5130, saves: 980, comments: 3 },
+  'ee000000-0000-0000-0000-000000000005': { likes: 6420, saves: 1530, comments: 2 },
+  'ee000000-0000-0000-0000-000000000006': { likes: 3120, saves: 610, comments: 2 },
+  'ee000000-0000-0000-0000-000000000007': { likes: 5420, saves: 1240, comments: 2 },
+  'ee000000-0000-0000-0000-000000000008': { likes: 3210, saves: 590, comments: 2 },
+  'ee000000-0000-0000-0000-000000000009': { likes: 2970, saves: 510, comments: 2 },
+  'ee000000-0000-0000-0000-000000000010': { likes: 2840, saves: 430, comments: 2 },
+  'ee000000-0000-0000-0000-000000000011': { likes: 4520, saves: 890, comments: 2 },
+  'ee000000-0000-0000-0000-000000000012': { likes: 3870, saves: 650, comments: 2 },
 };
 
 export const engagementService = {
@@ -189,9 +196,26 @@ export const engagementService = {
       ? base.saves + dbSavesCount
       : (cached.savesCount || base.saves + (isSaved ? 1 : 0));
 
-    const calculatedComments = (dbCommentsCount !== null && dbCommentsCount > 0)
-      ? dbCommentsCount
-      : (cached.commentsCount || base.comments);
+    let calculatedComments = null;
+    if (dbCommentsCount !== null && dbCommentsCount > 0) {
+      calculatedComments = dbCommentsCount;
+    } else {
+      // Check local storage for actual comments list length
+      try {
+        const key = `eg_reel_comments_${canonicalId}`;
+        const stored = localStorage.getItem(key);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            calculatedComments = parsed.length;
+          }
+        }
+      } catch (e) {}
+    }
+
+    if (calculatedComments === null) {
+      calculatedComments = base.comments || 3;
+    }
 
     return {
       isLiked,

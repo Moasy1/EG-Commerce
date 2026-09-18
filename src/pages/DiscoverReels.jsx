@@ -116,7 +116,7 @@ const getDefaultReels = (isAr = true) => [
         : 'Styling the oversized Citrine Yellow Blazer with denim and sleek shades 💛 Effortless luxury! #FashionReels #OOTD',
       music: isAr ? 'ألحان إيقاعية هادية • صيف 2026' : 'Summer Aesthetic Vibes • Instrumental',
       likes: 4820,
-      comments: 218,
+      comments: 3,
       saves: 1140,
       products: [
         {
@@ -150,7 +150,7 @@ const getDefaultReels = (isAr = true) => [
         : 'Sky blue linen oversized shirt paired with relaxed wide chinos 🩵 Summer perfection! #LinenStyle',
       music: isAr ? 'نغمات كاجوال مصرية' : 'Chill Acoustic Grooves',
       likes: 3450,
-      comments: 139,
+      comments: 3,
       saves: 820,
       products: [
         {
@@ -184,7 +184,7 @@ const getDefaultReels = (isAr = true) => [
         : 'Asymmetric one-shoulder white bodysuit with high-waist denim 🤍 The classic "jeans and a cute top" equation! ✨',
       music: isAr ? 'صوت تريند عالمي' : 'Trending Pop Rhythm',
       likes: 2910,
-      comments: 124,
+      comments: 3,
       saves: 730,
       products: [
         {
@@ -218,7 +218,7 @@ const getDefaultReels = (isAr = true) => [
         : 'All 5 iconic colorways of the structured leather shoulder bag with polished gold hardware! 👜✨ #Bags',
       music: isAr ? 'إيقاع إكسسوارات راقي' : 'High Fashion Beats',
       likes: 5120,
-      comments: 195,
+      comments: 3,
       saves: 980,
       products: [
         {
@@ -252,7 +252,7 @@ const getDefaultReels = (isAr = true) => [
         : 'Chunky oversized knit turtleneck sweater paired with wool argyle skirt 🖤 Winter warmth & elegance!',
       music: isAr ? 'موسيقى شتوية دافئة' : 'Cozy Winter Harmony',
       likes: 2140,
-      comments: 98,
+      comments: 2,
       saves: 560,
       products: [
         {
@@ -286,7 +286,7 @@ const getDefaultReels = (isAr = true) => [
         : 'Refined menswear styling: Tobacco brown suede Harrington jacket with olive pleated trousers 🤎 #MenStyle',
       music: isAr ? 'جاز مصري حديث' : 'Modern Lo-Fi Beats',
       likes: 3120,
-      comments: 87,
+      comments: 2,
       saves: 610,
       products: [
         {
@@ -320,7 +320,7 @@ const getDefaultReels = (isAr = true) => [
         : 'Vintage tonneau rose gold watch with roman dial & brown leather strap ⌚✨ Complete quiet luxury!',
       music: isAr ? 'عزف بيانو كلاسيكي' : 'Classical Elegance Sound',
       likes: 5420,
-      comments: 231,
+      comments: 2,
       saves: 1240,
       products: [
         {
@@ -354,7 +354,7 @@ const getDefaultReels = (isAr = true) => [
         : 'Handcrafted woven leather bag with braided handle styled with camel linen trousers & white mules! 🤎',
       music: isAr ? 'أنغام ريترو هادية' : 'Aesthetic Retro Beats',
       likes: 3210,
-      comments: 94,
+      comments: 2,
       saves: 590,
       products: [
         {
@@ -388,7 +388,7 @@ const getDefaultReels = (isAr = true) => [
         : 'Luxury barrel bowling leather handbags in 4 rich finishes (croc dark brown, suede tan, deep wine, black) 👜',
       music: isAr ? 'إيقاع استوديو القاهرة' : 'Cairo Studio Lounge',
       likes: 2970,
-      comments: 86,
+      comments: 2,
       saves: 510,
       products: [
         {
@@ -422,7 +422,7 @@ const getDefaultReels = (isAr = true) => [
         : 'Retro print Cuban collar shirt styled with black linen trousers 🕶️ Smooth summer aesthetic! #MenSummer',
       music: isAr ? 'فانك مصري هادي' : 'Smooth Funk Grooves',
       likes: 2840,
-      comments: 79,
+      comments: 2,
       saves: 430,
       products: [
         {
@@ -456,7 +456,7 @@ const getDefaultReels = (isAr = true) => [
         : 'Testing the new SHEGLAM Ultra Lash Lift Mascara & Easy Lash Removal! Amazing results! ✨👀 #Sheglam #Makeup',
       music: isAr ? 'تريند بيوتي • تيك توك' : 'Trending Beauty Sound',
       likes: 4520,
-      comments: 124,
+      comments: 2,
       saves: 890,
       products: [
         {
@@ -490,7 +490,7 @@ const getDefaultReels = (isAr = true) => [
         : 'SHEGLAM Jelly Lip Tint & Blusher swatches 🍒 Gorgeous shades (Cherry Bark, Plum Sauce) and amazing hydration! 💋 #LipTint #Sheglam',
       music: isAr ? 'موسيقى ريلز هادية' : 'Chill Aesthetic Vibes',
       likes: 3870,
-      comments: 98,
+      comments: 2,
       saves: 650,
       products: [
         {
@@ -545,7 +545,7 @@ export default function DiscoverReels() {
   const [likesCount, setLikesCount] = useState(4820);
   const [isSaved, setIsSaved] = useState(false);
   const [savesCount, setSavesCount] = useState(1140);
-  const [commentsCount, setCommentsCount] = useState(218);
+  const [commentsCount, setCommentsCount] = useState(3);
   const [isFollowed, setIsFollowed] = useState(false);
   const reelMountTime = useRef(Date.now());
 
@@ -592,7 +592,15 @@ export default function DiscoverReels() {
       reelMountTime.current = Date.now();
       eventTracker.trackReelImpression(currentReel, currentReelIndex);
 
-      // Fetch live DB engagement metrics (likes, saves, comments counts + user state)
+      // Fetch live real comments and sync real comments count
+      socialService.comments.getComments(currentReel.id).then(fetched => {
+        if (Array.isArray(fetched)) {
+          setCommentsList(fetched);
+          setCommentsCount(fetched.length);
+        }
+      });
+
+      // Fetch live DB engagement metrics (likes, saves + user state)
       socialService.engagement.getReelEngagement(currentReel.id, user?.id)
         .then(eng => {
           if (eng) {
@@ -600,14 +608,12 @@ export default function DiscoverReels() {
             setIsSaved(Boolean(eng.isSaved));
             setLikesCount(eng.likesCount ?? (Number(currentReel.likes) || 0));
             setSavesCount(eng.savesCount ?? (Number(currentReel.saves) || 0));
-            setCommentsCount(eng.commentsCount ?? (Number(currentReel.comments) || 0));
           }
         })
         .catch(err => {
           console.warn("Error fetching reel engagement from database:", err);
           setLikesCount(Number(currentReel.likes) || 0);
           setSavesCount(Number(currentReel.saves) || 0);
-          setCommentsCount(Number(currentReel.comments) || 0);
         });
 
       const creatorTarget = currentReel.creatorId || currentReel.creatorHandle;
@@ -734,7 +740,10 @@ export default function DiscoverReels() {
   useEffect(() => {
     if (currentReel?.id) {
       socialService.comments.getComments(currentReel.id).then(fetched => {
-        setCommentsList(fetched);
+        if (Array.isArray(fetched)) {
+          setCommentsList(fetched);
+          setCommentsCount(fetched.length);
+        }
       });
     }
   }, [currentReel?.id, isCommentsOpen]);

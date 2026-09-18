@@ -12,8 +12,108 @@ export default function AuthModal() {
   const [name, setName] = useState('');
   const [selectedRole, setSelectedRole] = useState('buyer');
   
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [demoCategory, setDemoCategory] = useState('merchant');
+
+  const DEMO_LIST = [
+    // Merchants
+    {
+      key: 'merchant_talieska',
+      type: 'merchant',
+      name: isAr ? 'تاليسكا ستوديو' : 'Talieska Studio',
+      sub: isAr ? 'أزياء كتان فاخرة' : 'Haute Linen Boutique',
+      handle: '@talieska',
+      img: '/images/brands/talieska_logo.jpg',
+      badge: isAr ? 'تاجر رئيسي' : 'Merchant',
+      color: 'border-red-200 bg-red-50/40 text-red-700 hover:border-red-400'
+    },
+    {
+      key: 'merchant_khan',
+      type: 'merchant',
+      name: isAr ? 'ورشة خان الخليلي' : 'Khan El Khalili Craft',
+      sub: isAr ? 'نحاس وسجاد تراثي' : 'Brass & Rug Heritage',
+      handle: '@khan.craft.eg',
+      img: '/images/products/copper_lantern.jpg',
+      badge: isAr ? 'حرف تراثية' : 'Heritage',
+      color: 'border-amber-200 bg-amber-50/40 text-amber-700 hover:border-amber-400'
+    },
+    {
+      key: 'merchant_tiba',
+      type: 'merchant',
+      name: isAr ? 'مجوهرات طيبة' : 'Tiba Jewelry',
+      sub: isAr ? 'فضة فرعونية وذهب' : 'Pharaonic Silver & Gold',
+      handle: '@tiba.jewels',
+      img: '/images/brands/talieska_logo.jpg',
+      badge: isAr ? 'مجوهرات' : 'Jewelry',
+      color: 'border-yellow-200 bg-yellow-50/40 text-yellow-700 hover:border-yellow-400'
+    },
+    // Creators
+    {
+      key: 'creator_yasmin',
+      type: 'creator',
+      name: isAr ? 'ياسمين السيد' : 'Yasmin Sayed',
+      sub: isAr ? 'سفيرة براند تاليسكا' : 'Brand Ambassador',
+      handle: '@yasmin_style',
+      img: '/images/reels/reel_2.jpg',
+      badge: '4.95 ⭐',
+      color: 'border-purple-200 bg-purple-50/40 text-purple-700 hover:border-purple-400'
+    },
+    {
+      key: 'creator_cairochic',
+      type: 'creator',
+      name: isAr ? 'كايرو شيك (سارة)' : 'Cairo Chic (Sara)',
+      sub: isAr ? 'تنسيق أزياء وبليزرات' : 'Stylist & Blazer UGC',
+      handle: '@cairo_chic',
+      img: '/images/reels/fashion_citrine_blazer_thumb.jpg',
+      badge: '4.98 ⭐',
+      color: 'border-pink-200 bg-pink-50/40 text-pink-700 hover:border-pink-400'
+    },
+    {
+      key: 'creator_salma',
+      type: 'creator',
+      name: isAr ? 'سلمى ستايلز' : 'Salma Styles',
+      sub: isAr ? 'قمصان وأوفرسايز' : 'Casual & Streetwear',
+      handle: '@salma.styles',
+      img: '/images/reels/fashion_oversized_shirt_thumb.jpg',
+      badge: '4.88 ⭐',
+      color: 'border-indigo-200 bg-indigo-50/40 text-indigo-700 hover:border-indigo-400'
+    },
+    // Buyers
+    {
+      key: 'buyer_mariam',
+      type: 'buyer',
+      name: isAr ? 'مريم الشافعي' : 'Mariam El-Shafei',
+      sub: isAr ? 'متسوقة نشطة • 450 نقطة' : 'Active Shopper • 450 pts',
+      handle: '@mariam_sh',
+      img: '/images/reels/reel_1.jpg',
+      badge: isAr ? 'متسوق' : 'Shopper',
+      color: 'border-emerald-200 bg-emerald-50/40 text-emerald-700 hover:border-emerald-400'
+    },
+    {
+      key: 'buyer_nourhan',
+      type: 'buyer',
+      name: isAr ? 'نورهان كريم' : 'Nourhan Karim',
+      sub: isAr ? 'متسوقة بالإسكندرية' : 'Alexandria Shopper',
+      handle: '@nourhan_k',
+      img: '/images/reels/reel_2.jpg',
+      badge: isAr ? 'متسوق' : 'Shopper',
+      color: 'border-teal-200 bg-teal-50/40 text-teal-700 hover:border-teal-400'
+    },
+    // Admin
+    {
+      key: 'admin',
+      type: 'admin',
+      name: isAr ? 'مدير المنصة العام' : 'Platform SuperAdmin',
+      sub: isAr ? 'صلاحيات الإدارة والتحكم' : 'Full Platform Access',
+      handle: '@superadmin',
+      img: null,
+      badge: 'SuperAdmin',
+      color: 'border-slate-300 bg-slate-100 text-slate-800 hover:border-slate-500'
+    }
+  ];
+
+  const filteredDemoList = demoCategory === 'all' 
+    ? DEMO_LIST 
+    : DEMO_LIST.filter(d => d.type === demoCategory);
   
   const modalRef = useRef(null);
   
@@ -79,7 +179,9 @@ export default function AuthModal() {
       setUser(demoUser);
       setRole(demoUser.role);
       if (demoUser.role === 'merchant') {
-        setSelectedMerchantId('m-01');
+        if (roleKey === 'merchant_khan') setSelectedMerchantId('m-02');
+        else if (roleKey === 'merchant_tiba') setSelectedMerchantId('m-03');
+        else setSelectedMerchantId('m-01');
       }
       setIsAuthModalOpen(false);
     } catch (err) {
@@ -98,7 +200,7 @@ export default function AuthModal() {
     >
       <div 
         ref={modalRef}
-        className="bg-white rounded-3xl w-full max-w-md p-5 sm:p-7 shadow-2xl relative animate-scale-up my-auto" 
+        className="bg-white rounded-3xl w-full max-w-lg p-5 sm:p-6 shadow-2xl relative animate-scale-up my-auto max-h-[90vh] overflow-y-auto" 
         dir={isAr ? 'rtl' : 'ltr'}
         role="dialog"
         aria-modal="true"
@@ -117,80 +219,77 @@ export default function AuthModal() {
           {mode === 'login' ? (isAr ? 'تسجيل الدخول' : 'Sign In') : (isAr ? 'إنشاء حساب جديد' : 'Create Account')}
         </h2>
         
-        <p id="auth-modal-description" className="text-slate-500 text-xs sm:text-sm mb-4">
+        <p id="auth-modal-description" className="text-slate-500 text-xs sm:text-sm mb-3.5">
           {mode === 'login' 
             ? (isAr ? 'مرحباً بك في منصة egyptian-commerce.com' : 'Welcome to egyptian-commerce.com') 
             : (isAr ? 'انضم إلى مجتمع التجارة المصرية الآن' : 'Join the Egyptian Commerce network today')}
         </p>
 
         {/* 1-Click Quick Demo Logins Bar */}
-        <div className="mb-5 p-3.5 bg-gradient-to-r from-red-50/70 via-amber-50/50 to-slate-50 border border-red-100/80 rounded-2xl">
-          <div className="flex items-center justify-between gap-2 mb-2.5">
+        <div className="mb-4 p-3.5 bg-gradient-to-r from-red-50/60 via-amber-50/40 to-slate-50 border border-red-100/80 rounded-2xl">
+          <div className="flex items-center justify-between gap-2 mb-2">
             <span className="text-[11px] font-black text-[#d00000] flex items-center gap-1">
-              <span className="material-symbols-outlined text-[14px]">bolt</span>
-              {isAr ? 'دخول تجريبي فوري بنقرة واحدة (بدون كلمة سر)' : '1-Click Quick Demo Login'}
+              <span className="material-symbols-outlined text-[15px]">bolt</span>
+              {isAr ? 'تبديل الحسابات التجريبية بنقرة واحدة (بدون كلمة سر)' : '1-Click Multi-Account Switcher'}
             </span>
-            <span className="text-[9px] px-1.5 py-0.5 rounded bg-red-100 text-red-700 font-bold">جاهز</span>
+            <span className="text-[9px] px-1.5 py-0.5 rounded bg-red-100 text-red-700 font-bold">مُفعل</span>
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => handleDemoLogin('merchant')}
-              className="flex items-center gap-2 p-2 bg-white hover:bg-red-50/50 border border-gray-200 hover:border-red-200 rounded-xl transition-all text-start group shadow-2xs active:scale-98"
-            >
-              <img src="/images/brands/talieska_logo.jpg" alt="Merchant" className="w-7 h-7 rounded-lg object-cover" />
-              <div className="min-w-0 flex-1">
-                <span className="block text-[11px] font-bold text-slate-900 truncate group-hover:text-[#d00000]">
-                  {isAr ? 'تاجر: تاليسكا' : 'Merchant'}
-                </span>
-                <span className="block text-[9px] text-gray-500 truncate">Talieska Studio</span>
-              </div>
-            </button>
+          {/* Persona Filter Tabs */}
+          <div className="flex items-center gap-1 mb-2.5 overflow-x-auto pb-1 no-scrollbar text-[10px] font-bold">
+            {[
+              { id: 'merchant', label: isAr ? 'المتاجر (3)' : 'Merchants (3)' },
+              { id: 'creator', label: isAr ? 'صناع المحتوى (3)' : 'Creators (3)' },
+              { id: 'buyer', label: isAr ? 'المشترين (2)' : 'Buyers (2)' },
+              { id: 'admin', label: isAr ? 'الإدارة' : 'Admin' },
+              { id: 'all', label: isAr ? 'الكل' : 'All' }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setDemoCategory(tab.id)}
+                className={`px-2.5 py-1 rounded-lg transition-all shrink-0 ${
+                  demoCategory === tab.id
+                    ? 'bg-[#d00000] text-white shadow-xs'
+                    : 'bg-white/80 text-slate-600 hover:bg-white border border-slate-200/80'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
 
-            <button
-              type="button"
-              onClick={() => handleDemoLogin('creator')}
-              className="flex items-center gap-2 p-2 bg-white hover:bg-purple-50/50 border border-gray-200 hover:border-purple-200 rounded-xl transition-all text-start group shadow-2xs active:scale-98"
-            >
-              <img src="/images/reels/reel_2.jpg" alt="Creator" className="w-7 h-7 rounded-lg object-cover" />
-              <div className="min-w-0 flex-1">
-                <span className="block text-[11px] font-bold text-slate-900 truncate group-hover:text-purple-600">
-                  {isAr ? 'صانع محتوى' : 'Creator'}
-                </span>
-                <span className="block text-[9px] text-gray-500 truncate">ياسمين السيد</span>
-              </div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleDemoLogin('buyer')}
-              className="flex items-center gap-2 p-2 bg-white hover:bg-emerald-50/50 border border-gray-200 hover:border-emerald-200 rounded-xl transition-all text-start group shadow-2xs active:scale-98"
-            >
-              <img src="/images/reels/reel_1.jpg" alt="Buyer" className="w-7 h-7 rounded-lg object-cover" />
-              <div className="min-w-0 flex-1">
-                <span className="block text-[11px] font-bold text-slate-900 truncate group-hover:text-emerald-600">
-                  {isAr ? 'مشتري / متسوق' : 'Buyer'}
-                </span>
-                <span className="block text-[9px] text-gray-500 truncate">مريم الشافعي</span>
-              </div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleDemoLogin('admin')}
-              className="flex items-center gap-2 p-2 bg-white hover:bg-slate-100 border border-gray-200 rounded-xl transition-all text-start group shadow-2xs active:scale-98"
-            >
-              <div className="w-7 h-7 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold text-[10px]">
-                EG
-              </div>
-              <div className="min-w-0 flex-1">
-                <span className="block text-[11px] font-bold text-slate-900 truncate">
-                  {isAr ? 'مدير المنصة' : 'Superadmin'}
-                </span>
-                <span className="block text-[9px] text-gray-500 truncate">لوحة التحكم العليا</span>
-              </div>
-            </button>
+          {/* Persona Cards Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-48 overflow-y-auto pr-0.5">
+            {filteredDemoList.map(item => (
+              <button
+                key={item.key}
+                type="button"
+                onClick={() => handleDemoLogin(item.key)}
+                className={`flex items-center gap-2 p-2 bg-white rounded-xl border transition-all text-start group shadow-2xs active:scale-[0.98] ${item.color}`}
+              >
+                {item.img ? (
+                  <img src={item.img} alt={item.name} className="w-8 h-8 rounded-lg object-cover shrink-0 border border-black/5" />
+                ) : (
+                  <div className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold text-[10px] shrink-0">
+                    EG
+                  </div>
+                )}
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-1">
+                    <span className="block text-[11px] font-bold text-slate-900 truncate group-hover:text-[#d00000]">
+                      {item.name}
+                    </span>
+                    <span className="text-[9px] px-1 py-0.2 rounded bg-white/80 border border-black/5 font-semibold shrink-0">
+                      {item.badge}
+                    </span>
+                  </div>
+                  <span className="block text-[9px] text-gray-500 truncate">
+                    {item.sub}
+                  </span>
+                </div>
+              </button>
+            ))}
           </div>
         </div>
 

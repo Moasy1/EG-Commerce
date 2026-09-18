@@ -227,7 +227,7 @@ export const ProductService = {
       price: Number(productData.price) || 0,
       originalPrice: productData.originalPrice ? Number(productData.originalPrice) : Math.round((Number(productData.price) || 0) * 1.25),
       merchant: productData.merchant || 'Talieska Studio • تاليسكا ستوديو',
-      merchantId: productData.merchantId || 'm0000000-0000-0000-0000-000000000001',
+      merchantId: productData.merchantId || 'd0000000-0000-0000-0000-000000000001',
       merchantVerified: true,
       category: productData.category || 'الفساتين',
       description: productData.description || '',

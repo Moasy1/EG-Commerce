@@ -333,6 +333,27 @@ export const SOCIAL_PROFILES = {
     highlights: [
       { id: 'h1', title: 'ريلز الكتان', icon: 'movie', img: '/images/reels/reel_2.jpg' }
     ]
+  },
+  'salma.styles': {
+    id: 'p-salma',
+    handle: '@salma.styles',
+    slug: 'salma.styles',
+    name: 'سلمى ستايلز • Salma Styles',
+    verified: true,
+    role: 'creator',
+    merchantId: 'm-01',
+    avatar: '/images/reels/fashion_oversized_shirt_thumb.jpg',
+    category: 'Casual Styling & Sustainable Fashion',
+    categoryAr: 'تنسيقات كاجوال وموضة مستدامة',
+    bio: '🩵 قمصان وتنسيقات صيفية مريحة وعملية لكل يوم | عاشقة للأقمشة الطبيعية والموضة المستدامة 🇪🇬',
+    location: 'القاهرة، مصر • Cairo',
+    followersCount: '41.8K',
+    followingCount: '156',
+    productsCount: 3,
+    reelsCount: 11,
+    highlights: [
+      { id: 'h1', title: 'تنسيقات أوفرسايز', icon: 'checkroom', img: '/images/reels/fashion_oversized_shirt_thumb.jpg' }
+    ]
   }
 };
 

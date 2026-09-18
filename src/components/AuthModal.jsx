@@ -12,6 +12,9 @@ export default function AuthModal() {
   const [name, setName] = useState('');
   const [selectedRole, setSelectedRole] = useState('buyer');
   
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  
   const [demoCategory, setDemoCategory] = useState('merchant');
 
   const DEMO_LIST = [
@@ -140,32 +143,52 @@ export default function AuthModal() {
     };
   }, [isAuthModalOpen, mode]);
 
+  useEffect(() => {
+    if (isAuthModalOpen) {
+      setError('');
+      setLoading(false);
+    }
+  }, [isAuthModalOpen, mode]);
+
   if (!isAuthModalOpen) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    const trimmedEmail = (email || '').trim();
+    if (!trimmedEmail) {
+      setError(isAr ? 'يرجى إدخال البريد الإلكتروني' : 'Please enter your email address');
+      return;
+    }
+    if (!password) {
+      setError(isAr ? 'يرجى إدخال كلمة المرور' : 'Please enter your password');
+      return;
+    }
+
     setLoading(true);
 
     try {
+      let authRes;
       if (mode === 'login') {
-        await AuthService.signInWithEmail(email, password);
+        authRes = await AuthService.signInWithEmail(trimmedEmail, password);
       } else {
-        await AuthService.signUpWithEmail(email, password, selectedRole, name);
+        authRes = await AuthService.signUpWithEmail(trimmedEmail, password, selectedRole, name);
       }
       
       const currentUser = await AuthService.getCurrentUser();
-      if (currentUser) {
-        setUser(currentUser);
-        if (currentUser.role) setRole(currentUser.role);
-        if (currentUser.role === 'merchant') {
-          setSelectedMerchantId('m-01');
+      const userToSet = currentUser || authRes?.user;
+      if (userToSet) {
+        setUser(userToSet);
+        if (userToSet.role) setRole(userToSet.role);
+        if (userToSet.role === 'merchant') {
+          setSelectedMerchantId(userToSet.merchant_id || 'm-01');
         }
       }
       
       setIsAuthModalOpen(false);
     } catch (err) {
-      setError(err.message || 'فشل تسجيل الدخول. يمكنك تجربة الدخول السريع بنقرة واحدة أدناه.');
+      setError(err.message || (isAr ? 'فشل تسجيل الدخول. يمكنك تجربة الدخول السريع بنقرة واحدة أدناه.' : 'Login failed. You can use 1-Click Quick Demo Login below.'));
     } finally {
       setLoading(false);
     }
@@ -181,11 +204,11 @@ export default function AuthModal() {
       if (demoUser.role === 'merchant') {
         if (roleKey === 'merchant_khan') setSelectedMerchantId('m-02');
         else if (roleKey === 'merchant_tiba') setSelectedMerchantId('m-03');
-        else setSelectedMerchantId('m-01');
+        else setSelectedMerchantId(demoUser.merchant_id || 'm-01');
       }
       setIsAuthModalOpen(false);
     } catch (err) {
-      setError(err.message || 'حدث خطأ أثناء الدخول التجريبي');
+      setError(err.message || (isAr ? 'حدث خطأ أثناء الدخول التجريبي' : 'Error during demo sign-in'));
     } finally {
       setLoading(false);
     }

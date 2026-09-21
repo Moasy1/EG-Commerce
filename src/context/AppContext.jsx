@@ -1242,30 +1242,44 @@ export function AppProvider({ children }) {
 
   useEffect(() => {
     const loadData = async () => {
+      // Step 1: Identify the current user
       const currentUser = await AuthService.getCurrentUser();
-      if (currentUser) {
-        const balance = await RewardService.getBalance(currentUser.id);
-        setRewardPoints(balance);
-      }
+      let activeMerchantId = null;
+
       if (currentUser) {
         setUser(currentUser);
         if (currentUser.role) setRole(currentUser.role);
         if (currentUser.merchant_id) {
+          activeMerchantId = currentUser.merchant_id;
           setSelectedMerchantId(prev => prev || currentUser.merchant_id);
         }
+        const balance = await RewardService.getBalance(currentUser.id);
+        setRewardPoints(balance);
         sessionTracker.setAuthenticatedUser(currentUser.id);
       }
-      
-      const fetchedProducts = await ProductService.getProducts();
+
+      // Step 2: Determine the effective merchant scope
+      // - Merchants see ONLY their own data
+      // - Superadmins and buyers see the full catalogue (no filter)
+      const isMerchantRole = currentUser?.role === 'merchant';
+      const scopedMerchantId = isMerchantRole
+        ? (activeMerchantId || currentUser?.merchant_id || null)
+        : null; // buyers / superadmins get unfiltered data
+
+      // Step 3: Load products scoped to the merchant (or all for buyers)
+      const fetchedProducts = await ProductService.getProducts(null, scopedMerchantId);
       setProducts(fetchedProducts);
-      
+
+      // Step 4: Load merchants list (always full, only for display purposes)
       const fetchedMerchants = await ProductService.getMerchants();
       setMerchants(fetchedMerchants);
 
+      // Step 5: Load cart (always user-scoped)
       const fetchedCart = await CartService.getCartItems();
       setCartItems(fetchedCart);
 
-      const fetchedOrders = await OrderService.getOrders();
+      // Step 6: Load orders scoped to the merchant
+      const fetchedOrders = await OrderService.getOrders(currentUser?.id || null, scopedMerchantId);
       setOrders(fetchedOrders);
     };
     loadData();
@@ -1295,6 +1309,22 @@ export function AppProvider({ children }) {
       }
     }
   }, [merchants]);
+
+  // When the store switcher changes merchant, reload products and orders for that merchant
+  // (Only active for merchant/admin roles — buyers get the full catalogue)
+  useEffect(() => {
+    if (!selectedMerchantId || !user) return;
+    const isMerchantRole = user?.role === 'merchant';
+    if (!isMerchantRole) return; // buyers don't need re-scoped data
+
+    const reloadMerchantData = async () => {
+      const fetchedProducts = await ProductService.getProducts(null, selectedMerchantId);
+      setProducts(fetchedProducts);
+      const fetchedOrders = await OrderService.getOrders(user.id, selectedMerchantId);
+      setOrders(fetchedOrders);
+    };
+    reloadMerchantData();
+  }, [selectedMerchantId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handle Browser Back / Forward buttons (popstate)
   useEffect(() => {

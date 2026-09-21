@@ -6,10 +6,21 @@ const HIDDEN_REELS_KEY = 'eg_hidden_reels';
 const REPORTS_KEY = 'eg_reel_reports';
 
 export const reelService = {
-  async getReels() {
+  async getReels(filter = null) {
+    // Build query URL with tenant filter params
+    let queryUrl = '/api/reels';
+    if (filter && typeof filter === 'object') {
+      const params = new URLSearchParams();
+      if (filter.merchantId)    params.append('merchantId',    filter.merchantId);
+      if (filter.creatorId)     params.append('creatorId',     filter.creatorId);
+      if (filter.storeSlug)     params.append('storeSlug',     filter.storeSlug);
+      if (filter.creatorHandle) params.append('creatorHandle', filter.creatorHandle);
+      if (params.toString()) queryUrl += `?${params.toString()}`;
+    }
+
     // 1. Fetch from Hostinger / Shared Backend API
     try {
-      const res = await fetch(apiConfig.getApiUrl('/api/reels'), { cache: 'no-store' });
+      const res = await fetch(apiConfig.getApiUrl(queryUrl), { cache: 'no-store' });
       if (res.ok) {
         const shared = await res.json();
         if (Array.isArray(shared) && shared.length > 0) {
@@ -18,9 +29,12 @@ export const reelService = {
             videoBg: apiConfig.getMediaUrl(r.videoBg || r.video_url),
             avatar: apiConfig.getMediaUrl(r.avatar || r.thumbnail_url)
           }));
-          try {
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(normalized));
-          } catch (e) {}
+          // Only cache globally when fetching without filter (public feed)
+          if (!filter) {
+            try {
+              localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(normalized));
+            } catch (e) {}
+          }
           const hiddenIds = this.getHiddenReelIds();
           return normalized.filter(r => !hiddenIds.includes(r.id));
         }
@@ -31,7 +45,7 @@ export const reelService = {
 
     let dbReels = [];
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('reels')
         .select(`
           *,
@@ -57,6 +71,14 @@ export const reelService = {
         .eq('visibility', 'public')
         .order('created_at', { ascending: false });
 
+      // Apply server-side filter when available
+      if (filter?.merchantId) {
+        query = query.eq('merchant_id', filter.merchantId);
+      } else if (filter?.creatorId) {
+        query = query.eq('creator_id', filter.creatorId);
+      }
+
+      const { data, error } = await query;
       if (!error && data && data.length > 0) {
         dbReels = data.map(r => this.normalizeDbReel(r));
       }
@@ -83,6 +105,23 @@ export const reelService = {
       combined = [...localReels, ...dbReels.filter(r => !localIds.has(r.id))];
     } else if (dbReels.length > 0) {
       combined = dbReels;
+    }
+
+    // Apply tenant filter to local/DB fallback results
+    if (filter && typeof filter === 'object') {
+      combined = combined.filter(r => {
+        if (filter.merchantId && (
+          r.merchantId === filter.merchantId ||
+          r.creatorId === filter.merchantId ||
+          (Array.isArray(r.products) && r.products.some(p => p.merchantId === filter.merchantId))
+        )) return true;
+        if (filter.creatorId && (
+          r.creatorId === filter.creatorId || r.publisherId === filter.creatorId
+        )) return true;
+        if (filter.storeSlug && r.storeSlug?.toLowerCase() === filter.storeSlug.toLowerCase()) return true;
+        if (filter.creatorHandle && r.creatorHandle?.toLowerCase() === filter.creatorHandle.toLowerCase()) return true;
+        return false;
+      });
     }
 
     return combined.filter(r => !hiddenIds.includes(r.id));

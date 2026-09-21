@@ -7,16 +7,25 @@ export const feedService = {
   /**
    * Main feed API endpoint
    * Returns: { items: [{ reel, ranking }], nextCursor, hasMore }
+   *
+   * @param {string|null} merchantId  - When set, only reels for this merchant are shown.
+   *                                    Pass null for the public Discover feed.
    */
   async getPersonalizedFeed({
     userId = null,
+    merchantId = null,
     tab = 'foryou',
     cursor = 0,
     limit = 10,
     fallbackReels = []
   } = {}) {
-    // 1. Fetch available reels from reelService (Supabase with synchronized local storage)
-    let baseReels = await reelService.getReels();
+    // Build tenant filter — public Discover page passes merchantId = null
+    const reelFilter = merchantId
+      ? { merchantId }
+      : (userId && tab !== 'foryou' ? { creatorId: userId } : null);
+
+    // 1. Fetch available reels scoped to the correct tenant
+    let baseReels = await reelService.getReels(reelFilter);
     if (!baseReels || baseReels.length === 0) {
       baseReels = fallbackReels;
     }

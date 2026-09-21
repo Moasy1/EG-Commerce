@@ -352,22 +352,40 @@ export const OrderService = {
     return saveCreatedOrders(createdOrders.length === 1 ? createdOrders[0] : createdOrders);
   },
 
-  async getOrders(userId = null) {
+  async getOrders(userId = null, merchantId = null) {
     const localOrders = getStoredOrders();
+
+    // Helper to apply merchant filter
+    const applyFilters = (list) => {
+      let filtered = list;
+      if (merchantId) {
+        filtered = filtered.filter(o => o.merchantId === merchantId || o.merchant_id === merchantId);
+      }
+      if (userId && !merchantId) {
+        // Only filter by userId when not scoping by merchant (buyer order history)
+        const userOrders = filtered.filter(o => o.userId === userId);
+        return userOrders.length > 0 ? userOrders : filtered;
+      }
+      return filtered;
+    };
+
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('platform_orders')
         .select('*')
         .order('created_at', { ascending: false });
 
+      if (merchantId) {
+        query = query.eq('merchant_id', merchantId);
+      }
+
+      const { data, error } = await query;
+
       if (!error && Array.isArray(data) && data.length > 0) {
         const sharedOrders = data.map(normalizePlatformOrder).filter(Boolean);
-        if (userId) {
-          const userOrders = sharedOrders.filter(o => o.userId === userId);
-          return userOrders.length > 0 ? userOrders : sharedOrders;
-        }
-        setStoredOrders(sharedOrders);
-        return sharedOrders;
+        const result = applyFilters(sharedOrders);
+        if (!merchantId) setStoredOrders(sharedOrders); // only cache full set
+        return result;
       }
     } catch (err) {
       // Use local orders when the shared sync table has not been installed yet.
@@ -377,6 +395,9 @@ export const OrderService = {
       let query = supabase.from('orders').select('*, order_items(*)');
       if (userId) {
         query = query.eq('user_id', userId);
+      }
+      if (merchantId) {
+        query = query.eq('merchant_id', merchantId);
       }
       const { data, error } = await query.order('created_at', { ascending: false });
       if (!error && Array.isArray(data) && data.length > 0) {
@@ -419,10 +440,7 @@ export const OrderService = {
       // Use synchronized local orders
     }
 
-    if (userId) {
-      return localOrders.filter(o => o.userId === userId);
-    }
-    return localOrders;
+    return applyFilters(localOrders);
   },
 
   async getMerchantOrders(merchantId) {

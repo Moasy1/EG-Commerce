@@ -154,7 +154,7 @@ export const ProductService = {
     });
   },
 
-  async getProducts(categorySlug = null) {
+  async getProducts(categorySlug = null, merchantId = null) {
     let allProducts = [];
 
     // 1. Fetch custom uploaded products from persistent local storage
@@ -171,12 +171,27 @@ export const ProductService = {
       console.warn('Could not parse eg_custom_products from storage:', e);
     }
 
+    // Filter custom products by merchant when scoped
+    if (merchantId) {
+      customProducts = customProducts.filter(
+        p => p.merchantId === merchantId || p.merchant_id === merchantId
+      );
+    }
+
     try {
       let query = supabase.from('products').select('*');
-      
+      // Scope Supabase query to merchant when possible
+      if (merchantId) {
+        query = query.eq('merchant_id', merchantId);
+      }
+
       const { data, error } = await query;
       if (error || !data || data.length === 0) {
-        allProducts = [...customProducts, ...INITIAL_PRODUCTS];
+        // When merchant-scoped, don't fall back to ALL INITIAL_PRODUCTS
+        const initialFallback = merchantId
+          ? INITIAL_PRODUCTS.filter(p => p.merchantId === merchantId || p.merchant_id === merchantId)
+          : INITIAL_PRODUCTS;
+        allProducts = [...customProducts, ...initialFallback];
       } else {
         // Map DB products to frontend format
         const dbMapped = data.map(dbProduct => ({
@@ -202,14 +217,20 @@ export const ProductService = {
           colors: ['Default']
         }));
 
-        // Merge Custom + DB products with INITIAL_PRODUCTS
+        // Merge Custom + DB products with INITIAL_PRODUCTS (filtered when scoped)
         const existingIds = new Set([...customProducts.map(p => p.id), ...dbMapped.map(p => p.id)]);
-        allProducts = [...customProducts, ...dbMapped, ...INITIAL_PRODUCTS.filter(p => !existingIds.has(p.id))];
+        const seedFallback = merchantId
+          ? INITIAL_PRODUCTS.filter(p => (p.merchantId === merchantId || p.merchant_id === merchantId) && !existingIds.has(p.id))
+          : INITIAL_PRODUCTS.filter(p => !existingIds.has(p.id));
+        allProducts = [...customProducts, ...dbMapped, ...seedFallback];
       }
     } catch (err) {
       console.warn('Error fetching products from backend:', err.message);
       const existingIds = new Set(customProducts.map(p => p.id));
-      allProducts = [...customProducts, ...INITIAL_PRODUCTS.filter(p => !existingIds.has(p.id))];
+      const seedFallback = merchantId
+        ? INITIAL_PRODUCTS.filter(p => (p.merchantId === merchantId || p.merchant_id === merchantId) && !existingIds.has(p.id))
+        : INITIAL_PRODUCTS.filter(p => !existingIds.has(p.id));
+      allProducts = [...customProducts, ...seedFallback];
     }
 
     if (categorySlug && categorySlug !== 'all') {
@@ -258,7 +279,7 @@ export const ProductService = {
         status: 'active',
         images: finalProduct.images,
         category_id: finalProduct.category,
-        merchant_id: 'd0000000-0000-0000-0000-000000000001'
+        merchant_id: finalProduct.merchantId || productData.merchantId || null
       };
 
       const { data, error } = await supabase.from('products').insert(dbPayload).select();

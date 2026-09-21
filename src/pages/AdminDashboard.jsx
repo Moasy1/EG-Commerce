@@ -714,9 +714,9 @@ export default function AdminDashboard() {
                   className="h-10 px-3 rounded-lg border border-gray-200 bg-gray-50 text-xs font-bold text-gray-700 cursor-pointer focus:outline-none"
                   >
                     <option value="all">{isAr ? 'كل المتاجر' : 'All Stores'}</option>
-                    <option value="m-01">Talieska Studio</option>
-                    <option value="m-02">Khan El Khalili Craft</option>
-                    <option value="m-03">Tiba Jewelry</option>
+                    <option value="171842bd-daed-40ef-853f-917eab2ed437">Drip Fit</option>
+                    <option value="171842bd-daed-40ef-853f-917eab2ed437">Khan El Khalili Craft</option>
+                    <option value="171842bd-daed-40ef-853f-917eab2ed437">Tiba Jewelry</option>
                   </select>
                   <select
                     value={orderStatusFilter}
@@ -1366,7 +1366,7 @@ export default function AdminDashboard() {
                     </td>
                     <td className="px-4 py-3">
                       <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[11px] font-bold">
-                        {prod.merchant || 'Talieska Studio'}
+                        {prod.merchant || 'Drip Fit'}
                       </span>
                     </td>
                     <td className="px-4 py-3 font-mono font-bold text-slate-900">{prod.price.toLocaleString()} ج.م</td>
@@ -1552,7 +1552,7 @@ export default function AdminDashboard() {
                       value={formData.assignedStore || ''} 
                       onChange={e => setFormData({ ...formData, assignedStore: e.target.value })} 
                       className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:border-slate-900 outline-none font-mono" 
-                      placeholder="e.g. Talieska Studio (talieska)"
+                      placeholder="e.g. Drip Fit (talieska)"
                     />
                   </div>
                 </>
@@ -1601,7 +1601,7 @@ export default function AdminDashboard() {
                         setFormData({ 
                           ...formData, 
                           merchantId: e.target.value,
-                          merchant: st?.name || 'Talieska Studio'
+                          merchant: st?.name || 'Drip Fit'
                         });
                       }} 
                       className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:border-slate-900 outline-none"

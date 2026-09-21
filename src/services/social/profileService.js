@@ -18,7 +18,7 @@ export const profileService = {
           username: data.username || data.email?.split('@')[0],
           displayName: data.display_name || data.name || 'مستخدم المنصة',
           avatarUrl: data.avatar_url || '/images/reels/reel_1.jpg',
-          coverUrl: data.cover_url || '/images/banners/talieska_hero.jpg',
+          coverUrl: data.cover_url || '/images/products/the_sharp_v_yellow_1.webp',
           bio: data.bio || '',
           role: data.role || 'buyer',
           isCreator: Boolean(data.is_creator || data.role === 'creator'),

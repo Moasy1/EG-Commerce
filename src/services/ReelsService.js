@@ -147,7 +147,7 @@ export const ReelsService = {
       merchantId: reelData.merchantId || null,
       storeSlug: reelData.storeSlug || null,
       isMerchantReel: isMerchant,
-      videoBg: reelData.videoBg || reelData.video || '/images/reels/linen_abaya.mp4',
+      videoBg: reelData.videoBg || reelData.video || reelData.image || (formattedProducts[0]?.image) || '',
       caption: reelData.caption || 'إطلالة حصرية جديدة متوفرة الآن في egyptian-commerce.com 🇪🇬✨ #موضة_مصرية #ريلز',
       music: reelData.music || 'Egyptian Aesthetic Vibes • Instrumental',
       likes: reelData.likes !== undefined ? reelData.likes : 15,
@@ -177,12 +177,33 @@ export const ReelsService = {
 
     // 2. Try to persist to Supabase
     try {
-      await supabase.from('reels').insert({
-        id: formattedReel.id.includes('-') && formattedReel.id.length === 36 ? formattedReel.id : undefined,
+      const isUuid = (val) => typeof val === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
+      const reelPayload = {
         video_url: formattedReel.videoBg,
+        thumbnail_url: formattedReel.avatar || formattedReel.thumbnail,
         caption: formattedReel.caption,
         status: 'active'
-      });
+      };
+      if (isUuid(formattedReel.id)) reelPayload.id = formattedReel.id;
+      if (isUuid(formattedReel.merchantId)) reelPayload.merchant_id = formattedReel.merchantId;
+      if (isUuid(formattedReel.creatorId)) reelPayload.creator_id = formattedReel.creatorId;
+
+      const { data: dbReel, error: reelErr } = await supabase
+        .from('reels')
+        .insert(reelPayload)
+        .select()
+        .single();
+
+      if (!reelErr && dbReel && formattedProducts.length > 0) {
+        for (const p of formattedProducts) {
+          if (isUuid(p.id)) {
+            await supabase.from('reel_products').upsert({
+              reel_id: dbReel.id,
+              product_id: p.id
+            }, { onConflict: 'reel_id,product_id' });
+          }
+        }
+      }
     } catch (err) {
       console.warn('DB Save Reel skipped (using synchronized storage):', err.message);
     }

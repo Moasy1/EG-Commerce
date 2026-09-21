@@ -7,6 +7,8 @@ import { CATEGORIES_DATA } from '../services/ProductService';
 export default function Marketplace() {
   const { 
     products: contextProducts, 
+    merchants,
+    creators,
     openProductDetail, 
     totalCartCount, 
     setActiveTab, 
@@ -26,26 +28,19 @@ export default function Marketplace() {
   // Fallback products if context not ready
   const fallbackProducts = [
     {
-      id: 'p-fashion-blazer',
-      title: 'Citrine Yellow Oversized Blazer',
-      price: 1850,
-      image: '/images/reels/fashion_citrine_blazer_thumb.jpg',
-      video: '/images/reels/fashion_citrine_blazer.mp4',
-      category: 'Women',
-      rating: 4.9,
-      reviewsCount: 142,
-      merchantId: 'm-01'
-    },
-    {
-      id: 'p-fashion-oversized-shirt',
-      title: 'Sky Blue Linen Oversized Shirt',
-      price: 980,
-      image: '/images/reels/fashion_oversized_shirt_thumb.jpg',
-      video: '/images/reels/fashion_oversized_shirt.mp4',
+      id: '11111111-d001-4000-8000-000000000001',
+      sku: 'DF-SHARP-V-YEL',
+      title: 'The Sharp V Yellow Oversized T-Shirt • تيشرت شارب في أصفر أوفرسايز',
+      price: 680,
+      originalPrice: 850,
+      image: '/images/products/the_sharp_v_yellow_1.webp',
+      video: '/images/reels/the_sharp_v_yellow_reel.mp4',
       category: 'Streetwear',
-      rating: 4.8,
-      reviewsCount: 96,
-      merchantId: 'm-01'
+      rating: 5.0,
+      reviewsCount: 18,
+      merchantId: '171842bd-daed-40ef-853f-917eab2ed437',
+      merchant: 'Drip Fit • دريب فيت',
+      merchantSlug: 'drip-fit'
     }
   ];
 
@@ -59,23 +54,37 @@ export default function Marketplace() {
       )
     : rawProducts;
 
+  // Dynamic Stores & Brands in Real Time
+  const topStores = (merchants && merchants.length > 0 ? merchants : [
+    { 
+      id: '171842bd-daed-40ef-853f-917eab2ed437', 
+      name: 'Drip Fit • دريب فيت', 
+      slug: 'drip-fit', 
+      handle: 'drip_fit', 
+      logo: '/images/brands/dripfit_logo.png' 
+    }
+  ]).map(store => ({
+    id: store.id,
+    name: store.shortName || store.name?.split('•')[0]?.trim() || store.name,
+    slug: store.slug || 'drip-fit',
+    handle: store.handle ? store.handle.replace(/^@/, '') : (store.slug || 'drip-fit'),
+    image: store.logo || store.avatar || '/images/brands/dripfit_logo.png'
+  }));
 
-  // Top Stores & Brands
-  const topStores = [
-    { id: 'store-1', name: 'Talieska Studio', slug: 'talieska', handle: 'talieska', image: '/images/brands/talieska_logo.jpg' },
-    { id: 'store-2', name: 'ورشة خان الخليلي', slug: 'khan-craft', handle: 'khan-craft', image: '/images/banners/khan_hero.jpg' },
-    { id: 'store-3', name: 'مجوهرات طيبة', slug: 'tiba-jewelry', handle: 'tiba-jewelry', image: '/images/reels/fashion_vintage_watch_thumb.jpg' },
-  ];
-
-  // Featured Creators
-  const featuredCreators = [
+  // Dynamic Creators in Real Time
+  const featuredCreators = (creators && creators.length > 0 ? creators : [
     { id: 'c-1', handle: 'cairo_chic', name: 'Cairo Chic', avatar: '/images/reels/fashion_citrine_blazer_thumb.jpg' },
     { id: 'c-2', handle: 'salma.styles', name: 'Salma Styles', avatar: '/images/reels/fashion_oversized_shirt_thumb.jpg' },
     { id: 'c-3', handle: 'yasmin_style', name: 'Yasmin Sayed', avatar: '/images/reels/reel_2.jpg' },
     { id: 'c-4', handle: 'zeina_ootd', name: 'Zeina OOTD', avatar: '/images/reels/fashion_oneshoulder_top_thumb.jpg' },
     { id: 'c-5', handle: 'karim.editorial', name: 'Karim Editorial', avatar: '/images/reels/fashion_vintage_watch_thumb.jpg' },
     { id: 'c-6', handle: 'maya_accessories', name: 'Maya Accessories', avatar: '/images/reels/fashion_shoulder_bags_thumb.jpg' },
-  ];
+  ]).map(c => ({
+    id: c.id,
+    handle: c.handle ? c.handle.replace(/^@/, '') : (c.slug || c.name?.toLowerCase().replace(/\s+/g, '_')),
+    name: c.name,
+    avatar: c.avatar || c.avatar_url || '/images/reels/reel_2.jpg'
+  }));
 
   return (
     <div className="w-full flex-1 overflow-y-auto min-h-0 relative">

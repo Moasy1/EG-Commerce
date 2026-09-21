@@ -312,7 +312,7 @@ export default function DesktopFeed() {
                     e.stopPropagation();
                     const handle = card.creator?.includes('@') 
                       ? card.creator.split('@')[1]?.replace(')', '').trim() 
-                      : 'talieska';
+                      : 'drip-fit';
                     navigateToProfile(handle);
                   }}
                 >

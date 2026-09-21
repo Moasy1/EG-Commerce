@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useApp, MERCHANTS_DATA } from '../../context/AppContext';
 import { MerchantService } from '../../services/MerchantService';
 import EgLogo from '../common/EgLogo';
+import StorefrontThemeCustomizer from '../merchant/StorefrontThemeCustomizer';
 import ProductFormModal from '../merchant/ProductFormModal';
 import InvoiceModal from '../common/InvoiceModal';
 import NotificationCenter from '../common/NotificationCenter';
@@ -36,9 +37,14 @@ export default function DesktopSellerDashboard() {
   const [productToEdit, setProductToEdit] = useState(null);
   const [activeInvoiceOrder, setActiveInvoiceOrder] = useState(null);
 
+  const isSuperadmin = user?.role === 'superadmin' || user?.role === 'admin';
   const fallbackMerchant = (merchants && merchants.length > 0) ? merchants[0] : (MERCHANTS_DATA?.[0] || {});
   const currentMerchant = (merchants && merchants.length > 0)
-    ? (merchants.find(m => m.id === selectedMerchantId || m.id === user?.merchant_id || m.user_id === user?.id) || fallbackMerchant)
+    ? (
+        (!isSuperadmin && user?.role === 'merchant')
+          ? (merchants.find(m => m.id === user?.merchant_id || m.user_id === user?.id || (user?.store_slug && m.slug === user.store_slug)) || fallbackMerchant)
+          : (merchants.find(m => m.id === selectedMerchantId || m.id === user?.merchant_id || m.user_id === user?.id) || fallbackMerchant)
+      )
     : fallbackMerchant;
 
   const merchantProducts = (products || []).filter(p => p && (p.merchantId === currentMerchant?.id || p.merchant_id === currentMerchant?.id));
@@ -78,39 +84,12 @@ export default function DesktopSellerDashboard() {
   const topVideos = [
     {
       id: 'v-1',
-      title: 'إطلالة الجلابية الجديدة',
-      views: '32.4K',
-      orders: '428',
-      growth: '42%',
-      duration: '0:24',
-      img: '/images/products/linen_abaya.jpg'
-    },
-    {
-      id: 'v-2',
-      title: 'تفاصيل التطريز اليدوي',
-      views: '21.7K',
-      orders: '312',
-      growth: '36%',
-      duration: '0:18',
-      img: '/images/products/silk_dress.jpg'
-    },
-    {
-      id: 'v-3',
-      title: 'ستايل رجالي للصيف',
-      views: '18.9K',
-      orders: '241',
-      growth: '28%',
-      duration: '0:27',
-      img: '/images/products/linen_shirt.jpg'
-    },
-    {
-      id: 'v-4',
-      title: 'عبايات كلاسيك',
-      views: '15.6K',
-      orders: '198',
-      growth: '24%',
-      duration: '0:21',
-      img: '/images/products/wool_blazer.jpg'
+      title: 'The Sharp V Yellow Drop Reel 🔥',
+      views: '14.8K',
+      orders: '42',
+      growth: '54%',
+      duration: '0:15',
+      img: '/images/products/the_sharp_v_yellow_1.webp'
     }
   ];
 
@@ -132,6 +111,7 @@ export default function DesktopSellerDashboard() {
               { id: 'customers', label: 'العملاء', icon: 'group' },
               { id: 'content', label: 'المحتوى', icon: 'smart_display' },
               { id: 'analytics', label: 'التحليلات', icon: 'trending_up' },
+              { id: 'storefront_design', label: 'تخصيص المتجر', icon: 'palette' },
               { id: 'marketing', label: 'التسويق', icon: 'campaign' },
               { id: 'settings', label: 'الإعدادات', icon: 'settings' },
             ].map((item) => (
@@ -759,7 +739,7 @@ export default function DesktopSellerDashboard() {
                   { img: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=800&q=80', views: '45.2K', sales: '312 طلب', status: 'نشط (تريند)' },
                   { img: 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?auto=format&fit=crop&w=800&q=80', views: '89.1K', sales: '840 طلب', status: 'نشط (تريند)' },
                   { img: '/images/reels/reel_1.jpg', views: '124K', sales: '84 طلب', status: 'نشط (الرئيسية)' },
-                  { img: '/images/products/linen_abaya.jpg', views: '12K', sales: '8 طلبات', status: 'قيد المراجعة' },
+                  { img: '/images/products/the_sharp_v_yellow_1.webp', views: '12K', sales: '8 طلبات', status: 'قيد المراجعة' },
                 ].map((reel, i) => (
 
                   <div key={i} className="relative group rounded-2xl overflow-hidden border border-gray-200 bg-gray-50">
@@ -953,6 +933,12 @@ export default function DesktopSellerDashboard() {
               </div>
             );
           })()}
+
+          {activeNav === 'storefront_design' && (
+            <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-xs">
+              <StorefrontThemeCustomizer />
+            </div>
+          )}
 
           {activeNav === 'settings' && (
             <div className="bg-white rounded-3xl border border-gray-200 p-5 shadow-xs space-y-6 min-h-[400px]">

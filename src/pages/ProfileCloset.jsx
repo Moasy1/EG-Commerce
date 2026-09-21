@@ -39,7 +39,7 @@ export default function ProfileCloset() {
   // Filter items created by or associated with this profile
   const userProducts = (products || []).filter(p => 
     p.createdBy === user.id || 
-    (user.role === 'merchant' && (p.merchant?.toLowerCase().includes('talieska') || p.merchantId?.includes('0001')))
+    (user.role === 'merchant' && (p.merchant?.toLowerCase().includes('drip-fit') || p.merchantId?.includes('0001')))
   );
 
   return (

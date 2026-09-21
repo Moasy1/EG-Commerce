@@ -7,7 +7,7 @@ export default function DeliveryDashboard() {
   const [activeTab, setActiveTab] = useState('available'); // available, active
 
   const [availableOrders, setAvailableOrders] = useState([
-    { id: 'ORD-8211', merchant: 'Talieska Studio', pickup: 'Zamalek, Cairo', dropoff: 'Maadi, Cairo', payout: 45, distance: '12 km', status: 'ready' },
+    { id: 'ORD-8211', merchant: 'Drip Fit', pickup: 'Zamalek, Cairo', dropoff: 'Maadi, Cairo', payout: 45, distance: '12 km', status: 'ready' },
     { id: 'ORD-9932', merchant: 'Theba Jewelry', pickup: 'Heliopolis, Cairo', dropoff: 'New Cairo', payout: 55, distance: '18 km', status: 'ready' }
   ]);
   const [activeOrders, setActiveOrders] = useState([]);

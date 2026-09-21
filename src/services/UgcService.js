@@ -15,7 +15,7 @@ const DEFAULT_PROFILE = {
   name: 'ياسمين السيد • Yasmin El Sayed',
   handle: '@cairo_chic',
   avatar: '/images/reels/reel_1.jpg',
-  cover: '/images/products/linen_abaya.jpg',
+  cover: '/images/products/the_sharp_v_yellow_1.webp',
   bio: 'صانعة محتوى أزياء وستايلست معاصرة من القاهرة 🇪🇬✨ أعشق مزج القطن والكتان المصري مع اللمسات العالمية.',
   city: 'القاهرة، مصر',
   cityEn: 'Cairo, Egypt',
@@ -34,126 +34,29 @@ const DEFAULT_PROFILE = {
 
 const DEFAULT_CAMPAIGNS = [
   {
-    id: 'camp-1',
-    merchantId: 'm-01',
-    productId: 'p-sheglam-1',
-    title: 'إطلاق كولكشن الكتان الصيفي 2026',
-    titleEn: 'Kaizen Linen Summer 2026 Launch',
-    brandName: 'Talieska Studio • تاليسكا',
-    brandLogo: '/images/brands/talieska_logo.jpg',
-    productName: 'عباية كتان ناعمة وتوب كاجوال',
+    id: 'camp-df-1',
+    merchantId: '171842bd-daed-40ef-853f-917eab2ed437',
+    productId: '11111111-d001-4000-8000-000000000001',
+    title: 'إطلاق كولكشن The Sharp V Yellow • دريب فيت',
+    titleEn: 'Drip Fit The Sharp V Yellow Launch',
+    brandName: 'Drip Fit • دريب فيت',
+    brandLogo: '/images/brands/dripfit_logo.png',
+    productName: 'The Sharp V Yellow Oversized T-Shirt',
     rewardType: 'hybrid',
-    rewardLabel: 'طقم مجاني + 15% عمولة مبيعات',
-    rewardLabelEn: 'Free Outfit + 15% Commission',
-    budgetEgp: 3500,
+    rewardLabel: 'تيشرت مجاني + 15% عمولة مبيعات',
+    rewardLabelEn: 'Free T-Shirt + 15% Commission',
+    budgetEgp: 4500,
     commissionRate: 15,
-    slotsAvailable: 4,
+    slotsAvailable: 5,
     slotsTotal: 5,
-    deadline: '2026-09-30',
+    deadline: '2026-10-30',
     status: 'active',
-    applied: true,
-    applicationStatus: 'draft_submitted', // 'applied' | 'approved' | 'draft_submitted' | 'completed'
-    submittedUrl: '/images/reels/linen_abaya.mp4',
-    draftNotes: 'تم تصوير الفيديو بأعلى جودة وإبراز الكولكشن الصيفي وكود التخفيض، يرجى المراجعة للاعتماد.',
-    guidelines: 'تصوير ريلز عالي الجودة يبرز خامة الكتان في ضوء النهار، مع توضيح كود الخصم في الوصف.',
-    createdAt: '2026-09-01'
-  },
-  {
-    id: 'camp-2',
-    merchantId: 'm-01',
-    productId: 'p-sheglam-2',
-    title: 'تنسيقات الشارع المعاصرة • Cairo Streetwear',
-    titleEn: 'Contemporary Streetwear Styling',
-    brandName: 'Talieska Studio • تاليسكا',
-    brandLogo: '/images/brands/talieska_logo.jpg',
-    productName: 'قميص كتان فضفاض وبنطال أوفرسايز',
-    rewardType: 'fixed',
-    rewardLabel: '4,200 ج.م كاش + طقم كامل',
-    rewardLabelEn: '4,200 EGP + Full Outfit',
-    budgetEgp: 4200,
-    commissionRate: 10,
-    slotsAvailable: 2,
-    slotsTotal: 3,
-    deadline: '2026-10-05',
-    status: 'active',
-    applied: true,
-    applicationStatus: 'applied',
-    submittedUrl: '',
+    applied: false,
+    applicationStatus: null,
+    submittedUrl: '/images/reels/the_sharp_v_yellow_reel.mp4',
     draftNotes: '',
-    guidelines: 'ستايل عصري شبابي في شوارع المعادي أو الزمالك مع منشن للبراند واستخدام تراك التريند.',
-    createdAt: '2026-09-05'
-  },
-  {
-    id: 'camp-3',
-    merchantId: 'm-01',
-    productId: 'p-sheglam-3',
-    title: 'تحدي ستايلنج العبايات الأنيقة للعمل',
-    titleEn: 'Workwear Modest Styling Challenge',
-    brandName: 'Talieska Studio • تاليسكا',
-    brandLogo: '/images/brands/talieska_logo.jpg',
-    productName: 'فستان حرير مع جاكيت كيمونو محتشم',
-    rewardType: 'hybrid',
-    rewardLabel: '3,800 ج.م + كود خصم للمتابعين',
-    rewardLabelEn: '3,800 EGP + Follower Discount Code',
-    budgetEgp: 3800,
-    commissionRate: 12,
-    slotsAvailable: 6,
-    slotsTotal: 6,
-    deadline: '2026-10-12',
-    status: 'active',
-    applied: false,
-    applicationStatus: null,
-    submittedUrl: '',
-    guidelines: 'توضيح 3 طرق مختلفة لارتداء الفستان في مناسبات العمل والخروجات الصباحية.',
-    createdAt: '2026-09-08'
-  },
-  {
-    id: 'camp-4',
-    merchantId: 'm-02',
-    productId: 'p-fashion-copper-lantern',
-    title: 'حملة إكسسوارات النحاس الفاطمي اليدوي',
-    titleEn: 'Handcrafted Heritage Brass Accessories',
-    brandName: 'Khan El Khalili Crafts',
-    brandLogo: '/images/products/copper_lantern.jpg',
-    productName: 'عقد نحاسي عريض وأقراط تراثية',
-    rewardType: 'commission',
-    rewardLabel: '20% عمولة على كل طلب عبر الرابط',
-    rewardLabelEn: '20% Commission on each tagged sale',
-    budgetEgp: 2500,
-    commissionRate: 20,
-    slotsAvailable: 8,
-    slotsTotal: 8,
-    deadline: '2026-10-20',
-    status: 'active',
-    applied: false,
-    applicationStatus: null,
-    submittedUrl: '',
-    guidelines: 'التركيز على تفاصيل الحرفية اليدوية المصرية وجودة لمعان النحاس.',
-    createdAt: '2026-09-10'
-  },
-  {
-    id: 'camp-5',
-    merchantId: 'm-01',
-    productId: 'p-cotton-shirt-01',
-    title: 'أسبوع القطن المصري فائق النعومة',
-    titleEn: 'Premium Egyptian Cotton Week',
-    brandName: 'Talieska Studio • تاليسكا',
-    brandLogo: '/images/brands/talieska_logo.jpg',
-    productName: 'تيشيرت وبلوفر قطن جيزة 100%',
-    rewardType: 'fixed',
-    rewardLabel: '5,000 ج.م + بوكس هدايا فاخر',
-    rewardLabelEn: '5,000 EGP + Luxury Gift Box',
-    budgetEgp: 5000,
-    commissionRate: 8,
-    slotsAvailable: 3,
-    slotsTotal: 3,
-    deadline: '2026-10-28',
-    status: 'active',
-    applied: false,
-    applicationStatus: null,
-    submittedUrl: '',
-    guidelines: 'اختبار ملمس القطن الأصلي ومقارنته بالأقمشة العادية مع تركيز على شعور الراحة.',
-    createdAt: '2026-09-11'
+    guidelines: 'تصوير ريلز عالي الجودة يبرز قصة الأوفرسايز وخامة القطن المصري 100% مع منشن @drip_fit.',
+    createdAt: '2026-09-21'
   }
 ];
 
@@ -162,7 +65,7 @@ const DEFAULT_APPLICATIONS = [
     id: 'app-001',
     campaignId: 'camp-1',
     campaignTitle: 'إطلاق كولكشن الكتان الصيفي 2026',
-    merchantId: 'm-01',
+    merchantId: '171842bd-daed-40ef-853f-917eab2ed437',
     creatorId: 'cr-01',
     creatorName: 'ياسمين السيد • Yasmin El Sayed',
     creatorHandle: '@cairo_chic',
@@ -172,7 +75,7 @@ const DEFAULT_APPLICATIONS = [
     creatorCity: 'القاهرة، مصر',
     status: 'draft_submitted', // 'applied' | 'approved' | 'rejected' | 'draft_submitted' | 'completed'
     notes: 'أحببت خامة الكتان وتفاصيل القصّة، أخطط لعمل فيديو ستايلنج Morning to Night في حديقة الأزهر مع إبراز كود الخصم.',
-    submittedUrl: '/images/reels/linen_abaya.mp4',
+    submittedUrl: '/images/reels/the_sharp_v_yellow_reel.mp4',
     draftNotes: 'تم تصوير الفيديو بأعلى جودة وإبراز الكولكشن الصيفي وكود التخفيض، يرجى المراجعة للاعتماد.',
     appliedAt: '2026-09-14',
     submittedAt: '2026-09-16'
@@ -181,7 +84,7 @@ const DEFAULT_APPLICATIONS = [
     id: 'app-002',
     campaignId: 'camp-2',
     campaignTitle: 'تنسيقات الشارع المعاصرة • Cairo Streetwear',
-    merchantId: 'm-01',
+    merchantId: '171842bd-daed-40ef-853f-917eab2ed437',
     creatorId: 'cr-02',
     creatorName: 'سلمى ستايلز • Salma Styles',
     creatorHandle: '@salma_fashion_eg',
@@ -211,7 +114,7 @@ const DEFAULT_CONTENT = [
     commissionEarned: '2,730 ج.م',
     date: '2026-09-10',
     status: 'published',
-    thumbnail: '/images/products/linen_abaya.jpg',
+    thumbnail: '/images/products/the_sharp_v_yellow_1.webp',
     taggedProduct: 'عباية كتان ناعمة وتوب عصري'
   },
   {
@@ -310,14 +213,14 @@ export const UgcService = {
         : (user.name 
             ? `@${user.name.trim().toLowerCase().replace(/[^a-z0-9_]/g, '_')}` 
             : (user.slug ? `@${user.slug}` : '@store'));
-      const avatar = user.profile?.avatar_url || user.avatar_url || user.avatar || (isMerchant ? '/images/brands/talieska_logo.jpg' : '/images/reels/reel_2.jpg');
+      const avatar = user.profile?.avatar_url || user.avatar_url || user.avatar || (isMerchant ? '/images/brands/dripfit_logo.png' : '/images/reels/reel_2.jpg');
       
       const customProfile = {
         id: user.id || 'cr-01',
         name: user.name || user.email?.split('@')[0] || (isMerchant ? 'متجر معتمد' : 'صانع محتوى'),
         handle: cleanHandle,
         avatar: avatar,
-        cover: '/images/banners/talieska_hero.jpg',
+        cover: '/images/products/the_sharp_v_yellow_1.webp',
         bio: isMerchant ? `المتجر الرسمي لـ ${user.name || 'البراند'} في منصة EG-Commerce 🇪🇬✨` : 'صانع محتوى ومبدع معتمد في EG-Commerce 🇪🇬✨',
         city: 'القاهرة، مصر',
         cityEn: 'Cairo, Egypt',
@@ -444,7 +347,7 @@ export const UgcService = {
           productId: d.product_id,
           title: d.title,
           brandName: d.brand_name || 'متجر معتمد',
-          brandLogo: d.brand_logo || '/images/brands/talieska_logo.jpg',
+          brandLogo: d.brand_logo || '/images/brands/dripfit_logo.png',
           productName: d.product_name || 'منتج مميز',
           rewardType: d.reward_type,
           rewardLabel: d.reward_label || `${d.fixed_reward_amount || 0} ج.م`,
@@ -478,8 +381,8 @@ export const UgcService = {
       title: campaignData.title || 'حملة ريلز جديدة',
       titleEn: campaignData.titleEn || campaignData.title || 'New UGC Campaign',
       brandName: campaignData.brandName || 'متجر معتمد',
-      brandLogo: campaignData.brandLogo || '/images/brands/talieska_logo.jpg',
-      merchantId: campaignData.merchantId || campaignData.merchant_id || 'm-01',
+      brandLogo: campaignData.brandLogo || '/images/brands/dripfit_logo.png',
+      merchantId: campaignData.merchantId || campaignData.merchant_id || '171842bd-daed-40ef-853f-917eab2ed437',
       productId: campaignData.productId || campaignData.product_id || null,
       productName: campaignData.productName || 'منتج مختار',
       rewardType: campaignData.rewardType || 'hybrid',
@@ -642,7 +545,7 @@ export const UgcService = {
       id: `app-${Date.now()}`,
       campaignId,
       campaignTitle: targetCamp?.title || 'حملة محتوى',
-      merchantId: targetCamp?.merchantId || 'm-01',
+      merchantId: targetCamp?.merchantId || '171842bd-daed-40ef-853f-917eab2ed437',
       creatorId,
       creatorName: typeof creatorData === 'object' && creatorData.name ? creatorData.name : 'ياسمين السيد • Yasmin El Sayed',
       creatorHandle: typeof creatorData === 'object' && creatorData.handle ? creatorData.handle : '@cairo_chic',
@@ -773,7 +676,7 @@ export const UgcService = {
     // 4. Publish to platform Reels feed via ReelsService
     const creatorHandle = reviewed?.creatorHandle || '@cairo_chic';
     const creatorName = reviewed?.creatorName || 'صانعة محتوى معتمدة';
-    const videoUrl = reviewed?.submittedUrl || camp.submittedUrl || '/images/reels/linen_abaya.mp4';
+    const videoUrl = reviewed?.submittedUrl || camp.submittedUrl || '/images/reels/the_sharp_v_yellow_reel.mp4';
     
     await ReelsService.saveReel({
       id: `reel-ugc-${Date.now()}`,
@@ -801,7 +704,7 @@ export const UgcService = {
       titleEn: camp.titleEn || camp.title,
       status: 'published',
       taggedProduct: camp.productName,
-      thumbnail: camp.brandLogo || '/images/products/linen_abaya.jpg'
+      thumbnail: camp.brandLogo || '/images/products/the_sharp_v_yellow_1.webp'
     });
 
     return { success: true, application: reviewed, campaign: camp };
@@ -898,9 +801,9 @@ export const UgcService = {
       commissionEarned: '0 ج.م',
       date: new Date().toISOString().split('T')[0],
       status: contentData.status || 'published',
-      thumbnail: contentData.thumbnail || '/images/products/linen_abaya.jpg',
+      thumbnail: contentData.thumbnail || '/images/products/the_sharp_v_yellow_1.webp',
       taggedProduct: contentData.taggedProduct || 'منتج مميز',
-      videoUrl: contentData.videoUrl || '/images/reels/linen_abaya.mp4',
+      videoUrl: contentData.videoUrl || '/images/reels/the_sharp_v_yellow_reel.mp4',
       music: contentData.music || 'Egyptian Aesthetic Vibes',
       duration: contentData.duration || '0:15',
       category: contentData.category || 'fashion',

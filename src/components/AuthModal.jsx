@@ -3,7 +3,18 @@ import { useApp } from '../context/AppContext';
 import { AuthService, DEMO_USERS } from '../services/AuthService';
 
 export default function AuthModal() {
-  const { isAuthModalOpen, setIsAuthModalOpen, setUser, setRole, isAr, setSelectedMerchantId } = useApp();
+  const { 
+    user,
+    isAuthModalOpen, 
+    setIsAuthModalOpen, 
+    setUser, 
+    setRole, 
+    isAr, 
+    setSelectedMerchantId,
+    refreshData,
+    navigateToMyProfile,
+    navigateToProfile
+  } = useApp();
   const [mode, setMode] = useState('login'); // 'login' or 'register'
   
   const [email, setEmail] = useState('');
@@ -20,34 +31,14 @@ export default function AuthModal() {
   const DEMO_LIST = [
     // Merchants
     {
-      key: 'merchant_talieska',
+      key: 'merchant_dripfit',
       type: 'merchant',
-      name: isAr ? 'تاليسكا ستوديو' : 'Talieska Studio',
-      sub: isAr ? 'أزياء كتان فاخرة' : 'Haute Linen Boutique',
-      handle: '@talieska',
-      img: '/images/brands/talieska_logo.jpg',
-      badge: isAr ? 'تاجر رئيسي' : 'Merchant',
+      name: isAr ? 'دريب فيت ستريت وير' : 'Drip Fit Official',
+      sub: isAr ? 'أزياء ستريت وير وتوبات صيفية' : 'Urban Streetwear & Summer Tops',
+      handle: '@drip_fit',
+      img: '/images/brands/dripfit_logo.png',
+      badge: isAr ? 'تاجر رئيسي موثق' : 'Verified Merchant',
       color: 'border-red-200 bg-red-50/40 text-red-700 hover:border-red-400'
-    },
-    {
-      key: 'merchant_khan',
-      type: 'merchant',
-      name: isAr ? 'ورشة خان الخليلي' : 'Khan El Khalili Craft',
-      sub: isAr ? 'نحاس وسجاد تراثي' : 'Brass & Rug Heritage',
-      handle: '@khan.craft.eg',
-      img: '/images/products/copper_lantern.jpg',
-      badge: isAr ? 'حرف تراثية' : 'Heritage',
-      color: 'border-amber-200 bg-amber-50/40 text-amber-700 hover:border-amber-400'
-    },
-    {
-      key: 'merchant_tiba',
-      type: 'merchant',
-      name: isAr ? 'مجوهرات طيبة' : 'Tiba Jewelry',
-      sub: isAr ? 'فضة فرعونية وذهب' : 'Pharaonic Silver & Gold',
-      handle: '@tiba.jewels',
-      img: '/images/brands/talieska_logo.jpg',
-      badge: isAr ? 'مجوهرات' : 'Jewelry',
-      color: 'border-yellow-200 bg-yellow-50/40 text-yellow-700 hover:border-yellow-400'
     },
     // Creators
     {
@@ -184,8 +175,10 @@ export default function AuthModal() {
           setRole(userToSet.role);
         }
         if (userToSet.role === 'merchant') {
-          setSelectedMerchantId(userToSet.merchant_id || 'm-01');
+          setSelectedMerchantId(userToSet.merchant_id || `m-${userToSet.id}`);
         }
+        await refreshData(userToSet);
+        window.dispatchEvent(new Event('eg_profiles_updated'));
       }
       
       setIsAuthModalOpen(false);
@@ -204,10 +197,10 @@ export default function AuthModal() {
       setUser(demoUser);
       setRole(demoUser.role);
       if (demoUser.role === 'merchant') {
-        if (roleKey === 'merchant_khan') setSelectedMerchantId('m-02');
-        else if (roleKey === 'merchant_tiba') setSelectedMerchantId('m-03');
-        else setSelectedMerchantId(demoUser.merchant_id || 'm-01');
+        setSelectedMerchantId(demoUser.merchant_id || '171842bd-daed-40ef-853f-917eab2ed437');
       }
+      await refreshData(demoUser);
+      window.dispatchEvent(new Event('eg_profiles_updated'));
       setIsAuthModalOpen(false);
     } catch (err) {
       setError(err.message || (isAr ? 'حدث خطأ أثناء الدخول التجريبي' : 'Error during demo sign-in'));
@@ -250,81 +243,85 @@ export default function AuthModal() {
             : (isAr ? 'انضم إلى مجتمع التجارة المصرية الآن' : 'Join the Egyptian Commerce network today')}
         </p>
 
-        {/* 1-Click Quick Demo Logins Bar */}
-        <div className="mb-4 p-3.5 bg-gradient-to-r from-red-50/60 via-amber-50/40 to-slate-50 border border-red-100/80 rounded-2xl">
-          <div className="flex items-center justify-between gap-2 mb-2">
-            <span className="text-[11px] font-black text-[#d00000] flex items-center gap-1">
-              <span className="material-symbols-outlined text-[15px]">bolt</span>
-              {isAr ? 'تبديل الحسابات التجريبية بنقرة واحدة (بدون كلمة سر)' : '1-Click Multi-Account Switcher'}
-            </span>
-            <span className="text-[9px] px-1.5 py-0.5 rounded bg-red-100 text-red-700 font-bold">مُفعل</span>
-          </div>
+        {/* 1-Click Quick Demo Switcher - Admin Only */}
+        {user && (user.role === 'admin' || user.role === 'superadmin') && (
+          <>
+            <div className="mb-4 p-3.5 bg-gradient-to-r from-red-50/60 via-amber-50/40 to-slate-50 border border-red-100/80 rounded-2xl">
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <span className="text-[11px] font-black text-[#d00000] flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[15px]">admin_panel_settings</span>
+                  {isAr ? 'تبديل الحسابات (مخصص لمشرفي النظام فقط)' : 'Admin Account Switcher'}
+                </span>
+                <span className="text-[9px] px-1.5 py-0.5 rounded bg-red-100 text-red-700 font-bold">Admin Mode</span>
+              </div>
 
-          {/* Persona Filter Tabs */}
-          <div className="flex items-center gap-1 mb-2.5 overflow-x-auto pb-1 no-scrollbar text-[10px] font-bold">
-            {[
-              { id: 'merchant', label: isAr ? 'المتاجر (3)' : 'Merchants (3)' },
-              { id: 'creator', label: isAr ? 'صناع المحتوى (3)' : 'Creators (3)' },
-              { id: 'buyer', label: isAr ? 'المشترين (2)' : 'Buyers (2)' },
-              { id: 'admin', label: isAr ? 'الإدارة' : 'Admin' },
-              { id: 'all', label: isAr ? 'الكل' : 'All' }
-            ].map(tab => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setDemoCategory(tab.id)}
-                className={`px-2.5 py-1 rounded-lg transition-all shrink-0 ${
-                  demoCategory === tab.id
-                    ? 'bg-[#d00000] text-white shadow-xs'
-                    : 'bg-white/80 text-slate-600 hover:bg-white border border-slate-200/80'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+              {/* Persona Filter Tabs */}
+              <div className="flex items-center gap-1 mb-2.5 overflow-x-auto pb-1 no-scrollbar text-[10px] font-bold">
+                {[
+                  { id: 'merchant', label: isAr ? 'المتاجر (3)' : 'Merchants (3)' },
+                  { id: 'creator', label: isAr ? 'صناع المحتوى (3)' : 'Creators (3)' },
+                  { id: 'buyer', label: isAr ? 'المشترين (2)' : 'Buyers (2)' },
+                  { id: 'admin', label: isAr ? 'الإدارة' : 'Admin' },
+                  { id: 'all', label: isAr ? 'الكل' : 'All' }
+                ].map(tab => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setDemoCategory(tab.id)}
+                    className={`px-2.5 py-1 rounded-lg transition-all shrink-0 ${
+                      demoCategory === tab.id
+                        ? 'bg-[#d00000] text-white shadow-xs'
+                        : 'bg-white/80 text-slate-600 hover:bg-white border border-slate-200/80'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
 
-          {/* Persona Cards Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-48 overflow-y-auto pr-0.5">
-            {filteredDemoList.map(item => (
-              <button
-                key={item.key}
-                type="button"
-                onClick={() => handleDemoLogin(item.key)}
-                className={`flex items-center gap-2 p-2 bg-white rounded-xl border transition-all text-start group shadow-2xs active:scale-[0.98] ${item.color}`}
-              >
-                {item.img ? (
-                  <img src={item.img} alt={item.name} className="w-8 h-8 rounded-lg object-cover shrink-0 border border-black/5" />
-                ) : (
-                  <div className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold text-[10px] shrink-0">
-                    EG
-                  </div>
-                )}
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-1">
-                    <span className="block text-[11px] font-bold text-slate-900 truncate group-hover:text-[#d00000]">
-                      {item.name}
-                    </span>
-                    <span className="text-[9px] px-1 py-0.2 rounded bg-white/80 border border-black/5 font-semibold shrink-0">
-                      {item.badge}
-                    </span>
-                  </div>
-                  <span className="block text-[9px] text-gray-500 truncate">
-                    {item.sub}
-                  </span>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
+              {/* Persona Cards Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-48 overflow-y-auto pr-0.5">
+                {filteredDemoList.map(item => (
+                  <button
+                    key={item.key}
+                    type="button"
+                    onClick={() => handleDemoLogin(item.key)}
+                    className={`flex items-center gap-2 p-2 bg-white rounded-xl border transition-all text-start group shadow-2xs active:scale-[0.98] ${item.color}`}
+                  >
+                    {item.img ? (
+                      <img src={item.img} alt={item.name} className="w-8 h-8 rounded-lg object-cover shrink-0 border border-black/5" />
+                    ) : (
+                      <div className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold text-[10px] shrink-0">
+                        EG
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-1">
+                        <span className="block text-[11px] font-bold text-slate-900 truncate group-hover:text-[#d00000]">
+                          {item.name}
+                        </span>
+                        <span className="text-[9px] px-1 py-0.2 rounded bg-white/80 border border-black/5 font-semibold shrink-0">
+                          {item.badge}
+                        </span>
+                      </div>
+                      <span className="block text-[9px] text-gray-500 truncate">
+                        {item.sub}
+                      </span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
 
-        <div className="relative flex py-2 items-center mb-4">
-          <div className="flex-grow border-t border-gray-200"></div>
-          <span className="flex-shrink mx-3 text-[11px] text-gray-400 font-bold">
-            {isAr ? 'أو تسجيل الدخول اليدوي' : 'Or Manual Sign In'}
-          </span>
-          <div className="flex-grow border-t border-gray-200"></div>
-        </div>
+            <div className="relative flex py-2 items-center mb-4">
+              <div className="flex-grow border-t border-gray-200"></div>
+              <span className="flex-shrink mx-3 text-[11px] text-gray-400 font-bold">
+                {isAr ? 'أو تسجيل الدخول اليدوي' : 'Or Manual Sign In'}
+              </span>
+              <div className="flex-grow border-t border-gray-200"></div>
+            </div>
+          </>
+        )}
 
         {error && (
           <div 

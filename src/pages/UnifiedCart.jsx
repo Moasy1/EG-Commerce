@@ -20,7 +20,7 @@ export default function UnifiedCart() {
   const [promoApplied, setPromoApplied] = useState(false);
 
   const applyPromo = () => {
-    if (promoCode.trim().toLowerCase() === 'eg10' || promoCode.trim().toLowerCase() === 'talieska15') {
+    if (promoCode.trim().toLowerCase() === 'eg10' || promoCode.trim().toLowerCase() === 'drip10') {
       setPromoApplied(true);
     }
   };
@@ -67,7 +67,7 @@ export default function UnifiedCart() {
               {/* Thumbnail */}
               <div className="w-[84px] h-[100px] rounded-xl overflow-hidden bg-gray-100 shrink-0 border border-gray-100 relative">
                 <img 
-                  src={item.image || '/images/products/linen_abaya.jpg'} 
+                  src={item.image || '/images/products/the_sharp_v_yellow_1.webp'} 
                   alt={item.title} 
                   className="w-full h-full object-cover" 
                 />

@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useMemo } from '
 import { ProductService } from '../services/ProductService';
 import { ReelsService } from '../services/ReelsService';
 import { CartService } from '../services/CartService';
-import { AuthService } from '../services/AuthService';
+import { AuthService, DEFAULT_CREATORS } from '../services/AuthService';
 import { RewardService } from '../services/RewardService';
 import { OrderService } from '../services/OrderService';
 import { socialService } from '../services/social/socialService.js';
@@ -17,108 +17,39 @@ const AppContext = createContext();
 
 export const MERCHANTS_DATA = [
   {
-    id: 'm-01',
-    name: 'Talieska Studio • تاليسكا ستوديو',
-    shortName: 'Talieska',
-    slug: 'talieska',
-    subdomain: 'talieska.egyptian-commerce.com',
-    customDomain: 'shop.talieskastudio.com',
+    id: '171842bd-daed-40ef-853f-917eab2ed437',
+    name: 'Drip Fit • دريب فيت',
+    shortName: 'Drip Fit',
+    slug: 'drip-fit',
+    subdomain: 'drip-fit.egyptian-commerce.com',
+    customDomain: 'dripfit-eg.com',
     customDomainStatus: 'Active (SSL)',
-    category: 'Haute Egyptian Linen & Resort Wear',
-    categoryAr: 'أزياء الكتان والتطريز اليدوي',
-    bio: 'دار أزياء مصرية معاصرة متخصصة في ابتكار أزياء استثنائية منسوجة يدوياً من الكتان الطبيعي المصري في القاهرة.',
-    established: '2022',
-    rating: 4.9,
-    reviewsCount: 180,
+    category: 'Urban Streetwear & Summer Tops',
+    categoryAr: 'ستريت وير وتوبات صيفية عصرية',
+    bio: '✨ براند مصري عصري للأزياء والملابس الصيفية والستريت وير بالقاهرة 🇪🇬 | تصاميم صيفية حصرية وشحن سريع لجميع المحافظات',
+    established: '2026',
+    rating: 5.0,
+    reviewsCount: 18,
     verified: true,
-    logo: '/images/brands/talieska_logo.jpg',
-    banner: '/images/banners/talieska_hero.jpg',
-    announcement: '✨ كولكشن صيف 2026 متاح الآن • شحن مجاني للطلبات فوق 1,500 ج.م بكود TALIESKA15',
-    promoCode: 'TALIESKA15',
-    discountPct: 15,
-    themeColor: '#d00000',
-    whatsapp: '+201002345678',
-    instagram: '@talieska.studio',
-    bostaAccount: 'BST-EG-8921',
-    instapayHandle: 'talieska@instapay',
-    themeConfig: {
-      themeMode: 'dark', // 'dark' | 'light' | 'midnight'
-      accentColor: '#d00000',
-      fontFamily: 'sans', // 'sans' | 'serif' | 'cairo'
-      borderRadius: 'rounded-2xl', // 'rounded-none' | 'rounded-xl' | 'rounded-2xl' | 'rounded-3xl'
-      heroStyle: 'wide_cinema', // 'wide_cinema' | 'split_editorial' | 'minimal_card'
-      heroHeadline: 'إحياء فخامة الكتان الطبيعي بأيادٍ مصرية أصيلة',
-      heroSubheadline: 'أزياء مصرية معاصرة منسوجة يدوياً 100% من أجود ألياف الكتان طويل التيلة بالقاهرة لتمنحك إطلالة راقية تدوم لسنوات.',
-      heroCtaText: 'تسوق كولكشن 2026',
-      productsGridCols: 3, // 2 | 3 | 4
-      showRatings: true,
-      showStockBadges: true,
-    },
-    layoutConfig: {
-      showAnnouncementBar: true,
-      showHeroBanner: true,
-      showTrustBadges: true,
-      showProductsCatalog: true,
-      showCommunityReels: true,
-      showSocialMediaFeed: true,
-      showTestimonials: true,
-      showContactSection: true,
-      showWhatsAppFloat: true,
-      showAboutUsTab: true,
-      trustBadges: [
-        { id: 'b1', icon: 'local_shipping', title: 'شحن سريع بوسطة', desc: 'توصيل لباب بيتك خلال 24-48 ساعة' },
-        { id: 'b2', icon: 'verified', title: 'كتان طبيعي 100%', desc: 'أقمشة مصرية معالجة ضد الانكماش' },
-        { id: 'b3', icon: 'assignment_return', title: 'معاينة عند الاستلام', desc: 'حق الاستبدال خلال 14 يوم مجاناً' },
-        { id: 'b4', icon: 'support_agent', title: 'استشارة مقاسات فورية', desc: 'فريق متخصص عبر الواتساب لحظياً' }
-      ]
-    },
-    stats: {
-      grossSales: 142500,
-      growthPct: 18.4,
-      totalOrders: 118,
-      ordersPending: 8,
-      ordersShipping: 14,
-      reelsAttributedSales: 58200,
-      reelsAttributedPct: 41,
-      aov: 1210,
-      visitors: 4820,
-      conversionRate: 2.8,
-    }
-  },
-  {
-    id: 'm-02',
-    name: 'Khan El Khalili Craft • ورشة خان الخليلي',
-    shortName: 'Khan Craft',
-    slug: 'khan-craft',
-    subdomain: 'khan-craft.egyptian-commerce.com',
-    customDomain: 'khancraft-eg.com',
-    customDomainStatus: 'Active (SSL)',
-    category: 'Handmade Leather & Brass',
-    categoryAr: 'صناعات نحاسية وسجاد يدوي وتراثي',
-    bio: 'حرفيون مصريون من قلب القاهرة الفاطمية يبتكرون فوانيس نحاسية منقوشة وسجاد كليم يدوي أصيل.',
-    established: '2019',
-    rating: 4.9,
-    reviewsCount: 112,
-    verified: true,
-    logo: '/images/products/copper_lantern.jpg',
-    banner: '/images/banners/khan_hero.jpg',
-    announcement: '🏮 تحف نحاسية وسجاد كليم يدوي 100% مع ضمان استبدال مجاني',
-    promoCode: 'KHAN10',
+    logo: '/images/brands/dripfit_logo.png',
+    banner: '/images/products/the_sharp_v_yellow_1.webp',
+    announcement: '🔥 تشكيلة The Sharp V Yellow الجديدة متاحة الآن • قطن مصري 100%',
+    promoCode: 'DRIP10',
     discountPct: 10,
-    themeColor: '#feb700',
-    whatsapp: '+201112345678',
-    instagram: '@khan.craft.eg',
-    bostaAccount: 'BST-EG-4412',
-    instapayHandle: 'khancraft@instapay',
+    themeColor: '#d00000',
+    whatsapp: '+201012345678',
+    instagram: '@drip_fit',
+    bostaAccount: 'BST-EG-9912',
+    instapayHandle: 'dripfit@instapay',
     themeConfig: {
       themeMode: 'dark',
-      accentColor: '#feb700',
-      fontFamily: 'serif',
+      accentColor: '#d00000',
+      fontFamily: 'sans',
       borderRadius: 'rounded-2xl',
       heroStyle: 'wide_cinema',
-      heroHeadline: 'سحر الحرف الفاطمية والتراث المصري الأصيل',
-      heroSubheadline: 'فوانيس نحاسية منقوشة وسجاد كليم يدوي مصنوع بأيدي أمهر شيوخ الصنعة في خان الخليلي.',
-      heroCtaText: 'استكشف التحف النحاسية',
+      heroHeadline: 'Drip Fit • إطلالة صيفية عصرية مستوحاة من نبض الشارع المصري',
+      heroSubheadline: 'The Sharp V Yellow drop: قمصان وتيشرتات أوفرسايز بخامات قطنية نقية وتصاميم جريئة.',
+      heroCtaText: 'تسوق التشكيلة الآن',
       productsGridCols: 3,
       showRatings: true,
       showStockBadges: true,
@@ -135,751 +66,120 @@ export const MERCHANTS_DATA = [
       showWhatsAppFloat: true,
       showAboutUsTab: true,
       trustBadges: [
-        { id: 'b1', icon: 'local_shipping', title: 'شحن آمن مع بوسطة', desc: 'تغليف خاص ومقاوم للصدمات' },
-        { id: 'b2', icon: 'workspace_premium', title: 'نحاس أحمر نقي 100%', desc: 'نقش وتخريم يدوي يدوم للأبد' },
-        { id: 'b3', icon: 'verified', title: 'شهادة أصالة تراثية', desc: 'مختومة من ورش خان الخليلي' },
-        { id: 'b4', icon: 'support_agent', title: 'طلبات تصنيع خاصة', desc: 'حفر الأسماء والإهداءات حسب الطلب' }
+        { id: 'b1', icon: 'local_shipping', title: 'شحن سريع لجميع المحافظات', desc: 'توصيل لباب بيتك خلال 24-48 ساعة عبر بوسطة' },
+        { id: 'b2', icon: 'verified', title: 'خامات قطنية 100%', desc: 'قطن مصري عالي الجودة معالج ضد الانكماش' },
+        { id: 'b3', icon: 'assignment_return', title: 'معاينة عند الاستلام', desc: 'حق الاستبدال والمعاينة قبل الدفع' },
+        { id: 'b4', icon: 'support_agent', title: 'خدمة عملاء فورية', desc: 'دعم سريع عبر الواتساب' }
       ]
     },
     stats: {
-      grossSales: 89400,
-      growthPct: 12.2,
-      totalOrders: 94,
-      ordersPending: 5,
-      ordersShipping: 9,
-      reelsAttributedSales: 31000,
-      reelsAttributedPct: 35,
-      aov: 950,
-      visitors: 3100,
-      conversionRate: 3.0,
-    }
-  },
-  {
-    id: 'm-03',
-    name: 'Tiba Jewelry • مجوهرات طيبة',
-    shortName: 'Tiba',
-    slug: 'tiba-jewelry',
-    subdomain: 'tiba-jewelry.egyptian-commerce.com',
-    customDomain: 'tibajewelry.com',
-    customDomainStatus: 'Pending DNS',
-    category: 'Gold Plated & Egyptian Heritage Jewelry',
-    categoryAr: 'حلي ومجوهرات مستوحاة من التاريخ',
-    bio: 'تصاميم فرعونية وهندسية معاصرة من الفضة عيار 925 والذهب عيار 18.',
-    established: '2023',
-    rating: 5.0,
-    reviewsCount: 78,
-    verified: true,
-    logo: '/images/brands/talieska_logo.jpg',
-    banner: '/images/banners/talieska_hero.jpg',
-    announcement: '👑 قطع محدودة مستوحاة من زهرة اللوتس • علبة هدايا فاخرة مجاناً',
-    promoCode: 'TIBA20',
-    discountPct: 20,
-    themeColor: '#10b981',
-    whatsapp: '+201223456789',
-    instagram: '@tiba.jewels',
-    bostaAccount: 'BST-EG-1190',
-    instapayHandle: 'tiba@instapay',
-    themeConfig: {
-      themeMode: 'midnight',
-      accentColor: '#10b981',
-      fontFamily: 'cairo',
-      borderRadius: 'rounded-xl',
-      heroStyle: 'split_editorial',
-      heroHeadline: 'حلي فرعونية ملكية مفعمة بسحر التاريخ',
-      heroSubheadline: 'مجوهرات مصوغة من الفضة عيار 925 المطلية بذهب عيار 18 المستوحاة من رموز مصر القديمة.',
-      heroCtaText: 'تسوق قطع اللوتس',
-      productsGridCols: 3,
-      showRatings: true,
-      showStockBadges: true,
-    },
-    layoutConfig: {
-      showAnnouncementBar: true,
-      showHeroBanner: true,
-      showTrustBadges: true,
-      showProductsCatalog: true,
-      showCommunityReels: true,
-      showSocialMediaFeed: true,
-      showTestimonials: true,
-      showContactSection: true,
-      showWhatsAppFloat: true,
-      showAboutUsTab: true,
-      trustBadges: [
-        { id: 'b1', icon: 'local_shipping', title: 'توصيل مصفح وسريع', desc: 'معاينة وفحص الصياغة قبل الدفع' },
-        { id: 'b2', icon: 'diamond', title: 'فضة 925 مطلية بالذهب', desc: 'ضمان ثبات اللون لمدة عامين' },
-        { id: 'b3', icon: 'redeem', title: 'علبة هدايا ملكية', desc: 'تغليف مخملي فاخر مع كارت إهداء' },
-        { id: 'b4', icon: 'verified', title: 'شهادة ضمان معتمدة', desc: 'توثيق عيار الفضة ونسبة الذهب' }
-      ]
-    },
-    stats: {
-      grossSales: 63800,
-      growthPct: 24.1,
-      totalOrders: 68,
-      ordersPending: 3,
-      ordersShipping: 6,
-      reelsAttributedSales: 39500,
-      reelsAttributedPct: 62,
-      aov: 938,
-      visitors: 2890,
-      conversionRate: 2.4,
+      grossSales: 34000,
+      growthPct: 28.5,
+      totalOrders: 42,
+      ordersPending: 2,
+      ordersShipping: 5,
+      reelsAttributedSales: 18500,
+      reelsAttributedPct: 54,
+      aov: 810,
+      visitors: 1840,
+      conversionRate: 3.4,
     }
   }
 ];
 
 export const SOCIAL_PROFILES = {
-  talieska: {
-    id: 'p-talieska',
-    handle: '@talieska',
-    slug: 'talieska',
-    name: 'Talieska Studio • تاليسكا ستوديو',
+  'drip-fit': {
+    id: '171842bd-daed-40ef-853f-917eab2ed437',
+    handle: '@drip_fit',
+    slug: 'drip-fit',
+    name: 'Drip Fit • دريب فيت',
     verified: true,
     role: 'merchant',
-    merchantId: 'm-01',
-    avatar: '/images/brands/talieska_logo.jpg',
-    banner: '/images/banners/talieska_hero.jpg',
-    category: 'Haute Egyptian Linen & Fashion',
-    categoryAr: 'دار أزياء الكتان والتطريز المصري المعاصر',
-    bio: '✨ إحياء فخامة الكتان الطبيعي والتطريز اليدوي 100% بأيادٍ مصرية أصيلة بالقاهرة 🇪🇬 | شحن سريع لجميع المحافظات مع بوسطة',
+    merchantId: '171842bd-daed-40ef-853f-917eab2ed437',
+    avatar: '/images/brands/dripfit_logo.png',
+    banner: '/images/products/the_sharp_v_yellow_1.webp',
+    category: 'Urban Streetwear & Summer Tops',
+    categoryAr: 'ستريت وير وتوبات صيفية عصرية',
+    bio: '✨ براند مصري عصري للأزياء والملابس الصيفية والستريت وير بالقاهرة 🇪🇬 | تصاميم صيفية حصرية وشحن سريع لجميع المحافظات',
     location: 'القاهرة، مصر • Cairo, Egypt',
-    website: 'shop.talieskastudio.com',
-    followersCount: '48.2K',
-    followingCount: '142',
-    productsCount: 12,
-    reelsCount: 8,
-    highlights: [
-      { id: 'h1', title: 'صيف 2026', icon: 'flare', img: '/images/products/linen_abaya.jpg' },
-      { id: 'h2', title: 'آراء العملاء', icon: 'rate_review', img: '/images/reels/fashion_citrine_blazer_thumb.jpg' },
-      { id: 'h3', title: 'خامات الكتان', icon: 'dry_cleaning', img: '/images/products/embroidered_blouse.jpg' },
-      { id: 'h4', title: 'توصيل بوسطة', icon: 'local_shipping', img: '/images/banners/talieska_hero.jpg' }
-    ]
-  },
-  'khan-craft': {
-    id: 'p-khan',
-    handle: '@khan.craft.eg',
-    slug: 'khan-craft',
-    name: 'Khan El Khalili Craft • ورشة خان الخليلي',
-    verified: true,
-    role: 'merchant',
-    merchantId: 'm-02',
-    avatar: '/images/products/copper_lantern.jpg',
-    banner: '/images/banners/khan_hero.jpg',
-    category: 'Handmade Leather & Brass Heritage',
-    categoryAr: 'صناعات نحاسية وتحف تراثية فاطمية',
-    bio: '🏮 حرفيون مصريون من قلب القاهرة الفاطمية • فوانيس نحاسية منقوشة يدوياً وسجاد كليم أصيل 100% مع ضمان استبدال مجاني',
-    location: 'حي الجمالية، خان الخليلي • Al-Gamaleya',
-    website: 'khancraft-eg.com',
-    followersCount: '24.8K',
-    followingCount: '98',
-    productsCount: 8,
-    reelsCount: 6,
-    highlights: [
-      { id: 'h1', title: 'فوانيس نحاس', icon: 'emoji_objects', img: '/images/products/copper_lantern.jpg' },
-      { id: 'h2', title: 'كليم يدوي', icon: 'texture', img: '/images/banners/khan_hero.jpg' }
-    ]
-  },
-  'tiba-jewelry': {
-    id: 'p-tiba',
-    handle: '@tiba.jewels',
-    slug: 'tiba-jewelry',
-    name: 'Tiba Jewelry • مجوهرات طيبة',
-    verified: true,
-    role: 'merchant',
-    merchantId: 'm-03',
-    avatar: '/images/brands/talieska_logo.jpg',
-    banner: '/images/banners/talieska_hero.jpg',
-    category: 'Gold Plated & Heritage Jewelry',
-    categoryAr: 'حلي ومجوهرات ملكية مستوحاة من التاريخ',
-    bio: '👑 مجوهرات وحلي فرعونية معاصرة مصوغة من الفضة عيار 925 والذهب عيار 18 المستوحاة من رموز مصر القديمة ✨',
-    location: 'الزمالك، القاهرة • Zamalek, Cairo',
-    website: 'tibajewelry.com',
-    followersCount: '31.5K',
-    followingCount: '84',
-    productsCount: 6,
-    reelsCount: 4,
-    highlights: [
-      { id: 'h1', title: 'كولكشن اللوتس', icon: 'diamond', img: '/images/brands/talieska_logo.jpg' }
-    ]
-  },
-  cairo_chic: {
-    id: 'p-cairo-chic',
-    handle: '@cairo_chic',
-    slug: 'cairo_chic',
-    name: 'كايرو شيك • Cairo Chic',
-    verified: true,
-    role: 'creator',
-    merchantId: 'm-01',
-    avatar: '/images/reels/fashion_citrine_blazer_thumb.jpg',
-    category: 'Fashion Stylist & UGC Creator',
-    categoryAr: 'منسقة أزياء وصانعة محتوى',
-    bio: '💛 تنسيق بليزر السيترين والكولكشنات الصيفية المعاصرة | شراكات مع أفضل البراندات المصرية المستقلة 🇪🇬',
-    location: 'القاهرة، مصر',
-    followersCount: '92.4K',
-    followingCount: '210',
-    productsCount: 4,
-    reelsCount: 14,
-    highlights: [
-      { id: 'h1', title: 'أوتفت الصيف', icon: 'style', img: '/images/reels/fashion_citrine_blazer_thumb.jpg' }
-    ]
-  },
-  yasmin_style: {
-    id: 'p-yasmin',
-    handle: '@yasmin_style',
-    slug: 'yasmin_style',
-    name: 'ياسمين السيد • Yasmin Sayed',
-    verified: true,
-    role: 'creator',
-    merchantId: 'm-01',
-    avatar: '/images/reels/reel_2.jpg',
-    category: 'Digital Creator & Model',
-    categoryAr: 'صانعة محتوى وموديل أزياء',
-    bio: '👗 شغفي بالأزياء التراثية المصرية والألوان الصيفية المبهجة | سفيرة براند تاليسكا ستوديو',
-    location: 'الإسكندرية • Cairo',
-    followersCount: '67.1K',
-    followingCount: '188',
-    productsCount: 5,
-    reelsCount: 18,
-    highlights: [
-      { id: 'h1', title: 'ريلز الكتان', icon: 'movie', img: '/images/reels/reel_2.jpg' }
-    ]
-  },
-  'salma.styles': {
-    id: 'p-salma',
-    handle: '@salma.styles',
-    slug: 'salma.styles',
-    name: 'سلمى ستايلز • Salma Styles',
-    verified: true,
-    role: 'creator',
-    merchantId: 'm-01',
-    avatar: '/images/reels/fashion_oversized_shirt_thumb.jpg',
-    category: 'Casual Styling & Sustainable Fashion',
-    categoryAr: 'تنسيقات كاجوال وموضة مستدامة',
-    bio: '🩵 قمصان وتنسيقات صيفية مريحة وعملية لكل يوم | عاشقة للأقمشة الطبيعية والموضة المستدامة 🇪🇬',
-    location: 'القاهرة، مصر • Cairo',
-    followersCount: '41.8K',
-    followingCount: '156',
-    productsCount: 3,
-    reelsCount: 11,
-    highlights: [
-      { id: 'h1', title: 'تنسيقات أوفرسايز', icon: 'checkroom', img: '/images/reels/fashion_oversized_shirt_thumb.jpg' }
-    ]
-  },
-  zeina_ootd: {
-    id: 'p-zeina',
-    handle: '@zeina_ootd',
-    slug: 'zeina_ootd',
-    name: 'زينة أوفت • Zeina OOTD',
-    verified: true,
-    role: 'creator',
-    merchantId: 'm-01',
-    avatar: '/images/reels/fashion_oneshoulder_top_thumb.jpg',
-    category: 'Occasion & Evening Styling',
-    categoryAr: 'أطقم المناسبات وتنسيقات التوبات الراقية',
-    bio: '🤍 أطقم المناسبات والفساتين الكلاسيك | تنسيقات الجينز والتوبات المعاصرة للقاهرة والساحل 🇪🇬',
-    location: 'القاهرة، مصر • Cairo',
-    followersCount: '52.9K',
-    followingCount: '134',
-    productsCount: 4,
-    reelsCount: 9,
-    highlights: [
-      { id: 'h1', title: 'سهرات', icon: 'nightlife', img: '/images/reels/fashion_oneshoulder_top_thumb.jpg' }
-    ]
-  },
-  'karim.editorial': {
-    id: 'p-karim',
-    handle: '@karim.editorial',
-    slug: 'karim.editorial',
-    name: 'كريم إيديتوريال • Karim Editorial',
-    verified: true,
-    role: 'creator',
-    merchantId: 'm-02',
-    avatar: '/images/reels/fashion_vintage_watch_thumb.jpg',
-    category: "Men's Fashion & Vintage Watches",
-    categoryAr: 'أزياء رجالية وتنسيق ساعات كلاسيك',
-    bio: '⌚ تنسيقات الساعات الكلاسيكية والأزياء الرجالية المعاصرة في مصر 🇪🇬',
-    location: 'الزمالك، القاهرة • Zamalek',
-    followersCount: '38.4K',
-    followingCount: '112',
-    productsCount: 4,
-    reelsCount: 7,
-    highlights: [
-      { id: 'h1', title: 'ساعات فاخرة', icon: 'watch', img: '/images/reels/fashion_vintage_watch_thumb.jpg' }
-    ]
-  },
-  maya_accessories: {
-    id: 'p-maya',
-    handle: '@maya_accessories',
-    slug: 'maya_accessories',
-    name: 'مايا إكسسوارات • Maya Accessories',
-    verified: true,
-    role: 'creator',
-    merchantId: 'm-02',
-    avatar: '/images/reels/fashion_shoulder_bags_thumb.jpg',
-    category: 'Bags & Accessories Stylist',
-    categoryAr: 'تنسيق شنط وإكسسوارات جلد طبيعي',
-    bio: '👜 كل ما يخص الشنط الجلدية المصنوعة يدوياً وتنسيق الإكسسوارات الفاخرة ✨',
-    location: 'المعادي، القاهرة • Maadi',
-    followersCount: '29.7K',
-    followingCount: '95',
-    productsCount: 5,
-    reelsCount: 12,
-    highlights: [
-      { id: 'h1', title: 'شنط جلد', icon: 'handbag', img: '/images/reels/fashion_shoulder_bags_thumb.jpg' }
-    ]
-  },
-  'farida.atelier': {
-    id: 'p-farida',
-    handle: '@farida.atelier',
-    slug: 'farida.atelier',
-    name: 'فريدة أتيليه • Farida Atelier',
-    verified: true,
-    role: 'creator',
-    merchantId: 'm-02',
-    avatar: '/images/reels/fashion_woven_bag_thumb.jpg',
-    category: 'Artisan Crafts & Leather',
-    categoryAr: 'حرف يدوية وشنط جلد طبيعي',
-    bio: '🧵 حرف يدوية وتطريز مصري أصيل | شنط جلد طبيعي منسوجة يدوياً بمقبض مضفر 🇪🇬',
-    location: 'خان الخليلي، القاهرة',
-    followersCount: '33.1K',
-    followingCount: '108',
-    productsCount: 4,
-    reelsCount: 8,
-    highlights: [
-      { id: 'h1', title: 'صناعة يدوية', icon: 'brush', img: '/images/reels/fashion_woven_bag_thumb.jpg' }
-    ]
+    website: 'dripfit-eg.com',
+    followersCount: '24.5K',
+    followingCount: '48',
+    productsCount: 1,
+    reelsCount: 1
   }
 };
 
 export const INITIAL_ORDERS = [
   {
-    id: 'EG-8841',
-    merchantId: 'm-01',
-    customerName: 'سلمى الأحمدي (Salma El-Ahmady)',
-    phone: '+20 102 345 6789',
-    address: 'المعادي، القاهرة - شارع 9، عمارة 14',
-    productTitle: 'عباية كتان مغسول فاخرة • M',
+    id: 'DF-1092',
+    merchantId: '171842bd-daed-40ef-853f-917eab2ed437',
+    customerName: 'أحمد محمود (Ahmed Mahmoud)',
+    phone: '+20 101 882 3411',
+    address: 'التجمع الخامس، القاهرة - الحي النرجس، عمارة 12',
+    productTitle: 'The Sharp V Yellow Oversized T-Shirt • L',
     quantity: 1,
-    amount: 1450,
-    paymentMethod: 'InstaPay (تم التحقق • Ref: 98124)',
+    amount: 680,
+    paymentMethod: 'InstaPay (تم التحقق • Ref: 881294)',
     paymentStatus: 'paid',
     shippingStatus: 'ready_for_pickup',
     courier: 'Bosta Express',
-    trackingNumber: 'BST-77391024',
+    trackingNumber: 'BST-DF-88120',
     date: 'منذ ساعتين',
-    attributedCreator: '@nour_style'
+    attributedCreator: '@drip_fit'
   },
   {
-    id: 'EG-8840',
-    merchantId: 'm-01',
-    customerName: 'نورهان كريم (Nourhan Karim)',
-    phone: '+20 111 876 5432',
-    address: 'سموحة، الإسكندرية - شارع فيكتور عمانويل',
-    productTitle: 'فستان سهرة حرير ملكي • 54',
+    id: 'DF-1091',
+    merchantId: '171842bd-daed-40ef-853f-917eab2ed437',
+    customerName: 'كريم عادل (Karim Adel)',
+    phone: '+20 112 345 6789',
+    address: 'المعادي، القاهرة - شارع 15',
+    productTitle: 'The Sharp V Yellow Oversized T-Shirt • XL',
     quantity: 1,
-    amount: 1980,
+    amount: 680,
     paymentMethod: 'الدفع عند الاستلام (COD)',
     paymentStatus: 'pending_cod',
     shippingStatus: 'in_transit',
     courier: 'Bosta Express',
-    trackingNumber: 'BST-77390918',
+    trackingNumber: 'BST-DF-88119',
     date: 'منذ 5 ساعات',
-    attributedCreator: '@farida_fashion'
-  },
-  {
-    id: 'EG-8839',
-    merchantId: 'm-02',
-    customerName: 'طارق مصطفى',
-    phone: '+20 122 998 1122',
-    address: 'الشيخ زايد، الجيزة - بيفرلي هيلز',
-    productTitle: 'فانوس نحاس أرابيسك يدوي',
-    quantity: 1,
-    amount: 920,
-    paymentMethod: 'InstaPay',
-    paymentStatus: 'paid',
-    shippingStatus: 'delivered',
-    courier: 'Bosta Express',
-    trackingNumber: 'BST-77389100',
-    date: 'أمس',
-    attributedCreator: '@cairo_looks'
+    attributedCreator: '@drip_fit'
   }
 ];
 
 export const INITIAL_PRODUCTS = [
-
   {
-    id: 'p-sheglam-1',
-    sku: 'SHG-MASC-01',
-    title: 'شيجلام ماسكارا لرفع الرموش مع مزيل • SHEGLAM Ultra Lash Lift Mascara',
-    merchant: 'Talieska Studio • تاليسكا',
-    merchantId: 'm-01',
-    merchantVerified: true,
-    price: 450,
-    originalPrice: 550,
-    rating: 4.9,
-    reviewsCount: 1420,
-    stock: 85,
-    isSyndicated: true,
-    image: '/images/reels/sheglam_mascara_thumb.jpg',
-    pointsEarned: 45,
-    category: 'Makeup مكياج',
-    description: 'ماسكارا شيجلام الثورية لرفع وتطويل الرموش بشكل ملحوظ، تأتي مع مزيل مكياج عيون لطيف مخصص لإزالتها بسهولة وفي ثوانٍ معدودة دون تساقط الرموش.',
-    sizes: ['Standard'],
-    colors: ['Black أسود']
-  },
-  {
-    id: 'p-sheglam-2',
-    sku: 'SHG-LIP-02',
-    title: 'شيجلام ملمع ومورد شفاه وبلاشر جيلي • SHEGLAM Jelly Lip Tint & Blusher',
-    merchant: 'Talieska Studio • تاليسكا',
-    merchantId: 'm-01',
-    merchantVerified: true,
-    price: 280,
-    originalPrice: 350,
-    rating: 4.8,
-    reviewsCount: 3200,
-    stock: 120,
-    isSyndicated: true,
-    image: '/images/reels/sheglam_liptint_thumb.jpg',
-    pointsEarned: 28,
-    category: 'Makeup مكياج',
-    description: 'مورد شفاه وخدود بتركيبة الجيلي المرطبة، يمنحك لوناً غنياً وثباتاً يدوم طويلاً مع ترطيب عميق بفضل الزيوت الطبيعية.',
-    sizes: ['Standard'],
-    colors: ['Cherry Bark', 'Plum Sauce', 'Bare Blush', 'Chocoholic', 'Mauvelous', 'Pinky Promise']
-  },
-  {
-    id: 'p-01',
-    sku: 'TLK-ABY-01',
-    title: 'عباية كتان ناعمة وتوب عصري • Asymmetric Cutout Top & Linen Style',
-    merchant: 'Talieska Studio • تاليسكا',
-    merchantId: 'm-01',
-    merchantVerified: true,
-    price: 1450,
-    originalPrice: 1850,
-    rating: 4.9,
-    reviewsCount: 142,
-    stock: 24,
-    isSyndicated: true,
-    image: '/images/products/linen_abaya.jpg',
-    video: '/images/products/linen_abaya.mp4',
-    pointsEarned: 145,
-    category: 'Linen كاجوال كتان',
-    description: 'إطلالة عصرية أنيقة تجمع بين التوب العصري المميز والقصة الجذابة مع تفاصيل راقية لإطلالة لافتة مستوحاة من أحدث صيحات الموضة المصرية.',
-    sizes: ['S', 'M', 'L', 'XL', 'Free Size'],
-    colors: ['Sandy Beige بيج رملي', 'Terracotta تيراكوتا', 'Black أسود ملكي']
-  },
-  {
-    id: 'p-02',
-    sku: 'TLK-DRS-02',
-    title: 'كنزة تريكو صوف برقبة دافئة • Chunky Knit Turtleneck Sweater',
-    merchant: 'Talieska Studio • تاليسكا',
-    merchantId: 'm-01',
-    merchantVerified: true,
-    price: 1250,
-    originalPrice: 1600,
-    rating: 5.0,
-    reviewsCount: 98,
-    stock: 14,
-    isSyndicated: true,
-    image: '/images/products/silk_dress.jpg',
-    video: '/images/products/silk_dress.mp4',
-    pointsEarned: 125,
-    category: 'Knitwear تريكو وشتاء',
-    description: 'كنزة تريكو فاخرة بتطريز صوف مجدول دافئ وياقة عالية مريحة، مصممة لإطلالة خريفية وشتوية غاية في الرقي والأناقة.',
-    sizes: ['S', 'M', 'L', 'XL'],
-    colors: ['Ivory White عاجي ناصع', 'Warm Beige بيج دافئ']
-  },
-  {
-    id: 'p-03',
-    sku: 'TLK-BLZ-03',
-    title: 'بليزر صوف أوفرسايز عصري • Tailored Oversized Wool Blazer',
-    merchant: 'Talieska Studio • تاليسكا',
-    merchantId: 'm-01',
-    merchantVerified: true,
-    price: 1980,
-    originalPrice: 2400,
-    rating: 4.9,
-    reviewsCount: 64,
-    stock: 18,
-    isSyndicated: true,
-    image: '/images/products/wool_blazer.jpg',
-    pointsEarned: 198,
-    category: 'Jackets & Blazers بليزرات',
-    description: 'بليزر صوف فاخر بقصة أوفرسايز عصرية وتفاصيل حياكة متقنة تناسب الإطلالات الكلاسيكية والعملية.',
-    sizes: ['M', 'L', 'XL'],
-    colors: ['Charcoal فحم غامق', 'Midnight Black أسود ليلي']
-  },
-  {
-    id: 'p-04',
-    sku: 'TLK-SHT-04',
-    title: 'قميص كتان صيفي مريح • Relaxed Pure Linen Shirt',
-    merchant: 'Talieska Studio • تاليسكا',
-    merchantId: 'm-01',
-    merchantVerified: true,
-    price: 890,
-    originalPrice: 1100,
-    rating: 4.8,
-    reviewsCount: 52,
-    stock: 35,
-    isSyndicated: true,
-    image: '/images/products/linen_shirt.jpg',
-    pointsEarned: 89,
-    category: 'Linen كاجوال كتان',
-    description: 'قميص صيفي من خيوط الكتان المصري النقي بنسيج خفيف يسمح بمرور الهواء مثالي لأيام الصيف المشمسة.',
-    sizes: ['S', 'M', 'L', 'XL', '2XL'],
-    colors: ['Olive Sage أخضر ميرمية', 'Pure White أبيض ناصع', 'Sand بيج']
-  },
-  {
-    id: 'p-05',
-    sku: 'KHC-LTN-05',
-    title: 'فانوس نحاس أرابيسك يدوي • Handcrafted Arabesque Copper Lantern',
-    merchant: 'Khan El Khalili Craft • ورشة خان الخليلي',
-    merchantId: 'm-02',
-    merchantVerified: true,
-    price: 1250,
-    originalPrice: 1600,
-    rating: 4.9,
-    reviewsCount: 76,
-    stock: 12,
-    isSyndicated: true,
-    image: '/images/products/copper_lantern.jpg',
-    pointsEarned: 125,
-    category: 'Heritage Crafts نحاسيات وتحف',
-    description: 'فانوس نحاسي مصنوع يدوياً بنقوش أرابيسك هندسية إسلامية دقيقة من قلب ورش خان الخليلي التاريخية.',
-    sizes: ['Medium 45cm', 'Large 60cm'],
-    colors: ['Antique Brass نحاس عتيق']
-  },
-  {
-    id: 'p-06',
-    sku: 'KHC-RUG-06',
-    title: 'سجادة كليم يدوي فاخرة • Egyptian Handwoven Tribal Kilim Rug',
-    merchant: 'Khan El Khalili Craft • ورشة خان الخليلي',
-    merchantId: 'm-02',
-    merchantVerified: true,
-    price: 2150,
-    originalPrice: 2600,
-    rating: 5.0,
-    reviewsCount: 43,
-    stock: 8,
-    isSyndicated: true,
-    image: '/images/products/kilim_rug.jpg',
-    pointsEarned: 215,
-    category: 'Handmade Carpets كليم يدوي',
-    description: 'سجادة كليم صوف طبيعي 100% منسوجة على النول اليدوي بألوان ترابية مستوحاة من البيئة المصرية الأصيلة.',
-    sizes: ['150x200 cm', '180x250 cm'],
-    colors: ['Terracotta & Indigo تيراكوتا ونيلي']
-  },
-  {
-    id: 'p-fashion-blazer',
-    sku: 'TLK-BLZ-09',
-    title: 'بليزر أوفرسايز أصفر ليموني راقي • Citrine Tailored Oversized Blazer',
-    merchant: 'Talieska Studio • تاليسكا ستوديو',
-    merchantId: 'm-01',
-    merchantVerified: true,
-    price: 2200,
-    originalPrice: 2750,
-    rating: 4.9,
-    reviewsCount: 88,
-    stock: 22,
-    isSyndicated: true,
-    image: '/images/reels/fashion_citrine_blazer_thumb.jpg',
-    video: '/images/reels/fashion_citrine_blazer.mp4',
-    pointsEarned: 220,
-    category: 'Jackets & Blazers بليزرات',
-    description: 'بليزر أوفرسايز بتصميم عصري راقٍ منسوج من أقمشة الكريب الفاخرة بلون أصفر سيترين ساحر، قصة أكتاف دراماتيكية أنيقة تمنحك إطلالة فريدة ومتميزة.',
-    sizes: ['S', 'M', 'L', 'XL'],
-    colors: ['Citrine Pastel Yellow أصفر سيترين', 'Pure Ivory عاجي']
-  },
-  {
-    id: 'p-fashion-oversized-shirt',
-    sku: 'TLK-SHT-05',
-    title: 'قميص كتان سماوي بقصة أوفرسايز • Oversized Sky Blue Linen Shirt',
-    merchant: 'Talieska Studio • تاليسكا ستوديو',
-    merchantId: 'm-01',
-    merchantVerified: true,
-    price: 950,
-    originalPrice: 1200,
-    rating: 4.8,
-    reviewsCount: 114,
-    stock: 45,
-    isSyndicated: true,
-    image: '/images/reels/fashion_oversized_shirt_thumb.jpg',
-    video: '/images/reels/fashion_oversized_shirt.mp4',
-    pointsEarned: 95,
-    category: 'Linen كاجوال كتان',
-    description: 'قميص كاجوال أنيق بأزرار وقصة واسعة مريحة منسوج من أجود خيوط الكتان المصري النقي، مثالي لتنسيق الإطلالات اليومية والطبقات العصرية.',
-    sizes: ['S', 'M', 'L', 'XL'],
-    colors: ['Sky Blue أزرق سماوي', 'Off-White أوف وايت', 'Sand بيج رملي']
-  },
-  {
-    id: 'p-fashion-oneshoulder-top',
-    sku: 'TLK-TOP-06',
-    title: 'توب بكتف واحد عاجي ناعم • Asymmetric One-Shoulder White Bodysuit Top',
-    merchant: 'Talieska Studio • تاليسكا ستوديو',
-    merchantId: 'm-01',
+    id: '11111111-d001-4000-8000-000000000001',
+    sku: 'DF-SHARP-V-YEL',
+    title: 'The Sharp V Yellow Oversized T-Shirt • تيشرت شارب في أصفر أوفرسايز',
+    merchant: 'Drip Fit • دريب فيت',
+    merchantId: '171842bd-daed-40ef-853f-917eab2ed437',
+    merchantSlug: 'drip-fit',
     merchantVerified: true,
     price: 680,
     originalPrice: 850,
-    rating: 4.9,
-    reviewsCount: 92,
-    stock: 38,
+    rating: 5.0,
+    reviewsCount: 18,
+    stock: 50,
     isSyndicated: true,
-    image: '/images/reels/fashion_oneshoulder_top_thumb.jpg',
-    video: '/images/reels/fashion_oneshoulder_top.mp4',
+    image: '/images/products/the_sharp_v_yellow_1.webp',
+    images: [
+      '/images/products/the_sharp_v_yellow_1.webp',
+      '/images/products/the_sharp_v_yellow_2.webp',
+      '/images/products/the_sharp_v_yellow_size.png'
+    ],
+    video: '/images/reels/the_sharp_v_yellow_reel.mp4',
+    sizeGuide: '/images/products/the_sharp_v_yellow_size.png',
     pointsEarned: 68,
-    category: 'Tops & Blouses توبات وبلايز',
-    description: 'توب أنيق بتصميم الكتف الواحد العصري من خامة مريحة داعمة، ينسجم بشكل استثنائي مع البناطيل الجينز الواسعة والتنانير الصيفية.',
-    sizes: ['XS', 'S', 'M', 'L'],
-    colors: ['Pure Ivory عاجي ناصع', 'Noir Black أسود', 'Mocha موكا']
-  },
-  {
-    id: 'p-fashion-knit-sweater',
-    sku: 'TLK-SWT-07',
-    title: 'سويتر صوف تريكو أوفرسايز بياقة عالية • Chunky Knit Oversized Turtleneck',
-    merchant: 'Talieska Studio • تاليسكا ستوديو',
-    merchantId: 'm-01',
-    merchantVerified: true,
-    price: 1650,
-    originalPrice: 2100,
-    rating: 5.0,
-    reviewsCount: 67,
-    stock: 19,
-    isSyndicated: true,
-    image: '/images/reels/fashion_knit_sweater_thumb.jpg',
-    video: '/images/reels/fashion_knit_sweater.mp4',
-    pointsEarned: 165,
-    category: 'Knitwear تريكو وصوف',
-    description: 'كنزة صوف تريكو محاكة بغرز عريضة دافئة وياقة عالية مريحة، تمنحك إطلالة شتوية فارهة مع الجونلات الصوف والأحذية الجلدية.',
-    sizes: ['S', 'M', 'L', 'XL'],
-    colors: ['Midnight Black أسود ليلي', 'Oatmeal شوفان', 'Chocolate بني']
-  },
-  {
-    id: 'p-fashion-suede-jacket',
-    sku: 'TLK-JCK-08',
-    title: 'جاكيت شمواه كلاسيكي بني بسحاب • Classic Suede Harrington Jacket',
-    merchant: 'Talieska Studio • تاليسكا ستوديو',
-    merchantId: 'm-01',
-    merchantVerified: true,
-    price: 2600,
-    originalPrice: 3200,
-    rating: 4.9,
-    reviewsCount: 54,
-    stock: 16,
-    isSyndicated: true,
-    image: '/images/reels/fashion_suede_jacket_thumb.jpg',
-    video: '/images/reels/fashion_suede_jacket.mp4',
-    pointsEarned: 260,
-    category: 'Jackets & Blazers بليزرات وجواكت',
-    description: 'جاكيت شمواه رجالي فاخر بقصة هارنجتون وسحاب معدني راقٍ، ببطانة داخلية ناعمة توفر الدفء والأناقة في مختلف المناسبات.',
-    sizes: ['M', 'L', 'XL', '2XL'],
-    colors: ['Tobacco Brown بني توباكو', 'Dark Forest أخضر غامق', 'Navy كحلي']
-  },
-  {
-    id: 'p-fashion-cuban-shirt',
-    sku: 'TLK-SHT-09',
-    title: 'قميص ريزورت بياقة كوبية مطرز • Resort Cuban Collar White Shirt',
-    merchant: 'Talieska Studio • تاليسكا ستوديو',
-    merchantId: 'm-01',
-    merchantVerified: true,
-    price: 880,
-    originalPrice: 1100,
-    rating: 4.8,
-    reviewsCount: 78,
-    stock: 40,
-    isSyndicated: true,
-    image: '/images/reels/fashion_cuban_shirt_thumb.jpg',
-    video: '/images/reels/fashion_cuban_shirt.mp4',
-    pointsEarned: 88,
-    category: 'Linen كاجوال كتان',
-    description: 'قميص صيفي أنيق بياقة مفتوحة وتطريز جانبي ناعم على الصدر، مصمم للراحة والانتعاش في العطلات والإطلالات اليومية.',
-    sizes: ['S', 'M', 'L', 'XL', '2XL'],
-    colors: ['Eggshell White أبيض مطفي', 'Black أسود']
-  },
-  {
-    id: 'p-fashion-shoulder-bags',
-    sku: 'KHC-BAG-01',
-    title: 'حقيبة كتف جلدية كلاسيك بإبزيم ذهبي • Classic Structured Leather Shoulder Bag',
-    merchant: 'Khan El Khalili Craft • ورشة خان الخليلي',
-    merchantId: 'm-02',
-    merchantVerified: true,
-    price: 1850,
-    originalPrice: 2300,
-    rating: 5.0,
-    reviewsCount: 130,
-    stock: 28,
-    isSyndicated: true,
-    image: '/images/reels/fashion_shoulder_bags_thumb.jpg',
-    video: '/images/reels/fashion_shoulder_bags.mp4',
-    pointsEarned: 185,
-    category: 'Handmade Leather منتجات جلدية',
-    description: 'حقيبة كتف مهيكلة مصنوعة يدوياً من الجلد المصري المدبوغ بعناية، مزودة بحزام كتف مريح وقطعة معدنية ذهبية تضفي لمسة عصرية فخمة.',
-    sizes: ['One Size قياس موحد'],
-    colors: ['Ivory Cream عاجي كريمي', 'Chocolate Brown شوكولاتة', 'Burgundy بوردو', 'Charcoal Grey رمادي', 'Camel Tan جملي']
-  },
-  {
-    id: 'p-fashion-woven-bag',
-    sku: 'KHC-BAG-02',
-    title: 'حقيبة جلد منسوجة يدوياً بمقبض مضفر • Handcrafted Woven Leather Bag',
-    merchant: 'Khan El Khalili Craft • ورشة خان الخليلي',
-    merchantId: 'm-02',
-    merchantVerified: true,
-    price: 1950,
-    originalPrice: 2500,
-    rating: 4.9,
-    reviewsCount: 84,
-    stock: 18,
-    isSyndicated: true,
-    image: '/images/reels/fashion_woven_bag_thumb.jpg',
-    video: '/images/reels/fashion_woven_bag.mp4',
-    pointsEarned: 195,
-    category: 'Handmade Leather منتجات جلدية',
-    description: 'حقيبة راقية محاكة بتقنية الجلد المنسوج الدقيق، بحزام كتف مضفر يدوياً وبطانة داخلية واسعة لتتسع لجميع متعلقاتك الأساسية.',
-    sizes: ['One Size قياس موحد'],
-    colors: ['Terracotta Red أحمر طوبي', 'Caramel كراميل', 'Black أسود']
-  },
-  {
-    id: 'p-fashion-barrel-bag',
-    sku: 'KHC-BAG-03',
-    title: 'حقيبة بولينج أسطوانية من الجلد الطبيعي • Luxury Barrel Leather Handbag',
-    merchant: 'Khan El Khalili Craft • ورشة خان الخليلي',
-    merchantId: 'm-02',
-    merchantVerified: true,
-    price: 1750,
-    originalPrice: 2200,
-    rating: 4.8,
-    reviewsCount: 62,
-    stock: 25,
-    isSyndicated: true,
-    image: '/images/reels/fashion_barrel_bag_thumb.jpg',
-    video: '/images/reels/fashion_barrel_bag.mp4',
-    pointsEarned: 175,
-    category: 'Handmade Leather منتجات جلدية',
-    description: 'حقيبة بشكل أسطواني بوهيمي مستوحاة من حقائب السفر الكلاسيكية مع سحاب معدني وسعة مثالية للأيام العملية والخرجات.',
-    sizes: ['One Size قياس موحد'],
-    colors: ['Croc Espresso تماسيح بني داكن', 'Cognac Tan كونياك جملي', 'Deep Wine نبيذي فخم', 'Classic Black أسود كلاسيك']
-  },
-  {
-    id: 'p-fashion-vintage-watch',
-    sku: 'TBA-WTC-01',
-    title: 'ساعة يد كلاسيكية برميليّة بعقارب رومانية • Vintage Tonneau Rose Gold Leather Watch',
-    merchant: 'Tiba Jewelry • مجوهرات طيبة',
-    merchantId: 'm-03',
-    merchantVerified: true,
-    price: 3400,
-    originalPrice: 4200,
-    rating: 5.0,
-    reviewsCount: 96,
-    stock: 15,
-    isSyndicated: true,
-    image: '/images/reels/fashion_vintage_watch_thumb.jpg',
-    video: '/images/reels/fashion_vintage_watch.mp4',
-    pointsEarned: 340,
-    category: 'Gold Plated & Watches ساعات وحلي',
-    description: 'ساعة يد فاخرة بتصميم برميلي أنيق وإطار مصقول بطلاء الذهب الوردي، ميناء كلاسيكي بأرقام رومانية وحزام جلد طبيعي مخملي الملمس.',
-    sizes: ['Case 38mm'],
-    colors: ['Rose Gold & Brown ذهب وردي وجلد بني', 'Silver & Black فضي وجلد أسود']
+    category: 'Streetwear ستريت وير وكاجوال',
+    description: 'تيشرت أوفرسايز فاخر باللون الأصفر العصري مع تصميم Sharp V المميز. مصنوع من أجود أنواع القطن المصري المعالج لملمس ناعم وراحة فائقة طوال اليوم، سواء في النادي أو الإطلالات اليومية الكاجوال.',
+    sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+    colors: ['Yellow • أصفر']
   }
 ];
 
 export function detectSubdomain() {
-  if (typeof window === 'undefined') return { isSubdomain: false, merchantSlug: null, merchantId: 'm-01' };
+  if (typeof window === 'undefined') return { isSubdomain: false, merchantSlug: null, merchantId: '171842bd-daed-40ef-853f-917eab2ed437' };
   
   const hostname = (window.location.hostname || '').toLowerCase().trim();
   const searchParams = new URLSearchParams(window.location.search);
@@ -887,7 +187,7 @@ export function detectSubdomain() {
 
   // 1. Explicit query parameter (highest precedence for dev / testing e.g. ?subdomain=talieska or ?subdomain=demo)
   if (querySub) {
-    const slug = querySub === 'demo' ? 'talieska' : querySub;
+    const slug = querySub === 'demo' ? 'drip-fit' : querySub;
     const found = MERCHANTS_DATA.find(m => 
       m.slug.toLowerCase() === slug || 
       m.id.toLowerCase() === slug || 
@@ -896,11 +196,11 @@ export function detectSubdomain() {
     return {
       isSubdomain: true,
       merchantSlug: slug,
-      merchantId: found ? found.id : 'm-01'
+      merchantId: found ? found.id : '171842bd-daed-40ef-853f-917eab2ed437'
     };
   }
 
-  // 2. Custom domain match (e.g. shop.talieskastudio.com, khancraft-eg.com)
+  // 2. Custom domain match (e.g. dripfit-eg.com, khancraft-eg.com)
   const customMatched = MERCHANTS_DATA.find(m => 
     m.customDomain && hostname.includes(m.customDomain.toLowerCase())
   );
@@ -915,10 +215,10 @@ export function detectSubdomain() {
   // 3. Skip pure IP addresses and plain localhost
   const isIp = /^(\d{1,3}\.){3}\d{1,3}$/.test(hostname) || hostname === '::1';
   if (isIp || hostname === 'localhost') {
-    return { isSubdomain: false, merchantSlug: null, merchantId: 'm-01' };
+    return { isSubdomain: false, merchantSlug: null, merchantId: '171842bd-daed-40ef-853f-917eab2ed437' };
   }
 
-  // 4. Subdomain on localhost (e.g. talieska.localhost) or production domain (e.g. talieska.egyptian-commerce.com)
+  // 4. Subdomain on localhost (e.g. talieska.localhost) or production domain (e.g. drip-fit.egyptian-commerce.com)
   const parts = hostname.split('.');
   const isLocalhostDomain = hostname.endsWith('.localhost');
   const minParts = isLocalhostDomain ? 2 : 3;
@@ -927,7 +227,7 @@ export function detectSubdomain() {
     const prefix = parts[0].toLowerCase().trim();
     const ignored = ['www', 'app', 'shop', 'api', 'admin', 'stage', 'staging', 'mail', 'cpanel', 'webmail', 'eg-commerce'];
     if (!ignored.includes(prefix)) {
-      const slug = prefix === 'demo' ? 'talieska' : prefix;
+      const slug = prefix === 'demo' ? 'drip-fit' : prefix;
       const found = MERCHANTS_DATA.find(m => 
         m.slug.toLowerCase() === slug || 
         m.id.toLowerCase() === slug || 
@@ -943,7 +243,7 @@ export function detectSubdomain() {
     }
   }
 
-  return { isSubdomain: false, merchantSlug: null, merchantId: 'm-01' };
+  return { isSubdomain: false, merchantSlug: null, merchantId: '171842bd-daed-40ef-853f-917eab2ed437' };
 }
 
 export function parseRouteFromLocation(pathname, search, isSubdomain) {
@@ -974,14 +274,14 @@ export function parseRouteFromLocation(pathname, search, isSubdomain) {
   if (cleanPath === '/merchant/dashboard') return { tab: 'dashboard' };
 
   if (cleanPath === '/profile' || cleanPath.startsWith('/profile/')) {
-    const handle = cleanPath.startsWith('/profile/') ? cleanPath.replace('/profile/', '').trim() : 'talieska';
+    const handle = cleanPath.startsWith('/profile/') ? cleanPath.replace('/profile/', '').trim() : 'drip-fit';
     return { tab: 'profile', profileHandle: handle };
   }
 
   if (cleanPath === '/showcase') return { tab: 'showcase' };
 
   if (cleanPath === '/storefront' || cleanPath.startsWith('/store')) {
-    const slug = cleanPath.startsWith('/store/') ? cleanPath.replace('/store/', '').trim() : 'talieska';
+    const slug = cleanPath.startsWith('/store/') ? cleanPath.replace('/store/', '').trim() : 'drip-fit';
     return { tab: 'storefront', storeSlug: slug };
   }
 
@@ -1034,11 +334,11 @@ export function getPathForTab(tab, { product, category, isSubdomain, profileHand
     case 'settings':
       return '/settings';
     case 'profile':
-      return profileHandle ? `/profile/${profileHandle.replace(/^@/, '')}` : '/profile/talieska';
+      return profileHandle ? `/profile/${profileHandle.replace(/^@/, '')}` : '/profile/drip-fit';
     case 'showcase':
       return '/showcase';
     case 'storefront':
-      return storeSlug ? `/store/${storeSlug}` : '/store/talieska';
+      return storeSlug ? `/store/${storeSlug}` : '/store/drip-fit';
     default:
       return isSubdomain ? '/' : '/';
   }
@@ -1061,7 +361,8 @@ export function AppProvider({ children }) {
     return INITIAL_PRODUCTS[0];
   });
   const [merchants, setMerchants] = useState(MERCHANTS_DATA);
-  const [selectedMerchantId, setSelectedMerchantId] = useState(() => initialSubdomain.merchantId || 'm-01');
+  const [creators, setCreators] = useState(DEFAULT_CREATORS);
+  const [selectedMerchantId, setSelectedMerchantId] = useState(() => initialSubdomain.merchantId || '171842bd-daed-40ef-853f-917eab2ed437');
   const [orders, setOrders] = useState(() => OrderService.getInitialOrders());
 
   const updateOrderStatus = async (orderId, newStatus) => {
@@ -1087,31 +388,158 @@ export function AppProvider({ children }) {
   });
 
   // Social Profile State & Navigation Layer
-  const [activeProfileHandle, setActiveProfileHandle] = useState(() => initialRoute.profileHandle || 'talieska');
-  const socialProfiles = SOCIAL_PROFILES;
+  const [activeProfileHandle, setActiveProfileHandle] = useState(() => initialRoute.profileHandle || 'drip-fit');
+  
+  const socialProfiles = useMemo(() => {
+    const base = { ...SOCIAL_PROFILES };
+    // Merge dynamic merchants
+    (merchants || []).forEach(m => {
+      const key = (m.slug || m.id || '').replace(/^@/, '');
+      if (key && !base[key]) {
+        base[key] = {
+          id: m.id,
+          handle: `@${m.slug || key}`,
+          slug: m.slug || key,
+          name: m.name || m.store_name,
+          verified: m.verified ?? true,
+          role: 'merchant',
+          merchantId: m.id,
+          avatar: m.logo || m.avatar || '/images/brands/dripfit_logo.png',
+          category: m.category || 'Egyptian Merchant',
+          categoryAr: m.categoryAr || 'متجر مصري',
+          bio: m.bio || m.description || 'متجر موثق على إيجي كومرس',
+          location: m.location || 'القاهرة، مصر',
+          website: m.website || `${m.slug || key}.eg-commerce.com`,
+          followersCount: m.followersCount || '1.2K',
+          followingCount: '84',
+          productsCount: m.productsCount || 0,
+          reelsCount: m.reelsCount || 0
+        };
+      }
+    });
+    // Merge dynamic creators
+    (creators || []).forEach(c => {
+      const key = (c.slug || c.handle || c.id || '').replace(/^@/, '');
+      if (key && !base[key]) {
+        base[key] = {
+          id: c.id,
+          handle: c.handle?.startsWith('@') ? c.handle : `@${key}`,
+          slug: c.slug || key,
+          name: c.name,
+          verified: c.verified ?? true,
+          role: 'creator',
+          creatorId: c.id,
+          avatar: c.avatar || '/images/reels/reel_1.jpg',
+          category: c.category || 'Egyptian Fashion Creator',
+          categoryAr: c.categoryAr || 'صانع محتوى مصري',
+          bio: c.bio || 'مبدع محتوى على منصة إيجي كومرس',
+          location: c.location || 'القاهرة، مصر',
+          website: c.website || `${key}.eg-commerce.com`,
+          followersCount: c.followersCount || '2.4K',
+          followingCount: '120',
+          productsCount: 0,
+          reelsCount: 0
+        };
+      }
+    });
+    return base;
+  }, [merchants, creators]);
 
   const activeProfile = useMemo(() => {
-    const rawClean = (activeProfileHandle || 'talieska').replace(/^@/, '').trim();
+    const rawClean = (activeProfileHandle || (user ? (user.slug || user.merchant_id || user.handle || user.username || user.name) : 'drip-fit')).replace(/^@/, '').trim();
     const clean = rawClean.toLowerCase();
-    
-    // Direct key match
+
+    // 1. If viewing own profile (handle matches user id, email prefix, username, handle, merchant_id, creator_id, slug, name or 'me')
+    if (user && (
+      clean === 'me' ||
+      clean === user.id?.toLowerCase() ||
+      clean === user.email?.split('@')[0]?.toLowerCase() ||
+      clean === user.username?.toLowerCase() ||
+      clean === user.handle?.replace(/^@/, '').toLowerCase() ||
+      clean === user.slug?.toLowerCase() ||
+      clean === user.merchant_id?.toLowerCase() ||
+      clean === user.creator_id?.toLowerCase() ||
+      clean === user.name?.toLowerCase().replace(/\s+/g, '-') ||
+      clean === user.name?.toLowerCase()
+    )) {
+      if (user.role === 'merchant') {
+        const merchantMatch = (merchants || []).find(m => 
+          m.id === user.merchant_id || 
+          m.slug?.toLowerCase() === clean || 
+          m.user_id === user.id
+        );
+        const slug = user.slug || merchantMatch?.slug || user.name?.toLowerCase().replace(/\s+/g, '-') || 'store';
+        return {
+          id: user.merchant_id || user.id,
+          handle: `@${slug}`,
+          slug: slug,
+          name: merchantMatch?.name || `${user.name} Store • متجر ${user.name}`,
+          verified: true,
+          role: 'merchant',
+          merchantId: user.merchant_id || merchantMatch?.id || 'm-custom',
+          avatar: user.avatar_url || user.profile?.avatar_url || merchantMatch?.logo || '/images/brands/dripfit_logo.png',
+          banner: merchantMatch?.banner || '/images/products/the_sharp_v_yellow_1.webp',
+          category: merchantMatch?.category || 'Egyptian Fashion & Retail',
+          categoryAr: merchantMatch?.categoryAr || 'أزياء وتجارة مصرية معتمدة',
+          bio: merchantMatch?.bio || user.bio || `✨ متجر مصري موثق لـ ${user.name} على منصة EG-Commerce`,
+          location: 'القاهرة، مصر • Cairo, Egypt',
+          website: merchantMatch?.customDomain || merchantMatch?.subdomain || `${slug}.egyptian-commerce.com`,
+          followersCount: '1.2K',
+          followingCount: '30',
+          productsCount: (products || []).filter(p => p.merchantId === user.merchant_id || p.merchant_id === user.merchant_id).length,
+          reelsCount: 0,
+          isOwner: true
+        };
+      } else if (user.role === 'creator') {
+        const handle = user.handle || `@${(user.username || user.name).toLowerCase().replace(/\s+/g, '_')}`;
+        const slug = user.slug || user.name?.toLowerCase().replace(/\s+/g, '-') || 'creator';
+        return {
+          id: user.creator_id || user.id,
+          handle,
+          slug,
+          name: user.name,
+          verified: true,
+          role: 'creator',
+          creatorId: user.creator_id || user.id,
+          avatar: user.avatar_url || user.profile?.avatar_url || '/images/reels/reel_2.jpg',
+          category: 'Fashion Stylist & UGC Creator',
+          categoryAr: 'منسقة أزياء وصانعة محتوى معتمدة',
+          bio: user.bio || `✨ إطلالات وتنسيقات أزياء عصرية | صانع محتوى مصري معتمد لـ ${user.name}`,
+          location: 'القاهرة، مصر • Cairo, Egypt',
+          followersCount: '2.4K',
+          followingCount: '65',
+          productsCount: (products || []).filter(p => p.creator_id === user.creator_id || p.creatorId === user.creator_id).length,
+          reelsCount: 0,
+          isOwner: true
+        };
+      } else {
+        return {
+          id: user.id,
+          handle: `@${(user.username || user.name || user.email?.split('@')[0]).replace(/\s+/g, '_').toLowerCase()}`,
+          name: user.name || 'مستخدم المنصة',
+          verified: false,
+          role: 'buyer',
+          avatar: user.avatar_url || user.profile?.avatar_url || '/images/reels/reel_1.jpg',
+          bio: user.bio || 'متسوق أزياء ومتابع نشط في EG-Commerce 🇪🇬',
+          followersCount: '120',
+          followingCount: '85',
+          productsCount: 0,
+          reelsCount: 0,
+          isOwner: true
+        };
+      }
+    }
+
+    // 2. Direct key match in static social profiles
     if (socialProfiles[clean]) return socialProfiles[clean];
     if (socialProfiles[rawClean]) return socialProfiles[rawClean];
 
-    // Check by slug or handle match in registry
-    const found = Object.values(socialProfiles).find(p => 
-      p.slug?.toLowerCase() === clean || 
-      p.handle?.toLowerCase() === `@${clean}` ||
-      p.handle?.toLowerCase() === `@${rawClean}` ||
-      p.merchantId === clean
-    );
-    if (found) return found;
-
-    // Check if it matches a merchant in merchants array
+    // 3. Check registered merchants array
     const merchantMatch = (merchants || []).find(m => 
       m.slug?.toLowerCase() === clean || 
       m.id?.toLowerCase() === clean || 
-      m.shortName?.toLowerCase() === clean
+      m.shortName?.toLowerCase() === clean ||
+      m.handle?.replace(/^@/, '').toLowerCase() === clean
     );
     if (merchantMatch) {
       return {
@@ -1129,19 +557,48 @@ export function AppProvider({ children }) {
         bio: merchantMatch.bio,
         location: 'القاهرة، مصر • Cairo, Egypt',
         website: merchantMatch.customDomain || merchantMatch.subdomain,
-        followersCount: '36.4K',
-        followingCount: '110',
-        productsCount: (products || []).filter(p => p.merchantId === merchantMatch.id).length || 8,
+        followersCount: merchantMatch.followersCount || '36.4K',
+        followingCount: merchantMatch.followingCount || '110',
+        productsCount: (products || []).filter(p => p.merchantId === merchantMatch.id || p.merchant_id === merchantMatch.id).length,
         reelsCount: 6
       };
     }
 
-    // If clean is empty or talieska, return Talieska Studio
-    if (!clean || clean === 'talieska') {
-      return socialProfiles['talieska'];
+    // 4. Check dynamic creators array
+    const creatorMatch = (creators || []).find(c => 
+      c.slug?.toLowerCase() === clean || 
+      c.id?.toLowerCase() === clean || 
+      c.handle?.replace(/^@/, '').toLowerCase() === clean ||
+      c.name?.toLowerCase().replace(/\s+/g, '-') === clean ||
+      c.name?.toLowerCase() === clean
+    );
+    if (creatorMatch) {
+      return {
+        id: creatorMatch.id,
+        handle: creatorMatch.handle?.startsWith('@') ? creatorMatch.handle : `@${creatorMatch.handle}`,
+        slug: creatorMatch.slug || creatorMatch.handle?.replace(/^@/, ''),
+        name: creatorMatch.name,
+        verified: creatorMatch.verified ?? true,
+        role: 'creator',
+        creatorId: creatorMatch.id,
+        avatar: creatorMatch.avatar || '/images/reels/reel_2.jpg',
+        category: creatorMatch.category || 'Fashion Stylist & UGC Creator',
+        categoryAr: creatorMatch.categoryAr || 'منسقة أزياء وصانعة محتوى معتمدة',
+        bio: creatorMatch.bio || `✨ إطلالات وتنسيقات أزياء عصرية | صانع محتوى مصري معتمد 🇪🇬`,
+        location: 'القاهرة، مصر • Cairo, Egypt',
+        followersCount: creatorMatch.followersCount || '24.5K',
+        followingCount: creatorMatch.followingCount || '115',
+        productsCount: (products || []).filter(p => p.creatorId === creatorMatch.id || p.creator_id === creatorMatch.id).length,
+        reelsCount: 4
+      };
     }
 
-    // Dynamic Creator Profile for any clicked creator handle!
+    // 5. If clean is empty or talieska, return Drip Fit
+    if (!clean || clean === 'drip-fit') {
+      return socialProfiles['drip-fit'];
+    }
+
+    // 6. Dynamic Fallback Creator Profile for any clicked creator handle!
     const formattedName = rawClean
       .split(/[._-]/)
       .map(part => part.charAt(0).toUpperCase() + part.slice(1))
@@ -1154,7 +611,7 @@ export function AppProvider({ children }) {
       name: formattedName,
       verified: true,
       role: 'creator',
-      merchantId: 'm-01',
+      creatorId: `cr-${clean}`,
       avatar: '/images/reels/fashion_oneshoulder_top_thumb.jpg',
       category: 'Fashion Stylist & UGC Creator',
       categoryAr: 'منسقة أزياء وصانعة محتوى معتمدة',
@@ -1168,10 +625,30 @@ export function AppProvider({ children }) {
         { id: 'h1', title: 'إطلالات الصيف', icon: 'style', img: '/images/reels/fashion_citrine_blazer_thumb.jpg' }
       ]
     };
-  }, [activeProfileHandle, merchants, products, socialProfiles]);
+  }, [activeProfileHandle, merchants, creators, products, socialProfiles, user]);
+
+  const navigateToMyProfile = () => {
+    if (!user) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+    const myHandle = user.slug || 
+      (user.handle ? user.handle.replace(/^@/, '') : null) || 
+      user.merchant_id || 
+      user.creator_id || 
+      user.username || 
+      user.name || 
+      user.id;
+    setActiveProfileHandle(myHandle);
+    setActiveTab('profile', { profileHandle: myHandle });
+  };
 
   const navigateToProfile = (profileOrHandle) => {
-    let handle = 'talieska';
+    let handle = 'drip-fit';
+    if (!profileOrHandle && user) {
+      navigateToMyProfile();
+      return;
+    }
     if (typeof profileOrHandle === 'string') {
       handle = profileOrHandle.replace(/^@/, '');
     } else if (profileOrHandle?.slug) {
@@ -1199,7 +676,7 @@ export function AppProvider({ children }) {
         return;
       }
     }
-    setActiveTab('storefront', { storeSlug: 'talieska' });
+    setActiveTab('storefront', { storeSlug: 'drip-fit' });
   };
 
   const navigateToDashboard = () => {
@@ -1216,7 +693,7 @@ export function AppProvider({ children }) {
     const cat = options.category || selectedCategory;
     const profHandle = options.profileHandle || activeProfileHandle;
     const curMerchant = (merchants || []).find(m => m.id === selectedMerchantId);
-    const sSlug = options.storeSlug || curMerchant?.slug || 'talieska';
+    const sSlug = options.storeSlug || curMerchant?.slug || 'drip-fit';
 
     const newPath = getPathForTab(tab, { 
       product: prod, 
@@ -1240,49 +717,88 @@ export function AppProvider({ children }) {
     }
   };
 
-  useEffect(() => {
-    const loadData = async () => {
-      // Step 1: Identify the current user
-      const currentUser = await AuthService.getCurrentUser();
-      let activeMerchantId = null;
+  const loadData = async (activeUserOverride = null) => {
+    // Step 1: Identify the current user
+    const currentUser = activeUserOverride || (await AuthService.getCurrentUser());
+    let activeMerchantId = null;
 
-      if (currentUser) {
-        setUser(currentUser);
-        if (currentUser.role) setRole(currentUser.role);
-        if (currentUser.merchant_id) {
-          activeMerchantId = currentUser.merchant_id;
-          setSelectedMerchantId(prev => prev || currentUser.merchant_id);
-        }
+    if (currentUser) {
+      setUser(currentUser);
+      if (currentUser.role) setRole(currentUser.role);
+      if (currentUser.merchant_id) {
+        activeMerchantId = currentUser.merchant_id;
+        setSelectedMerchantId(prev => prev || currentUser.merchant_id);
+      }
+      try {
         const balance = await RewardService.getBalance(currentUser.id);
         setRewardPoints(balance);
         sessionTracker.setAuthenticatedUser(currentUser.id);
+      } catch (e) {}
+    }
+
+    // Step 2: Determine the effective merchant scope
+    // - Merchants see ONLY their own data
+    // - Superadmins and buyers see the full catalogue (no filter)
+    const isMerchantRole = currentUser?.role === 'merchant';
+    const scopedMerchantId = isMerchantRole
+      ? (activeMerchantId || currentUser?.merchant_id || null)
+      : null; // buyers / superadmins get unfiltered data
+
+    // Step 3: Load products scoped to the merchant (or all for buyers)
+    let fetchedProducts = await ProductService.getProducts(null, scopedMerchantId);
+    fetchedProducts = (fetchedProducts || []).map(p => {
+      const isDripFit = p.title?.toLowerCase().includes('drip fit') || 
+                        p.description?.toLowerCase().includes('drip fit') ||
+                        p.merchant?.toLowerCase().includes('drip fit') ||
+                        p.merchantSlug?.toLowerCase() === 'drip-fit';
+      if (isDripFit) {
+        return {
+          ...p,
+          merchant: 'Drip Fit • دريب فيت',
+          merchantId: '171842bd-daed-40ef-853f-917eab2ed437',
+          merchantSlug: 'drip-fit'
+        };
       }
+      return p;
+    });
+    setProducts(fetchedProducts);
 
-      // Step 2: Determine the effective merchant scope
-      // - Merchants see ONLY their own data
-      // - Superadmins and buyers see the full catalogue (no filter)
-      const isMerchantRole = currentUser?.role === 'merchant';
-      const scopedMerchantId = isMerchantRole
-        ? (activeMerchantId || currentUser?.merchant_id || null)
-        : null; // buyers / superadmins get unfiltered data
+    // Step 4: Load merchants list (always full, includes all registered custom merchants)
+    const fetchedMerchants = await ProductService.getMerchants();
+    setMerchants(fetchedMerchants);
 
-      // Step 3: Load products scoped to the merchant (or all for buyers)
-      const fetchedProducts = await ProductService.getProducts(null, scopedMerchantId);
-      setProducts(fetchedProducts);
+    // Step 5: Load creators list (always full, includes all registered creators)
+    const fetchedCreators = await AuthService.getCreators();
+    setCreators(fetchedCreators);
 
-      // Step 4: Load merchants list (always full, only for display purposes)
-      const fetchedMerchants = await ProductService.getMerchants();
-      setMerchants(fetchedMerchants);
+    // Step 6: Load cart (always user-scoped)
+    const fetchedCart = await CartService.getCartItems();
+    setCartItems(fetchedCart);
 
-      // Step 5: Load cart (always user-scoped)
-      const fetchedCart = await CartService.getCartItems();
-      setCartItems(fetchedCart);
+    // Step 7: Load orders scoped to the merchant
+    const fetchedOrders = await OrderService.getOrders(currentUser?.id || null, scopedMerchantId);
+    setOrders(fetchedOrders);
+  };
 
-      // Step 6: Load orders scoped to the merchant
-      const fetchedOrders = await OrderService.getOrders(currentUser?.id || null, scopedMerchantId);
-      setOrders(fetchedOrders);
-    };
+  const refreshData = async (userOverride = null) => {
+    await loadData(userOverride);
+  };
+
+  useEffect(() => {
     loadData();
+
+    // Real-time listener for cross-tab or local registration events
+    const handleStorageChange = (e) => {
+      if (e.key === 'eg_custom_merchants' || e.key === 'eg_custom_creators' || e.key === 'eg_active_session' || e.key === 'eg_registered_users_registry') {
+        loadData();
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('eg_profiles_updated', loadData);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('eg_profiles_updated', loadData);
+    };
   }, []);
 
   const updateUserProfile = async (updates) => {
@@ -1364,7 +880,7 @@ export function AppProvider({ children }) {
 
   const addProduct = async (newProd) => {
     const activeMerchant = merchants.find(m => m.id === selectedMerchantId) || merchants[0];
-    const merchantName = newProd.merchant || activeMerchant?.name || user?.name || 'Talieska Studio • تاليسكا ستوديو';
+    const merchantName = newProd.merchant || activeMerchant?.name || user?.name || 'Drip Fit • دريب فيت';
     const merchantId = newProd.merchantId || activeMerchant?.id || 'm0000000-0000-0000-0000-000000000001';
 
     const enrichedProd = {
@@ -1377,17 +893,18 @@ export function AppProvider({ children }) {
     // 1. Persist product via ProductService
     const created = await ProductService.createProduct(enrichedProd);
 
-    // 2. If product has video, also create a Reel in ReelsService linked to profile!
-    if (newProd.video) {
-      const isMerchant = user?.role === 'merchant' || !!user?.storeName || user?.type === 'merchant' || activeMerchant?.id === merchantId;
-      const derivedHandle = user?.handle 
-        || (user?.name ? `@${user.name.trim().toLowerCase().replace(/[^a-z0-9_]/g, '_')}` : null)
-        || (activeMerchant?.slug ? `@${activeMerchant.slug}` : '@store');
-      const creatorHandle = newProd.creatorHandle || (user?.role === 'creator' ? `@${(user.name || 'creator').replace(/\s+/g, '_')}` : derivedHandle);
-      const creatorName = newProd.creatorName || user?.name || merchantName;
-      const creatorAvatar = newProd.creatorAvatar || user?.profile?.avatar_url || user?.avatar_url || user?.avatar || user?.logo || activeMerchant?.logo || created.image;
-      const merchantSlug = activeMerchant?.slug || user?.slug || user?.name?.toLowerCase().replace(/[^a-z0-9_]/g, '_');
+    // 2. Automatically create a real Reel in ReelsService linked to merchant profile & storefront!
+    const isMerchant = user?.role === 'merchant' || !!user?.storeName || user?.type === 'merchant' || activeMerchant?.id === merchantId;
+    const derivedHandle = user?.handle 
+      || (user?.name ? `@${user.name.trim().toLowerCase().replace(/[^a-z0-9_]/g, '_')}` : null)
+      || (activeMerchant?.slug ? `@${activeMerchant.slug}` : '@store');
+    const creatorHandle = newProd.creatorHandle || (user?.role === 'creator' ? `@${(user.name || 'creator').replace(/\s+/g, '_')}` : derivedHandle);
+    const creatorName = newProd.creatorName || user?.name || merchantName;
+    const creatorAvatar = newProd.creatorAvatar || user?.profile?.avatar_url || user?.avatar_url || user?.avatar || user?.logo || activeMerchant?.logo || created.image;
+    const merchantSlug = activeMerchant?.slug || user?.slug || user?.name?.toLowerCase().replace(/[^a-z0-9_]/g, '_');
+    const reelMediaUrl = newProd.video || created.video || created.image || (created.images && created.images[0]) || '';
 
+    try {
       await ReelsService.saveReel({
         id: `reel-${created.id}`,
         creatorId: user?.id || null,
@@ -1399,11 +916,17 @@ export function AppProvider({ children }) {
         storeSlug: merchantSlug,
         isMerchantReel: isMerchant,
         avatar: creatorAvatar,
-        videoBg: newProd.video,
-        caption: `${created.title} • متوفر حصرياً عبر egyptian-commerce.com 🇪🇬✨ #موضة_مصرية`,
-        music: 'Summer Aesthetic Vibes • Instrumental',
+        videoBg: reelMediaUrl,
+        thumbnail: created.image || (created.images && created.images[0]) || reelMediaUrl,
+        caption: newProd.caption || `${created.title} • ${created.description ? created.description.slice(0, 100) + '...' : 'متوفر الآن عبر متجرنا الرسمي'} 🇪🇬✨ #${merchantSlug || 'DripFit'}`,
+        music: 'Drip Fit Official • Streetwear Vibes',
         products: [created]
       });
+      try {
+        window.dispatchEvent(new CustomEvent('eg_reels_updated', { detail: { productId: created.id, reelId: `reel-${created.id}` } }));
+      } catch (e) {}
+    } catch (reelErr) {
+      console.warn('Reel creation notice:', reelErr);
     }
 
     // 3. Update active in-memory products state
@@ -1411,18 +934,26 @@ export function AppProvider({ children }) {
     return created;
   };
 
-  const updateProduct = (updatedProd) => {
+  const updateProduct = async (updatedProd) => {
     setProducts(prev => prev.map(p => p.id === updatedProd.id ? updatedProd : p));
+    try {
+      await ProductService.updateProduct(updatedProd.id, updatedProd);
+    } catch (e) {
+      console.warn('Could not persist updated product:', e);
+    }
   };
 
   const deleteProduct = async (productId) => {
-    await ProductService.deleteProduct(productId);
+    try {
+      await ProductService.deleteProduct(productId);
+      await ReelsService.deleteReel(`reel-${productId}`);
+    } catch (e) {}
     setProducts(prev => prev.filter(p => p.id !== productId));
   };
 
-  const updateMerchant = (merchantId, updatedFields) => {
+  const updateMerchant = async (merchantId, updatedFields) => {
     setMerchants(prev => prev.map(m => {
-      if (m.id === merchantId) {
+      if (m.id === merchantId || m.slug === updatedFields.slug) {
         return {
           ...m,
           ...updatedFields,
@@ -1439,6 +970,12 @@ export function AppProvider({ children }) {
       }
       return m;
     }));
+
+    try {
+      await ProductService.updateMerchant(merchantId, updatedFields);
+    } catch (err) {
+      console.warn('Merchant persistence error:', err);
+    }
   };
 
   const [cartItems, setCartItems] = useState([]);
@@ -1575,6 +1112,8 @@ export function AppProvider({ children }) {
       setProducts,
       merchants,
       setMerchants,
+      creators,
+      setCreators,
       selectedMerchantId,
       setSelectedMerchantId,
       orders,
@@ -1598,6 +1137,8 @@ export function AppProvider({ children }) {
       activeProfileHandle,
       setActiveProfileHandle,
       navigateToProfile,
+      navigateToMyProfile,
+      refreshData,
       navigateToStorefront,
       navigateToDashboard,
       // Engine Services

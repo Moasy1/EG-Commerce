@@ -12,8 +12,8 @@ const FASHION_VIDEO_PRESETS = [
     id: 'linen-abaya',
     title: 'عباية كتان بوهيمي ناعمة',
     titleEn: 'Bohemian Linen Abaya',
-    url: '/images/reels/linen_abaya.mp4',
-    thumb: '/images/products/linen_abaya.jpg',
+    url: '/images/reels/the_sharp_v_yellow_reel.mp4',
+    thumb: '/images/products/the_sharp_v_yellow_1.webp',
     duration: '0:15',
     size: '14.2 MB',
     category: 'fashion'
@@ -228,7 +228,7 @@ export default function DesktopCreatorAnalytics() {
         price: 1850,
         originalPrice: 2300,
         merchant: 'تاليسكا ستوديو • Talieska',
-        image: '/images/products/linen_abaya.jpg'
+        image: '/images/products/the_sharp_v_yellow_1.webp'
       },
       {
         id: 'p-fashion-shirt',
@@ -391,7 +391,7 @@ export default function DesktopCreatorAnalytics() {
         || (isMerchant ? '@store' : '@creator');
       const authorAvatar = user?.profile?.avatar_url || user?.avatar_url || user?.avatar || user?.logo || profile?.avatar || '/images/reels/reel_2.jpg';
       const authorId = user?.id || profile?.id || 'cr-' + Date.now();
-      const merchantId = isMerchant ? (user?.id || user?.merchantId || 'm-01') : (selectedProduct?.merchantId || null);
+      const merchantId = isMerchant ? (user?.id || user?.merchantId || '171842bd-daed-40ef-853f-917eab2ed437') : (selectedProduct?.merchantId || null);
       const storeSlug = isMerchant ? (user?.slug || user?.storeSlug || user?.name?.toLowerCase().replace(/[^a-z0-9_]/g, '_')) : (selectedProduct?.merchantSlug || null);
 
       // Await video upload to server if still in progress
@@ -409,7 +409,7 @@ export default function DesktopCreatorAnalytics() {
       // If videoUrl is still an ephemeral local blob URL, fallback to reliable server video
       // so other devices on the network or mobile phones will stream properly without error
       if (typeof finalVideoUrl === 'string' && finalVideoUrl.startsWith('blob:')) {
-        finalVideoUrl = '/images/reels/linen_abaya.mp4';
+        finalVideoUrl = '/images/reels/the_sharp_v_yellow_reel.mp4';
       }
 
       setPublishReelProgress(50);
@@ -424,7 +424,7 @@ export default function DesktopCreatorAnalytics() {
         discount: selectedProduct.discount || '20% OFF',
         image: selectedProduct.image || selectedProduct.images?.[0] || reelThumbnail,
         merchant: selectedProduct.merchant || selectedProduct.merchantName || (isMerchant ? authorName : 'براند مصري معتمد'),
-        merchantId: selectedProduct.merchantId || selectedProduct.merchant_id || merchantId || 'm-01',
+        merchantId: selectedProduct.merchantId || selectedProduct.merchant_id || merchantId || '171842bd-daed-40ef-853f-917eab2ed437',
         merchantSlug: selectedProduct.merchantSlug || storeSlug
       } : null;
 
@@ -2057,7 +2057,7 @@ export default function DesktopCreatorAnalytics() {
             <div className="absolute top-2 left-1/2 -translate-x-1/2 w-20 h-4 bg-slate-900 rounded-full z-30" />
 
             <video
-              src={activePreviewReel.videoUrl || '/images/reels/linen_abaya.mp4'}
+              src={activePreviewReel.videoUrl || '/images/reels/the_sharp_v_yellow_reel.mp4'}
               poster={activePreviewReel.thumbnail}
               autoPlay
               loop

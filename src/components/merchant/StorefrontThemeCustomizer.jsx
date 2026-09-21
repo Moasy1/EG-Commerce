@@ -126,13 +126,13 @@ export default function StorefrontThemeCustomizer() {
 
   // Preset Logos & Banners
   const logoPresets = [
-    { label: 'تاليسكا مونوغرام T', url: '/images/brands/talieska_logo.jpg' },
+    { label: 'تاليسكا مونوغرام T', url: '/images/brands/dripfit_logo.png' },
     { label: 'فانوس خان الخليلي', url: '/images/products/copper_lantern.jpg' },
     { label: 'بليزر أيقوني', url: '/images/products/wool_blazer.jpg' },
   ];
 
   const bannerPresets = [
-    { label: 'عرض أزياء تاليسكا بالقاهرة', url: '/images/banners/talieska_hero.jpg' },
+    { label: 'عرض أزياء تاليسكا بالقاهرة', url: '/images/products/the_sharp_v_yellow_1.webp' },
     { label: 'ساحة خان الخليلي التراثية', url: '/images/banners/khan_hero.jpg' },
     { label: 'موديل في شوارع المعز', url: '/images/reels/reel_1.jpg' },
   ];
@@ -633,7 +633,7 @@ export default function StorefrontThemeCustomizer() {
                             type="text"
                             value={promoCode}
                             onChange={(e) => { setPromoCode(e.target.value); triggerLiveUpdate({ promoCode: e.target.value }); }}
-                            placeholder="كود الخصم (TALIESKA15)"
+                            placeholder="كود الخصم (DRIP10)"
                             className="w-2/3 px-2.5 py-1.5 rounded-lg bg-surface-container border border-surface-container-high text-on-surface text-xs font-mono font-bold"
                           />
                           <input

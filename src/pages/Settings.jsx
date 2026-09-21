@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import { AuthService } from '../services/AuthService';
 
 const PRESET_AVATARS = [
-  { id: 'talieska', name: 'Talieska Logo', url: '/images/brands/talieska_logo.jpg' },
+  { id: 'drip-fit', name: 'Talieska Logo', url: '/images/brands/dripfit_logo.png' },
   { id: 'yasmin', name: 'Yasmin (Creator)', url: '/images/reels/reel_2.jpg' },
   { id: 'cairo_chic', name: 'Cairo Chic (Blazer)', url: '/images/reels/fashion_citrine_blazer_thumb.jpg' },
   { id: 'salma', name: 'Salma (Linen)', url: '/images/reels/fashion_oversized_shirt_thumb.jpg' },
@@ -442,7 +442,7 @@ export default function Settings() {
                     type="text" 
                     value={website} 
                     onChange={(e) => setWebsite(e.target.value)}
-                    placeholder="talieska.eg-commerce.com"
+                    placeholder="drip-fit.egyptian-commerce.com"
                     className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:border-slate-900 outline-none text-sm bg-white" 
                   />
                 </div>

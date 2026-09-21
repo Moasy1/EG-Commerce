@@ -67,7 +67,7 @@ export const CartService = {
         productId: item.product_id,
         merchantId: item.merchant_id,
         title: item.products?.title || item.title || 'Egyptian Fashion Item',
-        image: item.products?.image || item.image || '/images/products/linen_abaya.jpg',
+        image: item.products?.image || item.image || '/images/products/the_sharp_v_yellow_1.webp',
         brand: item.products?.merchant || item.brand || 'EG Brand',
         price: Number(item.unit_price || item.price || 950),
         quantity: item.quantity || 1,
@@ -144,7 +144,7 @@ export const CartService = {
         size: 'M',
         color: 'Citrine Yellow',
         image: '/images/reels/fashion_citrine_blazer_thumb.jpg',
-        brand: 'Talieska Studio'
+        brand: 'Drip Fit'
       },
       {
         id: 'cart-init-2',
@@ -174,7 +174,7 @@ export const CartService = {
         productId,
         merchantId,
         title: title || 'Egyptian Fashion Item',
-        image: image || '/images/products/linen_abaya.jpg',
+        image: image || '/images/products/the_sharp_v_yellow_1.webp',
         brand: brand || 'EG Brand',
         price: Number(price) || 950,
         quantity: Number(quantity) || 1,

@@ -10,7 +10,7 @@ export const CATEGORIES_DATA = [
     description: 'Contemporary Egyptian linen, elegant dresses, tailored blazers and seasonal collections.',
     descriptionAr: 'أحدث صيحات الموضة النسائية، فساتين أنيقة، وتصاميم كتان مصري راقية.',
     image: '/images/reels/fashion_citrine_blazer_thumb.jpg',
-    banner: '/images/banners/talieska_hero.jpg',
+    banner: '/images/products/the_sharp_v_yellow_1.webp',
     icon: 'woman',
     subcategories: ['All', 'Dresses', 'Tops & Blouses', 'Blazers & Jackets', 'Linen', 'Knitwear'],
     subcategoriesAr: ['الكل', 'فساتين', 'توبات وبلوزات', 'بليزرات وجواكت', 'كتان', 'تريكو وصوف'],
@@ -37,8 +37,8 @@ export const CATEGORIES_DATA = [
     labelAr: 'أزياء محتشمة وعبايات',
     description: 'Chic abayas, modest dresses, galabeyas and refined Egyptian linen silhouettes.',
     descriptionAr: 'عبايات كتان راقية، فساتين محتشمة، وجلابيات مصرية بتطريز يدوي فاخر.',
-    image: '/images/products/linen_abaya.jpg',
-    banner: '/images/products/linen_abaya.jpg',
+    image: '/images/products/the_sharp_v_yellow_1.webp',
+    banner: '/images/products/the_sharp_v_yellow_1.webp',
     icon: 'dry_cleaning',
     subcategories: ['All', 'Abayas', 'Galabeyas', 'Maxi Dresses', 'Modest Linen'],
     subcategoriesAr: ['الكل', 'عبايات', 'جلابيات', 'فساتين طويلة', 'كتان محتشم'],
@@ -108,7 +108,7 @@ export const CATEGORIES_DATA = [
     description: 'Fresh drops, trending reels picks and the latest 2026 fashion releases.',
     descriptionAr: 'أحدث القطع المضافة وإصدارات كولكشن 2026 الحصرية من أفضل المصممين المصريين.',
     image: '/images/reels/fashion_citrine_blazer_thumb.jpg',
-    banner: '/images/banners/talieska_hero.jpg',
+    banner: '/images/products/the_sharp_v_yellow_1.webp',
     icon: 'local_fire_department',
     isRedCard: true,
     subcategories: ['All', 'This Week', 'Trending Reels', 'Limited Edition'],
@@ -180,58 +180,87 @@ export const ProductService = {
 
     try {
       let query = supabase.from('products').select('*');
-      // Scope Supabase query to merchant when possible
+      // Scope Supabase query to merchant when requested
       if (merchantId) {
         query = query.eq('merchant_id', merchantId);
       }
 
       const { data, error } = await query;
-      if (error || !data || data.length === 0) {
-        // When merchant-scoped, don't fall back to ALL INITIAL_PRODUCTS
-        const initialFallback = merchantId
-          ? INITIAL_PRODUCTS.filter(p => p.merchantId === merchantId || p.merchant_id === merchantId)
-          : INITIAL_PRODUCTS;
-        allProducts = [...customProducts, ...initialFallback];
+      if (error || !data) {
+        if (merchantId) {
+          // Strict merchant scoping: Return ONLY this merchant's custom products, NO fake fallback
+          allProducts = customProducts;
+        } else {
+          allProducts = [...customProducts, ...INITIAL_PRODUCTS];
+        }
       } else {
-        // Map DB products to frontend format
-        const dbMapped = data.map(dbProduct => ({
+        // Map DB products to frontend format without inventing mockups
+        const legacyDemoMerchants = ['d0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000002'];
+        const dbMapped = data
+          .filter(dbProduct => !legacyDemoMerchants.includes(dbProduct.merchant_id))
+          .map(dbProduct => ({
           id: dbProduct.id,
-          sku: dbProduct.slug,
+          sku: dbProduct.slug || `EG-${dbProduct.id.slice(0, 8)}`,
           title: dbProduct.title,
-          merchant: dbProduct.merchant_id,
+          merchant: 'Drip Fit • دريب فيت',
           merchantId: dbProduct.merchant_id,
+          merchantSlug: 'drip-fit',
           merchantVerified: true,
-          price: Number(dbProduct.base_price),
+          price: Number(dbProduct.base_price) || 0,
           originalPrice: dbProduct.sale_price ? Number(dbProduct.base_price) : undefined,
-          rating: 4.9,
-          reviewsCount: 38,
-          stock: dbProduct.stock_quantity || 20,
+          rating: 5.0,
+          reviewsCount: 1,
+          stock: dbProduct.stock_quantity ?? 10,
           isSyndicated: true,
-          image: dbProduct.images && dbProduct.images.length > 0 ? dbProduct.images[0] : '/images/reels/reel_2.jpg',
+          image: dbProduct.images && dbProduct.images.length > 0 ? dbProduct.images[0] : null,
           images: dbProduct.images || [],
           video: null,
-          pointsEarned: Math.floor(Number(dbProduct.base_price) * 0.1),
-          category: dbProduct.category_id || 'General',
-          description: dbProduct.description,
-          sizes: ['S', 'M', 'L'],
-          colors: ['Default']
+          pointsEarned: Math.floor((Number(dbProduct.base_price) || 0) * 0.1),
+          category: dbProduct.category_id || 'Streetwear & Casual',
+          description: dbProduct.description || '',
+          sizes: Array.isArray(dbProduct.sizes) ? dbProduct.sizes : [],
+          colors: Array.isArray(dbProduct.colors) ? dbProduct.colors : []
         }));
 
-        // Merge Custom + DB products with INITIAL_PRODUCTS (filtered when scoped)
-        const existingIds = new Set([...customProducts.map(p => p.id), ...dbMapped.map(p => p.id)]);
-        const seedFallback = merchantId
-          ? INITIAL_PRODUCTS.filter(p => (p.merchantId === merchantId || p.merchant_id === merchantId) && !existingIds.has(p.id))
-          : INITIAL_PRODUCTS.filter(p => !existingIds.has(p.id));
-        allProducts = [...customProducts, ...dbMapped, ...seedFallback];
+        if (merchantId) {
+          // Scoped strictly to merchant: combine custom for this merchant + dbMapped
+          const existingIds = new Set(customProducts.map(p => p.id));
+          allProducts = [...customProducts, ...dbMapped.filter(p => !existingIds.has(p.id))];
+        } else {
+          const existingIds = new Set([...customProducts.map(p => p.id), ...dbMapped.map(p => p.id)]);
+          const seedRemaining = INITIAL_PRODUCTS.filter(p => !existingIds.has(p.id));
+          allProducts = [...customProducts, ...dbMapped, ...seedRemaining];
+        }
       }
     } catch (err) {
       console.warn('Error fetching products from backend:', err.message);
-      const existingIds = new Set(customProducts.map(p => p.id));
-      const seedFallback = merchantId
-        ? INITIAL_PRODUCTS.filter(p => (p.merchantId === merchantId || p.merchant_id === merchantId) && !existingIds.has(p.id))
-        : INITIAL_PRODUCTS.filter(p => !existingIds.has(p.id));
-      allProducts = [...customProducts, ...seedFallback];
+      allProducts = merchantId ? customProducts : [...customProducts, ...INITIAL_PRODUCTS];
     }
+
+    // Filter out any legacy stores across all products
+    const legacyDemoMerchants = ['d0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000002'];
+    allProducts = allProducts.filter(p => {
+      const mid = p.merchantId || p.merchant_id;
+      return !legacyDemoMerchants.includes(mid);
+    });
+
+    // Normalize products so any Drip Fit product is attributed to Drip Fit
+    allProducts = allProducts.map(p => {
+      const isDripFit = p.title?.toLowerCase().includes('drip fit') || 
+                        p.description?.toLowerCase().includes('drip fit') ||
+                        p.merchant?.toLowerCase().includes('drip fit') ||
+                        p.merchantSlug?.toLowerCase() === 'drip-fit' ||
+                        p.merchantId === '171842bd-daed-40ef-853f-917eab2ed437';
+      if (isDripFit) {
+        return {
+          ...p,
+          merchant: 'Drip Fit • دريب فيت',
+          merchantId: '171842bd-daed-40ef-853f-917eab2ed437',
+          merchantSlug: 'drip-fit'
+        };
+      }
+      return p;
+    });
 
     if (categorySlug && categorySlug !== 'all') {
       return this.filterProductsByCategory(allProducts, categorySlug);
@@ -241,25 +270,27 @@ export const ProductService = {
   },
 
   async createProduct(productData) {
+    const fallbackSlug = productData.merchant ? productData.merchant.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') : 'store';
     const finalProduct = {
       id: productData.id || `p-${Date.now()}`,
       sku: productData.sku || `SKU-${Date.now().toString().slice(-6)}`,
       title: productData.title,
       price: Number(productData.price) || 0,
       originalPrice: productData.originalPrice ? Number(productData.originalPrice) : Math.round((Number(productData.price) || 0) * 1.25),
-      merchant: productData.merchant || 'Talieska Studio • تاليسكا ستوديو',
-      merchantId: productData.merchantId || 'd0000000-0000-0000-0000-000000000001',
+      merchant: productData.merchant || 'متجر مصري معتمد',
+      merchantId: productData.merchantId || `m-${fallbackSlug}`,
+      merchantSlug: productData.merchantSlug || fallbackSlug,
       merchantVerified: true,
       category: productData.category || 'الفساتين',
       description: productData.description || '',
-      image: productData.image || (productData.images && productData.images[0]) || '/images/products/linen_abaya.jpg',
-      images: productData.images || [productData.image || '/images/products/linen_abaya.jpg'],
+      image: productData.image || (productData.images && productData.images[0]) || null,
+      images: productData.images || (productData.image ? [productData.image] : []),
       video: productData.video || null,
       rating: 5.0,
       reviewsCount: 1,
       stock: Number(productData.stock || productData.quantity || 20),
-      sizes: productData.sizes || ['M', 'L'],
-      colors: productData.colors || ['Default'],
+      sizes: Array.isArray(productData.sizes) ? productData.sizes : [],
+      colors: Array.isArray(productData.colors) ? productData.colors : [],
       colorSwatches: productData.colorSwatches || null,
       sizeGuide: productData.sizeGuide || null,
       isSyndicated: true,
@@ -269,6 +300,7 @@ export const ProductService = {
 
     // 1. Attempt Supabase backend insertion
     try {
+      const isUuid = (val) => typeof val === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
       const dbPayload = {
         title: finalProduct.title,
         slug: finalProduct.sku,
@@ -278,9 +310,11 @@ export const ProductService = {
         stock_quantity: finalProduct.stock,
         status: 'active',
         images: finalProduct.images,
-        category_id: finalProduct.category,
-        merchant_id: finalProduct.merchantId || productData.merchantId || null
+        category_id: finalProduct.category
       };
+      if (isUuid(finalProduct.merchantId)) {
+        dbPayload.merchant_id = finalProduct.merchantId;
+      }
 
       const { data, error } = await supabase.from('products').insert(dbPayload).select();
       if (!error && data && data.length > 0) {
@@ -303,6 +337,39 @@ export const ProductService = {
     return finalProduct;
   },
 
+  async updateProduct(productId, updates) {
+    if (!productId) return null;
+    const isUuid = (val) => typeof val === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
+
+    if (isUuid(productId)) {
+      try {
+        const supaPayload = {};
+        if (updates.title) supaPayload.title = updates.title;
+        if (updates.price) supaPayload.base_price = updates.price;
+        if (updates.description) supaPayload.description = updates.description;
+        if (updates.stock !== undefined) supaPayload.stock_quantity = updates.stock;
+        if (updates.images) supaPayload.images = updates.images;
+        if (Object.keys(supaPayload).length > 0) {
+          supaPayload.updated_at = new Date().toISOString();
+          await supabase.from('products').update(supaPayload).eq('id', productId);
+        }
+      } catch (err) {
+        console.warn('Supabase updateProduct error:', err.message);
+      }
+    }
+
+    try {
+      const stored = localStorage.getItem('eg_custom_products');
+      if (stored) {
+        let customProducts = JSON.parse(stored);
+        customProducts = customProducts.map(p => p.id === productId ? { ...p, ...updates } : p);
+        localStorage.setItem('eg_custom_products', JSON.stringify(customProducts));
+      }
+    } catch (e) {}
+
+    return updates;
+  },
+
   async deleteProduct(productId) {
     try {
       await supabase.from('products').delete().eq('id', productId);
@@ -315,6 +382,65 @@ export const ProductService = {
         localStorage.setItem('eg_custom_products', JSON.stringify(customProducts));
       }
     } catch (e) {}
+  },
+
+  async updateMerchant(merchantId, updates) {
+    if (!merchantId) return null;
+    const isUuid = (val) => typeof val === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
+
+    // 1. If merchantId is a UUID in Supabase, update the merchants record
+    if (isUuid(merchantId)) {
+      try {
+        const supaUpdates = {};
+        if (updates.name) supaUpdates.store_name = updates.name.split('•')[0].trim();
+        if (updates.slug) supaUpdates.slug = updates.slug;
+        if (Object.keys(supaUpdates).length > 0) {
+          supaUpdates.updated_at = new Date().toISOString();
+          await supabase.from('merchants').update(supaUpdates).eq('id', merchantId);
+        }
+      } catch (err) {
+        console.warn('Supabase merchant update error:', err.message);
+      }
+    }
+
+    // 2. Persist to merchant customization in localStorage
+    try {
+      localStorage.setItem(`eg_merchant_settings_${merchantId}`, JSON.stringify(updates));
+      if (updates.slug) {
+        localStorage.setItem(`eg_merchant_settings_${updates.slug}`, JSON.stringify(updates));
+      }
+      const raw = localStorage.getItem('eg_custom_merchants');
+      let custom = raw ? JSON.parse(raw) : [];
+      const idx = custom.findIndex(m => m.id === merchantId || m.slug === updates.slug);
+      if (idx >= 0) {
+        custom[idx] = { ...custom[idx], ...updates, updatedAt: new Date().toISOString() };
+      } else {
+        custom.push({ id: merchantId, ...updates, updatedAt: new Date().toISOString() });
+      }
+      localStorage.setItem('eg_custom_merchants', JSON.stringify(custom));
+    } catch (e) {
+      console.warn('Could not save to eg_custom_merchants:', e);
+    }
+
+    // 3. Also update profile in Supabase if user_id is known
+    if (updates.user_id && isUuid(updates.user_id)) {
+      try {
+        const profUpdates = {};
+        if (updates.name) profUpdates.name = updates.name.split('•')[0].trim();
+        if (updates.logo) profUpdates.avatar_url = updates.logo;
+        if (updates.bio) profUpdates.bio = updates.bio;
+        if (Object.keys(profUpdates).length > 0) {
+          await supabase.from('profiles').update(profUpdates).eq('id', updates.user_id);
+        }
+      } catch (e) {}
+    }
+
+    // 4. Notify all listening components
+    try {
+      window.dispatchEvent(new CustomEvent('eg_merchant_updated', { detail: { merchantId, updates } }));
+    } catch (e) {}
+
+    return updates;
   },
 
   async getMerchants() {
@@ -344,8 +470,8 @@ export const ProductService = {
         shortName: cm.shortName || cm.name || 'متجر',
         slug: cm.slug || 'store',
         subdomain: cm.subdomain || `${cm.slug || 'store'}.egyptian-commerce.com`,
-        logo: cm.logo || existing.logo || '/images/brands/talieska_logo.jpg',
-        banner: cm.banner || existing.banner || '/images/banners/talieska_hero.jpg'
+        logo: cm.logo || existing.logo || '/images/brands/dripfit_logo.png',
+        banner: cm.banner || existing.banner || '/images/products/the_sharp_v_yellow_1.webp'
       });
     });
 
@@ -355,6 +481,10 @@ export const ProductService = {
       if (!error && data && data.length > 0) {
         data.forEach(dbm => {
           const id = dbm.id;
+          // Filter out deleted mock merchants
+          if (id === 'd0000000-0000-0000-0000-000000000001' || id === 'd0000000-0000-0000-0000-000000000002') return;
+          if (dbm.slug === 'talieska' || dbm.slug === 'khan-el-khalili') return;
+
           const existing = merchantMap.get(id) || {};
           merchantMap.set(id, {
             ...MERCHANTS_DATA[0],
@@ -372,6 +502,35 @@ export const ProductService = {
     } catch (err) {
       console.warn('Error fetching merchants from Supabase:', err.message);
     }
+
+    // Also check eg_registered_users_registry for merchant accounts
+    try {
+      const rawReg = localStorage.getItem('eg_registered_users_registry');
+      if (rawReg) {
+        const regObj = JSON.parse(rawReg);
+        Object.values(regObj).forEach(acc => {
+          if (acc.role === 'merchant') {
+            const id = acc.merchant_id || acc.id;
+            if (!merchantMap.has(id)) {
+              const slug = acc.name?.toLowerCase().replace(/\s+/g, '-') || 'store';
+              merchantMap.set(id, {
+                ...MERCHANTS_DATA[0],
+                id,
+                user_id: acc.id,
+                name: `${acc.name} Store • متجر ${acc.name}`,
+                shortName: acc.name,
+                slug,
+                handle: `@${slug}`,
+                subdomain: `${slug}.egyptian-commerce.com`,
+                logo: acc.avatar_url || '/images/brands/dripfit_logo.png',
+                banner: '/images/products/the_sharp_v_yellow_1.webp',
+                is_verified: true
+              });
+            }
+          }
+        });
+      }
+    } catch (e) {}
 
     return Array.from(merchantMap.values());
   }

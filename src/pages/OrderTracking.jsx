@@ -44,7 +44,7 @@ export default function OrderTracking() {
             <span>{latestOrder?.shippingStatus === 'ready_for_pickup' ? 'جاري تجهيز الشحنة لدى المتجر ⏳' : latestOrder?.shippingStatus === 'in_transit' ? 'الشحنة مع مندوب بوسطة 🚚' : 'تم استلام الأوردر وتأكيده بنجاح! 🎉'}</span>
           </div>
           <h1 className="font-serif text-lg md:text-xl font-bold text-on-surface">
-            تتبع الشحنة #{latestOrder ? latestOrder.id : 'EG-8841'} • {latestOrder?.merchantName || 'Talieska Studio'}
+            تتبع الشحنة #{latestOrder ? latestOrder.id : 'EG-8841'} • {latestOrder?.merchantName || 'Drip Fit'}
           </h1>
           <p className="text-xs text-on-surface-variant mt-0.5">
             المتجر بدأ تجهيز طلبك دلوقتي في مسار شحن بوسطة السريع (Bosta Express)

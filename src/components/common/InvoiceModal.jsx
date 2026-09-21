@@ -7,7 +7,7 @@ export default function InvoiceModal({ isOpen, onClose, order, merchant = null }
 
   const [activeTab, setActiveTab] = useState('invoice'); // 'invoice' | 'waybill'
 
-  const storeName = merchant?.name || order.merchantName || 'Talieska Studio • تاليسكا ستوديو';
+  const storeName = merchant?.name || order.merchantName || 'Drip Fit • دريب فيت';
   const storePhone = merchant?.whatsapp || merchant?.phone || '+20 100 234 5678';
   const orderId = order.id || 'EG-8841';
   const invoiceNumber = `INV-${orderId.replace(/[^a-zA-Z0-9]/g, '')}-${new Date(order.createdAt || Date.now()).getFullYear()}`;

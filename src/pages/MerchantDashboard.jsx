@@ -161,24 +161,30 @@ export default function MerchantDashboard() {
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-surface-container-high border border-surface-container-highest p-1 flex items-center justify-center shadow-xs">
               <img 
-                src={currentMerchant?.logo || '/images/brands/talieska_logo.jpg'} 
+                src={currentMerchant?.logo || '/images/brands/dripfit_logo.png'} 
                 alt={currentMerchant?.name || 'Store'} 
                 className="w-full h-full object-cover rounded-lg"
               />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <select
-                  value={currentMerchant?.id || ''}
-                  onChange={(e) => setSelectedMerchantId(e.target.value)}
-                  className="bg-transparent font-bold text-sm md:text-base text-on-surface cursor-pointer focus:outline-none"
-                >
-                  {(merchants || []).map(m => (
-                    <option key={m.id} value={m.id} className="bg-surface-container text-on-surface">
-                      {m.name || m.store_name || m.id}
-                    </option>
-                  ))}
-                </select>
+                {user && (user.role === 'admin' || user.role === 'superadmin') ? (
+                  <select
+                    value={currentMerchant?.id || ''}
+                    onChange={(e) => setSelectedMerchantId(e.target.value)}
+                    className="bg-transparent font-bold text-sm md:text-base text-on-surface cursor-pointer focus:outline-none"
+                  >
+                    {(merchants || []).map(m => (
+                      <option key={m.id} value={m.id} className="bg-surface-container text-on-surface">
+                        {m.name || m.store_name || m.id}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <h2 className="font-bold text-sm md:text-base text-on-surface">
+                    {currentMerchant?.name || currentMerchant?.store_name || 'متجري المعتمد'}
+                  </h2>
+                )}
                 <span className="hidden md:inline-flex px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold font-mono">
                   SaaS Active ✓
                 </span>
@@ -194,7 +200,7 @@ export default function MerchantDashboard() {
           {/* Quick Action CTAs */}
           <div className="flex items-center gap-2">
             <button
-              onClick={() => navigateToProfile(currentMerchant?.slug || 'talieska')}
+              onClick={() => navigateToProfile(currentMerchant?.slug || 'drip-fit')}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface border border-surface-container-high text-xs font-bold transition-all shadow-xs"
               title="معاينة الملف الاجتماعي (Instagram Profile)"
             >
@@ -203,7 +209,7 @@ export default function MerchantDashboard() {
             </button>
 
             <button
-              onClick={() => navigateToStorefront(currentMerchant?.id || 'm-01')}
+              onClick={() => navigateToStorefront(currentMerchant?.id || '171842bd-daed-40ef-853f-917eab2ed437')}
               className="hidden md:flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface border border-surface-container-high text-xs font-bold transition-all shadow-xs"
             >
               <span className="material-symbols-outlined text-[16px] text-primary">storefront</span>
@@ -376,7 +382,7 @@ export default function MerchantDashboard() {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-on-surface-variant">الحساب المستلم:</span>
-                <span className="font-mono font-bold text-secondary">{currentMerchant?.instapayHandle || 'talieska@instapay'}</span>
+                <span className="font-mono font-bold text-secondary">{currentMerchant?.instapayHandle || 'dripfit@instapay'}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-on-surface-variant">المبلغ المحول:</span>

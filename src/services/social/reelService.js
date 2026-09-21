@@ -133,7 +133,7 @@ export const reelService = {
       title: rp.products?.title,
       price: rp.products?.sale_price || rp.products?.base_price,
       originalPrice: rp.products?.base_price,
-      image: rp.products?.images?.[0] || '/images/products/linen_abaya.jpg',
+      image: rp.products?.images?.[0] || '/images/products/the_sharp_v_yellow_1.webp',
       tagX: rp.tag_x,
       tagY: rp.tag_y,
       isPrimary: rp.is_primary
@@ -178,7 +178,7 @@ export const reelService = {
       merchantId: reelData.merchantId || null,
       storeSlug: reelData.storeSlug || null,
       isMerchantReel: isMerchant,
-      videoBg: reelData.videoBg || reelData.video || '/images/reels/linen_abaya.mp4',
+      videoBg: reelData.videoBg || reelData.video || '/images/reels/the_sharp_v_yellow_reel.mp4',
       caption: reelData.caption || '',
       music: reelData.music || 'Egyptian Aesthetic Vibes',
       likes: Number(reelData.likes) || 120,

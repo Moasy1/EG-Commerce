@@ -61,18 +61,13 @@ export default function QuickBuyDrawer() {
     }
   };
 
-  const availableSizes = quickBuyProduct?.sizes && quickBuyProduct.sizes.length > 0
-    ? quickBuyProduct.sizes
-    : ['S', 'M', 'L', 'XL'];
+  const availableSizes = Array.isArray(quickBuyProduct?.sizes) ? quickBuyProduct.sizes : [];
 
   const availableSwatches = quickBuyProduct?.colorSwatches && quickBuyProduct.colorSwatches.length > 0
     ? quickBuyProduct.colorSwatches
     : (quickBuyProduct?.colors && quickBuyProduct.colors.length > 0
         ? quickBuyProduct.colors.map(c => ({ name: c, hex: '#8b5a2b' }))
-        : [
-            { name: 'أصفر ليموني • Lemon', hex: '#d4af37' },
-            { name: 'بيج كتاني • Linen Beige', hex: '#d2b48c' }
-          ]);
+        : []);
 
   useEffect(() => {
     if (availableSizes[0]) {
@@ -179,7 +174,7 @@ export default function QuickBuyDrawer() {
             </div>
 
             <div className="flex flex-col">
-              <span className="text-xs text-amber-700 font-semibold">{quickBuyProduct.merchant || 'Talieska Studio'}</span>
+              <span className="text-xs text-amber-700 font-semibold">{quickBuyProduct.merchant || 'Drip Fit'}</span>
               
               {/* Clickable Title to view product */}
               <h3 

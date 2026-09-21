@@ -25,28 +25,33 @@ $dataFile = $dataDir . '/shared_reels.json';
 if (!file_exists($dataFile)) {
     $initialReels = [
         [
-            'id' => 'ee000000-0000-0000-0000-000000000001',
-            'creatorHandle' => '@cairo_chic',
-            'creatorName' => 'كايرو شيك • Cairo Chic',
-            'avatar' => '/images/reels/fashion_citrine_blazer_thumb.jpg',
-            'videoBg' => '/images/reels/fashion_citrine_blazer.mp4',
-            'caption' => 'تنسيق بليزر السيترين الأوفرسايز مع بنطلون جينز كلاسيك ونظارة شمسية 💛 فخامة الصيف وأناقة لا تقاوم! #بليزر #موضة_القاهرة',
-            'music' => 'ألحان إيقاعية هادية • صيف 2026',
-            'likes' => 4820,
-            'comments' => 3,
-            'saves' => 1140,
-            'categoryId' => 'fashion',
-            'qualityScore' => 0.95,
-            'trendScore' => 0.90,
+            'id' => '22222222-d001-4000-8000-000000000001',
+            'creatorHandle' => '@drip_fit',
+            'creatorName' => 'Drip Fit • دريب فيت',
+            'avatar' => '/images/brands/dripfit_logo.png',
+            'videoBg' => '/images/reels/the_sharp_v_yellow_reel.mp4',
+            'thumbnail' => '/images/products/the_sharp_v_yellow_1.webp',
+            'caption' => 'The Sharp V Yellow drop is here! خامة قطنية استثنائية 100% وقصة أوفرسايز تليق بيومك وتمرينك 💛🔥 متوفر الآن حصرياً عبر متجر Drip Fit #DripFit #Streetwear #موضة_مصرية',
+            'music' => 'Drip Fit Original Audio • الصيف في مصر 2026',
+            'likes' => 1420,
+            'comments' => 24,
+            'saves' => 382,
+            'categoryId' => 'streetwear',
+            'merchantId' => '171842bd-daed-40ef-853f-917eab2ed437',
+            'storeSlug' => 'drip-fit',
+            'qualityScore' => 1.0,
+            'trendScore' => 0.98,
             'createdAt' => date('c'),
             'products' => [
                 [
-                    'id' => 'p-fashion-blazer',
-                    'title' => 'بليزر أوفرسايز أصفر ليموني راقي',
-                    'price' => 2200,
-                    'originalPrice' => 2750,
+                    'id' => '11111111-d001-4000-8000-000000000001',
+                    'sku' => 'DF-SHARP-V-YEL',
+                    'title' => 'The Sharp V Yellow Oversized T-Shirt • تيشرت شارب في أصفر أوفرسايز',
+                    'merchantId' => '171842bd-daed-40ef-853f-917eab2ed437',
+                    'price' => 680,
+                    'originalPrice' => 850,
                     'discount' => '20% OFF',
-                    'image' => '/images/reels/fashion_citrine_blazer_thumb.jpg'
+                    'image' => '/images/products/the_sharp_v_yellow_1.webp'
                 ]
             ]
         ]

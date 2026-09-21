@@ -88,8 +88,8 @@ export default function MerchantCampaign() {
         title: campaignTitle,
         titleEn: campaignTitleEn,
         brandName: currentMerchant?.name || currentMerchant?.shortName || 'متجر معتمد',
-        brandLogo: currentMerchant?.logo || '/images/brands/talieska_logo.jpg',
-        merchantId: currentMerchant?.id || 'm-01',
+        brandLogo: currentMerchant?.logo || '/images/brands/dripfit_logo.png',
+        merchantId: currentMerchant?.id || '171842bd-daed-40ef-853f-917eab2ed437',
         productId: targetProd?.id,
         productName: targetProd?.title || targetProd?.name || 'منتج مختار',
         rewardType,
@@ -424,7 +424,7 @@ export default function MerchantCampaign() {
                   }`}
                 >
                   <img
-                    src={prod.image || prod.img || '/images/products/linen_abaya.jpg'}
+                    src={prod.image || prod.img || '/images/products/the_sharp_v_yellow_1.webp'}
                     alt={prod.title || prod.name}
                     className="w-12 h-14 rounded-xl object-cover border border-black/5 bg-gray-100 shrink-0"
                   />
@@ -701,7 +701,7 @@ export default function MerchantCampaign() {
                       {/* Video Player / Mock */}
                       <div className="relative rounded-2xl overflow-hidden bg-black max-w-sm mx-auto aspect-[9/16] max-h-72 shadow-md flex items-center justify-center">
                         <video
-                          src={app.submittedUrl || '/images/reels/linen_abaya.mp4'}
+                          src={app.submittedUrl || '/images/reels/the_sharp_v_yellow_reel.mp4'}
                           controls
                           className="w-full h-full object-cover"
                         />

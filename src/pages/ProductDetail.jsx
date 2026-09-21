@@ -5,7 +5,7 @@ import DesktopProductDetail from '../components/desktop/DesktopProductDetail';
 import SizeGuideModal from '../components/common/SizeGuideModal';
 
 export default function ProductDetail() {
-  const { selectedProduct, addToCart, setActiveTab, navigateToProfile, isAr, language, isSubdomainMode } = useApp();
+  const { selectedProduct, addToCart, setActiveTab, navigateToProfile, isAr, language, isSubdomainMode, merchants, navigateToStorefront } = useApp();
 
   // Fallback to Linen Co-ord Set if no product selected
   const product = selectedProduct || {
@@ -18,37 +18,28 @@ export default function ProductDetail() {
     rating: 4.9,
     reviewsCount: 142,
     sizes: ['XS', 'S', 'M', 'L', 'XL'],
-    merchantId: 'm-01'
+    merchantId: '171842bd-daed-40ef-853f-917eab2ed437'
   };
 
-  const availableSizes = product.sizes && product.sizes.length > 0 
-    ? product.sizes 
-    : ['XS', 'S', 'M', 'L', 'XL'];
+  const availableSizes = Array.isArray(product.sizes) ? product.sizes : [];
 
   const availableSwatches = product.colorSwatches && product.colorSwatches.length > 0
     ? product.colorSwatches
     : (product.colors && product.colors.length > 0 
         ? product.colors.map(c => ({ name: c, hex: '#8b5a2b' })) 
-        : [
-            { name: 'أصفر ليموني • Lemon', hex: '#d4af37' },
-            { name: 'بيج كتاني • Linen Beige', hex: '#d2b48c' },
-            { name: 'أسود كلاسيك • Onyx Black', hex: '#111827' }
-          ]);
+        : []);
 
-  const [selectedSize, setSelectedSize] = useState(availableSizes[0] || 'M');
-  const [selectedColor, setSelectedColor] = useState(availableSwatches[0]?.name || 'Default');
+  const [selectedSize, setSelectedSize] = useState(availableSizes[0] || null);
+  const [selectedColor, setSelectedColor] = useState(availableSwatches[0]?.name || null);
   const [isFavorited, setIsFavorited] = useState(false);
   const [addedToast, setAddedToast] = useState(false);
   const [isPlayingVideo, setIsPlayingVideo] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showSizeGuide, setShowSizeGuide] = useState(false);
 
-  const productImages = (product.images && product.images.length > 0) ? product.images : [
-    product.image || '/images/products/linen_abaya.jpg',
-    typeof product.image === 'string' ? product.image.replace('.jpg', '_2.jpg').replace('.webp', '_2.webp').replace('.png', '_2.png') : '/images/products/linen_abaya.jpg',
-    typeof product.image === 'string' ? product.image.replace('.jpg', '_3.jpg').replace('.webp', '_3.webp').replace('.png', '_3.png') : '/images/products/linen_abaya.jpg',
-    typeof product.image === 'string' ? product.image.replace('.jpg', '_4.jpg').replace('.webp', '_4.webp').replace('.png', '_4.png') : '/images/products/linen_abaya.jpg',
-  ];
+  const productImages = (product.images && product.images.length > 0)
+    ? product.images
+    : (product.image ? [product.image] : ['/images/products/the_sharp_v_yellow_1.webp']);
 
   const handleScroll = (e) => {
     const scrollLeft = e.target.scrollLeft;
@@ -279,31 +270,78 @@ export default function ProductDetail() {
           </div>
 
           {/* Seller Profile Card */}
-          <div 
-            onClick={() => {
+          {(() => {
+            const matchedMerchant = (merchants || []).find(m => 
+              (product?.merchantId && (m.id === product.merchantId || m.merchant_id === product.merchantId)) ||
+              (product?.merchantSlug && m.slug?.toLowerCase() === product.merchantSlug.toLowerCase()) ||
+              (product?.merchant && (
+                m.name?.toLowerCase().includes(product.merchant.toLowerCase()) ||
+                product.merchant.toLowerCase().includes(m.name?.toLowerCase()) ||
+                (m.store_name && m.store_name.toLowerCase().includes(product.merchant.toLowerCase()))
+              ))
+            );
+
+            const isDripFit = Boolean(
+              product?.title?.toLowerCase().includes('drip fit') || 
+              product?.description?.toLowerCase().includes('drip fit') ||
+              product?.merchant?.toLowerCase().includes('drip fit') ||
+              product?.merchantSlug?.toLowerCase() === 'drip-fit'
+            );
+
+            const sellerName = isDripFit 
+              ? 'Drip Fit • دريب فيت' 
+              : (matchedMerchant?.name || product?.merchant || 'Drip Fit • دريب فيت');
+
+            const sellerSlug = isDripFit 
+              ? 'drip-fit' 
+              : (matchedMerchant?.slug || product?.merchantSlug || 'drip-fit');
+
+            const sellerLogo = isDripFit 
+              ? (matchedMerchant?.logo || '/images/brands/dripfit_logo.png') 
+              : (matchedMerchant?.logo || (sellerName.toLowerCase().includes('khan') ? '/images/products/copper_lantern.jpg' : '/images/brands/dripfit_logo.png'));
+
+            const sellerLocation = isDripFit
+              ? (isAr ? 'القاهرة، مصر • براند مصري معتمد' : 'Cairo, Egypt • Verified Egyptian Brand')
+              : (isAr ? 'القاهرة، مصر • ★ 4.9 متجر مصري معتمد' : 'Cairo, Egypt • ★ 4.9 Verified Egyptian Merchant');
+
+            const handleSellerClick = () => {
               if (isSubdomainMode) {
                 setActiveTab('storefront');
+              } else if (navigateToStorefront && sellerSlug) {
+                navigateToStorefront(sellerSlug);
               } else if (navigateToProfile) {
-                navigateToProfile(product.merchantSlug || product.merchantId || product.merchant || 'talieska');
+                navigateToProfile(sellerSlug);
               } else {
                 setActiveTab('profile');
               }
-            }}
-            className="p-3 bg-gray-50 border border-gray-100 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold text-xs border border-gray-200 overflow-hidden">
-                <img src="/images/brands/talieska_logo.jpg" alt="Logo" className="w-full h-full object-cover" />
+            };
+
+            return (
+              <div 
+                onClick={handleSellerClick}
+                className="p-3 bg-gray-50 border border-gray-100 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold text-xs border border-gray-200 overflow-hidden">
+                    <img src={sellerLogo} alt={sellerName} className="w-full h-full object-cover" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-900">{sellerName}</h4>
+                    <span className="text-[10px] text-gray-500">{sellerLocation}</span>
+                  </div>
+                </div>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSellerClick();
+                  }}
+                  className="px-3 py-1 rounded-full border border-gray-300 text-xs font-bold text-slate-800 hover:border-[#d00000] hover:text-[#d00000]"
+                >
+                  {isAr ? 'زيارة المتجر' : 'Visit'}
+                </button>
               </div>
-              <div>
-                <h4 className="text-xs font-bold text-slate-900">{product.merchant || 'Talieska Studio'}</h4>
-                <span className="text-[10px] text-gray-500">Cairo, Egypt • مصمم محلي معتمد</span>
-              </div>
-            </div>
-            <button className="px-3 py-1 rounded-full border border-gray-300 text-xs font-bold text-slate-800 hover:border-[#d00000] hover:text-[#d00000]">
-              {isAr ? 'زيارة المتجر' : 'Visit'}
-            </button>
-          </div>
+            );
+          })()}
         </div>
 
         {/* Fixed Bottom Action Bar */}

@@ -9,107 +9,32 @@ const STORAGE_CATALOG_KEY = 'eg_admin_demo_catalog';
 
 const DEFAULT_STORES = [
   {
-    id: 'm-01',
-    name: 'Talieska Studio • تاليسكا ستوديو',
-    subdomain: 'talieska.egyptian-commerce.com',
-    customDomain: 'shop.talieskastudio.com',
-    owner: 'Talieska Atelier (u-talieska)',
-    ownerEmail: 'merchant@egyptian-commerce.com',
+    id: '171842bd-daed-40ef-853f-917eab2ed437',
+    name: 'Drip Fit • دريب فيت',
+    subdomain: 'drip-fit.egyptian-commerce.com',
+    customDomain: 'dripfit-eg.com',
+    owner: 'Drip Fit (u-dripfit)',
+    ownerEmail: 'drip.fit_egy@eg-commerce.com',
     status: 'active',
-    productsCount: 14,
-    revenue: 94800,
+    productsCount: 1,
+    revenue: 34000,
     themeMode: 'dark',
-    category: 'أزياء وكتان فاخر'
-  },
-  {
-    id: 'm-02',
-    name: 'Sheglam Egypt • شيجلام مصر',
-    subdomain: 'sheglam.egyptian-commerce.com',
-    customDomain: null,
-    owner: 'Sheglam Middle East Hub',
-    ownerEmail: 'sheglam@egyptian-commerce.com',
-    status: 'active',
-    productsCount: 8,
-    revenue: 42300,
-    themeMode: 'light',
-    category: 'مستحضرات تجميل وعناية'
-  },
-  {
-    id: 'm-03',
-    name: 'Cairo Leather Craft • جلود القاهرة',
-    subdomain: 'cairo-leather.egyptian-commerce.com',
-    customDomain: 'cairoleather.eg',
-    owner: 'Ahmed El-Gazzar',
-    ownerEmail: 'leather@egyptian-commerce.com',
-    status: 'active',
-    productsCount: 6,
-    revenue: 16900,
-    themeMode: 'dark',
-    category: 'صناعات جلدية يدوية'
-  },
-  {
-    id: 'm-04',
-    name: 'Demo Atelier • متجر تجريبي',
-    subdomain: 'demo.egyptian-commerce.com',
-    customDomain: null,
-    owner: 'Demo Merchant',
-    ownerEmail: 'demo@egyptian-commerce.com',
-    status: 'active',
-    productsCount: 4,
-    revenue: 0,
-    themeMode: 'dark',
-    category: 'متجر اختباري'
+    category: 'ستريت وير وتوبات صيفية عصرية'
   }
 ];
 
 const DEFAULT_CREATORS = [
   {
     id: 'c-01',
-    name: 'Yasmin El Sayed • ياسمين السيد',
-    handle: '@yasmin_fashion',
-    followers: '128K',
-    brandAffiliation: 'Talieska Studio',
-    commissionRate: 12,
-    totalEarnings: 48200,
-    status: 'verified',
-    avatar: '/images/reels/reel_1.jpg',
-    specialty: 'تنسيق الأزياء الصيفية والكتان'
-  },
-  {
-    id: 'c-02',
-    name: 'Salma El-Ahmady • سلمى الأحمدي',
-    handle: '@salma_style_eg',
-    followers: '94K',
-    brandAffiliation: 'Sheglam Egypt',
+    name: 'Drip Fit Official • دريب فيت الرسمي',
+    handle: '@drip_fit',
+    followers: '24.5K',
+    brandAffiliation: 'Drip Fit',
     commissionRate: 10,
-    totalEarnings: 31400,
+    totalEarnings: 18500,
     status: 'verified',
-    avatar: '/images/reels/reel_2.jpg',
-    specialty: 'ريفيوهات الميك اب والجمال'
-  },
-  {
-    id: 'c-03',
-    name: 'Layla Chic • ليلى شيك',
-    handle: '@layla_cairo',
-    followers: '62K',
-    brandAffiliation: 'Talieska Studio',
-    commissionRate: 15,
-    totalEarnings: 21900,
-    status: 'active',
-    avatar: '/images/reels/reel_3.jpg',
-    specialty: 'عبايات وملابس سهرة راقية'
-  },
-  {
-    id: 'c-04',
-    name: 'Nour Modern • نور مودرن',
-    handle: '@nour_trends',
-    followers: '45K',
-    brandAffiliation: 'Cairo Leather Craft',
-    commissionRate: 10,
-    totalEarnings: 14200,
-    status: 'active',
-    avatar: '/images/reels/reel_4.jpg',
-    specialty: 'إكسسوارات وحقائب يدوية'
+    avatar: '/images/brands/dripfit_logo.png',
+    specialty: 'ستريت وير وملابس رياضية وصيفية'
   }
 ];
 
@@ -133,11 +58,11 @@ const DEFAULT_USERS = [
     created_at: '2026-01-15T00:00:00.000Z'
   },
   {
-    id: 'u-merchant-talieska',
-    name: 'Talieska Atelier • إدارة تاليسكا',
-    email: 'merchant@egyptian-commerce.com',
+    id: 'c11b2fdc-02a8-4c18-8e53-ea7e52d66beb',
+    name: 'Drip Fit • دريب فيت',
+    email: 'drip.fit_egy@eg-commerce.com',
     role: 'merchant',
-    assignedStore: 'Talieska Studio (talieska)',
+    assignedStore: 'Drip Fit (drip-fit)',
     status: 'active',
     created_at: '2026-02-01T00:00:00.000Z'
   },
@@ -146,7 +71,7 @@ const DEFAULT_USERS = [
     name: 'Yasmin El Sayed • صانعة محتوى',
     email: 'creator@egyptian-commerce.com',
     role: 'creator',
-    assignedStore: 'Talieska Studio (Affiliate)',
+    assignedStore: 'Drip Fit (Affiliate)',
     status: 'active',
     created_at: '2026-02-10T00:00:00.000Z'
   },
@@ -303,7 +228,7 @@ export const AdminService = {
         name: creatorData.name,
         handle: creatorData.handle.startsWith('@') ? creatorData.handle : `@${creatorData.handle}`,
         followers: creatorData.followers || '10K',
-        brandAffiliation: creatorData.brandAffiliation || 'Talieska Studio',
+        brandAffiliation: creatorData.brandAffiliation || 'Drip Fit',
         commissionRate: Number(creatorData.commissionRate) || 12,
         totalEarnings: 0,
         status: 'verified',
@@ -489,11 +414,11 @@ export const AdminService = {
         title: prodData.title,
         price: Number(prodData.price) || 950,
         originalPrice: Number(prodData.originalPrice) || (Number(prodData.price) * 1.2),
-        image: prodData.image || '/images/products/linen_abaya.jpg',
+        image: prodData.image || '/images/products/the_sharp_v_yellow_1.webp',
         video: prodData.video || '/images/reels/fashion_citrine_blazer.mp4',
         category: prodData.category || 'Women',
-        merchant: prodData.merchant || 'Talieska Studio • تاليسكا ستوديو',
-        merchantId: prodData.merchantId || 'm-01',
+        merchant: prodData.merchant || 'Drip Fit • دريب فيت',
+        merchantId: prodData.merchantId || '171842bd-daed-40ef-853f-917eab2ed437',
         rating: 5.0,
         reviewsCount: 1,
         sizes: ['S', 'M', 'L', 'XL'],

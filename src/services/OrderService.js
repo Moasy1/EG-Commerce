@@ -5,132 +5,68 @@ const ORDERS_STORAGE_KEY = 'eg_platform_orders';
 
 export const INITIAL_ORDERS = [
   {
-    id: 'EG-8841',
-    merchantId: 'm-01',
-    merchantName: 'Talieska Studio • تاليسكا ستوديو',
-    customerName: 'سلمى الأحمدي (Salma El-Ahmady)',
-    phone: '+20 102 345 6789',
-    address: 'المعادي، القاهرة - شارع 9، عمارة 14',
-    productTitle: 'عباية كتان مغسول فاخرة • M',
+    id: 'DF-8841',
+    merchantId: '171842bd-daed-40ef-853f-917eab2ed437',
+    merchantName: 'Drip Fit • دريب فيت',
+    customerName: 'أحمد محمود (Ahmed Mahmoud)',
+    phone: '+20 101 882 3411',
+    address: 'التجمع الخامس، القاهرة - الحي النرجس، عمارة 12',
+    productTitle: 'The Sharp V Yellow Oversized T-Shirt • L',
     items: [
       {
-        productId: 'p-linen-abaya-01',
-        title: 'عباية كتان مغسول فاخرة',
-        price: 1450,
+        productId: '11111111-d001-4000-8000-000000000001',
+        title: 'The Sharp V Yellow Oversized T-Shirt',
+        price: 680,
         quantity: 1,
-        size: 'M',
-        color: 'Off-White أوف وايت'
+        size: 'L',
+        color: 'Yellow أصفر'
       }
     ],
     quantity: 1,
-    amount: 1450,
-    subtotal: 1450,
+    amount: 680,
+    subtotal: 680,
     discount: 0,
     shipping: 60,
-    paymentMethod: 'InstaPay (تم التحقق • Ref: 98124)',
+    paymentMethod: 'InstaPay (تم التحقق • Ref: 881294)',
     paymentStatus: 'paid',
     shippingStatus: 'ready_for_pickup',
     courier: 'Bosta Express',
-    trackingNumber: 'BST-77391024',
+    trackingNumber: 'BST-DF-88120',
     date: 'منذ ساعتين',
     createdAt: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
-    attributedCreator: '@nour_style'
+    attributedCreator: '@drip_fit'
   },
   {
-    id: 'EG-8840',
-    merchantId: 'm-01',
-    merchantName: 'Talieska Studio • تاليسكا ستوديو',
-    customerName: 'نورهان كريم (Nourhan Karim)',
-    phone: '+20 111 876 5432',
-    address: 'سموحة، الإسكندرية - شارع فيكتور عمانويل',
-    productTitle: 'فستان سهرة حرير ملكي • 54',
+    id: 'DF-8840',
+    merchantId: '171842bd-daed-40ef-853f-917eab2ed437',
+    merchantName: 'Drip Fit • دريب فيت',
+    customerName: 'كريم عادل (Karim Adel)',
+    phone: '+20 112 345 6789',
+    address: 'المعادي، القاهرة - شارع 15',
+    productTitle: 'The Sharp V Yellow Oversized T-Shirt • XL',
     items: [
       {
-        productId: 'p-silk-dress-01',
-        title: 'فستان سهرة حرير ملكي',
-        price: 1980,
+        productId: '11111111-d001-4000-8000-000000000001',
+        title: 'The Sharp V Yellow Oversized T-Shirt',
+        price: 680,
         quantity: 1,
-        size: '54',
-        color: 'Burgundy نبيذي'
+        size: 'XL',
+        color: 'Yellow أصفر'
       }
     ],
     quantity: 1,
-    amount: 1980,
-    subtotal: 1980,
+    amount: 680,
+    subtotal: 680,
     discount: 0,
     shipping: 60,
     paymentMethod: 'الدفع عند الاستلام (COD)',
     paymentStatus: 'pending_cod',
     shippingStatus: 'in_transit',
     courier: 'Bosta Express',
-    trackingNumber: 'BST-77390918',
+    trackingNumber: 'BST-DF-88119',
     date: 'منذ 5 ساعات',
     createdAt: new Date(Date.now() - 5 * 3600 * 1000).toISOString(),
-    attributedCreator: '@farida_fashion'
-  },
-  {
-    id: 'EG-8839',
-    merchantId: 'm-02',
-    merchantName: 'Khan El Khalili Craft • ورشة خان الخليلي',
-    customerName: 'طارق مصطفى',
-    phone: '+20 122 998 1122',
-    address: 'الشيخ زايد، الجيزة - بيفرلي هيلز',
-    productTitle: 'فانوس نحاس أرابيسك يدوي',
-    items: [
-      {
-        productId: 'p-copper-lantern',
-        title: 'فانوس نحاس أرابيسك يدوي',
-        price: 920,
-        quantity: 1,
-        size: 'Large',
-        color: 'Antique Brass'
-      }
-    ],
-    quantity: 1,
-    amount: 920,
-    subtotal: 920,
-    discount: 0,
-    shipping: 60,
-    paymentMethod: 'InstaPay',
-    paymentStatus: 'paid',
-    shippingStatus: 'delivered',
-    courier: 'Bosta Express',
-    trackingNumber: 'BST-77389100',
-    date: 'أمس',
-    createdAt: new Date(Date.now() - 24 * 3600 * 1000).toISOString(),
-    attributedCreator: '@cairo_looks'
-  },
-  {
-    id: 'EG-8838',
-    merchantId: 'm-03',
-    merchantName: 'Tiba Jewelry • مجوهرات طيبة',
-    customerName: 'ياسمين الشريف',
-    phone: '+20 100 456 7890',
-    address: 'التجمع الخامس، القاهرة الجديدة',
-    productTitle: 'ساعة يد كلاسيكية برميليّة بعقارب رومانية',
-    items: [
-      {
-        productId: 'p-fashion-vintage-watch',
-        title: 'ساعة يد كلاسيكية برميليّة بعقارب رومانية',
-        price: 3400,
-        quantity: 1,
-        size: 'Case 38mm',
-        color: 'Rose Gold & Brown'
-      }
-    ],
-    quantity: 1,
-    amount: 3400,
-    subtotal: 3400,
-    discount: 200,
-    shipping: 60,
-    paymentMethod: 'بطاقة ائتمان (Visa)',
-    paymentStatus: 'paid',
-    shippingStatus: 'in_transit',
-    courier: 'Bosta Express',
-    trackingNumber: 'BST-77388412',
-    date: 'أمس',
-    createdAt: new Date(Date.now() - 26 * 3600 * 1000).toISOString(),
-    attributedCreator: '@sarah_jewelry'
+    attributedCreator: '@drip_fit'
   }
 ];
 
@@ -187,7 +123,7 @@ function normalizePlatformOrder(row) {
   return {
     ...data,
     id: data.id || row.display_id || `EG-${String(row.id || '').slice(-4)}`,
-    merchantId: data.merchantId || row.merchant_id || 'm-01',
+    merchantId: data.merchantId || row.merchant_id || '171842bd-daed-40ef-853f-917eab2ed437',
     customerName: data.customerName || row.customer_name || 'عميل تجارة مصرية',
     phone: data.phone || row.phone || '+20 102 345 6789',
     shippingStatus: data.shippingStatus || row.shipping_status || 'ready_for_pickup',
@@ -205,7 +141,7 @@ async function syncPlatformOrders(createdOrders) {
 
   const rows = orders.map(order => ({
     display_id: order.id,
-    merchant_id: order.merchantId || 'm-01',
+    merchant_id: order.merchantId || '171842bd-daed-40ef-853f-917eab2ed437',
     customer_name: order.customerName || null,
     phone: order.phone || null,
     order_data: order,
@@ -278,7 +214,7 @@ export const OrderService = {
     // Group cart items by merchantId so each merchant receives their exact orders
     const itemsByMerchant = {};
     cartItems.forEach(item => {
-      const mId = item.merchantId || item.merchant_id || 'm-01';
+      const mId = item.merchantId || item.merchant_id || '171842bd-daed-40ef-853f-917eab2ed437';
       if (!itemsByMerchant[mId]) {
         itemsByMerchant[mId] = [];
       }
@@ -301,7 +237,7 @@ export const OrderService = {
       const merchantOrder = {
         id: `EG-${Math.floor(1000 + Math.random() * 9000)}`,
         merchantId: merchantId,
-        merchantName: mItems[0]?.merchant || (merchantId === 'm-01' ? 'Talieska Studio • تاليسكا ستوديو' : merchantId === 'm-02' ? 'Khan El Khalili Craft' : 'Tiba Jewelry'),
+        merchantName: mItems[0]?.merchant || (merchantId === '171842bd-daed-40ef-853f-917eab2ed437' ? 'Drip Fit • دريب فيت' : merchantId === '171842bd-daed-40ef-853f-917eab2ed437' ? 'Khan El Khalili Craft' : 'Tiba Jewelry'),
         customerName: customerName,
         phone: phone,
         address: address,
@@ -407,7 +343,7 @@ export const OrderService = {
           const firstItem = row.order_items?.[0] || {};
           return {
             id: `EG-${String(row.id).replace(/[^a-zA-Z0-9]/g, '').slice(-4)}`,
-            merchantId: row.merchant_id || firstItem.merchant_id || 'm-01',
+            merchantId: row.merchant_id || firstItem.merchant_id || '171842bd-daed-40ef-853f-917eab2ed437',
             customerName: row.customer_name || 'عميل تجارة مصرية',
             phone: row.phone || '+20 102 345 6789',
             address: row.address || 'القاهرة، جمهورية مصر العربية',

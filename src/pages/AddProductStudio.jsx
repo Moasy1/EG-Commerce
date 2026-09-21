@@ -9,8 +9,8 @@ const FASHION_VIDEO_PRESETS = [
   {
     id: 'linen-abaya',
     title: 'عباية كتان بوهيمي',
-    url: '/images/reels/linen_abaya.mp4',
-    thumb: '/images/products/linen_abaya.jpg',
+    url: '/images/reels/the_sharp_v_yellow_reel.mp4',
+    thumb: '/images/products/the_sharp_v_yellow_1.webp',
     duration: '0:15',
     size: '14.2 MB'
   },
@@ -113,19 +113,17 @@ const DEFAULT_SIZE_CHART = [
 export default function AddProductStudio() {
   const { setActiveTab, addProduct, user, role, merchants, selectedMerchantId } = useApp();
 
-  // Form State
-  const [productName, setProductName] = useState('فستان مطرز مصري فاخر');
-  const [description, setDescription] = useState(
-    'فستان أنيق بتطريز يدوي مستوحى من التراث المصري، مصنوع من قماش عالي الجودة مناسب للمناسبات والإطلالات الخاصة، يجمع بين الأصالة والموضة العصرية.'
-  );
-  const [price, setPrice] = useState(1250);
-  const [originalPrice, setOriginalPrice] = useState(1650);
-  const [category, setCategory] = useState('الفساتين');
-  const [quantity, setQuantity] = useState(20);
+  // Form State (Cleaned of all mockups - real user entered data only)
+  const [productName, setProductName] = useState('');
+  const [description, setDescription] = useState('');
+  const [price, setPrice] = useState('');
+  const [originalPrice, setOriginalPrice] = useState('');
+  const [category, setCategory] = useState('الملابس الرجالية والنسائية');
+  const [quantity, setQuantity] = useState(15);
 
   // Sizing & Size Guide State
   const [availableSizes, setAvailableSizes] = useState(['XS', 'S', 'M', 'L', 'XL', 'XXL']);
-  const [selectedSizes, setSelectedSizes] = useState(['L']);
+  const [selectedSizes, setSelectedSizes] = useState([]);
   const [customSizeInput, setCustomSizeInput] = useState('');
   const [isAddingCustomSize, setIsAddingCustomSize] = useState(false);
 
@@ -147,8 +145,8 @@ export default function AddProductStudio() {
     { id: 'c-navy', name: 'كحلي داكن', hex: '#1e3a8a', isPreset: true },
     { id: 'c-terracotta', name: 'تيراكوتا نوبي', hex: '#c2410c', isPreset: true }
   ]);
-  const [selectedColorIds, setSelectedColorIds] = useState(['c-red']);
-  const [primaryColorId, setPrimaryColorId] = useState('c-red');
+  const [selectedColorIds, setSelectedColorIds] = useState([]);
+  const [primaryColorId, setPrimaryColorId] = useState('');
 
   // Custom Color Creator State
   const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
@@ -158,21 +156,16 @@ export default function AddProductStudio() {
   const [governorate, setGovernorate] = useState('جميع المحافظات');
   const [area, setArea] = useState('جميع المناطق');
   const [codEnabled, setCodEnabled] = useState(true);
-  const [specs, setSpecs] = useState('خامة كتان مصري طبيعي 100% مع تطريز يدوي تراثي فاخر، تعليمات الغسيل: تنظيف جاف فقط.');
+  const [specs, setSpecs] = useState('');
 
   // Media State: Video & Photos
-  const [videoUrl, setVideoUrl] = useState('/images/reels/linen_abaya.mp4');
-  const [videoName, setVideoName] = useState('linen_abaya.mp4');
-  const [videoSize, setVideoSize] = useState('14.2 MB');
-  const [videoDuration, setVideoDuration] = useState('0:15');
+  const [videoUrl, setVideoUrl] = useState('');
+  const [videoName, setVideoName] = useState('');
+  const [videoSize, setVideoSize] = useState('');
+  const [videoDuration, setVideoDuration] = useState('');
   const [isCustomUploadedVideo, setIsCustomUploadedVideo] = useState(false);
   const [isDraggingVideo, setIsDraggingVideo] = useState(false);
-  const [photos, setPhotos] = useState([
-    '/images/products/linen_abaya.jpg',
-    '/images/products/silk_dress.jpg',
-    '/images/products/linen_shirt.jpg',
-    '/images/products/wool_blazer.jpg'
-  ]);
+  const [photos, setPhotos] = useState([]);
 
   // Video Player Controls & State
   const videoPlayerRef = useRef(null);
@@ -508,35 +501,56 @@ export default function AddProductStudio() {
       .filter(Boolean);
     const selectedColorNames = selectedColorObjects.map(c => c.name);
 
-    const activeMerchant = (merchants && merchants.find(m => m.id === selectedMerchantId)) || merchants?.[0];
+    // Dynamically match the logged-in merchant user to their own store
+    const userMerchant = (user && (
+      (user.merchant_id && merchants?.find(m => m.id === user.merchant_id)) ||
+      merchants?.find(m => m.user_id === user.id) ||
+      (user.store_slug && merchants?.find(m => m.slug?.toLowerCase() === user.store_slug.toLowerCase())) ||
+      (user.slug && merchants?.find(m => m.slug?.toLowerCase() === user.slug.toLowerCase())) ||
+      merchants?.find(m => user.name && (m.name?.toLowerCase().includes(user.name.toLowerCase()) || user.name.toLowerCase().includes(m.name?.toLowerCase())))
+    ));
+
+    const activeMerchant = userMerchant || 
+      (selectedMerchantId && merchants?.find(m => m.id === selectedMerchantId)) || 
+      (user?.role === 'merchant' ? {
+        id: user.merchant_id || `m-${user.id || 'custom'}`,
+        name: user.store_name || user.name || 'متجر مستقل',
+        slug: user.store_slug || user.slug || user.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'store',
+        logo: user.avatar_url || '/images/brands/dripfit_logo.png'
+      } : merchants?.[0]);
+
+    const resolvedMerchantName = activeMerchant?.name || (user?.role === 'merchant' ? (user.store_name || user.name) : 'Drip Fit • دريب فيت');
+    const resolvedMerchantId = activeMerchant?.id || (user?.role === 'merchant' ? (user.merchant_id || `m-${user.id}`) : 'd0000000-0000-0000-0000-000000000001');
+    const resolvedMerchantSlug = activeMerchant?.slug || (user?.role === 'merchant' ? (user.store_slug || user.slug || user.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-')) : 'drip-fit');
+
     const newProdPayload = {
       id: `p-${Date.now()}`,
       sku: `EG-${Date.now().toString().slice(-6)}`,
       title: productName,
       price: Number(price),
       originalPrice: Number(originalPrice) || Math.round(Number(price) * 1.3),
-      merchant: activeMerchant?.name || user?.name || 'Talieska Studio • تاليسكا ستوديو',
-      merchantId: activeMerchant?.id || 'm0000000-0000-0000-0000-000000000001',
-      merchantSlug: activeMerchant?.slug || 'talieska',
+      merchant: resolvedMerchantName,
+      merchantId: resolvedMerchantId,
+      merchantSlug: resolvedMerchantSlug,
       createdBy: user?.id || null,
-      creatorName: user?.name || activeMerchant?.name || 'مبدع مصري',
-      creatorHandle: user?.role === 'creator' ? `@${(user.name || 'creator').replace(/\s+/g, '_')}` : `@${activeMerchant?.slug || 'talieska'}_official`,
+      creatorName: user?.name || resolvedMerchantName,
+      creatorHandle: user?.role === 'creator' ? `@${(user.name || 'creator').replace(/\s+/g, '_')}` : `@${resolvedMerchantSlug}_official`,
       creatorAvatar: user?.avatar_url || activeMerchant?.logo || photos[0],
       category: category,
-      image: photos[0] || '/images/products/linen_abaya.jpg',
+      image: photos[0] || (videoUrl ? videoUrl : null),
       images: photos,
-      video: videoUrl,
+      video: videoUrl || null,
       rating: 5.0,
-      reviewsCount: 1,
-      stock: Number(quantity) || 20,
-      sizes: selectedSizes.length > 0 ? selectedSizes : ['M', 'L'],
+      reviewsCount: 0,
+      stock: Number(quantity) || 10,
+      sizes: selectedSizes,
       sizeGuide: {
         type: sizeGuideType,
         image: sizeGuideImage,
         chart: sizeChart,
         hasGuide: Boolean(sizeGuideImage || (sizeChart && sizeChart.length > 0))
       },
-      colors: selectedColorNames.length > 0 ? selectedColorNames : ['أحمر تراثي'],
+      colors: selectedColorNames,
       colorSwatches: selectedColorObjects,
       description: description,
       specs: specs,
@@ -575,8 +589,8 @@ export default function AddProductStudio() {
 
   const handleResetForm = () => {
     setShowSuccessModal(false);
-    setProductName('طقم كتان مصري جديد');
-    setDescription('تصميم عصري مصنوع من خامات مصرية طبيعية راقية.');
+    setProductName('');
+    setDescription('');
     setPrice(980);
     setOriginalPrice(1300);
     setQuantity(15);
@@ -705,7 +719,7 @@ export default function AddProductStudio() {
           {/* Bottom Card: ابدأ في بيع منتجات الموضة المصرية */}
           <div className="rounded-2xl bg-gradient-to-br from-red-50 to-orange-50 border border-red-100 p-4 space-y-2 text-start relative overflow-hidden shadow-xs">
             <div className="w-12 h-14 rounded-xl overflow-hidden shadow-sm">
-              <img src="/images/products/linen_abaya.jpg" alt="Fashion" className="w-full h-full object-cover" />
+              <img src="/images/products/the_sharp_v_yellow_1.webp" alt="Fashion" className="w-full h-full object-cover" />
             </div>
             <h4 className="text-xs font-black text-slate-900 leading-tight">ابدأ في بيع منتجات الموضة المصرية</h4>
             <p className="text-[10px] text-gray-600 leading-snug">ارفع منتجك ووصل لآلاف المشترين الآن</p>
@@ -756,19 +770,37 @@ export default function AddProductStudio() {
                 </div>
 
                 {/* 9:16 REAL HTML5 Video Player Container */}
-                <div className="relative aspect-[9/16] w-full max-w-[320px] mx-auto rounded-2xl overflow-hidden bg-black shadow-md group">
-                  <video
-                    ref={videoPlayerRef}
-                    src={videoUrl}
-                    poster={photos[0] || '/images/products/linen_abaya.jpg'}
-                    className="w-full h-full object-cover cursor-pointer"
-                    loop
-                    playsInline
-                    muted={isMuted}
-                    onTimeUpdate={handleTimeUpdate}
-                    onLoadedMetadata={handleLoadedMetadata}
-                    onClick={togglePlayPause}
-                  />
+                <div className="relative aspect-[9/16] w-full max-w-[320px] mx-auto rounded-2xl overflow-hidden bg-slate-900 shadow-md group">
+                  {videoUrl ? (
+                    <video
+                      ref={videoPlayerRef}
+                      src={videoUrl}
+                      poster={photos[0]}
+                      className="w-full h-full object-cover cursor-pointer"
+                      loop
+                      playsInline
+                      muted={isMuted}
+                      onTimeUpdate={handleTimeUpdate}
+                      onLoadedMetadata={handleLoadedMetadata}
+                      onClick={togglePlayPause}
+                    />
+                  ) : photos.length > 0 ? (
+                    <img
+                      src={photos[0]}
+                      alt="Product Preview"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-full text-gray-400 p-6 text-center space-y-3">
+                      <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center text-white/80">
+                        <span className="material-symbols-outlined text-3xl">video_camera_front</span>
+                      </div>
+                      <p className="text-xs font-bold text-gray-300 leading-relaxed">
+                        قم برفع فيديو أو صور للمنتج لمعاينته رأسياً (9:16)
+                      </p>
+                      <span className="text-[10px] text-gray-500">يدعم MP4, WebM, WEBP, JPG</span>
+                    </div>
+                  )}
                   
                   {/* Subtle Gradient Vignette */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-black/35 pointer-events-none" />
@@ -777,7 +809,7 @@ export default function AddProductStudio() {
                   <div className="absolute top-3 start-3 bg-white/95 backdrop-blur-md rounded-xl p-2 flex items-center gap-2.5 shadow-lg max-w-[220px] border border-white/50 text-start z-10">
                     <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-gray-200 bg-gray-100">
                       <img 
-                        src={photos[0] || '/images/products/linen_abaya.jpg'} 
+                        src={photos[0] || '/images/brands/dripfit_logo.png'} 
                         alt="Thumb" 
                         className="w-full h-full object-cover" 
                       />
@@ -1793,7 +1825,7 @@ export default function AddProductStudio() {
             <div className="bg-gray-50 rounded-2xl p-3 border border-gray-200/80 flex items-center gap-3 text-start">
               <div className="w-14 h-18 rounded-xl overflow-hidden bg-black shrink-0 border border-gray-300">
                 <img 
-                  src={photos[0] || '/images/products/linen_abaya.jpg'} 
+                  src={photos[0] || '/images/brands/dripfit_logo.png'} 
                   alt="Product" 
                   className="w-full h-full object-cover" 
                 />

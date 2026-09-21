@@ -28,7 +28,7 @@ import AuthModal from './components/AuthModal';
 import { AuthService } from './services/AuthService';
 
 function ProtectedRoute({ requiredRole, title, description, children }) {
-  const { user, setUser, setRole, setSelectedMerchantId, setIsAuthModalOpen, language, setActiveTab } = useApp();
+  const { user, setIsAuthModalOpen, language, setActiveTab } = useApp();
   const isAr = language === 'ar';
 
   const isSuperadmin = user?.role === 'superadmin' || user?.role === 'admin';
@@ -37,15 +37,6 @@ function ProtectedRoute({ requiredRole, title, description, children }) {
       ? requiredRole.includes(user?.role) 
       : user?.role === requiredRole
   );
-
-  const handleQuickDemoLogin = async () => {
-    const targetRole = Array.isArray(requiredRole) ? requiredRole[0] : (requiredRole || 'admin');
-    const roleKey = (targetRole === 'superadmin' || targetRole === 'admin') ? 'admin' : targetRole;
-    const demoUser = await AuthService.loginAsDemo(roleKey);
-    setUser(demoUser);
-    setRole(demoUser.role);
-    if (demoUser.role === 'merchant') setSelectedMerchantId('m-01');
-  };
 
   if (!user) {
     return (
@@ -58,26 +49,20 @@ function ProtectedRoute({ requiredRole, title, description, children }) {
         </h2>
         <p className="text-sm text-gray-500 leading-relaxed">
           {description || (isAr 
-            ? 'هذا القسم مخصص فقط للمستخدمين المصرح لهم. يرجى تسجيل الدخول بحساب مصرح للوصول إلى لوحة التحكم.' 
+            ? 'هذا القسم مخصص فقط للمستخدمين المصرح لهم. يرجى تسجيل الدخول بحساب مصرح للوصول.' 
             : 'This section requires authorized credentials. Please sign in to proceed.')}
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
           <button
-            onClick={handleQuickDemoLogin}
-            className="px-5 py-2.5 rounded-full bg-slate-900 hover:bg-black text-white text-xs font-bold shadow-md transition-all flex items-center gap-1.5 active:scale-95"
-          >
-            <span className="material-symbols-outlined text-[15px]">bolt</span>
-            <span>{isAr ? 'دخول فوري كمسؤول تجريبي (1-Click)' : '1-Click Demo Login'}</span>
-          </button>
-          <button
             onClick={() => setIsAuthModalOpen(true)}
-            className="px-5 py-2.5 rounded-full bg-[#d00000] hover:bg-red-700 text-white text-xs font-bold shadow-md active:scale-95 transition-all"
+            className="px-6 py-2.5 rounded-full bg-[#d00000] hover:bg-red-700 text-white text-xs font-bold shadow-md transition-all flex items-center gap-1.5 active:scale-95"
           >
-            {isAr ? 'تسجيل الدخول الآن' : 'Sign In Now'}
+            <span className="material-symbols-outlined text-[15px]">login</span>
+            <span>{isAr ? 'تسجيل الدخول / إنشاء حساب' : 'Sign In / Register'}</span>
           </button>
           <button
             onClick={() => setActiveTab('reels')}
-            className="px-4 py-2.5 rounded-full border border-gray-300 hover:bg-gray-100 text-slate-700 text-xs font-bold transition-all"
+            className="px-5 py-2.5 rounded-full border border-gray-300 hover:bg-gray-100 text-slate-700 text-xs font-bold transition-all"
           >
             {isAr ? 'العودة للرئيسية' : 'Return Home'}
           </button>
@@ -90,7 +75,7 @@ function ProtectedRoute({ requiredRole, title, description, children }) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center text-center p-6 space-y-4 max-w-md mx-auto">
         <div className="w-16 h-16 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center shadow-sm">
-          <span className="material-symbols-outlined text-[36px]">shield_person</span>
+          <span className="material-symbols-outlined text-[36px]">admin_panel_settings</span>
         </div>
         <h2 className="text-xl font-bold text-slate-900">
           {isAr ? 'غير مصرح بالوصول لهذا الحساب' : 'Access Restricted for Current Account'}
@@ -102,21 +87,8 @@ function ProtectedRoute({ requiredRole, title, description, children }) {
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
           <button
-            onClick={handleQuickDemoLogin}
-            className="px-5 py-2.5 rounded-full bg-[#d00000] hover:bg-red-700 text-white text-xs font-bold shadow-md transition-all flex items-center gap-1.5 active:scale-95"
-          >
-            <span className="material-symbols-outlined text-[15px]">bolt</span>
-            <span>{isAr ? 'ترقية الصلاحية فوراً (1-Click)' : '1-Click Elevate Role'}</span>
-          </button>
-          <button
-            onClick={() => setIsAuthModalOpen(true)}
-            className="px-5 py-2.5 rounded-full border border-gray-300 hover:bg-gray-100 text-slate-700 text-xs font-bold transition-all"
-          >
-            {isAr ? 'تبديل الحساب' : 'Switch Account'}
-          </button>
-          <button
             onClick={() => setActiveTab('reels')}
-            className="px-4 py-2.5 rounded-full border border-gray-300 hover:bg-gray-100 text-slate-700 text-xs font-bold transition-all"
+            className="px-6 py-2.5 rounded-full bg-[#d00000] hover:bg-red-700 text-white text-xs font-bold shadow-md transition-all"
           >
             {isAr ? 'العودة للرئيسية' : 'Return Home'}
           </button>
@@ -145,7 +117,7 @@ function MainContent() {
   }, [setActiveTab, isSubdomainMode]);
 
   // 1. PURE SHOPIFY-STYLE SUBDOMAIN BOUTIQUE MODE
-  // When accessed via subdomain (e.g. talieska.egyptian-commerce.com or ?subdomain=talieska)
+  // When accessed via subdomain (e.g. drip-fit.egyptian-commerce.com or ?subdomain=talieska)
   // We ONLY render the merchant's isolated boutique, its cart, checkout, and product details.
   // NO platform Header, NO bottom discovery navigation!
   if (isSubdomainMode) {

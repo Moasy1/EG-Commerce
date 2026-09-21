@@ -3,44 +3,24 @@ import { supabase } from '../lib/supabase.js';
 export const DEMO_USERS = {
   // Merchants
   merchant: {
-    id: '11111111-1111-1111-1111-111111111111',
-    email: 'talieska@eg-commerce.com',
-    name: 'Talieska Studio • تاليسكا ستوديو',
+    id: 'c11b2fdc-02a8-4c18-8e53-ea7e52d66beb',
+    email: 'drip.fit_egy@eg-commerce.com',
+    name: 'Drip Fit • دريب فيت',
     role: 'merchant',
-    avatar_url: '/images/brands/talieska_logo.jpg',
-    merchant_id: 'd0000000-0000-0000-0000-000000000001',
-    slug: 'talieska',
+    avatar_url: '/images/brands/dripfit_logo.png',
+    merchant_id: '171842bd-daed-40ef-853f-917eab2ed437',
+    slug: 'drip-fit',
     reward_points_balance: 1450
   },
-  merchant_talieska: {
-    id: '11111111-1111-1111-1111-111111111111',
-    email: 'talieska@eg-commerce.com',
-    name: 'Talieska Studio • تاليسكا ستوديو',
+  merchant_dripfit: {
+    id: 'c11b2fdc-02a8-4c18-8e53-ea7e52d66beb',
+    email: 'drip.fit_egy@eg-commerce.com',
+    name: 'Drip Fit • دريب فيت',
     role: 'merchant',
-    avatar_url: '/images/brands/talieska_logo.jpg',
-    merchant_id: 'd0000000-0000-0000-0000-000000000001',
-    slug: 'talieska',
+    avatar_url: '/images/brands/dripfit_logo.png',
+    merchant_id: '171842bd-daed-40ef-853f-917eab2ed437',
+    slug: 'drip-fit',
     reward_points_balance: 1450
-  },
-  merchant_khan: {
-    id: '22222222-2222-2222-2222-222222222222',
-    email: 'khan@eg-commerce.com',
-    name: 'Khan El Khalili Craft • ورشة خان الخليلي',
-    role: 'merchant',
-    avatar_url: '/images/products/copper_lantern.jpg',
-    merchant_id: 'd0000000-0000-0000-0000-000000000002',
-    slug: 'khan-craft',
-    reward_points_balance: 920
-  },
-  merchant_tiba: {
-    id: '33333333-3333-3333-3333-333333333333',
-    email: 'tiba@eg-commerce.com',
-    name: 'Tiba Jewelry • مجوهرات طيبة',
-    role: 'merchant',
-    avatar_url: '/images/brands/talieska_logo.jpg',
-    merchant_id: 'd0000000-0000-0000-0000-000000000003',
-    slug: 'tiba-jewelry',
-    reward_points_balance: 1100
   },
 
   // Creators
@@ -121,10 +101,19 @@ export const DEMO_USERS = {
     email: 'admin@eg-commerce.com',
     name: 'Egyptian Commerce SuperAdmin',
     role: 'admin',
-    avatar_url: '/images/brands/talieska_logo.jpg',
+    avatar_url: '/images/brands/dripfit_logo.png',
     reward_points_balance: 10000
   }
 };
+
+export const DEFAULT_CREATORS = [
+  { id: 'c-1', handle: '@cairo_chic', name: 'Cairo Chic (Sara)', avatar: '/images/reels/fashion_citrine_blazer_thumb.jpg', role: 'creator', verified: true, slug: 'cairo_chic', bio: 'Stylist & Blazer UGC Lookbooks | Cairo, Egypt', followersCount: '48.2K', followingCount: '142' },
+  { id: 'c-2', handle: '@salma.styles', name: 'Salma Styles', avatar: '/images/reels/fashion_oversized_shirt_thumb.jpg', role: 'creator', verified: true, slug: 'salma.styles', bio: 'Streetwear, linen & oversized styling | Alexandria, Egypt', followersCount: '32.1K', followingCount: '98' },
+  { id: 'c-3', handle: '@yasmin_style', name: 'Yasmin Sayed', avatar: '/images/reels/reel_2.jpg', role: 'creator', verified: true, slug: 'yasmin_style', bio: 'Drip Fit brand ambassador & modest fashion | Cairo, Egypt', followersCount: '64.5K', followingCount: '210' },
+  { id: 'c-4', handle: '@zeina_ootd', name: 'Zeina OOTD', avatar: '/images/reels/fashion_oneshoulder_top_thumb.jpg', role: 'creator', verified: true, slug: 'zeina_ootd', bio: 'Daily OOTD, luxury accessories & summer looks', followersCount: '27.8K', followingCount: '85' },
+  { id: 'c-5', handle: '@karim.editorial', name: 'Karim Editorial', avatar: '/images/reels/fashion_vintage_watch_thumb.jpg', role: 'creator', verified: true, slug: 'karim.editorial', bio: 'Menswear, horology & bespoke artisan crafts', followersCount: '19.4K', followingCount: '62' },
+  { id: 'c-6', handle: '@maya_accessories', name: 'Maya Accessories', avatar: '/images/reels/fashion_shoulder_bags_thumb.jpg', role: 'creator', verified: true, slug: 'maya_accessories', bio: 'Handcrafted Egyptian leather bags & jewelry', followersCount: '22.0K', followingCount: '115' },
+];
 
 const DEMO_STORAGE_KEY = 'eg_active_session';
 const REGISTERED_ACCOUNTS_KEY = 'eg_registered_users_registry';
@@ -194,7 +183,7 @@ export const AuthService = {
       const cachedReg = getRegisteredAccounts()[user.email?.toLowerCase().trim()];
       const role = profile?.role || user.user_metadata?.role || cachedReg?.role || 'buyer';
       const name = profile?.name || user.user_metadata?.name || cachedReg?.name || user.email?.split('@')[0];
-      const merchant_id = profile?.merchant_id || user.user_metadata?.merchant_id || cachedReg?.merchant_id || (role === 'merchant' ? 'm-01' : null);
+      const merchant_id = profile?.merchant_id || user.user_metadata?.merchant_id || cachedReg?.merchant_id || (role === 'merchant' ? '171842bd-daed-40ef-853f-917eab2ed437' : null);
       const creator_id = profile?.creator_id || user.user_metadata?.creator_id || cachedReg?.creator_id || (role === 'creator' ? 'cr-01' : null);
         
       const authenticatedUser = { 
@@ -239,8 +228,55 @@ export const AuthService = {
         const cachedReg = getRegisteredAccounts()[cleanEmail];
         const role = profile?.role || data.user.user_metadata?.role || cachedReg?.role || 'buyer';
         const name = profile?.name || data.user.user_metadata?.name || cachedReg?.name || cleanEmail.split('@')[0];
-        const merchant_id = profile?.merchant_id || data.user.user_metadata?.merchant_id || cachedReg?.merchant_id || (role === 'merchant' ? 'm-01' : null);
-        const creator_id = profile?.creator_id || data.user.user_metadata?.creator_id || cachedReg?.creator_id || (role === 'creator' ? 'cr-01' : null);
+        
+        let merchantRecord = null;
+        if (role === 'merchant') {
+          try {
+            const { data: mData } = await supabase
+              .from('merchants')
+              .select('*')
+              .eq('user_id', data.user.id)
+              .maybeSingle();
+            if (mData) merchantRecord = mData;
+          } catch (e) {}
+
+          if (!merchantRecord) {
+            try {
+              const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+              const { data: mData2 } = await supabase
+                .from('merchants')
+                .select('*')
+                .eq('slug', slug)
+                .maybeSingle();
+              if (mData2) merchantRecord = mData2;
+            } catch (e) {}
+          }
+
+          if (!merchantRecord) {
+            try {
+              const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'store';
+              const { data: newM } = await supabase
+                .from('merchants')
+                .insert({
+                  user_id: data.user.id,
+                  store_name: name,
+                  slug: slug,
+                  is_verified: true
+                })
+                .select()
+                .single();
+              if (newM) merchantRecord = newM;
+            } catch (e) {}
+          }
+        }
+
+        const merchant_id = merchantRecord?.id || 
+          profile?.merchant_id || 
+          data.user.user_metadata?.merchant_id || 
+          cachedReg?.merchant_id || 
+          (role === 'merchant' ? `m-${data.user.id}` : null);
+        const creator_id = profile?.creator_id || data.user.user_metadata?.creator_id || cachedReg?.creator_id || (role === 'creator' ? `cr-${data.user.id}` : null);
+        const store_slug = merchantRecord?.slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
         const authenticatedUser = {
           ...data.user,
@@ -248,9 +284,11 @@ export const AuthService = {
           role,
           merchant_id,
           creator_id,
+          store_slug: store_slug || merchantRecord?.slug || (role === 'merchant' ? name.toLowerCase().replace(/[^a-z0-9]+/g, '-') : null),
+          store_name: merchantRecord?.store_name || name,
           is_merchant: role === 'merchant',
           is_creator: role === 'creator',
-          profile: { ...(profile || {}), role, name, merchant_id, creator_id }
+          profile: { ...(profile || {}), role, name, merchant_id, creator_id, store_slug }
         };
 
         localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(authenticatedUser));
@@ -304,7 +342,13 @@ export const AuthService = {
     throw new Error('بيانات الدخول غير صحيحة. يمكنك إنشاء حساب جديد أو استخدام أزرار الدخول التجريبي.');
   },
 
-  async loginAsDemo(roleKey = 'merchant') {
+  async loginAsDemo(roleKey = 'merchant', callerUser = null) {
+    // Strict Admin-only gating: Check if there's an active non-admin session trying to switch
+    const current = callerUser || await this.getCurrentUser();
+    if (current && current.role !== 'admin' && current.role !== 'superadmin') {
+      throw new Error('غير مصرح لك بتبديل الحساب. خاصية تبديل الحسابات محصورة بمشرفي النظام فقط (Admins Only).');
+    }
+
     const demo = DEMO_USERS[roleKey] || DEMO_USERS.merchant;
     const sessionUser = {
       ...demo,
@@ -323,7 +367,7 @@ export const AuthService = {
     const generatedCreatorId = sanitizedRole === 'creator' ? `cr-${Date.now().toString(36)}` : null;
     const handle = sanitizedRole === 'creator' ? `@${defaultName.replace(/\s+/g, '_').toLowerCase()}` : undefined;
     const avatarUrl = sanitizedRole === 'merchant' 
-      ? '/images/brands/talieska_logo.jpg' 
+      ? '/images/brands/dripfit_logo.png' 
       : sanitizedRole === 'creator' 
         ? '/images/reels/reel_2.jpg' 
         : '/images/reels/reel_1.jpg';
@@ -430,6 +474,7 @@ export const AuthService = {
           name: `${defaultName} Store • متجر ${defaultName}`,
           shortName: defaultName,
           slug: defaultName.toLowerCase().replace(/\s+/g, '-'),
+          handle: `@${defaultName.toLowerCase().replace(/\s+/g, '-')}`,
           subdomain: `${defaultName.toLowerCase().replace(/\s+/g, '-')}.egyptian-commerce.com`,
           customDomain: null,
           category: 'Egyptian Fashion & Retail',
@@ -440,10 +485,34 @@ export const AuthService = {
           reviewsCount: 1,
           verified: true,
           logo: avatarUrl,
-          banner: '/images/banners/talieska_hero.jpg'
+          banner: '/images/products/the_sharp_v_yellow_1.webp'
         };
         customMerchants = [newMerchantRecord, ...customMerchants.filter(m => m.id !== generatedMerchantId)];
         localStorage.setItem('eg_custom_merchants', JSON.stringify(customMerchants));
+      } catch (e) {}
+    }
+
+    // If creator, persist to custom creators registry
+    if (sanitizedRole === 'creator') {
+      try {
+        const rawCreators = localStorage.getItem('eg_custom_creators');
+        let customCreators = rawCreators ? JSON.parse(rawCreators) : [];
+        const newCreatorRecord = {
+          id: generatedCreatorId,
+          user_id: supaUser?.id || generatedUserId,
+          name: defaultName,
+          handle: handle || `@${defaultName.replace(/\s+/g, '_').toLowerCase()}`,
+          slug: defaultName.toLowerCase().replace(/\s+/g, '-'),
+          avatar: avatarUrl,
+          role: 'creator',
+          verified: true,
+          bio: `صانع محتوى أزياء مصري معتمد لـ ${defaultName}`,
+          followersCount: '1.2K',
+          followingCount: '45',
+          reelsCount: 0
+        };
+        customCreators = [newCreatorRecord, ...customCreators.filter(c => c.id !== generatedCreatorId)];
+        localStorage.setItem('eg_custom_creators', JSON.stringify(customCreators));
       } catch (e) {}
     }
 
@@ -451,6 +520,80 @@ export const AuthService = {
     localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(newRegisteredUser));
 
     return { user: newRegisteredUser };
+  },
+
+  async getCreators() {
+    let custom = [];
+    try {
+      const stored = localStorage.getItem('eg_custom_creators');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) custom = parsed;
+      }
+    } catch (e) {}
+
+    // Also include any accounts from registered accounts registry with role === 'creator'
+    const regAccounts = getRegisteredAccounts();
+    Object.values(regAccounts).forEach(acc => {
+      if (acc.role === 'creator' && !custom.some(c => c.id === acc.creator_id || c.handle === acc.handle)) {
+        custom.push({
+          id: acc.creator_id || acc.id,
+          user_id: acc.id,
+          name: acc.name,
+          handle: acc.handle || `@${acc.name.replace(/\s+/g, '_').toLowerCase()}`,
+          slug: acc.name.toLowerCase().replace(/\s+/g, '-'),
+          avatar: acc.avatar_url || '/images/reels/reel_2.jpg',
+          role: 'creator',
+          verified: true,
+          bio: `صانع محتوى أزياء مصري معتمد لـ ${acc.name}`,
+          followersCount: '1.5K',
+          followingCount: '50',
+          reelsCount: 0
+        });
+      }
+    });
+
+    const creatorMap = new Map();
+    DEFAULT_CREATORS.forEach(c => creatorMap.set(c.id, { ...c }));
+
+    custom.forEach(cc => {
+      const id = cc.id || cc.creator_id || `cr-${cc.name}`;
+      creatorMap.set(id, {
+        ...cc,
+        id,
+        handle: cc.handle?.startsWith('@') ? cc.handle : `@${cc.handle || cc.name}`,
+        avatar: cc.avatar || cc.avatar_url || '/images/reels/reel_2.jpg',
+        role: 'creator',
+        verified: true
+      });
+    });
+
+    // Supabase profiles where is_creator = true or role = 'creator'
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .or('is_creator.eq.true,role.eq.creator');
+      if (!error && data && data.length > 0) {
+        data.forEach(dbp => {
+          const id = dbp.creator_id || dbp.id;
+          const handle = dbp.username ? `@${dbp.username.replace(/^@/, '')}` : `@${dbp.name?.replace(/\s+/g, '_').toLowerCase()}`;
+          creatorMap.set(id, {
+            id,
+            user_id: dbp.id,
+            name: dbp.display_name || dbp.name,
+            handle,
+            slug: dbp.username || dbp.name?.toLowerCase().replace(/\s+/g, '-'),
+            avatar: dbp.avatar_url || '/images/reels/reel_2.jpg',
+            role: 'creator',
+            verified: dbp.is_verified ?? true,
+            bio: dbp.bio || 'صانع محتوى معتمد في EG-Commerce'
+          });
+        });
+      }
+    } catch (err) {}
+
+    return Array.from(creatorMap.values());
   },
 
   async updateCurrentUser(updates = {}) {

@@ -13,25 +13,22 @@ export default function ProductFormModal({ isOpen, onClose, productToEdit = null
   // Form fields state
   const [title, setTitle] = useState('');
   const [sku, setSku] = useState('');
-  const [category, setCategory] = useState('Linen كاجوال كتان');
+  const [category, setCategory] = useState('ملابس وأزياء');
   const [description, setDescription] = useState('');
   const [image, setImage] = useState('');
-  const [originalPrice, setOriginalPrice] = useState('1800');
-  const [price, setPrice] = useState('1450');
-  const [costPrice, setCostPrice] = useState('650');
-  const [stock, setStock] = useState('25');
-  const [sizes, setSizes] = useState(['S', 'M', 'L', 'XL']);
-  const [colors, setColors] = useState(['Terracotta تيراكوتا', 'Sandy Beige بيج رملي']);
+  const [originalPrice, setOriginalPrice] = useState('');
+  const [price, setPrice] = useState('');
+  const [costPrice, setCostPrice] = useState('');
+  const [stock, setStock] = useState('10');
+  const [sizes, setSizes] = useState([]);
+  const [colors, setColors] = useState([]);
   const [isSyndicated, setIsSyndicated] = useState(true);
-  const [affiliateRate, setAffiliateRate] = useState('12');
+  const [affiliateRate, setAffiliateRate] = useState('10');
 
   const presetImages = [
-    { label: 'عباية كتان فاخرة', url: '/images/products/linen_abaya.jpg' },
-    { label: 'فستان سهرة حرير', url: '/images/products/silk_dress.jpg' },
-    { label: 'بليزر صوف أوفرسايز', url: '/images/products/wool_blazer.jpg' },
-    { label: 'قميص كتان صيفي', url: '/images/products/linen_shirt.jpg' },
-    { label: 'فانوس نحاس أرابيسك', url: '/images/products/copper_lantern.jpg' },
-    { label: 'سجادة كليم يدوي', url: '/images/products/kilim_rug.jpg' }
+    { label: 'The Sharp V Yellow', url: '/images/products/the_sharp_v_yellow_1.webp' },
+    { label: 'The Sharp V Front', url: '/images/products/the_sharp_v_yellow_2.webp' },
+    { label: 'لوجو المتجر', url: '/images/brands/dripfit_logo.png' }
   ];
 
   // Populate when editing
@@ -39,34 +36,34 @@ export default function ProductFormModal({ isOpen, onClose, productToEdit = null
     if (productToEdit) {
       setTitle(productToEdit.title || productToEdit.name || '');
       setSku(productToEdit.sku || '');
-      setCategory(productToEdit.category || 'Linen كاجوال كتان');
+      setCategory(productToEdit.category || 'ملابس وأزياء');
       setDescription(productToEdit.description || '');
-      setImage(productToEdit.image || presetImages[0].url);
+      setImage(productToEdit.image || '');
       setOriginalPrice(String(productToEdit.originalPrice || ''));
       setPrice(String(productToEdit.price || ''));
-      setCostPrice(String(Math.round((productToEdit.price || 1000) * 0.45)));
-      setStock(String(productToEdit.stock || '20'));
-      setSizes(productToEdit.sizes || ['S', 'M', 'L', 'XL']);
-      setColors(productToEdit.colors || ['Terracotta تيراكوتا', 'Sandy Beige بيج رملي']);
+      setCostPrice(String(Math.round((productToEdit.price || 0) * 0.5)));
+      setStock(String(productToEdit.stock || '10'));
+      setSizes(productToEdit.sizes || []);
+      setColors(productToEdit.colors || []);
       setIsSyndicated(productToEdit.isSyndicated !== false);
-      setAffiliateRate(String(productToEdit.affiliateRate || '12'));
+      setAffiliateRate(String(productToEdit.affiliateRate || '10'));
     } else {
       // Default new product values
       setTitle('');
       const rawPrefix = currentMerchant?.shortName || currentMerchant?.name || 'PRD';
       const cleanPrefix = (String(rawPrefix).replace(/[^a-zA-Z0-9]/g, '') || 'PRD').toUpperCase().slice(0, 3);
       setSku(`${cleanPrefix}-${Date.now().toString().slice(-4)}`);
-      setCategory('Linen كاجوال كتان');
-      setDescription('قطعة صيفية حصرية مصنوعة من أجود أنواع الكتان الطبيعي المصري المنسوج يدوياً في القاهرة.');
-      setImage(presetImages[0].url);
-      setOriginalPrice('1600');
-      setPrice('1250');
-      setCostPrice('550');
-      setStock('20');
-      setSizes(['S', 'M', 'L', 'XL']);
-      setColors(['Terracotta تيراكوتا', 'Sandy Beige بيج رملي']);
+      setCategory('ملابس وأزياء');
+      setDescription('');
+      setImage('');
+      setOriginalPrice('');
+      setPrice('');
+      setCostPrice('');
+      setStock('10');
+      setSizes([]);
+      setColors([]);
       setIsSyndicated(true);
-      setAffiliateRate('12');
+      setAffiliateRate('10');
     }
   }, [productToEdit, isOpen, currentMerchant]);
 
@@ -93,7 +90,7 @@ export default function ProductFormModal({ isOpen, onClose, productToEdit = null
       sku: sku || `SKU-${Date.now().toString().slice(-4)}`,
       title: title.trim(),
       merchant: currentMerchant?.name || 'متجر معتمد',
-      merchantId: currentMerchant?.id || 'm-01',
+      merchantId: currentMerchant?.id || '171842bd-daed-40ef-853f-917eab2ed437',
       merchantSlug: currentMerchant?.slug || 'store',
       createdBy: user?.id || null,
       merchantVerified: true,
@@ -104,11 +101,11 @@ export default function ProductFormModal({ isOpen, onClose, productToEdit = null
       stock: parseInt(stock, 10) || 0,
       isSyndicated: isSyndicated,
       affiliateRate: parseFloat(affiliateRate) || 10,
-      image: image || presetImages[0].url,
+      image: image || (currentMerchant?.logo || '/images/products/the_sharp_v_yellow_1.webp'),
       pointsEarned: Math.round(numPrice * 0.1),
       category: category,
       description: description,
-      sizes: sizes.length > 0 ? sizes : ['One Size'],
+      sizes: sizes,
       colors: colors
     };
 

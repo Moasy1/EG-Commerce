@@ -2,7 +2,7 @@ import React from 'react';
 import { useApp } from '../../context/AppContext';
 
 export default function BottomNav() {
-  const { activeTab, setActiveTab, totalCartCount, language, user, setIsAuthModalOpen } = useApp();
+  const { activeTab, setActiveTab, navigateToMyProfile, totalCartCount, language, user, setIsAuthModalOpen } = useApp();
   const isAr = language === 'ar';
 
   return (
@@ -68,7 +68,7 @@ export default function BottomNav() {
               } else if (user.role === 'creator' || user.role === 'superadmin' || user.role === 'admin') {
                 setActiveTab('studio');
               } else {
-                setActiveTab('profile');
+                navigateToMyProfile();
               }
             }}
             aria-label={isAr ? 'إنشاء محتوى أو منتج' : 'Create'}
@@ -109,7 +109,7 @@ export default function BottomNav() {
 
         {/* 5. Profile */}
         <button
-          onClick={() => setActiveTab('profile')}
+          onClick={navigateToMyProfile}
           aria-label={isAr ? 'الملف الشخصي' : 'Profile'}
           aria-current={activeTab === 'profile' ? 'page' : undefined}
           className={`flex-1 min-h-[44px] flex flex-col items-center justify-center transition-all active:scale-90 duration-150 ${

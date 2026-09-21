@@ -137,7 +137,7 @@ const getDefaultReels = (isAr = true) => [
           price: 850,
           originalPrice: 1100,
           discount: '22% OFF',
-          image: '/images/products/linen_abaya.jpg'
+          image: '/images/products/the_sharp_v_yellow_1.webp'
         }
       ]
     },
@@ -205,7 +205,7 @@ const getDefaultReels = (isAr = true) => [
           price: 850,
           originalPrice: 1100,
           discount: '22% OFF',
-          image: '/images/products/linen_abaya.jpg'
+          image: '/images/products/the_sharp_v_yellow_1.webp'
         }
       ]
     },
@@ -341,7 +341,7 @@ const getDefaultReels = (isAr = true) => [
           price: 520,
           originalPrice: 650,
           discount: '20% OFF',
-          image: '/images/brands/talieska_logo.jpg'
+          image: '/images/brands/dripfit_logo.png'
         }
       ]
     },
@@ -375,7 +375,7 @@ const getDefaultReels = (isAr = true) => [
           price: 880,
           originalPrice: 1100,
           discount: '20% OFF',
-          image: '/images/products/linen_abaya.jpg'
+          image: '/images/products/the_sharp_v_yellow_1.webp'
         }
       ]
     },
@@ -755,7 +755,7 @@ export default function DiscoverReels() {
     if (!newCommentText.trim() || !currentReel?.id) return;
 
     const authorName = user?.name || user?.profile?.name || user?.email?.split('@')[0] || (isAr ? 'متسوق مصري' : 'Shopper');
-    const authorAvatar = user?.avatar_url || (user?.role === 'merchant' ? '/images/brands/talieska_logo.jpg' : '/images/reels/reel_1.jpg');
+    const authorAvatar = user?.avatar_url || (user?.role === 'merchant' ? '/images/brands/dripfit_logo.png' : '/images/reels/reel_1.jpg');
     const authorRole = user?.role || 'buyer';
 
     const newComment = await socialService.postComment(currentReel, {
@@ -1635,8 +1635,8 @@ export default function DiscoverReels() {
                   category: 'Fashion',
                   rating: 4.9,
                   reviewsCount: 120,
-                  merchantId: 'm-01',
-                  merchant: currentReel?.creatorName || 'Talieska Studio',
+                  merchantId: '171842bd-daed-40ef-853f-917eab2ed437',
+                  merchant: currentReel?.creatorName || 'Drip Fit',
                   description: prod.title
                 };
                 openProductDetail(matched);
@@ -1735,7 +1735,7 @@ export default function DiscoverReels() {
             <div className="mb-3 px-3 py-2 bg-gray-50 border border-gray-100 rounded-xl flex items-center justify-between gap-2 text-xs">
               <div className="flex items-center gap-2">
                 <img 
-                  src={user?.avatar_url || (user?.role === 'merchant' ? '/images/brands/talieska_logo.jpg' : '/images/reels/reel_1.jpg')} 
+                  src={user?.avatar_url || (user?.role === 'merchant' ? '/images/brands/dripfit_logo.png' : '/images/reels/reel_1.jpg')} 
                   alt="Avatar" 
                   className="w-6 h-6 rounded-full object-cover border border-gray-200" 
                 />
@@ -1856,7 +1856,7 @@ export default function DiscoverReels() {
             <div className="flex items-center justify-between pb-3 border-b border-gray-100">
               <div className="flex items-center gap-3 min-w-0">
                 <img 
-                  src={currentReel?.avatar || '/images/products/linen_abaya.jpg'} 
+                  src={currentReel?.avatar || '/images/products/the_sharp_v_yellow_1.webp'} 
                   alt="avatar" 
                   className="w-10 h-10 rounded-full object-cover border border-gray-200 shadow-xs shrink-0" 
                 />
@@ -1907,7 +1907,7 @@ export default function DiscoverReels() {
               <button 
                 onClick={() => {
                   setIsOptionsMenuOpen(false);
-                  navigateToProfile(currentReel?.creatorHandle || 'talieska');
+                  navigateToProfile(currentReel?.creatorHandle || 'drip-fit');
                 }}
                 className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-gray-50 active:bg-gray-100 transition-colors text-start cursor-pointer"
               >

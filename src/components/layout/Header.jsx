@@ -15,7 +15,8 @@ export default function Header() {
     setUser,
     setIsAuthModalOpen,
     unreadNotifications,
-    refreshNotificationCount
+    refreshNotificationCount,
+    navigateToMyProfile
   } = useApp();
 
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
@@ -159,7 +160,7 @@ export default function Header() {
               {isAr ? 'العودة للتطبيق' : 'Back to App'}
             </button>
             <div className="w-8 h-8 rounded-full overflow-hidden border border-slate-600">
-              <img src="/images/brands/talieska_logo.jpg" alt="Store" className="w-full h-full object-cover" />
+              <img src="/images/brands/dripfit_logo.png" alt="Store" className="w-full h-full object-cover" />
             </div>
           </div>
         </div>
@@ -399,7 +400,7 @@ export default function Header() {
                     </div>
                   </div>
                   
-                  <button onClick={() => { setActiveTab('profile'); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-start mt-1">
+                  <button onClick={() => { navigateToMyProfile(); setIsProfileMenuOpen(false); }} className="px-4 py-2 text-xs font-bold hover:bg-gray-50 flex items-center gap-2 text-start mt-1">
                     <span className="material-symbols-outlined text-[18px]">person</span> {isAr ? 'الملف الشخصي' : 'My Profile'}
                   </button>
 

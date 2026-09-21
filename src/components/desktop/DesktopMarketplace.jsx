@@ -6,6 +6,9 @@ import { ProductService, CATEGORIES_DATA } from '../../services/ProductService';
 export default function DesktopMarketplace() {
   const { 
     products: contextProducts, 
+    merchants,
+    creators,
+    user,
     openProductDetail, 
     addToCart, 
     setActiveTab, 
@@ -29,33 +32,24 @@ export default function DesktopMarketplace() {
     { label: 'Heritage', labelAr: 'تحف وتراث', icon: 'star', slug: 'heritage' },
   ];
 
+  const products = contextProducts || [];
 
-  const products = (contextProducts && contextProducts.length > 0) ? contextProducts : [
-    {
-      id: 'dm-1',
-      title: 'Embroidered Galabeya',
-      price: 850,
-      rating: 4.8,
-      reviewsCount: 124,
-      image: '/images/products/linen_abaya.jpg',
-      category: 'Abayas'
-    }
-  ];
+  // Dynamic Stores & Brands in Real Time
+  const topStores = (merchants || []).map(store => ({
+    id: store.id,
+    name: store.shortName || store.name?.split('•')[0]?.trim() || store.name,
+    slug: store.slug || 'store',
+    handle: store.handle ? store.handle.replace(/^@/, '') : (store.slug || 'store'),
+    image: store.logo || store.avatar || '/images/brands/dripfit_logo.png'
+  }));
 
-  const topStores = [
-    { id: 'store-1', name: 'Talieska Studio', slug: 'talieska', handle: 'talieska', image: '/images/brands/talieska_logo.jpg' },
-    { id: 'store-2', name: 'ورشة خان الخليلي', slug: 'khan-craft', handle: 'khan-craft', image: '/images/banners/khan_hero.jpg' },
-    { id: 'store-3', name: 'مجوهرات طيبة', slug: 'tiba-jewelry', handle: 'tiba-jewelry', image: '/images/reels/fashion_vintage_watch_thumb.jpg' },
-  ];
-
-  const featuredCreators = [
-    { id: 'c-1', handle: 'cairo_chic', name: 'Cairo Chic', avatar: '/images/reels/fashion_citrine_blazer_thumb.jpg' },
-    { id: 'c-2', handle: 'salma.styles', name: 'Salma Styles', avatar: '/images/reels/fashion_oversized_shirt_thumb.jpg' },
-    { id: 'c-3', handle: 'yasmin_style', name: 'Yasmin Sayed', avatar: '/images/reels/reel_2.jpg' },
-    { id: 'c-4', handle: 'zeina_ootd', name: 'Zeina OOTD', avatar: '/images/reels/fashion_oneshoulder_top_thumb.jpg' },
-    { id: 'c-5', handle: 'karim.editorial', name: 'Karim Editorial', avatar: '/images/reels/fashion_vintage_watch_thumb.jpg' },
-    { id: 'c-6', handle: 'maya_accessories', name: 'Maya Accessories', avatar: '/images/reels/fashion_shoulder_bags_thumb.jpg' },
-  ];
+  // Dynamic Creators in Real Time
+  const featuredCreators = (creators || []).map(c => ({
+    id: c.id,
+    handle: c.handle ? c.handle.replace(/^@/, '') : (c.slug || c.name?.toLowerCase().replace(/\s+/g, '_')),
+    name: c.name,
+    avatar: c.avatar || c.avatar_url || '/images/reels/reel_2.jpg'
+  }));
 
   return (
     <div dir={isAr ? 'rtl' : 'ltr'} className="w-full bg-white text-slate-900 flex flex-col font-sans min-h-[580px] overflow-hidden select-none text-start">
@@ -81,7 +75,11 @@ export default function DesktopMarketplace() {
           <button className="flex items-center gap-1 hover:text-[#d00000]"><span className="text-gray-500">{isAr ? 'الترتيب:' : 'Sort by:'}</span><span className="text-slate-900 font-bold">{isAr ? 'الأكثر طلباً' : 'Most Popular'}</span></button>
           <div className="flex items-center gap-2 ml-2">
             <button onClick={() => setActiveTab('cart')} className="p-1 hover:text-[#d00000]"><span className="material-symbols-outlined text-[19px]">shopping_cart</span></button>
-            <img src="/images/reels/reel_2.jpg" alt="User" className="w-6 h-6 rounded-full object-cover ring-1 ring-gray-300" />
+            <img 
+              src={user?.avatar_url || user?.avatar || '/images/reels/reel_1.jpg'} 
+              alt={user?.name || "User"} 
+              className="w-6 h-6 rounded-full object-cover ring-1 ring-gray-300" 
+            />
           </div>
         </div>
       </div>

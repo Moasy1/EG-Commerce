@@ -27,7 +27,7 @@ export default function MerchantStorefront() {
     (currentMerchant.slug && p.merchantId?.includes(currentMerchant.slug)) ||
     (currentMerchant.shortName && p.merchant?.toLowerCase().includes(currentMerchant.shortName.toLowerCase())) ||
     (currentMerchant.slug && p.merchant?.toLowerCase().includes(currentMerchant.slug)) ||
-    (!p.merchantId && currentMerchant.id === 'm-01')
+    (!p.merchantId && currentMerchant.id === '171842bd-daed-40ef-853f-917eab2ed437')
   );
   
   // Extract dynamic theme and layout configurations with sensible fallbacks
@@ -171,7 +171,7 @@ export default function MerchantStorefront() {
   ];
 
   // Community Reels Data - Dynamic per Merchant with Real Hostinger & Local Backend Persistence
-  const defaultCommunityReels = currentMerchant.id === 'm-02' ? [
+  const defaultCommunityReels = currentMerchant.id === '171842bd-daed-40ef-853f-917eab2ed437' ? [
     { 
       id: 'cr-m2-1', 
       creator: '@maya_accessories', 
@@ -215,7 +215,7 @@ export default function MerchantStorefront() {
       image: '/images/products/copper_lantern.jpg',
       taggedProduct: products.find(p => p.id === 'p-05') || merchantProducts[0]
     }
-  ] : currentMerchant.id === 'm-03' ? [
+  ] : currentMerchant.id === '171842bd-daed-40ef-853f-917eab2ed437' ? [
     { 
       id: 'cr-m3-1', 
       creator: '@karim.editorial', 
@@ -323,8 +323,8 @@ export default function MerchantStorefront() {
               caption: r.caption || r.title || 'إطلالة حصرية من متجرنا ✨',
               views: typeof r.views === 'number' ? (r.views >= 1000 ? `${(r.views/1000).toFixed(1)}K` : r.views.toString()) : (r.views || '1.2K'),
               likes: typeof r.likes === 'number' ? (r.likes >= 1000 ? `${(r.likes/1000).toFixed(1)}K` : r.likes.toString()) : (r.likes || '320'),
-              image: r.avatar || r.thumbnail || (r.products?.[0]?.image) || currentMerchant.logo || '/images/products/linen_abaya.jpg',
-              video: r.videoBg || r.videoUrl || '/images/reels/linen_abaya.mp4',
+              image: r.avatar || r.thumbnail || (r.products?.[0]?.image) || currentMerchant.logo || '/images/products/the_sharp_v_yellow_1.webp',
+              video: r.videoBg || r.videoUrl || '/images/reels/the_sharp_v_yellow_reel.mp4',
               taggedProduct: r.products?.[0] || r.product || merchantProducts[0]
             }));
             setDynamicStoreReels(mapped);
@@ -372,23 +372,27 @@ export default function MerchantStorefront() {
               </span>
             </div>
 
-            {/* SaaS Demo Controls: Switch Merchant Storefront or Go to Merchant Admin */}
+            {/* Admin Controls & Actions */}
             <div className="flex items-center gap-2">
-              <span className={`text-[11px] hidden md:inline ${textMutedClass}`}>معاينة متجر آخر:</span>
-              <select
-                value={currentMerchant.id}
-                onChange={(e) => setSelectedMerchantId(e.target.value)}
-                className={`px-2 py-0.5 rounded text-[11px] border focus:outline-none cursor-pointer ${subCardBgClass}`}
-              >
-                {merchants.map(m => (
-                  <option key={m.id} value={m.id} className="bg-surface text-on-surface">
-                    🏬 {m.shortName} ({m.slug})
-                  </option>
-                ))}
-              </select>
+              {user && (user.role === 'admin' || user.role === 'superadmin') && (
+                <div className="flex items-center gap-2">
+                  <span className={`text-[11px] hidden md:inline ${textMutedClass}`}>معاينة متجر آخر:</span>
+                  <select
+                    value={currentMerchant.id}
+                    onChange={(e) => setSelectedMerchantId(e.target.value)}
+                    className={`px-2 py-0.5 rounded text-[11px] border focus:outline-none cursor-pointer ${subCardBgClass}`}
+                  >
+                    {merchants.map(m => (
+                      <option key={m.id} value={m.id} className="bg-surface text-on-surface">
+                        🏬 {m.shortName} ({m.slug})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <button
-                onClick={() => navigateToProfile(currentMerchant.slug || 'talieska')}
+                onClick={() => navigateToProfile(currentMerchant.slug || 'drip-fit')}
                 className="flex items-center gap-1 px-2.5 py-0.5 rounded-md font-bold text-[11px] transition-all bg-gradient-to-r from-rose-500/20 to-amber-500/20 text-rose-300 border border-rose-500/30 hover:opacity-90 shadow-xs"
                 title="زيارة الملف الاجتماعي للبراند (Social Profile)"
               >
@@ -544,7 +548,7 @@ export default function MerchantStorefront() {
           {/* Action Icons */}
           <div className="flex items-center gap-2">
             <button
-              onClick={() => navigateToProfile(currentMerchant.slug || 'talieska')}
+              onClick={() => navigateToProfile(currentMerchant.slug || 'drip-fit')}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-500/10 hover:bg-red-500/20 text-[#d00000] border border-red-500/30 text-xs font-bold transition-all shadow-xs"
               title="زيارة الملف الاجتماعي للبراند (Social Profile)"
             >
@@ -1127,7 +1131,7 @@ export default function MerchantStorefront() {
                       مواقع التواصل الاجتماعي
                     </span>
                     <h3 className="text-base sm:text-lg font-bold font-serif">
-                      انضمي إلى مجتمع {currentMerchant.name} ({currentMerchant.instagram || '@talieska.studio'})
+                      انضمي إلى مجتمع {currentMerchant.name} ({currentMerchant.instagram || '@drip_fit'})
                     </h3>
                   </div>
                   <div className="flex items-center gap-2">

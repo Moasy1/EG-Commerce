@@ -54,11 +54,11 @@ export function numberToArabicWords(num) {
 }
 
 export function generateInvoiceHtml(order, merchant = null) {
-  const storeName = merchant?.name || order.merchantName || 'Talieska Studio • تاليسكا ستوديو';
-  const storeShortName = merchant?.shortName || storeName.split(' • ')[0] || 'متجر مصري معتمد';
-  const storeAddress = merchant?.address || '14 شارع دجلة، المعادي، القاهرة، جمهورية مصر العربية';
-  const storePhone = merchant?.whatsapp || merchant?.phone || '+20 100 234 5678';
-  const storeSubdomain = merchant?.subdomain || (order.merchantId ? `${order.merchantId}.egyptian-commerce.com` : 'talieska.egyptian-commerce.com');
+  const storeName = merchant?.name || order.merchantName || 'Drip Fit • دريب فيت';
+  const storeShortName = merchant?.shortName || storeName.split(' • ')[0] || 'Drip Fit';
+  const storeAddress = merchant?.address || 'القاهرة، جمهورية مصر العربية';
+  const storePhone = merchant?.whatsapp || merchant?.phone || '+20 101 234 5678';
+  const storeSubdomain = merchant?.subdomain || (order.merchantId ? `${order.merchantId}.egyptian-commerce.com` : 'drip-fit.egyptian-commerce.com');
   const storeTaxId = merchant?.taxId || '620-891-304';
   const storeCommReg = merchant?.commercialRegistry || '419208';
 

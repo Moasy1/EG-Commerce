@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
+import { ReelsService } from '../services/ReelsService';
 
 export default function SocialProfile() {
   const {
@@ -24,25 +25,50 @@ export default function SocialProfile() {
   const [isProfileSwitcherOpen, setIsProfileSwitcherOpen] = useState(false);
 
   // Fallback profile if activeProfile is null
-  const currentProfile = activeProfile || (socialProfiles && socialProfiles['talieska']) || {
+  const baseProfile = activeProfile || (socialProfiles && socialProfiles['drip-fit']) || {
     id: 'p-talieska',
-    handle: '@talieska',
-    slug: 'talieska',
-    name: 'Talieska Studio • تاليسكا ستوديو',
+    handle: '@drip_fit',
+    slug: 'drip-fit',
+    name: 'Drip Fit • دريب فيت',
     verified: true,
     role: 'merchant',
-    merchantId: 'm-01',
-    avatar: '/images/brands/talieska_logo.jpg',
+    merchantId: '171842bd-daed-40ef-853f-917eab2ed437',
+    avatar: '/images/brands/dripfit_logo.png',
     category: 'Haute Egyptian Linen & Fashion',
     categoryAr: 'دار أزياء الكتان والتطريز المصري المعاصر',
     bio: '✨ إحياء فخامة الكتان الطبيعي والتطريز اليدوي 100% بأيادٍ مصرية أصيلة بالقاهرة 🇪🇬 | شحن سريع لجميع المحافظات مع بوسطة',
     location: 'القاهرة، مصر • Cairo, Egypt',
-    website: 'shop.talieskastudio.com',
+    website: 'dripfit-eg.com',
     followersCount: '48.2K',
     followingCount: '142',
     productsCount: 12,
     reelsCount: 8
   };
+
+  // Merge live custom merchant storefront / profile customizations
+  const currentProfile = (() => {
+    try {
+      const merchId = baseProfile.merchantId || baseProfile.id;
+      const slug = baseProfile.slug;
+      const raw = localStorage.getItem(`eg_merchant_settings_${merchId}`) || 
+                  (slug ? localStorage.getItem(`eg_merchant_settings_${slug}`) : null);
+      if (!raw) return baseProfile;
+      const parsed = JSON.parse(raw);
+      return {
+        ...baseProfile,
+        name: parsed.name || baseProfile.name,
+        bio: parsed.bio || baseProfile.bio,
+        avatar: parsed.logo || baseProfile.avatar,
+        banner: parsed.banner || baseProfile.banner,
+        categoryAr: parsed.categoryAr || baseProfile.categoryAr,
+        whatsapp: parsed.whatsapp || baseProfile.whatsapp,
+        instagram: parsed.instagram || baseProfile.instagram,
+        website: parsed.customDomain || parsed.subdomain || baseProfile.website
+      };
+    } catch (e) {
+      return baseProfile;
+    }
+  })();
 
   // Filter products for this merchant or creator
   const profileProducts = (products || []).filter(p => {
@@ -59,121 +85,99 @@ export default function SocialProfile() {
       );
       return matchId || matchSlug || matchName;
     }
-    // For creator: show curated or tagged products
+    // For creator: show tagged or collaboration products
     if (currentProfile.role === 'creator') {
       const handleClean = currentProfile.handle?.replace('@', '').toLowerCase();
-      if (p.creatorHandle && p.creatorHandle.toLowerCase().includes(handleClean)) return true;
-      if (p.creator && p.creator.toLowerCase().includes(handleClean)) return true;
-      return true;
+      const creatorId = currentProfile.creatorId || currentProfile.id;
+      if (p.creatorId && (p.creatorId === creatorId || p.creator_id === creatorId)) return true;
+      if (p.creatorHandle && p.creatorHandle.toLowerCase().replace('@', '') === handleClean) return true;
+      if (p.creator && p.creator.toLowerCase().replace('@', '') === handleClean) return true;
+      return false;
     }
-    return true;
+    return false;
   });
 
   // Highlight stories
   const highlights = currentProfile.highlights || [
-    { id: 'h1', title: isAr ? 'كولكشن 2026' : 'Summer 26', icon: 'flare', img: '/images/products/linen_abaya.jpg' },
+    { id: 'h1', title: isAr ? 'كولكشن 2026' : 'Summer 26', icon: 'flare', img: '/images/products/the_sharp_v_yellow_1.webp' },
     { id: 'h2', title: isAr ? 'آراء العملاء' : 'Reviews', icon: 'rate_review', img: '/images/reels/fashion_citrine_blazer_thumb.jpg' },
     { id: 'h3', title: isAr ? 'الخامات الطبيعية' : 'Linen Craft', icon: 'dry_cleaning', img: '/images/products/embroidered_blouse.jpg' },
-    { id: 'h4', title: isAr ? 'الشحن والتوصيل' : 'Shipping', icon: 'local_shipping', img: '/images/banners/talieska_hero.jpg' }
+    { id: 'h4', title: isAr ? 'الشحن والتوصيل' : 'Shipping', icon: 'local_shipping', img: '/images/products/the_sharp_v_yellow_1.webp' }
   ];
 
-  // Comprehensive reels associated with different profiles
-  const allMockReels = [
-    {
-      id: 'pr-1',
-      handles: ['@cairo_chic', 'cairo_chic', '@talieska', 'talieska'],
-      title: isAr ? 'تنسيق بليزر السيترين الأوفرسايز' : 'Citrine Oversized Blazer Styling',
-      views: '62.4K',
-      videoUrl: '/images/reels/fashion_citrine_blazer.mp4',
-      thumbnail: '/images/reels/fashion_citrine_blazer_thumb.jpg',
-      likes: '4.8K',
-      comments: '184',
-      productName: isAr ? 'بليزر سيترين أوفرسايز' : 'Citrine Blazer',
-      productPrice: 2200
-    },
-    {
-      id: 'pr-2',
-      handles: ['@salma.styles', 'salma.styles', '@talieska', 'talieska'],
-      title: isAr ? 'قميص كتان سماوي للصيف' : 'Sky Blue Linen Summer Shirt',
-      views: '45.1K',
-      videoUrl: '/images/reels/fashion_oversized_shirt.mp4',
-      thumbnail: '/images/reels/fashion_oversized_shirt_thumb.jpg',
-      likes: '3.2K',
-      comments: '92',
-      productName: isAr ? 'قميص كتان سماوي' : 'Blue Linen Shirt',
-      productPrice: 950
-    },
-    {
-      id: 'pr-3',
-      handles: ['@zeina_ootd', 'zeina_ootd'],
-      title: isAr ? 'توب بكتف واحد عاجي ناعم' : 'One Shoulder Bodysuit Lookbook',
-      views: '38.9K',
-      videoUrl: '/images/reels/fashion_oneshoulder_top.mp4',
-      thumbnail: '/images/reels/fashion_oneshoulder_top_thumb.jpg',
-      likes: '2.9K',
-      comments: '77',
-      productName: isAr ? 'توب بكتف واحد عاجي' : 'White Bodysuit',
-      productPrice: 680
-    },
-    {
-      id: 'pr-4',
-      handles: ['@maya_accessories', 'maya_accessories', 'khan-craft'],
-      title: isAr ? 'كولكشن شنط الكتف الكلاسيكية' : 'Structured Leather Bag Swatch',
-      views: '48.5K',
-      videoUrl: '/images/reels/fashion_shoulder_bags.mp4',
-      thumbnail: '/images/reels/fashion_shoulder_bags_thumb.jpg',
-      likes: '5.1K',
-      comments: '210',
-      productName: isAr ? 'حقيبة كتف كلاسيك' : 'Classic Shoulder Bag',
-      productPrice: 1850
-    },
-    {
-      id: 'pr-5',
-      handles: ['@yasmin_style', 'yasmin_style', 'talieska', '@talieska'],
-      title: isAr ? 'إطلالة عباية الكتان المطرزة يدوياً' : 'Hand Embroidered Linen Abaya',
-      views: '54.0K',
-      videoUrl: '/images/reels/fashion_oversized_shirt.mp4',
-      thumbnail: '/images/products/linen_abaya.jpg',
-      likes: '6.4K',
-      comments: '340',
-      productName: isAr ? 'عباية كتان فاخرة' : 'Luxury Linen Abaya',
-      productPrice: 2850
-    },
-    {
-      id: 'pr-6',
-      handles: ['khan-craft', '@khan.craft.eg', '@farida.atelier', 'farida.atelier'],
-      title: isAr ? 'تفاصيل نقش النحاس الأصيل' : 'Artisan Handcrafted Brass Details',
-      views: '29.3K',
-      videoUrl: '/images/reels/fashion_citrine_blazer.mp4',
-      thumbnail: '/images/products/copper_lantern.jpg',
-      likes: '2.1K',
-      comments: '58',
-      productName: isAr ? 'فانوس نحاسي فاطمي' : 'Brass Lantern',
-      productPrice: 1450
-    },
-    {
-      id: 'pr-7',
-      handles: ['@karim.editorial', 'karim.editorial', 'tiba-jewelry'],
-      title: isAr ? 'ساعة كلاسيكية وتنسيق أزياء رجالي' : 'Vintage Watch & Menswear Styling',
-      views: '35.7K',
-      videoUrl: '/images/reels/fashion_citrine_blazer.mp4',
-      thumbnail: '/images/reels/fashion_vintage_watch_thumb.jpg',
-      likes: '3.4K',
-      comments: '64',
-      productName: isAr ? 'ساعة يد عتيقة' : 'Vintage Watch',
-      productPrice: 3400
-    }
-  ];
+  // Real-time Reels state loaded from ReelsService (Hostinger API / Supabase / localStorage)
+  const [loadedReels, setLoadedReels] = useState([]);
+  const [isLoadingReels, setIsLoadingReels] = useState(true);
 
-  // Prioritize reels matching this profile handle/slug, and append other reels for full grid
   const cleanHandle = currentProfile.handle?.replace('@', '').toLowerCase();
-  const matchedReels = allMockReels.filter(r => 
-    r.handles.includes(currentProfile.handle) || 
-    r.handles.includes(currentProfile.slug) ||
-    r.handles.includes(cleanHandle)
-  );
-  const otherReels = allMockReels.filter(r => !matchedReels.some(mr => mr.id === r.id));
-  const profileReels = matchedReels.length > 0 ? [...matchedReels, ...otherReels] : allMockReels;
+
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchReels() {
+      setIsLoadingReels(true);
+      try {
+        const allReels = await ReelsService.getReels();
+        
+        // Strict matching for this specific profile:
+        const matched = (allReels || []).filter(r => {
+          if (currentProfile.role === 'merchant') {
+            if (currentProfile.merchantId && (r.merchantId === currentProfile.merchantId || r.creatorId === currentProfile.merchantId)) return true;
+            if (currentProfile.slug && (
+              r.storeSlug?.toLowerCase() === currentProfile.slug.toLowerCase() ||
+              r.merchantId?.toLowerCase() === currentProfile.slug.toLowerCase()
+            )) return true;
+            if (r.products && Array.isArray(r.products) && r.products.some(p => p.merchantId === currentProfile.merchantId)) return true;
+          }
+          if (currentProfile.role === 'creator') {
+            if (currentProfile.creatorId && (r.creatorId === currentProfile.creatorId || r.publisherId === currentProfile.creatorId)) return true;
+            if (currentProfile.id && (r.creatorId === currentProfile.id || r.publisherId === currentProfile.id || r.userId === currentProfile.id)) return true;
+            if (currentProfile.handle && (
+              r.creatorHandle?.toLowerCase() === currentProfile.handle.toLowerCase() ||
+              r.creatorHandle?.toLowerCase() === `@${cleanHandle}` ||
+              r.creatorHandle?.toLowerCase() === cleanHandle
+            )) return true;
+          }
+          if (r.handles && Array.isArray(r.handles)) {
+            if (r.handles.includes(currentProfile.handle) || r.handles.includes(cleanHandle) || (currentProfile.slug && r.handles.includes(currentProfile.slug))) return true;
+          }
+          return false;
+        });
+
+        const formatted = matched.map(r => ({
+          id: r.id,
+          title: r.caption || r.title || (isAr ? 'فيديو ريل' : 'Reel Video'),
+          views: r.views || `${(r.likes ? (Number(r.likes) * 8.5) / 1000 : 1.2).toFixed(1)}K`,
+          videoUrl: r.videoBg || r.videoUrl || r.video_url,
+          thumbnail: r.thumbnail || r.avatar || '/images/reels/fashion_citrine_blazer_thumb.jpg',
+          likes: typeof r.likes === 'number' ? `${(r.likes / 1000).toFixed(1)}K` : (r.likes || '1.2K'),
+          comments: String(r.comments || 12),
+          productName: r.products?.[0]?.title || r.productName,
+          productPrice: r.products?.[0]?.price || r.productPrice
+        }));
+
+        if (isMounted) {
+          setLoadedReels(formatted);
+        }
+      } catch (e) {
+        console.warn('Error loading profile reels:', e);
+      } finally {
+        if (isMounted) setIsLoadingReels(false);
+      }
+    }
+    fetchReels();
+    const handleReelsUpdated = () => {
+      fetchReels();
+    };
+    window.addEventListener('eg_reels_updated', handleReelsUpdated);
+    window.addEventListener('eg_merchant_updated', handleReelsUpdated);
+    return () => {
+      isMounted = false;
+      window.removeEventListener('eg_reels_updated', handleReelsUpdated);
+      window.removeEventListener('eg_merchant_updated', handleReelsUpdated);
+    };
+  }, [currentProfile.id, currentProfile.merchantId, currentProfile.creatorId, currentProfile.handle, currentProfile.slug, currentProfile.role, isAr]);
+
+  const profileReels = loadedReels;
 
   // Saved / Tagged lookbooks
   const savedLookbooks = [
@@ -209,10 +213,16 @@ export default function SocialProfile() {
     setTimeout(() => setCopiedLink(false), 2000);
   };
 
-  const isOwner = user && (
-    user.role === 'superadmin' || 
-    user.role === 'admin' ||
-    (user.role === 'merchant' && currentProfile.role === 'merchant')
+  const isOwner = Boolean(
+    currentProfile.isOwner ||
+    (user && (
+      user.role === 'superadmin' || 
+      (currentProfile.userId && user.id === currentProfile.userId) ||
+      (currentProfile.merchantId && (user.merchantId === currentProfile.merchantId || user.merchant_id === currentProfile.merchantId)) ||
+      (currentProfile.creatorId && (user.creatorId === currentProfile.creatorId || user.id === currentProfile.creatorId)) ||
+      (currentProfile.handle && user.email && currentProfile.handle.replace('@', '').toLowerCase() === user.email.split('@')[0].toLowerCase()) ||
+      (currentProfile.slug && user.store_slug && currentProfile.slug.toLowerCase() === user.store_slug.toLowerCase())
+    ))
   );
 
   return (
@@ -233,27 +243,40 @@ export default function SocialProfile() {
             </span>
           </button>
 
-          {/* Current Handle + Verified + Switcher Dropdown Toggle */}
+          {/* Current Handle + Verified + Switcher Dropdown Toggle (Admin Only) */}
           <div className="relative">
-            <button 
-              onClick={() => setIsProfileSwitcherOpen(!isProfileSwitcherOpen)}
-              className="flex items-center gap-1.5 hover:opacity-80 transition-opacity"
-            >
-              <span className="font-extrabold text-sm md:text-base tracking-tight text-slate-900">
-                {currentProfile.handle}
-              </span>
-              {currentProfile.verified && (
-                <span className="material-symbols-outlined text-[16px] text-sky-500 fill-current">
-                  verified
+            {user && (user.role === 'admin' || user.role === 'superadmin') ? (
+              <button 
+                onClick={() => setIsProfileSwitcherOpen(!isProfileSwitcherOpen)}
+                className="flex items-center gap-1.5 hover:opacity-80 transition-opacity"
+              >
+                <span className="font-extrabold text-sm md:text-base tracking-tight text-slate-900">
+                  {currentProfile.handle}
                 </span>
-              )}
-              <span className="material-symbols-outlined text-[18px] text-gray-500">
-                expand_more
-              </span>
-            </button>
+                {currentProfile.verified && (
+                  <span className="material-symbols-outlined text-[16px] text-sky-500 fill-current">
+                    verified
+                  </span>
+                )}
+                <span className="material-symbols-outlined text-[18px] text-gray-500">
+                  expand_more
+                </span>
+              </button>
+            ) : (
+              <div className="flex items-center gap-1.5">
+                <span className="font-extrabold text-sm md:text-base tracking-tight text-slate-900">
+                  {currentProfile.handle}
+                </span>
+                {currentProfile.verified && (
+                  <span className="material-symbols-outlined text-[16px] text-sky-500 fill-current">
+                    verified
+                  </span>
+                )}
+              </div>
+            )}
 
-            {/* Profile Switcher Modal / Dropdown */}
-            {isProfileSwitcherOpen && (
+            {/* Profile Switcher Modal / Dropdown - Admin Only */}
+            {user && (user.role === 'admin' || user.role === 'superadmin') && isProfileSwitcherOpen && (
               <div 
                 className="absolute top-full start-0 mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-gray-100 p-2 z-50 animate-scale-in"
                 onClick={(e) => e.stopPropagation()}
@@ -602,33 +625,69 @@ export default function SocialProfile() {
         
         {/* TAB 1: REELS GRID (Instagram 3-Column 9:16 Video Layout) */}
         {activeTabName === 'reels' && (
-          <div className="grid grid-cols-3 gap-1 sm:gap-2">
-            {profileReels.map((reel) => (
-              <div 
-                key={reel.id}
-                onClick={() => setSelectedVideoModal(reel)}
-                className="relative aspect-[9/16] rounded-xl overflow-hidden bg-slate-900 group cursor-pointer shadow-xs active:scale-95 transition-all"
-              >
-                <img 
-                  src={reel.thumbnail} 
-                  alt={reel.title} 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20 opacity-80 group-hover:opacity-90 transition-opacity" />
-                
-                {/* Views Counter badge */}
-                <div className="absolute bottom-2 start-2 flex items-center gap-1 text-white text-[11px] font-bold drop-shadow">
-                  <span className="material-symbols-outlined text-[15px]">play_arrow</span>
-                  <span>{reel.views}</span>
-                </div>
-
-                {/* Top Reel Icon */}
-                <div className="absolute top-2 end-2 text-white/80">
-                  <span className="material-symbols-outlined text-[16px]">smart_display</span>
-                </div>
+          isLoadingReels ? (
+            <div className="py-16 flex flex-col items-center justify-center text-gray-400">
+              <div className="w-8 h-8 border-2 border-gray-200 border-t-[#d00000] rounded-full animate-spin mb-3"></div>
+              <span className="text-xs font-semibold">{isAr ? 'جاري تحميل الفيديوهات...' : 'Loading reels...'}</span>
+            </div>
+          ) : profileReels.length === 0 ? (
+            <div className="py-14 px-4 text-center flex flex-col items-center justify-center max-w-sm mx-auto bg-gray-50/70 border border-dashed border-gray-200 rounded-3xl my-2">
+              <div className="w-16 h-16 rounded-2xl bg-red-50 text-[#d00000] flex items-center justify-center mb-3 shadow-inner">
+                <span className="material-symbols-outlined text-[32px]">smart_display</span>
               </div>
-            ))}
-          </div>
+              <h3 className="text-sm font-bold text-slate-800 mb-1">
+                {isAr ? 'لا توجد فيديوهات ريلز منشورة بعد' : 'No reels published yet'}
+              </h3>
+              <p className="text-xs text-gray-500 mb-4 leading-relaxed">
+                {isOwner
+                  ? (isAr ? 'شارك أول فيديو ريل لك لتسليط الضوء على منتجاتك وزيادة التفاعل والمبيعات مع مجتمع إيجي كومرس!' : 'Publish your first reel to showcase products and engage customers!')
+                  : (isAr ? 'لم يقم هذا الحساب بنشر أي مقاطع فيديو حتى الآن.' : 'This account has not posted any reels yet.')}
+              </p>
+              {isOwner && (
+                <button
+                  onClick={() => {
+                    if (currentProfile.role === 'merchant') {
+                      setActiveTab('dashboard');
+                    } else {
+                      setActiveTab('studio');
+                    }
+                  }}
+                  className="px-4 py-2 bg-[#d00000] hover:bg-red-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-sm transition-all active:scale-95"
+                >
+                  <span className="material-symbols-outlined text-[16px]">add_circle</span>
+                  <span>{currentProfile.role === 'merchant' ? (isAr ? 'إدارة ونشر من لوحة التاجر' : 'Merchant Dashboard') : (isAr ? 'إنشاء ريل في استوديو المبدعين' : 'Create Reel in Studio')}</span>
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 gap-1 sm:gap-2">
+              {profileReels.map((reel) => (
+                <div 
+                  key={reel.id}
+                  onClick={() => setSelectedVideoModal(reel)}
+                  className="relative aspect-[9/16] rounded-xl overflow-hidden bg-slate-900 group cursor-pointer shadow-xs active:scale-95 transition-all"
+                >
+                  <img 
+                    src={reel.thumbnail} 
+                    alt={reel.title} 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20 opacity-80 group-hover:opacity-90 transition-opacity" />
+                  
+                  {/* Views Counter badge */}
+                  <div className="absolute bottom-2 start-2 flex items-center gap-1 text-white text-[11px] font-bold drop-shadow">
+                    <span className="material-symbols-outlined text-[15px]">play_arrow</span>
+                    <span>{reel.views}</span>
+                  </div>
+
+                  {/* Top Reel Icon */}
+                  <div className="absolute top-2 end-2 text-white/80">
+                    <span className="material-symbols-outlined text-[16px]">smart_display</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
         )}
 
         {/* TAB 2: PRODUCTS CATALOG (Commerce Showcase with direct Shop connection) */}
@@ -663,60 +722,85 @@ export default function SocialProfile() {
               </div>
             )}
 
-            {/* Product Cards Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {profileProducts.map((prod) => (
-                <div 
-                  key={prod.id} 
-                  className="bg-white border border-gray-100 rounded-2xl p-2.5 flex flex-col hover:shadow-md transition-shadow group relative"
-                >
-                  {/* Image with zoom */}
-                  <div 
-                    onClick={() => openProductDetail(prod)}
-                    className="w-full aspect-square rounded-xl overflow-hidden mb-2 bg-gray-50 cursor-pointer relative"
-                  >
-                    <img 
-                      src={prod.image} 
-                      alt={prod.title} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform" 
-                    />
-                    {prod.badge && (
-                      <span className="absolute top-2 start-2 bg-black/70 backdrop-blur-xs text-white text-[9px] font-bold px-2 py-0.5 rounded-full">
-                        {prod.badge}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Title & Price */}
-                  <h3 
-                    onClick={() => openProductDetail(prod)}
-                    className="font-bold text-xs text-slate-900 line-clamp-1 hover:text-[#d00000] cursor-pointer"
-                  >
-                    {prod.title}
-                  </h3>
-                  
-                  <div className="flex items-baseline gap-1.5 mt-1">
-                    <span className="text-xs font-extrabold text-[#d00000]">
-                      {prod.price} ج.م
-                    </span>
-                    {prod.originalPrice && (
-                      <span className="text-[10px] text-gray-400 line-through">
-                        {prod.originalPrice} ج.م
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Action Button: Quick Buy */}
-                  <button
-                    onClick={() => openQuickBuy(prod)}
-                    className="mt-2 w-full py-1.5 rounded-xl bg-slate-900 hover:bg-[#d00000] text-white text-[11px] font-bold transition-colors flex items-center justify-center gap-1 active:scale-95"
-                  >
-                    <span className="material-symbols-outlined text-[14px]">shopping_cart</span>
-                    <span>{isAr ? 'شراء سريع' : 'Quick Buy'}</span>
-                  </button>
+            {/* Product Cards Grid or Empty State */}
+            {profileProducts.length === 0 ? (
+              <div className="py-14 px-4 text-center flex flex-col items-center justify-center max-w-sm mx-auto bg-gray-50/70 border border-dashed border-gray-200 rounded-3xl my-2">
+                <div className="w-16 h-16 rounded-2xl bg-red-50 text-[#d00000] flex items-center justify-center mb-3 shadow-inner">
+                  <span className="material-symbols-outlined text-[32px]">inventory_2</span>
                 </div>
-              ))}
-            </div>
+                <h3 className="text-sm font-bold text-slate-800 mb-1">
+                  {isAr ? 'لا توجد منتجات معروضة بعد' : 'No products listed yet'}
+                </h3>
+                <p className="text-xs text-gray-500 mb-4 leading-relaxed">
+                  {isOwner
+                    ? (isAr ? 'أضف منتجاتك للكتالوج لتظهر لجمهورك وعملائك مباشرة وتتمكن من ربطها بالريلز!' : 'Add your products to the catalog so customers can discover and buy them directly!')
+                    : (isAr ? 'لم يقم هذا الحساب بإدراج منتجات معروضة للبيع حالياً.' : 'This profile does not have any products listed for sale yet.')}
+                </p>
+                {isOwner && currentProfile.role === 'merchant' && (
+                  <button
+                    onClick={() => setActiveTab('dashboard')}
+                    className="px-4 py-2 bg-[#d00000] hover:bg-red-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-sm transition-all active:scale-95"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">add_shopping_cart</span>
+                    <span>{isAr ? 'إضافة منتجات من لوحة التاجر' : 'Add Products in Merchant Dashboard'}</span>
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {profileProducts.map((prod) => (
+                  <div 
+                    key={prod.id} 
+                    className="bg-white border border-gray-100 rounded-2xl p-2.5 flex flex-col hover:shadow-md transition-shadow group relative"
+                  >
+                    {/* Image with zoom */}
+                    <div 
+                      onClick={() => openProductDetail(prod)}
+                      className="w-full aspect-square rounded-xl overflow-hidden mb-2 bg-gray-50 cursor-pointer relative"
+                    >
+                      <img 
+                        src={prod.image} 
+                        alt={prod.title} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform" 
+                      />
+                      {prod.badge && (
+                        <span className="absolute top-2 start-2 bg-black/70 backdrop-blur-xs text-white text-[9px] font-bold px-2 py-0.5 rounded-full">
+                          {prod.badge}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Title & Price */}
+                    <h3 
+                      onClick={() => openProductDetail(prod)}
+                      className="font-bold text-xs text-slate-900 line-clamp-1 hover:text-[#d00000] cursor-pointer"
+                    >
+                      {prod.title}
+                    </h3>
+                    
+                    <div className="flex items-baseline gap-1.5 mt-1">
+                      <span className="text-xs font-extrabold text-[#d00000]">
+                        {prod.price} ج.م
+                      </span>
+                      {prod.originalPrice && (
+                        <span className="text-[10px] text-gray-400 line-through">
+                          {prod.originalPrice} ج.م
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Action Button: Quick Buy */}
+                    <button
+                      onClick={() => openQuickBuy(prod)}
+                      className="mt-2 w-full py-1.5 rounded-xl bg-slate-900 hover:bg-[#d00000] text-white text-[11px] font-bold transition-colors flex items-center justify-center gap-1 active:scale-95"
+                    >
+                      <span className="material-symbols-outlined text-[14px]">shopping_cart</span>
+                      <span>{isAr ? 'شراء سريع' : 'Quick Buy'}</span>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 

@@ -8,7 +8,8 @@
 
 const getHostingerApiBase = () => {
   // If explicitly defined in environment (e.g. https://api.yourdomain.com or https://yourdomain.com)
-  const envApiUrl = import.meta.env.VITE_HOSTINGER_API_URL;
+  const envApiUrl = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_HOSTINGER_API_URL) ||
+                    (typeof process !== 'undefined' && process.env?.VITE_HOSTINGER_API_URL);
   if (envApiUrl && envApiUrl.trim()) {
     return envApiUrl.trim().replace(/\/+$/, '');
   }
@@ -16,7 +17,8 @@ const getHostingerApiBase = () => {
 };
 
 const getHostingerMediaBase = () => {
-  const envMediaUrl = import.meta.env.VITE_HOSTINGER_MEDIA_URL;
+  const envMediaUrl = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_HOSTINGER_MEDIA_URL) ||
+                      (typeof process !== 'undefined' && process.env?.VITE_HOSTINGER_MEDIA_URL);
   if (envMediaUrl && envMediaUrl.trim()) {
     return envMediaUrl.trim().replace(/\/+$/, '');
   }

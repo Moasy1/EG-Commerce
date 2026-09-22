@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase.js';
-import { INITIAL_PRODUCTS, MERCHANTS_DATA } from '../context/AppContext.jsx';
+import { INITIAL_PRODUCTS, MERCHANTS_DATA } from '../data/storesData.js';
 
 export const CATEGORIES_DATA = [
   {

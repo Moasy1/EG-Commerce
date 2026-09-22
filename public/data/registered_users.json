@@ -1,0 +1,164 @@
+{
+  "onefourone@egyptian-commerce.com": {
+    "id": "14100000-0000-4000-8000-000000000001",
+    "email": "onefourone@egyptian-commerce.com",
+    "password": "adminpassword",
+    "name": "One Four One • ون فور ون",
+    "role": "merchant",
+    "merchant_id": "14100000-0000-4000-8000-000000000001",
+    "store_slug": "onefourone",
+    "store_name": "One Four One • ون فور ون",
+    "avatar_url": "/images/brands/onefourone_logo.jpg",
+    "is_merchant": true,
+    "reward_points_balance": 1000,
+    "user_metadata": {
+      "name": "One Four One • ون فور ون",
+      "role": "merchant",
+      "merchant_id": "14100000-0000-4000-8000-000000000001"
+    }
+  },
+  "4u@egyptian-commerce.com": {
+    "id": "40000000-0000-4000-8000-000000000002",
+    "email": "4u@egyptian-commerce.com",
+    "password": "adminpassword",
+    "name": "4U Store • فور يو",
+    "role": "merchant",
+    "merchant_id": "40000000-0000-4000-8000-000000000002",
+    "store_slug": "4u-store",
+    "store_name": "4U Store • فور يو",
+    "avatar_url": "/images/brands/4u_store_logo.webp",
+    "is_merchant": true,
+    "reward_points_balance": 1000,
+    "user_metadata": {
+      "name": "4U Store • فور يو",
+      "role": "merchant",
+      "merchant_id": "40000000-0000-4000-8000-000000000002"
+    }
+  },
+  "dripfit@egyptian-commerce.com": {
+    "id": "171842bd-daed-40ef-853f-917eab2ed437",
+    "email": "dripfit@egyptian-commerce.com",
+    "password": "adminpassword",
+    "name": "Drip Fit • دريب فيت",
+    "role": "merchant",
+    "merchant_id": "171842bd-daed-40ef-853f-917eab2ed437",
+    "store_slug": "drip-fit",
+    "store_name": "Drip Fit • دريب فيت",
+    "avatar_url": "/images/brands/dripfit_logo.png",
+    "is_merchant": true,
+    "reward_points_balance": 1000,
+    "user_metadata": {
+      "name": "Drip Fit • دريب فيت",
+      "role": "merchant",
+      "merchant_id": "171842bd-daed-40ef-853f-917eab2ed437"
+    }
+  },
+  "snugs@egyptian-commerce.com": {
+    "id": "50000000-0000-4000-8000-000000000004",
+    "email": "snugs@egyptian-commerce.com",
+    "password": "adminpassword",
+    "name": "Snugs • سناجز",
+    "role": "merchant",
+    "merchant_id": "50000000-0000-4000-8000-000000000004",
+    "store_slug": "snugs",
+    "store_name": "Snugs • سناجز",
+    "avatar_url": "/images/brands/snugs_logo.jpg",
+    "is_merchant": true,
+    "reward_points_balance": 1000,
+    "user_metadata": {
+      "name": "Snugs • سناجز",
+      "role": "merchant",
+      "merchant_id": "50000000-0000-4000-8000-000000000004"
+    }
+  },
+  "rakan@egyptian-commerce.com": {
+    "id": "60000000-0000-4000-8000-000000000005",
+    "email": "rakan@egyptian-commerce.com",
+    "password": "adminpassword",
+    "name": "Rakan Fragrances • رَكان للعطور",
+    "role": "merchant",
+    "merchant_id": "60000000-0000-4000-8000-000000000005",
+    "store_slug": "rakan-fragrances",
+    "store_name": "Rakan Fragrances • رَكان للعطور",
+    "avatar_url": "/images/brands/rakan_fragrances_logo.jpg",
+    "is_merchant": true,
+    "reward_points_balance": 1000,
+    "user_metadata": {
+      "name": "Rakan Fragrances • رَكان للعطور",
+      "role": "merchant",
+      "merchant_id": "60000000-0000-4000-8000-000000000005"
+    }
+  },
+  "vermelle@egyptian-commerce.com": {
+    "id": "70000000-0000-4000-8000-000000000006",
+    "email": "vermelle@egyptian-commerce.com",
+    "password": "adminpassword",
+    "name": "Vermelle • فيرميل",
+    "role": "merchant",
+    "merchant_id": "70000000-0000-4000-8000-000000000006",
+    "store_slug": "vermelle",
+    "store_name": "Vermelle • فيرميل",
+    "avatar_url": "/images/brands/vermelle_logo.jpg",
+    "is_merchant": true,
+    "reward_points_balance": 1000,
+    "user_metadata": {
+      "name": "Vermelle • فيرميل",
+      "role": "merchant",
+      "merchant_id": "70000000-0000-4000-8000-000000000006"
+    }
+  },
+  "liminal@egyptian-commerce.com": {
+    "id": "80000000-0000-4000-8000-000000000007",
+    "email": "liminal@egyptian-commerce.com",
+    "password": "adminpassword",
+    "name": "liminal • ليمينال",
+    "role": "merchant",
+    "merchant_id": "80000000-0000-4000-8000-000000000007",
+    "store_slug": "liminal",
+    "store_name": "liminal • ليمينال",
+    "avatar_url": "/images/brands/liminal_logo.jpg",
+    "is_merchant": true,
+    "reward_points_balance": 1000,
+    "user_metadata": {
+      "name": "liminal • ليمينال",
+      "role": "merchant",
+      "merchant_id": "80000000-0000-4000-8000-000000000007"
+    }
+  },
+  "jkperfumes@egyptian-commerce.com": {
+    "id": "90000000-0000-4000-8000-000000000008",
+    "email": "jkperfumes@egyptian-commerce.com",
+    "password": "adminpassword",
+    "name": "JK Perfumes • جي كي للعطور",
+    "role": "merchant",
+    "merchant_id": "90000000-0000-4000-8000-000000000008",
+    "store_slug": "jk-perfumes",
+    "store_name": "JK Perfumes • جي كي للعطور",
+    "avatar_url": "/images/brands/jk_perfumes_logo.jpg",
+    "is_merchant": true,
+    "reward_points_balance": 1000,
+    "user_metadata": {
+      "name": "JK Perfumes • جي كي للعطور",
+      "role": "merchant",
+      "merchant_id": "90000000-0000-4000-8000-000000000008"
+    }
+  },
+  "drip.fit_egy@eg-commerce.com": {
+    "id": "171842bd-daed-40ef-853f-917eab2ed437",
+    "email": "drip.fit_egy@eg-commerce.com",
+    "password": "adminpassword",
+    "name": "Drip Fit • دريب فيت",
+    "role": "merchant",
+    "merchant_id": "171842bd-daed-40ef-853f-917eab2ed437",
+    "store_slug": "drip-fit",
+    "store_name": "Drip Fit • دريب فيت",
+    "avatar_url": "/images/brands/dripfit_logo.png",
+    "is_merchant": true,
+    "reward_points_balance": 1000,
+    "user_metadata": {
+      "name": "Drip Fit • دريب فيت",
+      "role": "merchant",
+      "merchant_id": "171842bd-daed-40ef-853f-917eab2ed437"
+    }
+  }
+}

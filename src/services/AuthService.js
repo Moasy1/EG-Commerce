@@ -1,28 +1,106 @@
 import { supabase } from '../lib/supabase.js';
 
 export const DEMO_USERS = {
-  // Merchants
+  // Real Client Merchants
+  merchant_onefourone: {
+    id: '14100000-0000-4000-8000-000000000001',
+    email: 'onefourone@egyptian-commerce.com',
+    name: 'One Four One • ون فور ون',
+    role: 'merchant',
+    avatar_url: '/images/brands/onefourone_logo.jpg',
+    merchant_id: '14100000-0000-4000-8000-000000000001',
+    slug: 'onefourone',
+    reward_points_balance: 1500,
+    password: 'adminpassword'
+  },
+  merchant_4u_store: {
+    id: '40000000-0000-4000-8000-000000000002',
+    email: '4u@egyptian-commerce.com',
+    name: '4U Store • فور يو',
+    role: 'merchant',
+    avatar_url: '/images/brands/4u_store_logo.webp',
+    merchant_id: '40000000-0000-4000-8000-000000000002',
+    slug: '4u-store',
+    reward_points_balance: 1500,
+    password: 'adminpassword'
+  },
+  merchant_drip_fit: {
+    id: '171842bd-daed-40ef-853f-917eab2ed437',
+    email: 'dripfit@egyptian-commerce.com',
+    name: 'Drip Fit • دريب فيت',
+    role: 'merchant',
+    avatar_url: '/images/brands/dripfit_logo.png',
+    merchant_id: '171842bd-daed-40ef-853f-917eab2ed437',
+    slug: 'drip-fit',
+    reward_points_balance: 1500,
+    password: 'adminpassword'
+  },
+  merchant_snugs: {
+    id: '50000000-0000-4000-8000-000000000004',
+    email: 'snugs@egyptian-commerce.com',
+    name: 'Snugs • سناجز',
+    role: 'merchant',
+    avatar_url: '/images/brands/snugs_logo.jpg',
+    merchant_id: '50000000-0000-4000-8000-000000000004',
+    slug: 'snugs',
+    reward_points_balance: 1500,
+    password: 'adminpassword'
+  },
+  merchant_rakan_fragrances: {
+    id: '60000000-0000-4000-8000-000000000005',
+    email: 'rakan@egyptian-commerce.com',
+    name: 'Rakan Fragrances • رَكان للعطور',
+    role: 'merchant',
+    avatar_url: '/images/brands/rakan_fragrances_logo.jpg',
+    merchant_id: '60000000-0000-4000-8000-000000000005',
+    slug: 'rakan-fragrances',
+    reward_points_balance: 1500,
+    password: 'adminpassword'
+  },
+  merchant_vermelle: {
+    id: '70000000-0000-4000-8000-000000000006',
+    email: 'vermelle@egyptian-commerce.com',
+    name: 'Vermelle • فيرميل',
+    role: 'merchant',
+    avatar_url: '/images/brands/vermelle_logo.jpg',
+    merchant_id: '70000000-0000-4000-8000-000000000006',
+    slug: 'vermelle',
+    reward_points_balance: 1500,
+    password: 'adminpassword'
+  },
+  merchant_liminal: {
+    id: '80000000-0000-4000-8000-000000000007',
+    email: 'liminal@egyptian-commerce.com',
+    name: 'liminal • ليمينال',
+    role: 'merchant',
+    avatar_url: '/images/brands/liminal_logo.jpg',
+    merchant_id: '80000000-0000-4000-8000-000000000007',
+    slug: 'liminal',
+    reward_points_balance: 1500,
+    password: 'adminpassword'
+  },
+  merchant_jk_perfumes: {
+    id: '90000000-0000-4000-8000-000000000008',
+    email: 'jkperfumes@egyptian-commerce.com',
+    name: 'JK Perfumes • جي كي للعطور',
+    role: 'merchant',
+    avatar_url: '/images/brands/jk_perfumes_logo.jpg',
+    merchant_id: '90000000-0000-4000-8000-000000000008',
+    slug: 'jk-perfumes',
+    reward_points_balance: 1500,
+    password: 'adminpassword'
+  },
   merchant: {
-    id: 'c11b2fdc-02a8-4c18-8e53-ea7e52d66beb',
-    email: 'drip.fit_egy@eg-commerce.com',
+    id: '171842bd-daed-40ef-853f-917eab2ed437',
+    email: 'dripfit@egyptian-commerce.com',
     name: 'Drip Fit • دريب فيت',
     role: 'merchant',
     avatar_url: '/images/brands/dripfit_logo.png',
     merchant_id: '171842bd-daed-40ef-853f-917eab2ed437',
     slug: 'drip-fit',
-    reward_points_balance: 1450
+    reward_points_balance: 1500,
+    password: 'adminpassword'
   },
-  merchant_dripfit: {
-    id: 'c11b2fdc-02a8-4c18-8e53-ea7e52d66beb',
-    email: 'drip.fit_egy@eg-commerce.com',
-    name: 'Drip Fit • دريب فيت',
-    role: 'merchant',
-    avatar_url: '/images/brands/dripfit_logo.png',
-    merchant_id: '171842bd-daed-40ef-853f-917eab2ed437',
-    slug: 'drip-fit',
-    reward_points_balance: 1450
-  },
-
   // Creators
   creator: {
     id: 'c0000000-0000-0000-0000-000000000001',

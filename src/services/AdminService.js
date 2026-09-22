@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase.js';
-import { INITIAL_PRODUCTS, MERCHANTS_DATA } from '../context/AppContext.jsx';
+import { INITIAL_PRODUCTS, MERCHANTS_DATA } from '../data/storesData.js';
 import { apiConfig } from '../config/apiConfig.js';
 
 // Persistent local storage cache keys for Superadmin actions
@@ -10,18 +10,109 @@ const STORAGE_CATALOG_KEY = 'eg_admin_demo_catalog';
 
 const DEFAULT_STORES = [
   {
+    id: '14100000-0000-4000-8000-000000000001',
+    name: 'One Four One • ون فور ون',
+    subdomain: 'onefourone.egyptian-commerce.com',
+    customDomain: null,
+    owner: 'One Four One • ون فور ون',
+    ownerEmail: 'onefourone@egyptian-commerce.com',
+    status: 'active',
+    productsCount: 1,
+    revenue: 35000,
+    themeMode: 'dark',
+    category: 'أزياء شبابية وستريت وير'
+  },
+  {
+    id: '40000000-0000-4000-8000-000000000002',
+    name: '4U Store • فور يو',
+    subdomain: '4u.egyptian-commerce.com',
+    customDomain: null,
+    owner: '4U Store • فور يو',
+    ownerEmail: '4u@egyptian-commerce.com',
+    status: 'active',
+    productsCount: 1,
+    revenue: 35000,
+    themeMode: 'dark',
+    category: 'نظارات شمسية واكسسوارات فاخرة'
+  },
+  {
     id: '171842bd-daed-40ef-853f-917eab2ed437',
     name: 'Drip Fit • دريب فيت',
     subdomain: 'drip-fit.egyptian-commerce.com',
-    customDomain: 'dripfit-eg.com',
-    owner: 'Drip Fit (u-dripfit)',
-    ownerEmail: 'drip.fit_egy@eg-commerce.com',
+    customDomain: null,
+    owner: 'Drip Fit • دريب فيت',
+    ownerEmail: 'dripfit@egyptian-commerce.com',
     status: 'active',
     productsCount: 1,
-    revenue: 34000,
+    revenue: 35000,
     themeMode: 'dark',
     category: 'ستريت وير وتوبات صيفية عصرية'
-  }
+  },
+  {
+    id: '50000000-0000-4000-8000-000000000004',
+    name: 'Snugs • سناجز',
+    subdomain: 'snugs.egyptian-commerce.com',
+    customDomain: null,
+    owner: 'Snugs • سناجز',
+    ownerEmail: 'snugs@egyptian-commerce.com',
+    status: 'active',
+    productsCount: 1,
+    revenue: 35000,
+    themeMode: 'dark',
+    category: 'ملابس منزلية وبيجامات قطنية ناعمة'
+  },
+  {
+    id: '60000000-0000-4000-8000-000000000005',
+    name: 'Rakan Fragrances • رَكان للعطور',
+    subdomain: 'rakan.egyptian-commerce.com',
+    customDomain: null,
+    owner: 'Rakan Fragrances • رَكان للعطور',
+    ownerEmail: 'rakan@egyptian-commerce.com',
+    status: 'active',
+    productsCount: 1,
+    revenue: 35000,
+    themeMode: 'dark',
+    category: 'عطور نيش فاخرة وتوليفات خاصة'
+  },
+  {
+    id: '70000000-0000-4000-8000-000000000006',
+    name: 'Vermelle • فيرميل',
+    subdomain: 'vermelle.egyptian-commerce.com',
+    customDomain: null,
+    owner: 'Vermelle • فيرميل',
+    ownerEmail: 'vermelle@egyptian-commerce.com',
+    status: 'active',
+    productsCount: 1,
+    revenue: 35000,
+    themeMode: 'dark',
+    category: 'أزياء راقية وتراث مصري معاصر'
+  },
+  {
+    id: '80000000-0000-4000-8000-000000000007',
+    name: 'liminal • ليمينال',
+    subdomain: 'liminal.egyptian-commerce.com',
+    customDomain: null,
+    owner: 'liminal • ليمينال',
+    ownerEmail: 'liminal@egyptian-commerce.com',
+    status: 'active',
+    productsCount: 1,
+    revenue: 35000,
+    themeMode: 'dark',
+    category: 'أزياء مودرن مينيمال وقصات عصرية'
+  },
+  {
+    id: '90000000-0000-4000-8000-000000000008',
+    name: 'JK Perfumes • جي كي للعطور',
+    subdomain: 'jk-perfumes.egyptian-commerce.com',
+    customDomain: null,
+    owner: 'JK Perfumes • جي كي للعطور',
+    ownerEmail: 'jkperfumes@egyptian-commerce.com',
+    status: 'active',
+    productsCount: 2,
+    revenue: 35000,
+    themeMode: 'dark',
+    category: 'عطور فاخرة وتركيبات شرقية وفرنسية'
+  },
 ];
 
 const DEFAULT_CREATORS = [
@@ -59,11 +150,74 @@ const DEFAULT_USERS = [
     created_at: '2026-01-15T00:00:00.000Z'
   },
   {
-    id: 'c11b2fdc-02a8-4c18-8e53-ea7e52d66beb',
-    name: 'Drip Fit • دريب فيت',
-    email: 'drip.fit_egy@eg-commerce.com',
+    id: '14100000-0000-4000-8000-000000000001',
+    name: 'One Four One • ون فور ون',
+    email: 'onefourone@egyptian-commerce.com',
     role: 'merchant',
-    assignedStore: 'Drip Fit (drip-fit)',
+    assignedStore: 'One Four One • ون فور ون (onefourone)',
+    status: 'active',
+    created_at: '2026-02-01T00:00:00.000Z'
+  },
+  {
+    id: '40000000-0000-4000-8000-000000000002',
+    name: '4U Store • فور يو',
+    email: '4u@egyptian-commerce.com',
+    role: 'merchant',
+    assignedStore: '4U Store • فور يو (4u-store)',
+    status: 'active',
+    created_at: '2026-02-01T00:00:00.000Z'
+  },
+  {
+    id: '171842bd-daed-40ef-853f-917eab2ed437',
+    name: 'Drip Fit • دريب فيت',
+    email: 'dripfit@egyptian-commerce.com',
+    role: 'merchant',
+    assignedStore: 'Drip Fit • دريب فيت (drip-fit)',
+    status: 'active',
+    created_at: '2026-02-01T00:00:00.000Z'
+  },
+  {
+    id: '50000000-0000-4000-8000-000000000004',
+    name: 'Snugs • سناجز',
+    email: 'snugs@egyptian-commerce.com',
+    role: 'merchant',
+    assignedStore: 'Snugs • سناجز (snugs)',
+    status: 'active',
+    created_at: '2026-02-01T00:00:00.000Z'
+  },
+  {
+    id: '60000000-0000-4000-8000-000000000005',
+    name: 'Rakan Fragrances • رَكان للعطور',
+    email: 'rakan@egyptian-commerce.com',
+    role: 'merchant',
+    assignedStore: 'Rakan Fragrances • رَكان للعطور (rakan-fragrances)',
+    status: 'active',
+    created_at: '2026-02-01T00:00:00.000Z'
+  },
+  {
+    id: '70000000-0000-4000-8000-000000000006',
+    name: 'Vermelle • فيرميل',
+    email: 'vermelle@egyptian-commerce.com',
+    role: 'merchant',
+    assignedStore: 'Vermelle • فيرميل (vermelle)',
+    status: 'active',
+    created_at: '2026-02-01T00:00:00.000Z'
+  },
+  {
+    id: '80000000-0000-4000-8000-000000000007',
+    name: 'liminal • ليمينال',
+    email: 'liminal@egyptian-commerce.com',
+    role: 'merchant',
+    assignedStore: 'liminal • ليمينال (liminal)',
+    status: 'active',
+    created_at: '2026-02-01T00:00:00.000Z'
+  },
+  {
+    id: '90000000-0000-4000-8000-000000000008',
+    name: 'JK Perfumes • جي كي للعطور',
+    email: 'jkperfumes@egyptian-commerce.com',
+    role: 'merchant',
+    assignedStore: 'JK Perfumes • جي كي للعطور (jk-perfumes)',
     status: 'active',
     created_at: '2026-02-01T00:00:00.000Z'
   },

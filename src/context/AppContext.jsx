@@ -13,102 +13,11 @@ import { attributionService } from '../services/analytics/attributionService.js'
 import { interestService } from '../services/algorithm/interestService.js';
 import { NotificationService } from '../services/NotificationService.js';
 
+import { MERCHANTS_DATA, SOCIAL_PROFILES, INITIAL_PRODUCTS } from '../data/storesData.js';
+
 const AppContext = createContext();
 
-export const MERCHANTS_DATA = [
-  {
-    id: '171842bd-daed-40ef-853f-917eab2ed437',
-    name: 'Drip Fit • دريب فيت',
-    shortName: 'Drip Fit',
-    slug: 'drip-fit',
-    subdomain: 'drip-fit.egyptian-commerce.com',
-    customDomain: 'dripfit-eg.com',
-    customDomainStatus: 'Active (SSL)',
-    category: 'Urban Streetwear & Summer Tops',
-    categoryAr: 'ستريت وير وتوبات صيفية عصرية',
-    bio: '✨ براند مصري عصري للأزياء والملابس الصيفية والستريت وير بالقاهرة 🇪🇬 | تصاميم صيفية حصرية وشحن سريع لجميع المحافظات',
-    established: '2026',
-    rating: 5.0,
-    reviewsCount: 18,
-    verified: true,
-    logo: '/images/brands/dripfit_logo.png',
-    banner: '/images/products/the_sharp_v_yellow_1.webp',
-    announcement: '🔥 تشكيلة The Sharp V Yellow الجديدة متاحة الآن • قطن مصري 100%',
-    promoCode: 'DRIP10',
-    discountPct: 10,
-    themeColor: '#d00000',
-    whatsapp: '+201012345678',
-    instagram: '@drip_fit',
-    bostaAccount: 'BST-EG-9912',
-    instapayHandle: 'dripfit@instapay',
-    themeConfig: {
-      themeMode: 'dark',
-      accentColor: '#d00000',
-      fontFamily: 'sans',
-      borderRadius: 'rounded-2xl',
-      heroStyle: 'wide_cinema',
-      heroHeadline: 'Drip Fit • إطلالة صيفية عصرية مستوحاة من نبض الشارع المصري',
-      heroSubheadline: 'The Sharp V Yellow drop: قمصان وتيشرتات أوفرسايز بخامات قطنية نقية وتصاميم جريئة.',
-      heroCtaText: 'تسوق التشكيلة الآن',
-      productsGridCols: 3,
-      showRatings: true,
-      showStockBadges: true,
-    },
-    layoutConfig: {
-      showAnnouncementBar: true,
-      showHeroBanner: true,
-      showTrustBadges: true,
-      showProductsCatalog: true,
-      showCommunityReels: true,
-      showSocialMediaFeed: true,
-      showTestimonials: true,
-      showContactSection: true,
-      showWhatsAppFloat: true,
-      showAboutUsTab: true,
-      trustBadges: [
-        { id: 'b1', icon: 'local_shipping', title: 'شحن سريع لجميع المحافظات', desc: 'توصيل لباب بيتك خلال 24-48 ساعة عبر بوسطة' },
-        { id: 'b2', icon: 'verified', title: 'خامات قطنية 100%', desc: 'قطن مصري عالي الجودة معالج ضد الانكماش' },
-        { id: 'b3', icon: 'assignment_return', title: 'معاينة عند الاستلام', desc: 'حق الاستبدال والمعاينة قبل الدفع' },
-        { id: 'b4', icon: 'support_agent', title: 'خدمة عملاء فورية', desc: 'دعم سريع عبر الواتساب' }
-      ]
-    },
-    stats: {
-      grossSales: 34000,
-      growthPct: 28.5,
-      totalOrders: 42,
-      ordersPending: 2,
-      ordersShipping: 5,
-      reelsAttributedSales: 18500,
-      reelsAttributedPct: 54,
-      aov: 810,
-      visitors: 1840,
-      conversionRate: 3.4,
-    }
-  }
-];
-
-export const SOCIAL_PROFILES = {
-  'drip-fit': {
-    id: '171842bd-daed-40ef-853f-917eab2ed437',
-    handle: '@drip_fit',
-    slug: 'drip-fit',
-    name: 'Drip Fit • دريب فيت',
-    verified: true,
-    role: 'merchant',
-    merchantId: '171842bd-daed-40ef-853f-917eab2ed437',
-    avatar: '/images/brands/dripfit_logo.png',
-    banner: '/images/products/the_sharp_v_yellow_1.webp',
-    category: 'Urban Streetwear & Summer Tops',
-    categoryAr: 'ستريت وير وتوبات صيفية عصرية',
-    bio: '✨ براند مصري عصري للأزياء والملابس الصيفية والستريت وير بالقاهرة 🇪🇬 | تصاميم صيفية حصرية وشحن سريع لجميع المحافظات',
-    location: 'القاهرة، مصر • Cairo, Egypt',
-    website: 'dripfit-eg.com',
-    followersCount: '24.5K',
-    followingCount: '48',
-    productsCount: 1,
-    reelsCount: 1
-  }
-};
+export { MERCHANTS_DATA, SOCIAL_PROFILES } from '../data/storesData.js';
 
 export const INITIAL_ORDERS = [
   {
@@ -147,36 +56,7 @@ export const INITIAL_ORDERS = [
   }
 ];
 
-export const INITIAL_PRODUCTS = [
-  {
-    id: '11111111-d001-4000-8000-000000000001',
-    sku: 'DF-SHARP-V-YEL',
-    title: 'The Sharp V Yellow Oversized T-Shirt • تيشرت شارب في أصفر أوفرسايز',
-    merchant: 'Drip Fit • دريب فيت',
-    merchantId: '171842bd-daed-40ef-853f-917eab2ed437',
-    merchantSlug: 'drip-fit',
-    merchantVerified: true,
-    price: 680,
-    originalPrice: 850,
-    rating: 5.0,
-    reviewsCount: 18,
-    stock: 50,
-    isSyndicated: true,
-    image: '/images/products/the_sharp_v_yellow_1.webp',
-    images: [
-      '/images/products/the_sharp_v_yellow_1.webp',
-      '/images/products/the_sharp_v_yellow_2.webp',
-      '/images/products/the_sharp_v_yellow_size.png'
-    ],
-    video: '/images/reels/the_sharp_v_yellow_reel.mp4',
-    sizeGuide: '/images/products/the_sharp_v_yellow_size.png',
-    pointsEarned: 68,
-    category: 'Streetwear ستريت وير وكاجوال',
-    description: 'تيشرت أوفرسايز فاخر باللون الأصفر العصري مع تصميم Sharp V المميز. مصنوع من أجود أنواع القطن المصري المعالج لملمس ناعم وراحة فائقة طوال اليوم، سواء في النادي أو الإطلالات اليومية الكاجوال.',
-    sizes: ['S', 'M', 'L', 'XL', 'XXL'],
-    colors: ['Yellow • أصفر']
-  }
-];
+export { INITIAL_PRODUCTS } from '../data/storesData.js';
 
 export function detectSubdomain() {
   if (typeof window === 'undefined') return { isSubdomain: false, merchantSlug: null, merchantId: '171842bd-daed-40ef-853f-917eab2ed437' };

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "m-1790119532598",
+    "user_id": "usr-1790119532598",
+    "name": "Alexandria Boutique • بوتيك الإسكندرية",
+    "shortName": "بوتيك الإسكندرية",
+    "slug": "alexandria-boutique",
+    "handle": "@alexandria-boutique",
+    "subdomain": "alexandria-boutique.egyptian-commerce.com",
+    "verified": true,
+    "logo": "/images/brands/dripfit_logo.png",
+    "banner": "/images/products/the_sharp_v_yellow_1.webp"
+  },
+  {
+    "id": "m-1790119451400",
+    "user_id": "usr-1790119451400",
+    "name": "Alexandria Boutique • بوتيك الإسكندرية",
+    "shortName": "بوتيك الإسكندرية",
+    "slug": "alexandria-boutique",
+    "handle": "@alexandria-boutique",
+    "subdomain": "alexandria-boutique.egyptian-commerce.com",
+    "verified": true,
+    "logo": "/images/brands/dripfit_logo.png",
+    "banner": "/images/products/the_sharp_v_yellow_1.webp"
+  }
+]

@@ -1,0 +1,28 @@
+[
+  {
+    "id": "p-1790119532602",
+    "title": "فستان صيفي أبيض كتان ناعم",
+    "price": 950,
+    "originalPrice": 1200,
+    "merchant": "Alexandria Boutique • بوتيك الإسكندرية",
+    "merchantId": "m-1790119532598",
+    "merchantSlug": "alexandria-boutique",
+    "image": "/images/products/the_sharp_v_yellow_1.webp",
+    "video": "/images/reels/the_sharp_v_yellow_reel.mp4",
+    "stock": 20,
+    "isSyndicated": true
+  },
+  {
+    "id": "p-1790119451403",
+    "title": "فستان صيفي أبيض كتان ناعم",
+    "price": 950,
+    "originalPrice": 1200,
+    "merchant": "Alexandria Boutique • بوتيك الإسكندرية",
+    "merchantId": "m-1790119451400",
+    "merchantSlug": "alexandria-boutique",
+    "image": "/images/products/the_sharp_v_yellow_1.webp",
+    "video": "/images/reels/the_sharp_v_yellow_reel.mp4",
+    "stock": 20,
+    "isSyndicated": true
+  }
+]

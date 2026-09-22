@@ -10,22 +10,51 @@
     text-rendering: optimizeLegibility;
   }
 
-  html, body {
+  html, body, #root {
     margin: 0;
     padding: 0;
+    width: 100%;
+    height: 100%;
+    overscroll-behavior: none;
+    overscroll-behavior-y: none;
     background-color: #fbf9f6;
     color: #1b1c1a;
     font-family: 'IBM Plex Sans Arabic', sans-serif;
     -webkit-tap-highlight-color: transparent;
   }
+
+  html {
+    overscroll-behavior: none;
+    overscroll-behavior-y: none;
+  }
   
   body {
+    overscroll-behavior: none;
     overscroll-behavior-y: none;
     -webkit-overflow-scrolling: touch;
   }
 
+  #root {
+    overscroll-behavior: none;
+    overscroll-behavior-y: none;
+  }
+
+  /* Optimize touch action across all screens */
   button, a, input, select, textarea {
     touch-action: manipulation;
+  }
+
+  /* Prevent vertical drag from triggering native pull-to-refresh on Reels and full-screen video */
+  .touch-reel-swipe {
+    touch-action: none !important;
+    overscroll-behavior: none !important;
+    overscroll-behavior-y: none !important;
+  }
+
+  /* Allow momentum scrolling inside scrollable areas without bubbling to window pull-to-refresh */
+  .overflow-y-auto, .overflow-y-scroll {
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
   }
 
   .pb-safe {

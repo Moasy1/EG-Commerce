@@ -3,6 +3,7 @@ import { useApp } from '../../context/AppContext';
 import EgLogo from '../common/EgLogo';
 import { UgcService } from '../../services/UgcService';
 import { ReelsService } from '../../services/ReelsService';
+import { ProductService } from '../../services/ProductService';
 import { apiConfig } from '../../config/apiConfig.js';
 
 
@@ -415,7 +416,7 @@ export default function DesktopCreatorAnalytics() {
       setPublishReelProgress(50);
 
       // Package tagged product details
-      const taggedProd = selectedProduct ? {
+      let taggedProd = selectedProduct ? {
         id: selectedProduct.id,
         sku: selectedProduct.sku || `SKU-${selectedProduct.id}`,
         title: selectedProduct.title || selectedProduct.name,
@@ -427,6 +428,44 @@ export default function DesktopCreatorAnalytics() {
         merchantId: selectedProduct.merchantId || selectedProduct.merchant_id || merchantId || '171842bd-daed-40ef-853f-917eab2ed437',
         merchantSlug: selectedProduct.merchantSlug || storeSlug
       } : null;
+
+      // If merchant uploads a reel without tagging an existing product, auto-create a shoppable product for this boutique!
+      if (!taggedProd && isMerchant) {
+        try {
+          const autoProduct = await ProductService.createProduct({
+            title: reelTitle || `${authorName} Product • منتج ${authorName}`,
+            price: 890,
+            originalPrice: 1150,
+            image: reelThumbnail || '/images/products/the_sharp_v_yellow_1.webp',
+            images: [reelThumbnail || '/images/products/the_sharp_v_yellow_1.webp'],
+            video: finalVideoUrl,
+            merchant: authorName,
+            merchantId: merchantId,
+            merchantSlug: storeSlug || authorName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'store',
+            category: reelCategory || 'الفساتين',
+            description: reelTitle ? `${reelTitle} • متوفر الآن للشراء السريع من متجر ${authorName}` : `منتج فاخر متوفر عبر متجر ${authorName}`,
+            stock: 20,
+            isSyndicated: true
+          });
+          taggedProd = {
+            id: autoProduct.id,
+            sku: autoProduct.sku,
+            title: autoProduct.title,
+            price: autoProduct.price,
+            originalPrice: autoProduct.originalPrice,
+            discount: '22% OFF',
+            image: autoProduct.image,
+            merchant: autoProduct.merchant,
+            merchantId: autoProduct.merchantId,
+            merchantSlug: autoProduct.merchantSlug
+          };
+          window.dispatchEvent(new Event('eg_profiles_updated'));
+          window.dispatchEvent(new Event('eg_products_updated'));
+          console.log('[DesktopCreatorAnalytics] Auto-created product for merchant boutique:', autoProduct.title);
+        } catch (autoErr) {
+          console.warn('[DesktopCreatorAnalytics] Auto product creation notice:', autoErr);
+        }
+      }
 
       const reelId = `reel-creator-${Date.now()}`;
 

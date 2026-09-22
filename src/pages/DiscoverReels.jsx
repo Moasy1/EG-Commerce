@@ -979,6 +979,9 @@ export default function DiscoverReels() {
 
   const handleTouchMove = (e) => {
     if (!touchStartY || !isDragging) return;
+    if (e.cancelable) {
+      e.preventDefault();
+    }
     const currentY = e.touches[0].clientY;
     let diff = currentY - touchStartY;
     // Rubber-band resistance at list boundaries
@@ -1516,7 +1519,7 @@ export default function DiscoverReels() {
 
         {/* Swipeable Video Area */}
         <div 
-          className="relative flex-1 w-full overflow-hidden"
+          className="relative flex-1 w-full overflow-hidden touch-none select-none overscroll-none touch-reel-swipe"
           onWheel={handleWheel}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}

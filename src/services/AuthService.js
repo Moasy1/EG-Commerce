@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase.js';
+import { apiConfig } from '../config/apiConfig.js';
 
 export const DEMO_USERS = {
   // Real Client Merchants
@@ -431,6 +432,31 @@ export const AuthService = {
       return { user: registeredAccount, session: { access_token: 'reg-token' } };
     }
 
+    // 2.5 Check shared server backend for multi-device login
+    try {
+      const serverLoginRes = await fetch(apiConfig.getApiUrl('/api/auth/login'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: cleanEmail, password })
+      });
+      if (serverLoginRes.ok) {
+        const loginData = await serverLoginRes.json();
+        if (loginData?.user) {
+          saveRegisteredAccount(cleanEmail, loginData.user);
+          localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(loginData.user));
+          console.log('[AuthService] Successfully logged in from shared server registry:', cleanEmail);
+          return { user: loginData.user, session: { access_token: loginData.token || 'server-session' } };
+        }
+      } else if (serverLoginRes.status === 401) {
+        throw new Error('كلمة المرور غير صحيحة. يرجى التأكد من كلمة المرور المدخلة.');
+      }
+    } catch (netErr) {
+      if (netErr.message && netErr.message.includes('كلمة المرور غير صحيحة')) {
+        throw netErr;
+      }
+      console.warn('[AuthService] Server login lookup notice:', netErr.message);
+    }
+
     // 3. Match demo accounts (support both egyptian-commerce.com and legacy eg-commerce.com)
     for (const [key, demo] of Object.entries(DEMO_USERS)) {
       const demoPrefix = demo.email.split('@')[0];
@@ -586,6 +612,18 @@ export const AuthService = {
     // Save to persistent registry
     saveRegisteredAccount(cleanEmail, newRegisteredUser);
 
+    // Persist to shared server backend for multi-device login
+    try {
+      await fetch(apiConfig.getApiUrl('/api/auth/register'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newRegisteredUser)
+      });
+      console.log('[AuthService] Account synced to shared server backend for multi-device access:', cleanEmail);
+    } catch (apiErr) {
+      console.warn('[AuthService] Shared server registration sync notice:', apiErr.message);
+    }
+
     // If merchant, persist to custom merchants registry
     if (sanitizedRole === 'merchant') {
       try {
@@ -612,6 +650,18 @@ export const AuthService = {
         };
         customMerchants = [newMerchantRecord, ...customMerchants.filter(m => m.id !== generatedMerchantId)];
         localStorage.setItem('eg_custom_merchants', JSON.stringify(customMerchants));
+
+        // Persist merchant boutique to shared backend so all devices see it in Marketplace
+        try {
+          await fetch(apiConfig.getApiUrl('/api/merchants'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newMerchantRecord)
+          });
+          console.log('[AuthService] Merchant boutique synced to shared server:', newMerchantRecord.name);
+        } catch (mServerErr) {
+          console.warn('[AuthService] Server merchant sync notice:', mServerErr.message);
+        }
       } catch (e) {}
     }
 

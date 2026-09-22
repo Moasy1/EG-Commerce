@@ -20,6 +20,13 @@ if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 const sharedReelsFile = path.join(dataDir, 'shared_reels.json');
 const sharedUgcFile = path.join(dataDir, 'shared_ugc_content.json');
 const sharedCommentsFile = path.join(dataDir, 'shared_comments.json');
+const sharedUsersFile = path.join(dataDir, 'registered_users.json');
+const sharedMerchantsFile = path.join(dataDir, 'shared_merchants.json');
+const sharedProductsFile = path.join(dataDir, 'shared_products.json');
+
+if (!fs.existsSync(sharedUsersFile)) fs.writeFileSync(sharedUsersFile, JSON.stringify({}, null, 2), 'utf-8');
+if (!fs.existsSync(sharedMerchantsFile)) fs.writeFileSync(sharedMerchantsFile, JSON.stringify([], null, 2), 'utf-8');
+if (!fs.existsSync(sharedProductsFile)) fs.writeFileSync(sharedProductsFile, JSON.stringify([], null, 2), 'utf-8');
 
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -246,6 +253,177 @@ const server = http.createServer(async (req, res) => {
         res.end(JSON.stringify({ success: true, comment }));
         return;
       }
+    }
+  }
+
+  // 7. Hostinger API: GET & POST /api/users & /api/auth/register & /api/auth/login
+  if (pathname === '/api/users' || pathname === '/api/auth/users') {
+    const usersStore = readJsonFile(sharedUsersFile, {});
+    if (req.method === 'GET') {
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify(usersStore));
+      return;
+    }
+    if (req.method === 'POST') {
+      try {
+        const userData = await parseBody(req);
+        const email = (userData.email || '').toLowerCase().trim();
+        if (!email) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Email is required' }));
+          return;
+        }
+        usersStore[email] = {
+          ...userData,
+          email,
+          updated_at: new Date().toISOString()
+        };
+        writeJsonFile(sharedUsersFile, usersStore);
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ success: true, user: usersStore[email] }));
+      } catch (err) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: err.message }));
+      }
+      return;
+    }
+  }
+
+  if (req.method === 'POST' && pathname === '/api/auth/register') {
+    try {
+      const userData = await parseBody(req);
+      const email = (userData.email || '').toLowerCase().trim();
+      if (!email) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Email is required' }));
+        return;
+      }
+      const usersStore = readJsonFile(sharedUsersFile, {});
+      usersStore[email] = {
+        ...userData,
+        email,
+        updated_at: new Date().toISOString()
+      };
+      writeJsonFile(sharedUsersFile, usersStore);
+
+      // If registering as a merchant, also auto-register in shared_merchants.json
+      if (userData.role === 'merchant') {
+        const merchantsStore = readJsonFile(sharedMerchantsFile, []);
+        const merchantName = userData.store_name || userData.name || `${email.split('@')[0]} Store`;
+        const slug = userData.store_slug || userData.slug || merchantName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'store';
+        const merchantId = userData.merchant_id || `m-${userData.id || Date.now()}`;
+        const newMerchant = {
+          id: merchantId,
+          user_id: userData.id,
+          name: `${merchantName} • متجر ${merchantName}`,
+          shortName: merchantName,
+          slug,
+          handle: `@${slug}`,
+          subdomain: `${slug}.egyptian-commerce.com`,
+          customDomain: null,
+          category: 'Egyptian Fashion & Retail',
+          categoryAr: 'أزياء وتجارة مصرية معتمدة',
+          bio: `متجر مصري موثق لـ ${merchantName}`,
+          established: '2026',
+          rating: 5.0,
+          reviewsCount: 1,
+          verified: true,
+          logo: userData.avatar_url || '/images/brands/dripfit_logo.png',
+          banner: '/images/products/the_sharp_v_yellow_1.webp'
+        };
+        const updatedMerchants = [newMerchant, ...merchantsStore.filter(m => m.id !== merchantId && m.slug !== slug)];
+        writeJsonFile(sharedMerchantsFile, updatedMerchants);
+      }
+
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ success: true, user: usersStore[email] }));
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: err.message }));
+    }
+    return;
+  }
+
+  if (req.method === 'POST' && pathname === '/api/auth/login') {
+    try {
+      const { email, password } = await parseBody(req);
+      const cleanEmail = (email || '').toLowerCase().trim();
+      const usersStore = readJsonFile(sharedUsersFile, {});
+      const user = usersStore[cleanEmail];
+      if (!user) {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'المستخدم غير موجود' }));
+        return;
+      }
+      if (user.password && password && user.password !== password) {
+        res.writeHead(401, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'كلمة المرور غير صحيحة' }));
+        return;
+      }
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ success: true, user, token: 'session-token-' + Date.now() }));
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: err.message }));
+    }
+    return;
+  }
+
+  // 8. Hostinger API: GET & POST /api/merchants
+  if (pathname === '/api/merchants') {
+    const merchantsStore = readJsonFile(sharedMerchantsFile, []);
+    if (req.method === 'GET') {
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify(merchantsStore));
+      return;
+    }
+    if (req.method === 'POST') {
+      try {
+        const newMerchant = await parseBody(req);
+        if (!newMerchant || !newMerchant.id) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Merchant id is required' }));
+          return;
+        }
+        const updatedMerchants = [newMerchant, ...merchantsStore.filter(m => m.id !== newMerchant.id && m.slug !== newMerchant.slug)];
+        writeJsonFile(sharedMerchantsFile, updatedMerchants);
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ success: true, merchant: newMerchant }));
+      } catch (err) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: err.message }));
+      }
+      return;
+    }
+  }
+
+  // 9. Hostinger API: GET & POST /api/products
+  if (pathname === '/api/products') {
+    const productsStore = readJsonFile(sharedProductsFile, []);
+    if (req.method === 'GET') {
+      const merchantId = parsedUrl.searchParams.get('merchantId');
+      const list = merchantId ? productsStore.filter(p => p.merchantId === merchantId || p.merchant_id === merchantId) : productsStore;
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify(list));
+      return;
+    }
+    if (req.method === 'POST') {
+      try {
+        const newProduct = await parseBody(req);
+        if (!newProduct || !newProduct.id) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Product id is required' }));
+          return;
+        }
+        const updatedProducts = [newProduct, ...productsStore.filter(p => p.id !== newProduct.id)];
+        writeJsonFile(sharedProductsFile, updatedProducts);
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ success: true, product: newProduct }));
+      } catch (err) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: err.message }));
+      }
+      return;
     }
   }
 

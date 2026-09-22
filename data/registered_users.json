@@ -160,5 +160,31 @@
       "role": "merchant",
       "merchant_id": "171842bd-daed-40ef-853f-917eab2ed437"
     }
+  },
+  "test_boutique_1790119451400@egyptian-commerce.com": {
+    "id": "usr-1790119451400",
+    "email": "test_boutique_1790119451400@egyptian-commerce.com",
+    "password": "testpassword123",
+    "name": "Alexandria Boutique • بوتيك الإسكندرية",
+    "role": "merchant",
+    "store_name": "Alexandria Boutique • بوتيك الإسكندرية",
+    "store_slug": "alexandria-boutique",
+    "merchant_id": "m-1790119451400",
+    "is_merchant": true,
+    "avatar_url": "/images/brands/dripfit_logo.png",
+    "reward_points_balance": 500
+  },
+  "test_boutique_1790119532598@egyptian-commerce.com": {
+    "id": "usr-1790119532598",
+    "email": "test_boutique_1790119532598@egyptian-commerce.com",
+    "password": "testpassword123",
+    "name": "Alexandria Boutique • بوتيك الإسكندرية",
+    "role": "merchant",
+    "store_name": "Alexandria Boutique • بوتيك الإسكندرية",
+    "store_slug": "alexandria-boutique",
+    "merchant_id": "m-1790119532598",
+    "is_merchant": true,
+    "avatar_url": "/images/brands/dripfit_logo.png",
+    "reward_points_balance": 500
   }
 }

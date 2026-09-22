@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase.js';
 import { INITIAL_PRODUCTS, MERCHANTS_DATA } from '../data/storesData.js';
+import { apiConfig } from '../config/apiConfig.js';
 
 export const CATEGORIES_DATA = [
   {
@@ -176,6 +177,30 @@ export const ProductService = {
       customProducts = customProducts.filter(
         p => p.merchantId === merchantId || p.merchant_id === merchantId
       );
+    }
+
+    // Fetch custom products from shared server backend (cross-device sync)
+    try {
+      const serverUrl = apiConfig.getApiUrl(merchantId ? `/api/products?merchantId=${encodeURIComponent(merchantId)}` : '/api/products');
+      const sRes = await fetch(serverUrl);
+      if (sRes.ok) {
+        const sData = await sRes.json();
+        if (Array.isArray(sData)) {
+          const sFiltered = merchantId 
+            ? sData.filter(p => p.merchantId === merchantId || p.merchant_id === merchantId)
+            : sData;
+          // Merge server products with local storage products
+          const existingIds = new Set(customProducts.map(p => p.id));
+          sFiltered.forEach(sp => {
+            if (!existingIds.has(sp.id)) {
+              customProducts.push(sp);
+              existingIds.add(sp.id);
+            }
+          });
+        }
+      }
+    } catch (sErr) {
+      console.warn('[ProductService] Server products sync notice:', sErr.message);
     }
 
     try {
@@ -356,6 +381,18 @@ export const ProductService = {
       console.warn('Could not persist product to local storage:', e);
     }
 
+    // 3. Persist product to shared server backend for cross-device sync
+    try {
+      await fetch(apiConfig.getApiUrl('/api/products'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(finalProduct)
+      });
+      console.log('[ProductService] Product synced to shared server backend:', finalProduct.title);
+    } catch (serverErr) {
+      console.warn('[ProductService] Server product sync notice:', serverErr.message);
+    }
+
     return finalProduct;
   },
 
@@ -474,6 +511,55 @@ export const ProductService = {
         if (Array.isArray(parsed)) custom = parsed;
       }
     } catch (e) {}
+
+    // Fetch shared merchants from server backend (cross-device sync)
+    try {
+      const mRes = await fetch(apiConfig.getApiUrl('/api/merchants'));
+      if (mRes.ok) {
+        const serverMerchants = await mRes.json();
+        if (Array.isArray(serverMerchants)) {
+          serverMerchants.forEach(sm => {
+            if (!custom.some(c => c.id === sm.id || c.slug === sm.slug)) {
+              custom.push(sm);
+            }
+          });
+        }
+      }
+    } catch (mErr) {
+      console.warn('[ProductService] Server merchants fetch notice:', mErr.message);
+    }
+
+    // Also fetch registered users from server backend to check for merchant accounts
+    try {
+      const uRes = await fetch(apiConfig.getApiUrl('/api/users'));
+      if (uRes.ok) {
+        const serverUsers = await uRes.json();
+        if (serverUsers && typeof serverUsers === 'object') {
+          Object.values(serverUsers).forEach(acc => {
+            if (acc.role === 'merchant') {
+              const id = acc.merchant_id || acc.id;
+              const slug = acc.store_slug || acc.slug || acc.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'store';
+              if (!custom.some(c => c.id === id || c.slug === slug)) {
+                custom.push({
+                  id,
+                  user_id: acc.id,
+                  name: acc.store_name || `${acc.name} Store • متجر ${acc.name}`,
+                  shortName: acc.store_name || acc.name,
+                  slug,
+                  handle: `@${slug}`,
+                  subdomain: `${slug}.egyptian-commerce.com`,
+                  logo: acc.avatar_url || '/images/brands/dripfit_logo.png',
+                  banner: '/images/products/the_sharp_v_yellow_1.webp',
+                  verified: true
+                });
+              }
+            }
+          });
+        }
+      }
+    } catch (uErr) {
+      console.warn('[ProductService] Server users fetch notice:', uErr.message);
+    }
 
     // Build map starting from full canonical MERCHANTS_DATA
     const merchantMap = new Map();

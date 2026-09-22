@@ -1559,14 +1559,14 @@ export default function DiscoverReels() {
       {/* Shop the Look Backdrop Overlay */}
       {isShopTheLookOpen && (
         <div 
-          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 transition-opacity animate-fade-in"
+          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-[60] transition-opacity animate-fade-in"
           onClick={closeShopTheLook}
         />
       )}
 
       {/* Shop the Look Drawer with Slide Down to Cancel */}
       <div 
-        className={`fixed md:absolute bottom-0 left-0 w-full bg-white rounded-t-3xl shadow-2xl z-50 ${
+        className={`fixed md:absolute bottom-0 left-0 w-full bg-white rounded-t-3xl shadow-2xl z-[60] pb-[max(1rem,env(safe-area-inset-bottom))] ${
           isDrawerDragging ? 'transition-none' : 'transition-transform duration-300 ease-out'
         }`}
         style={{ 
@@ -1706,16 +1706,16 @@ export default function DiscoverReels() {
       {/* Interactive Comments Drawer Linked to Profiles */}
       {isCommentsOpen && (
         <div 
-          className="fixed inset-0 bg-black/70 backdrop-blur-xs z-50 flex flex-col justify-end"
+          className="fixed inset-0 bg-black/70 backdrop-blur-xs z-[70] flex flex-col justify-end"
           onClick={() => setIsCommentsOpen(false)}
         >
           <div 
-            className="w-full max-w-[500px] mx-auto bg-white text-slate-900 rounded-t-3xl p-4 sm:p-5 max-h-[75vh] flex flex-col shadow-2xl animate-fade-in text-right"
+            className="w-full max-w-[500px] mx-auto bg-white text-slate-900 rounded-t-3xl p-4 sm:p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] max-h-[80dvh] flex flex-col shadow-2xl animate-fade-in text-right"
             dir={isAr ? 'rtl' : 'ltr'}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-3">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-3 shrink-0">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-[#d00000] text-[20px]">chat</span>
                 <h3 className="text-sm font-bold text-slate-900">
@@ -1724,7 +1724,7 @@ export default function DiscoverReels() {
               </div>
               <button 
                 onClick={() => setIsCommentsOpen(false)} 
-                className="p-1 hover:text-[#d00000] rounded-full hover:bg-gray-100 transition-colors"
+                className="p-1 hover:text-[#d00000] rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
                 aria-label="Close"
               >
                 <span className="material-symbols-outlined text-[22px]">close</span>
@@ -1732,7 +1732,7 @@ export default function DiscoverReels() {
             </div>
 
             {/* Profile Status Banner */}
-            <div className="mb-3 px-3 py-2 bg-gray-50 border border-gray-100 rounded-xl flex items-center justify-between gap-2 text-xs">
+            <div className="mb-3 px-3 py-2 bg-gray-50 border border-gray-100 rounded-xl flex items-center justify-between gap-2 text-xs shrink-0">
               <div className="flex items-center gap-2">
                 <img 
                   src={user?.avatar_url || (user?.role === 'merchant' ? '/images/brands/dripfit_logo.png' : '/images/reels/reel_1.jpg')} 
@@ -1751,7 +1751,7 @@ export default function DiscoverReels() {
               {!user && (
                 <button 
                   onClick={() => setIsAuthModalOpen(true)}
-                  className="text-[#d00000] font-bold text-[11px] hover:underline"
+                  className="text-[#d00000] font-bold text-[11px] hover:underline cursor-pointer"
                 >
                   {isAr ? 'تسجيل الدخول' : 'Sign In'}
                 </button>
@@ -1759,7 +1759,7 @@ export default function DiscoverReels() {
             </div>
 
             {/* Comment Items List */}
-            <div className="space-y-3 overflow-y-auto flex-1 pr-1 pl-1">
+            <div className="space-y-3 overflow-y-auto flex-1 min-h-0 pr-1 pl-1 overscroll-contain">
               {commentsList.length === 0 ? (
                 <div className="py-8 text-center text-gray-400 text-xs">
                   {isAr ? 'كن أول من يترك تعليقاً على هذا الفيديو! ✨' : 'Be the first to comment on this reel! ✨'}
@@ -1799,7 +1799,7 @@ export default function DiscoverReels() {
                       <div className="flex items-center justify-between pt-1.5 mt-1 border-t border-gray-200/50 text-[10px] text-gray-500">
                         <button 
                           onClick={() => handleLikeCommentItem(c.id)}
-                          className="flex items-center gap-1 hover:text-[#d00000] font-bold transition-colors"
+                          className="flex items-center gap-1 hover:text-[#d00000] font-bold transition-colors cursor-pointer"
                         >
                           <span className="material-symbols-outlined text-[13px] fill-current">favorite</span>
                           <span>{c.likes || 0}</span>
@@ -1808,7 +1808,7 @@ export default function DiscoverReels() {
                         {(user?.id === c.userId || user?.role === 'admin') && (
                           <button 
                             onClick={() => handleDeleteCommentItem(c.id)}
-                            className="text-gray-400 hover:text-red-600 font-bold transition-colors text-[10px]"
+                            className="text-gray-400 hover:text-red-600 font-bold transition-colors text-[10px] cursor-pointer"
                           >
                             {isAr ? 'حذف' : 'Delete'}
                           </button>
@@ -1821,7 +1821,7 @@ export default function DiscoverReels() {
             </div>
 
             {/* Comment Input */}
-            <form onSubmit={handlePostComment} className="pt-3 border-t border-gray-100 flex items-center gap-2 mt-2">
+            <form onSubmit={handlePostComment} className="pt-3 border-t border-gray-100 flex items-center gap-2 mt-2 shrink-0">
               <input 
                 type="text" 
                 value={newCommentText}
@@ -1832,7 +1832,7 @@ export default function DiscoverReels() {
               <button 
                 type="submit"
                 disabled={!newCommentText.trim()}
-                className="px-4 py-2.5 rounded-xl bg-[#d00000] text-white text-xs font-bold shadow-md hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 disabled:active:scale-100"
+                className="px-4 py-2.5 rounded-xl bg-[#d00000] text-white text-xs font-bold shadow-md hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 disabled:active:scale-100 cursor-pointer"
               >
                 {isAr ? 'إرسال' : 'Post'}
               </button>

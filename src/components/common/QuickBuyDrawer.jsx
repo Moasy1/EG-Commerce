@@ -112,7 +112,7 @@ export default function QuickBuyDrawer() {
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 text-start"
+      className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4 text-start"
       role="dialog"
       aria-modal="true"
       aria-label={isAr ? "نافذة الشراء السريع" : "Quick Buy Drawer"}

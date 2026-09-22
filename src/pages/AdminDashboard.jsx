@@ -33,11 +33,19 @@ export default function AdminDashboard() {
   const [activeInvoiceOrder, setActiveInvoiceOrder] = useState(null);
 
   // Modal Dialog States
-  const [modalType, setModalType] = useState(null); // 'addStore' | 'editStore' | 'addUser' | 'editUser' | 'addProduct' | 'editProduct' | 'addCreator' | 'editCreator'
+  const [modalType, setModalType] = useState(null); // 'addStore' | 'editStore' | 'addUser' | 'editUser' | 'addProduct' | 'editProduct' | 'addCreator' | 'editCreator' | 'resetPassword'
   const [activeItem, setActiveItem] = useState(null);
 
   // Form Field States
   const [formData, setFormData] = useState({});
+
+  // Password Reset Form State
+  const [passwordForm, setPasswordForm] = useState({
+    newPassword: '',
+    confirmPassword: '',
+    showPassword: false,
+    isSubmitting: false
+  });
 
   const showToast = (msg) => {
     setToastMessage(msg);
@@ -99,6 +107,7 @@ export default function AdminDashboard() {
     setModalType(null);
     setActiveItem(null);
     setFormData({});
+    setPasswordForm({ newPassword: '', confirmPassword: '', showPassword: false, isSubmitting: false });
   };
 
   // ==========================================
@@ -175,6 +184,45 @@ export default function AdminDashboard() {
     const updated = await AdminService.toggleUserStatus(userId);
     setUsers(updated);
     showToast(isAr ? 'تم تحديث حالة الحساب' : 'User account status updated');
+  };
+
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    if (!passwordForm.newPassword || passwordForm.newPassword.length < 6) {
+      alert(isAr ? 'كلمة المرور يجب ألا تقل عن 6 أحرف' : 'Password must be at least 6 characters long');
+      return;
+    }
+    if (passwordForm.confirmPassword && passwordForm.newPassword !== passwordForm.confirmPassword) {
+      alert(isAr ? 'كلمتا المرور غير متطابقتين' : 'Passwords do not match');
+      return;
+    }
+
+    try {
+      setPasswordForm(prev => ({ ...prev, isSubmitting: true }));
+      await AdminService.setUserPassword(
+        activeItem.id,
+        passwordForm.newPassword,
+        activeItem.email
+      );
+
+      showToast(isAr 
+        ? `تم تعيين كلمة المرور الجديدة للمستخدم (${activeItem.name || activeItem.email}) بنجاح` 
+        : `Password updated successfully for ${activeItem.name || activeItem.email}`);
+      closeModal();
+    } catch (err) {
+      alert(err.message || (isAr ? 'حدث خطأ أثناء تعيين كلمة المرور' : 'Failed to update password'));
+    } finally {
+      setPasswordForm(prev => ({ ...prev, isSubmitting: false }));
+    }
+  };
+
+  const generateRandomPassword = () => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%&*';
+    let pass = '';
+    for (let i = 0; i < 10; i++) {
+      pass += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setPasswordForm(prev => ({ ...prev, newPassword: pass, confirmPassword: pass, showPassword: true }));
   };
 
   // ==========================================
@@ -1275,6 +1323,18 @@ export default function AdminDashboard() {
                     <td className="px-4 py-3 text-end">
                       <div className="flex items-center justify-end gap-1.5">
                         <button
+                          onClick={() => {
+                            setActiveItem(u);
+                            setPasswordForm({ newPassword: '', confirmPassword: '', showPassword: false, isSubmitting: false });
+                            setModalType('resetPassword');
+                          }}
+                          className="px-2.5 py-1 rounded-lg border border-red-200 bg-red-50 text-[#d00000] hover:bg-red-100 font-bold flex items-center gap-1 transition-all shadow-2xs"
+                          title={isAr ? 'تعيين كلمة مرور جديدة للمستخدم' : 'Set New Password'}
+                        >
+                          <span className="material-symbols-outlined text-[15px]">lock_reset</span>
+                          <span>{isAr ? 'كلمة المرور' : 'Password'}</span>
+                        </button>
+                        <button
                           onClick={() => openModal('editUser', u)}
                           className="px-2 py-1 rounded border border-gray-200 text-slate-700 hover:bg-gray-100 font-bold"
                         >
@@ -1443,6 +1503,7 @@ export default function AdminDashboard() {
                 {modalType === 'editProduct' && (isAr ? 'تعديل بيانات المنتج' : 'Edit Product')}
                 {modalType === 'addCreator' && (isAr ? 'إضافة صانع محتوى' : 'Add Content Creator')}
                 {modalType === 'editCreator' && (isAr ? 'تعديل بيانات المبدع' : 'Edit Creator')}
+                {modalType === 'resetPassword' && (isAr ? 'تعيين كلمة مرور جديدة للمستخدم' : 'Set New User Password')}
               </h3>
               <button onClick={closeModal} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200">
                 <span className="material-symbols-outlined text-[18px]">close</span>
@@ -1451,6 +1512,7 @@ export default function AdminDashboard() {
 
             {/* Form Content Depending on Modal Type */}
             <form onSubmit={
+              modalType === 'resetPassword' ? handleResetPassword :
               modalType.includes('Store') ? handleSaveStore :
               modalType.includes('User') ? handleSaveUser :
               modalType.includes('Product') ? handleSaveProduct :
@@ -1672,6 +1734,85 @@ export default function AdminDashboard() {
                 </>
               )}
 
+              {/* RESET PASSWORD FORM */}
+              {modalType === 'resetPassword' && activeItem && (
+                <div className="space-y-4">
+                  <div className="p-3.5 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold text-sm">
+                        {activeItem.name?.charAt(0) || activeItem.email?.charAt(0) || 'U'}
+                      </div>
+                      <div>
+                        <div className="font-bold text-slate-900 text-sm">{activeItem.name || 'مستخدم'}</div>
+                        <div className="text-gray-500 font-mono text-[11px]">{activeItem.email}</div>
+                      </div>
+                    </div>
+                    <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold font-mono uppercase bg-slate-200 text-slate-800">
+                      {activeItem.role || 'user'}
+                    </span>
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="font-bold text-gray-700">{isAr ? 'كلمة المرور الجديدة' : 'New Password'}</label>
+                      <button
+                        type="button"
+                        onClick={generateRandomPassword}
+                        className="text-[11px] text-[#d00000] hover:underline font-bold flex items-center gap-1 cursor-pointer"
+                      >
+                        <span className="material-symbols-outlined text-[14px]">casino</span>
+                        <span>{isAr ? 'توليد كلمة سر عشوائية' : 'Generate Random'}</span>
+                      </button>
+                    </div>
+                    <div className="relative flex items-center">
+                      <input 
+                        type={passwordForm.showPassword ? 'text' : 'password'}
+                        required 
+                        minLength={6}
+                        value={passwordForm.newPassword} 
+                        onChange={e => setPasswordForm({ ...passwordForm, newPassword: e.target.value })} 
+                        className="w-full px-3 py-2.5 pl-10 rounded-xl border border-gray-200 focus:border-slate-900 outline-none font-mono text-sm" 
+                        placeholder={isAr ? 'أدخل 6 أحرف على الأقل' : 'At least 6 characters'}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setPasswordForm({ ...passwordForm, showPassword: !passwordForm.showPassword })}
+                        className="absolute left-2.5 text-gray-400 hover:text-gray-600 p-1"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">
+                          {passwordForm.showPassword ? 'visibility_off' : 'visibility'}
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-gray-700 mb-1">{isAr ? 'تأكيد كلمة المرور' : 'Confirm Password'}</label>
+                    <input 
+                      type={passwordForm.showPassword ? 'text' : 'password'}
+                      required 
+                      minLength={6}
+                      value={passwordForm.confirmPassword} 
+                      onChange={e => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })} 
+                      className="w-full px-3 py-2.5 rounded-xl border border-gray-200 focus:border-slate-900 outline-none font-mono text-sm" 
+                      placeholder={isAr ? 'أعد إدخال كلمة المرور' : 'Re-enter password'}
+                    />
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-emerald-50/70 border border-emerald-200/60 text-emerald-800 text-[11px] flex items-start gap-2">
+                    <span className="material-symbols-outlined text-[16px] text-emerald-600 shrink-0 mt-0.5">verified_user</span>
+                    <div>
+                      <span className="font-bold block">{isAr ? 'تحديث فوري لـ Supabase Auth' : 'Instant Supabase Auth Sync'}</span>
+                      <span className="text-emerald-700">
+                        {isAr 
+                          ? 'سيتم اعتماد كلمة المرور الجديدة فوراً للمستخدم، وتحديث الحساب في قاعدة البيانات وسجل التوثيق لتسجيل الدخول مباشرة.' 
+                          : 'The new password will be activated immediately across Supabase Auth and persistent credentials.'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="pt-3 flex items-center justify-end gap-2 border-t border-gray-100">
                 <button 
                   type="button" 
@@ -1682,9 +1823,17 @@ export default function AdminDashboard() {
                 </button>
                 <button 
                   type="submit" 
-                  className="px-6 py-2.5 rounded-xl bg-[#d00000] hover:bg-red-700 text-white font-bold shadow-md transition-all active:scale-95"
+                  disabled={passwordForm.isSubmitting}
+                  className="px-6 py-2.5 rounded-xl bg-[#d00000] hover:bg-red-700 text-white font-bold shadow-md transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2"
                 >
-                  {isAr ? 'حفظ البيانات' : 'Save'}
+                  {passwordForm.isSubmitting && (
+                    <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  )}
+                  <span>
+                    {modalType === 'resetPassword' 
+                      ? (isAr ? 'تأكيد وحفظ كلمة المرور' : 'Confirm & Set Password') 
+                      : (isAr ? 'حفظ البيانات' : 'Save')}
+                  </span>
                 </button>
               </div>
             </form>

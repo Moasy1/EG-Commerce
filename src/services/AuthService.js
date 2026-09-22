@@ -138,6 +138,44 @@ function saveRegisteredAccount(email, userRecord) {
 export const AuthService = {
   getRegisteredAccounts,
 
+  updateUserPassword(email, newPassword) {
+    try {
+      const cleanEmail = (email || '').toLowerCase().trim();
+      if (!cleanEmail) return false;
+      const accounts = getRegisteredAccounts();
+      if (accounts[cleanEmail]) {
+        accounts[cleanEmail].password = newPassword;
+        accounts[cleanEmail].updated_at = new Date().toISOString();
+        localStorage.setItem(REGISTERED_ACCOUNTS_KEY, JSON.stringify(accounts));
+      } else {
+        accounts[cleanEmail] = {
+          email: cleanEmail,
+          password: newPassword,
+          name: cleanEmail.split('@')[0],
+          role: 'buyer',
+          updated_at: new Date().toISOString()
+        };
+        localStorage.setItem(REGISTERED_ACCOUNTS_KEY, JSON.stringify(accounts));
+      }
+
+      // If active session belongs to this user, update active session password as well
+      const stored = localStorage.getItem(DEMO_STORAGE_KEY);
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (parsed && parsed.email && parsed.email.toLowerCase().trim() === cleanEmail) {
+            parsed.password = newPassword;
+            localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(parsed));
+          }
+        } catch (e) {}
+      }
+      return true;
+    } catch (e) {
+      console.warn('AuthService.updateUserPassword error:', e);
+      return false;
+    }
+  },
+
   async getCurrentUser() {
     try {
       // 1. Check local active demo session first
@@ -207,7 +245,15 @@ export const AuthService = {
   async signInWithEmail(email, password) {
     const cleanEmail = (email || '').trim().toLowerCase();
 
-    // 1. Try real Supabase auth first
+    // 0. Verify password match against registered accounts registry if present
+    const registeredAccount = getRegisteredAccounts()[cleanEmail];
+    if (registeredAccount && registeredAccount.password) {
+      if (password !== registeredAccount.password) {
+        throw new Error('كلمة المرور غير صحيحة. يرجى التأكد من كلمة المرور المدخلة.');
+      }
+    }
+
+    // 1. Try real Supabase auth
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email: cleanEmail,
@@ -299,7 +345,6 @@ export const AuthService = {
     }
 
     // 2. Check persistent registered accounts registry
-    const registeredAccount = getRegisteredAccounts()[cleanEmail];
     if (registeredAccount) {
       if (registeredAccount.password && password && registeredAccount.password !== password) {
         throw new Error('كلمة المرور غير صحيحة. يرجى التأكد من كلمة المرور المدخلة.');

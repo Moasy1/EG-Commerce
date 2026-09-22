@@ -249,6 +249,89 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
+  // 6.5 Hostinger API: POST /api/commerce/admin-reset-password or /api/admin-reset-password
+  if (req.method === 'POST' && (pathname === '/api/commerce/admin-reset-password' || pathname === '/api/admin-reset-password')) {
+    const body = await parseBody(req);
+    const { userId, newPassword, email } = body || {};
+
+    if (!newPassword || typeof newPassword !== 'string' || newPassword.length < 6) {
+      res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ error: 'Password must be at least 6 characters long' }));
+      return;
+    }
+
+    if (!userId && !email) {
+      res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ error: 'userId or email is required' }));
+      return;
+    }
+
+    let supabaseUpdated = false;
+    let supabaseError = null;
+
+    // Try Supabase Admin API if service role key is configured
+    const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || 'https://dbufgbonhnoridenwjry.supabase.co';
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (serviceKey && userId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId)) {
+      try {
+        const fetchRes = await fetch(`${supabaseUrl.replace(/\/+$/, '')}/auth/v1/admin/users/${userId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': serviceKey,
+            'Authorization': `Bearer ${serviceKey}`
+          },
+          body: JSON.stringify({ password: newPassword })
+        });
+        if (fetchRes.ok) {
+          supabaseUpdated = true;
+        } else {
+          const errText = await fetchRes.text();
+          supabaseError = `Supabase admin error: ${fetchRes.status} ${errText}`;
+        }
+      } catch (e) {
+        supabaseError = e.message;
+      }
+    }
+
+    // Persist to local server data store
+    const registeredUsersFile = path.join(dataDir, 'registered_users.json');
+    const registeredUsers = readJsonFile(registeredUsersFile, []);
+    let userFound = false;
+
+    for (const u of registeredUsers) {
+      if ((userId && u.id === userId) || (email && u.email && u.email.toLowerCase() === email.toLowerCase())) {
+        u.password = newPassword;
+        u.updated_at = new Date().toISOString();
+        userFound = true;
+        break;
+      }
+    }
+
+    if (!userFound) {
+      registeredUsers.push({
+        id: userId || `u-${Date.now()}`,
+        email: email || '',
+        password: newPassword,
+        updated_at: new Date().toISOString()
+      });
+    }
+
+    writeJsonFile(registeredUsersFile, registeredUsers);
+
+    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({
+      success: true,
+      message: 'Password reset successfully',
+      userId,
+      email,
+      supabaseUpdated,
+      supabaseError
+    }));
+    return;
+  }
+
   // 7. Static file streaming (uploaded videos in public/uploads/ or built assets in dist/)
   let candidateFile = path.join(distDir, pathname);
   if (pathname.startsWith('/uploads/reels/')) {

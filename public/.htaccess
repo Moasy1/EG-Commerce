@@ -7,6 +7,7 @@
   RewriteRule ^api/upload-video(/.*)?$ api/upload-video.php [L,QSA]
   RewriteRule ^api/comments(/.*)?$ api/comments.php [L,QSA]
   RewriteRule ^api/ugc/content(/.*)?$ api/ugc.php [L,QSA]
+  RewriteRule ^api/(commerce/)?admin-reset-password(/.*)?$ api/admin-reset-password.php [L,QSA]
 
   # 2. Allow direct access to existing files, uploads, videos, and directories
   RewriteCond %{REQUEST_FILENAME} -f [OR]

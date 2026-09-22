@@ -4,7 +4,7 @@ import { OrderService } from '../services/OrderService';
 import { NotificationService } from '../services/NotificationService';
 
 export default function Checkout() {
-  const { cartItems, grandTotal, discountFromPoints, shippingTotal, subtotal, setActiveTab, setOrders, user } = useApp();
+  const { cartItems, grandTotal, discountFromPoints, shippingTotal, subtotal, setActiveTab, setOrders, user, clearCart } = useApp();
   const [paymentMethod, setPaymentMethod] = useState('instapay');
   const [customerName, setCustomerName] = useState(user?.name || '');
   const [phone, setPhone] = useState(user?.phone || '');
@@ -86,6 +86,11 @@ export default function Checkout() {
         NotificationService.createOrderNotification(order);
       });
       
+      // Clear dynamic cart now that order has been placed
+      if (clearCart) {
+        await clearCart();
+      }
+
       setIsProcessing(false);
       setActiveTab('tracking');
     } catch (err) {

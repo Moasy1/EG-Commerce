@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase';
+import { supabase } from '../lib/supabase.js';
 
 // Helper to get or create a persistent guest session token for cart isolation
 function getGuestSessionToken() {
@@ -127,39 +127,50 @@ export const CartService = {
 
   // Fallback local storage methods
   getLocalCart() {
+    if (typeof localStorage === 'undefined') return [];
     const cart = localStorage.getItem('eg_local_cart');
     if (cart) {
       try {
         const parsed = JSON.parse(cart);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed)) {
+          // Filter out legacy mockups if any exist in the browser storage
+          const clean = parsed.filter(item => 
+            item && 
+            item.id !== 'cart-init-1' && 
+            item.id !== 'cart-init-2' &&
+            item.productId !== 'p-fashion-blazer' &&
+            item.productId !== 'p-fashion-oversized-shirt' &&
+            !item.title?.includes('Citrine Yellow') &&
+            !item.brand?.includes('Ahmed Fits')
+          );
+          if (clean.length !== parsed.length) {
+            localStorage.setItem('eg_local_cart', JSON.stringify(clean));
+          }
+          return clean;
+        }
       } catch (e) {}
     }
-    const initialDefault = [
-      {
-        id: 'cart-init-1',
-        productId: 'p-fashion-blazer',
-        title: 'Citrine Yellow Oversized Blazer',
-        price: 1850,
-        quantity: 1,
-        size: 'M',
-        color: 'Citrine Yellow',
-        image: '/images/reels/fashion_citrine_blazer_thumb.jpg',
-        brand: 'Drip Fit'
-      },
-      {
-        id: 'cart-init-2',
-        productId: 'p-fashion-oversized-shirt',
-        title: 'Sky Blue Linen Oversized Shirt',
-        price: 980,
-        quantity: 1,
-        size: 'L',
-        color: 'Sky Blue',
-        image: '/images/reels/fashion_oversized_shirt_thumb.jpg',
-        brand: 'Ahmed Fits'
-      }
-    ];
-    localStorage.setItem('eg_local_cart', JSON.stringify(initialDefault));
-    return initialDefault;
+    // Production default: Cart starts empty
+    return [];
+  },
+
+  clearLocalCart() {
+    if (typeof localStorage !== 'undefined') {
+      try {
+        localStorage.setItem('eg_local_cart', JSON.stringify([]));
+      } catch (e) {}
+    }
+    return [];
+  },
+
+  async clearCart(userId = null) {
+    try {
+      const cartId = await this.getOrCreateCartId(userId);
+      await supabase.from('cart_items').delete().eq('cart_id', cartId);
+    } catch (err) {
+      console.warn('Cart Service clearCart DB notice:', err?.message || err);
+    }
+    return this.clearLocalCart();
   },
 
   addToLocalCart(productId, merchantId, price, quantity, size, color, title = '', image = '', brand = '') {

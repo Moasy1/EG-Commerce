@@ -945,6 +945,15 @@ export function AppProvider({ children }) {
     CartService.removeFromLocalCart(cartItemId);
   };
 
+  const clearCart = async () => {
+    setCartItems([]);
+    try {
+      await CartService.clearCart(user?.id || null);
+    } catch (e) {
+      console.warn('Error clearing cart:', e);
+    }
+  };
+
   const totalCartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
   const discountFromPoints = Math.floor(pointsRedeemed / 10);
@@ -969,6 +978,8 @@ export function AppProvider({ children }) {
       isAuthModalOpen,
       setIsAuthModalOpen,
       cartItems,
+      setCartItems,
+      clearCart,
       addToCart,
       removeFromCart,
       updateQuantity,

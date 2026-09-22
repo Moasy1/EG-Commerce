@@ -6,6 +6,7 @@ export default function UnifiedCart() {
     cartItems, 
     removeFromCart, 
     updateQuantity, 
+    clearCart,
     subtotal, 
     shippingTotal, 
     discountFromPoints, 
@@ -49,10 +50,20 @@ export default function UnifiedCart() {
           </h1>
         </div>
         {cartItems.length > 0 && (
-          <span className="text-xs font-bold text-[#d00000] bg-red-50 px-2.5 py-1 rounded-full border border-red-100 flex items-center gap-1">
-            <span className="material-symbols-outlined text-[14px]">timer</span>
-            <span>{isAr ? 'محجوزة لمدة 15:00' : 'Reserved for 15:00'}</span>
-          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => clearCart && clearCart()}
+              className="text-xs font-semibold text-gray-500 hover:text-red-600 px-2.5 py-1 rounded-lg hover:bg-red-50 transition-colors flex items-center gap-1"
+              title={isAr ? 'إفراغ السلة' : 'Clear Cart'}
+            >
+              <span className="material-symbols-outlined text-[16px]">delete_sweep</span>
+              <span>{isAr ? 'إفراغ السلة' : 'Clear'}</span>
+            </button>
+            <span className="text-xs font-bold text-[#d00000] bg-red-50 px-2.5 py-1 rounded-full border border-red-100 flex items-center gap-1">
+              <span className="material-symbols-outlined text-[14px]">timer</span>
+              <span>{isAr ? 'محجوزة لمدة 15:00' : 'Reserved for 15:00'}</span>
+            </span>
+          </div>
         )}
       </div>
 

@@ -5,6 +5,7 @@ import { UgcService } from '../../services/UgcService';
 import { ReelsService } from '../../services/ReelsService';
 import { ProductService } from '../../services/ProductService';
 import { apiConfig } from '../../config/apiConfig.js';
+import { generateStoreSlug } from '../../services/AuthService.js';
 
 
 // Egyptian Fashion Video Presets for 1-click test publishing
@@ -392,8 +393,8 @@ export default function DesktopCreatorAnalytics() {
         || (isMerchant ? '@store' : '@creator');
       const authorAvatar = user?.profile?.avatar_url || user?.avatar_url || user?.avatar || user?.logo || profile?.avatar || '/images/reels/reel_2.jpg';
       const authorId = user?.id || profile?.id || 'cr-' + Date.now();
-      const merchantId = isMerchant ? (user?.id || user?.merchantId || '171842bd-daed-40ef-853f-917eab2ed437') : (selectedProduct?.merchantId || null);
-      const storeSlug = isMerchant ? (user?.slug || user?.storeSlug || user?.name?.toLowerCase().replace(/[^a-z0-9_]/g, '_')) : (selectedProduct?.merchantSlug || null);
+      const merchantId = isMerchant ? (user?.merchant_id || user?.merchantId || user?.id || '171842bd-daed-40ef-853f-917eab2ed437') : (selectedProduct?.merchantId || null);
+      const storeSlug = isMerchant ? (user?.store_slug || user?.slug || user?.storeSlug || generateStoreSlug(authorName, user?.email, merchantId)) : (selectedProduct?.merchantSlug || null);
 
       // Await video upload to server if still in progress
       let finalVideoUrl = reelVideoUrl;
@@ -441,7 +442,7 @@ export default function DesktopCreatorAnalytics() {
             video: finalVideoUrl,
             merchant: authorName,
             merchantId: merchantId,
-            merchantSlug: storeSlug || authorName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'store',
+            merchantSlug: storeSlug,
             category: reelCategory || 'الفساتين',
             description: reelTitle ? `${reelTitle} • متوفر الآن للشراء السريع من متجر ${authorName}` : `منتج فاخر متوفر عبر متجر ${authorName}`,
             stock: 20,

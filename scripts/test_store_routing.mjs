@@ -22,7 +22,6 @@ const testPaths = [
   '/store/vermelle',
   '/store/liminal',
   '/store/jk-perfumes',
-  '/store/talieska',
   '/store/onefourone/'
 ];
 

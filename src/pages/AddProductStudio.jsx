@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import EgLogo from '../components/common/EgLogo';
 import { apiConfig } from '../config/apiConfig.js';
+import { generateStoreSlug } from '../services/AuthService.js';
 
 
 // Egyptian Fashion Sample Video Presets for 1-click testing
@@ -515,13 +516,13 @@ export default function AddProductStudio() {
       (user?.role === 'merchant' ? {
         id: user.merchant_id || `m-${user.id || 'custom'}`,
         name: user.store_name || user.name || 'متجر مستقل',
-        slug: user.store_slug || user.slug || user.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'store',
+        slug: user.store_slug || user.slug || generateStoreSlug(user.store_name || user.name, user.email, user.merchant_id || user.id),
         logo: user.avatar_url || '/images/brands/dripfit_logo.png'
       } : merchants?.[0]);
 
     const resolvedMerchantName = activeMerchant?.name || (user?.role === 'merchant' ? (user.store_name || user.name) : 'Drip Fit • دريب فيت');
     const resolvedMerchantId = activeMerchant?.id || (user?.role === 'merchant' ? (user.merchant_id || `m-${user.id}`) : '171842bd-daed-40ef-853f-917eab2ed437');
-    const resolvedMerchantSlug = activeMerchant?.slug || (user?.role === 'merchant' ? (user.store_slug || user.slug || user.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-')) : 'drip-fit');
+    const resolvedMerchantSlug = activeMerchant?.slug || (user?.role === 'merchant' ? (user.store_slug || user.slug || generateStoreSlug(resolvedMerchantName, user?.email, resolvedMerchantId)) : 'drip-fit');
 
     const newProdPayload = {
       id: `p-${Date.now()}`,

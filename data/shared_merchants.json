@@ -1,5 +1,24 @@
 [
   {
+    "id": "m-1790121232997",
+    "user_id": "usr-1790121232997",
+    "name": "بوتيك فيروز الملكي • Fayrouz Royal Boutique • متجر بوتيك فيروز الملكي • Fayrouz Royal Boutique",
+    "shortName": "بوتيك فيروز الملكي • Fayrouz Royal Boutique",
+    "slug": "fayrouz-royal-boutique",
+    "handle": "@fayrouz-royal-boutique",
+    "subdomain": "fayrouz-royal-boutique.egyptian-commerce.com",
+    "customDomain": null,
+    "category": "Egyptian Fashion & Retail",
+    "categoryAr": "أزياء وتجارة مصرية معتمدة",
+    "bio": "متجر مصري موثق لـ بوتيك فيروز الملكي • Fayrouz Royal Boutique",
+    "established": "2026",
+    "rating": 5,
+    "reviewsCount": 1,
+    "verified": true,
+    "logo": "/images/brands/dripfit_logo.png",
+    "banner": "/images/products/the_sharp_v_yellow_1.webp"
+  },
+  {
     "id": "m-1790119532598",
     "user_id": "usr-1790119532598",
     "name": "Alexandria Boutique • بوتيك الإسكندرية",

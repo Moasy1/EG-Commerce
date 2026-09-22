@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabase.js';
 import { INITIAL_PRODUCTS, MERCHANTS_DATA } from '../data/storesData.js';
 import { apiConfig } from '../config/apiConfig.js';
+import { generateStoreSlug } from './AuthService.js';
 
 export const CATEGORIES_DATA = [
   {
@@ -538,7 +539,7 @@ export const ProductService = {
           Object.values(serverUsers).forEach(acc => {
             if (acc.role === 'merchant') {
               const id = acc.merchant_id || acc.id;
-              const slug = acc.store_slug || acc.slug || acc.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'store';
+              const slug = acc.store_slug || acc.slug || generateStoreSlug(acc.store_name || acc.name, acc.email, id);
               if (!custom.some(c => c.id === id || c.slug === slug)) {
                 custom.push({
                   id,

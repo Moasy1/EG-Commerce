@@ -1,6 +1,22 @@
 import { supabase } from '../lib/supabase.js';
 import { apiConfig } from '../config/apiConfig.js';
 
+export function generateStoreSlug(name, email, id) {
+  const latin = (name || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  if (latin && latin.length >= 2) return latin;
+  const emailPrefix = (email || '')
+    .split('@')[0]
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  if (emailPrefix && emailPrefix.length >= 2) return `${emailPrefix}-boutique`;
+  const cleanId = String(id || Date.now()).replace(/[^a-z0-9]/gi, '').slice(-6).toLowerCase();
+  return `boutique-${cleanId || 'store'}`;
+}
+
 export const DEMO_USERS = {
   // Real Client Merchants
   merchant_onefourone: {
@@ -473,22 +489,8 @@ export const AuthService = {
       }
     }
 
-    // 4. Fallback for new ad-hoc email sign-ins
-    if (cleanEmail && password && password.length >= 4) {
-      const customDemo = {
-        id: `usr-${Date.now()}`,
-        email: cleanEmail,
-        name: cleanEmail.split('@')[0],
-        role: 'buyer',
-        avatar_url: '/images/reels/reel_1.jpg',
-        reward_points_balance: 100
-      };
-      saveRegisteredAccount(cleanEmail, customDemo);
-      localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(customDemo));
-      return { user: customDemo, session: { access_token: 'demo-token' } };
-    }
-
-    throw new Error('بيانات الدخول غير صحيحة. يمكنك إنشاء حساب جديد أو استخدام أزرار الدخول التجريبي.');
+    // 4. If account not found in DB or server registry
+    throw new Error('الحساب غير موجود أو بيانات الدخول غير صحيحة. يرجى التأكد من البريد الإلكتروني وكلمة المرور أو إنشاء حساب جديد.');
   },
 
   async loginAsDemo(roleKey = 'merchant', callerUser = null) {
@@ -578,6 +580,8 @@ export const AuthService = {
       console.warn('Supabase signUp error, proceeding with local persistent registration:', err.message);
     }
 
+    const storeSlug = generateStoreSlug(defaultName, cleanEmail, generatedMerchantId);
+
     // Persistent registered account object with real privileges
     const newRegisteredUser = {
       id: supaUser?.id || generatedUserId,
@@ -587,6 +591,9 @@ export const AuthService = {
       role: sanitizedRole,
       merchant_id: generatedMerchantId,
       creator_id: generatedCreatorId,
+      store_name: defaultName,
+      store_slug: storeSlug,
+      slug: storeSlug,
       handle,
       avatar_url: avatarUrl,
       is_merchant: sanitizedRole === 'merchant',
@@ -596,7 +603,10 @@ export const AuthService = {
         name: defaultName,
         role: sanitizedRole,
         merchant_id: generatedMerchantId,
-        creator_id: generatedCreatorId
+        creator_id: generatedCreatorId,
+        store_name: defaultName,
+        store_slug: storeSlug,
+        slug: storeSlug
       },
       profile: {
         id: supaUser?.id || generatedUserId,
@@ -605,6 +615,9 @@ export const AuthService = {
         role: sanitizedRole,
         merchant_id: generatedMerchantId,
         creator_id: generatedCreatorId,
+        store_name: defaultName,
+        store_slug: storeSlug,
+        slug: storeSlug,
         avatar_url: avatarUrl
       }
     };
@@ -634,9 +647,9 @@ export const AuthService = {
           user_id: supaUser?.id || generatedUserId,
           name: `${defaultName} Store • متجر ${defaultName}`,
           shortName: defaultName,
-          slug: defaultName.toLowerCase().replace(/\s+/g, '-'),
-          handle: `@${defaultName.toLowerCase().replace(/\s+/g, '-')}`,
-          subdomain: `${defaultName.toLowerCase().replace(/\s+/g, '-')}.egyptian-commerce.com`,
+          slug: storeSlug,
+          handle: `@${storeSlug}`,
+          subdomain: `${storeSlug}.egyptian-commerce.com`,
           customDomain: null,
           category: 'Egyptian Fashion & Retail',
           categoryAr: 'أزياء وتجارة مصرية معتمدة',

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { AuthService, DEMO_USERS } from '../services/AuthService';
+import EgLogo from './common/EgLogo';
 
 export default function AuthModal() {
   const { 
@@ -232,6 +233,11 @@ export default function AuthModal() {
         >
           <span className="material-symbols-outlined" aria-hidden="true">close</span>
         </button>
+
+        <div className="flex items-center gap-2 mb-2">
+          <EgLogo className="w-9 h-9" />
+          <span className="text-xs font-black tracking-wider text-slate-800 uppercase">EG-Commerce</span>
+        </div>
 
         <h2 id="auth-modal-title" className="text-xl sm:text-2xl font-bold text-slate-900 mb-1">
           {mode === 'login' ? (isAr ? 'تسجيل الدخول' : 'Sign In') : (isAr ? 'إنشاء حساب جديد' : 'Create Account')}

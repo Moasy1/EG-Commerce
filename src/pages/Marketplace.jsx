@@ -87,10 +87,10 @@ export default function Marketplace() {
   }));
 
   return (
-    <div className="w-full flex-1 overflow-y-auto min-h-0 relative">
+    <div className="w-full flex-1 relative">
       {/* 1. DESKTOP VIEW (Screen 2: Explore Marketplace with full filters & 4-col grid) */}
       <div className="hidden md:block w-full max-w-[1780px] mx-auto px-4 md:px-8 py-6">
-        <div className="rounded-3xl border border-gray-200/90 bg-white shadow-sm overflow-hidden">
+        <div className="rounded-3xl border border-gray-200/90 bg-white shadow-sm">
           <DesktopMarketplace />
         </div>
       </div>

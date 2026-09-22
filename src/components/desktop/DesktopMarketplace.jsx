@@ -52,7 +52,7 @@ export default function DesktopMarketplace() {
   }));
 
   return (
-    <div dir={isAr ? 'rtl' : 'ltr'} className="w-full bg-white text-slate-900 flex flex-col font-sans min-h-[580px] overflow-hidden select-none text-start">
+    <div dir={isAr ? 'rtl' : 'ltr'} className="w-full bg-white text-slate-900 flex flex-col font-sans select-none text-start">
       {/* 1. Top Bar */}
       <div className="px-5 py-2.5 border-b border-gray-100 flex items-center justify-between gap-4">
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => setActiveTab('reels')}>
@@ -111,7 +111,7 @@ export default function DesktopMarketplace() {
       </div>
 
       {/* 3. Main Content: Left Filters + 4-Column Product Grid */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex">
         {/* Left Filter Column */}
         <aside className={`w-52 p-4 ${isAr ? 'border-l' : 'border-r'} border-gray-100 space-y-4 text-start shrink-0 bg-gray-50/50`}>
           <div>
@@ -171,7 +171,7 @@ export default function DesktopMarketplace() {
         </aside>
 
         {/* 4-Column Product Cards Grid */}
-        <main className="flex-1 p-4 overflow-y-auto">
+        <main className="flex-1 p-4">
           {/* Desktop Stores & Creators Preview */}
           <div className="flex gap-4 mb-6">
             <div className="flex-1 bg-gray-50 border border-gray-100 rounded-2xl p-4">

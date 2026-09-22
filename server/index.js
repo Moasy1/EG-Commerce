@@ -66,6 +66,15 @@ function writeJsonFile(filePath, data) {
   }
 }
 
+function generateStoreSlug(name, email, id) {
+  const latin = (name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  if (latin && latin.length >= 2) return latin;
+  const emailPrefix = (email || '').split('@')[0].toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  if (emailPrefix && emailPrefix.length >= 2) return `${emailPrefix}-boutique`;
+  const cleanId = String(id || Date.now()).replace(/[^a-z0-9]/gi, '').slice(-6).toLowerCase();
+  return `boutique-${cleanId || 'store'}`;
+}
+
 function parseBody(req) {
   return new Promise((resolve) => {
     let raw = '';
@@ -310,8 +319,8 @@ const server = http.createServer(async (req, res) => {
       if (userData.role === 'merchant') {
         const merchantsStore = readJsonFile(sharedMerchantsFile, []);
         const merchantName = userData.store_name || userData.name || `${email.split('@')[0]} Store`;
-        const slug = userData.store_slug || userData.slug || merchantName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'store';
         const merchantId = userData.merchant_id || `m-${userData.id || Date.now()}`;
+        const slug = userData.store_slug || userData.slug || generateStoreSlug(merchantName, email, merchantId);
         const newMerchant = {
           id: merchantId,
           user_id: userData.id,

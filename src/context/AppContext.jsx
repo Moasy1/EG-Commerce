@@ -60,7 +60,7 @@ export function detectSubdomain() {
   // 3. Skip pure IP addresses and plain localhost
   const isIp = /^(\d{1,3}\.){3}\d{1,3}$/.test(hostname) || hostname === '::1';
   if (isIp || hostname === 'localhost') {
-    return { isSubdomain: false, merchantSlug: null, merchantId: '171842bd-daed-40ef-853f-917eab2ed437' };
+    return { isSubdomain: false, merchantSlug: null, merchantId: null };
   }
 
   // 4. Subdomain on localhost (e.g. talieska.localhost) or production domain (e.g. drip-fit.egyptian-commerce.com)
@@ -88,7 +88,7 @@ export function detectSubdomain() {
     }
   }
 
-  return { isSubdomain: false, merchantSlug: null, merchantId: '171842bd-daed-40ef-853f-917eab2ed437' };
+  return { isSubdomain: false, merchantSlug: null, merchantId: null };
 }
 
 export function parseRouteFromLocation(pathname, search, isSubdomain) {
@@ -126,7 +126,8 @@ export function parseRouteFromLocation(pathname, search, isSubdomain) {
   if (cleanPath === '/showcase') return { tab: 'showcase' };
 
   if (cleanPath === '/storefront' || cleanPath.startsWith('/store')) {
-    const slug = cleanPath.startsWith('/store/') ? cleanPath.replace('/store/', '').trim() : 'drip-fit';
+    const rawSlug = cleanPath.startsWith('/store/') ? cleanPath.replace('/store/', '').split('/')[0].split('?')[0].trim() : 'drip-fit';
+    const slug = rawSlug || 'drip-fit';
     return { tab: 'storefront', storeSlug: slug };
   }
 
@@ -207,7 +208,24 @@ export function AppProvider({ children }) {
   });
   const [merchants, setMerchants] = useState(MERCHANTS_DATA);
   const [creators, setCreators] = useState(DEFAULT_CREATORS);
-  const [selectedMerchantId, setSelectedMerchantId] = useState(() => initialSubdomain.merchantId || '171842bd-daed-40ef-853f-917eab2ed437');
+  // Robustly resolve initial store from route or subdomain
+  const initialStoreSlug = initialRoute.storeSlug || initialSubdomain.merchantSlug || null;
+  const initialMerchantMatch = initialStoreSlug
+    ? (MERCHANTS_DATA.find(m => 
+        (m.slug && m.slug.toLowerCase() === initialStoreSlug.toLowerCase()) || 
+        (m.id && m.id.toLowerCase() === initialStoreSlug.toLowerCase()) ||
+        (m.shortName && m.shortName.toLowerCase() === initialStoreSlug.toLowerCase()) ||
+        (m.subdomain && m.subdomain.toLowerCase().includes(initialStoreSlug.toLowerCase())) ||
+        (m.handle && m.handle.toLowerCase().replace(/^@/, '') === initialStoreSlug.toLowerCase())
+      ) || null)
+    : null;
+
+  const [selectedMerchantId, setSelectedMerchantId] = useState(() => 
+    initialMerchantMatch?.id || initialSubdomain.merchantId || '171842bd-daed-40ef-853f-917eab2ed437'
+  );
+  const [activeStoreSlug, setActiveStoreSlug] = useState(() => 
+    initialMerchantMatch?.slug || initialStoreSlug || 'drip-fit'
+  );
   const [orders, setOrders] = useState(() => OrderService.getInitialOrders());
 
   const updateOrderStatus = async (orderId, newStatus) => {
@@ -510,16 +528,23 @@ export function AppProvider({ children }) {
 
   const navigateToStorefront = (merchantIdOrSlug) => {
     if (merchantIdOrSlug) {
+      const target = String(merchantIdOrSlug).toLowerCase().trim().replace(/^@/, '');
       const match = (merchants || []).find(m => 
         m.id === merchantIdOrSlug || 
-        m.slug === merchantIdOrSlug || 
-        m.shortName?.toLowerCase() === String(merchantIdOrSlug).toLowerCase()
+        (m.slug && m.slug.toLowerCase() === target) || 
+        (m.shortName && m.shortName.toLowerCase() === target) ||
+        (m.handle && m.handle.toLowerCase().replace(/^@/, '') === target) ||
+        (m.subdomain && m.subdomain.toLowerCase().includes(target))
       );
       if (match) {
         setSelectedMerchantId(match.id);
-        setActiveTab('storefront', { storeSlug: match.slug });
+        setActiveStoreSlug(match.slug);
+        setActiveTab('storefront', { storeSlug: match.slug, merchantId: match.id });
         return;
       }
+      setActiveStoreSlug(target);
+      setActiveTab('storefront', { storeSlug: target });
+      return;
     }
     setActiveTab('storefront', { storeSlug: 'drip-fit' });
   };
@@ -534,11 +559,35 @@ export function AppProvider({ children }) {
     
     if (typeof window === 'undefined') return;
 
+    if (tab === 'storefront' || options.storeSlug) {
+      const targetSlug = options.storeSlug || activeStoreSlug;
+      if (targetSlug) {
+        const cleanSlug = String(targetSlug).toLowerCase().trim();
+        const match = (merchants || []).find(m => 
+          (m.slug && m.slug.toLowerCase() === cleanSlug) || 
+          m.id === targetSlug ||
+          (m.shortName && m.shortName.toLowerCase() === cleanSlug) ||
+          (m.handle && m.handle.toLowerCase().replace(/^@/, '') === cleanSlug)
+        );
+        if (match) {
+          setSelectedMerchantId(match.id);
+          setActiveStoreSlug(match.slug);
+        } else {
+          setActiveStoreSlug(targetSlug);
+        }
+      }
+    }
+    if (options.merchantId) {
+      setSelectedMerchantId(options.merchantId);
+      const match = (merchants || []).find(m => m.id === options.merchantId);
+      if (match?.slug) setActiveStoreSlug(match.slug);
+    }
+
     const prod = options.product || selectedProduct;
     const cat = options.category || selectedCategory;
     const profHandle = options.profileHandle || activeProfileHandle;
-    const curMerchant = (merchants || []).find(m => m.id === selectedMerchantId);
-    const sSlug = options.storeSlug || curMerchant?.slug || 'drip-fit';
+    const curMerchant = (merchants || []).find(m => m.id === (options.merchantId || selectedMerchantId));
+    const sSlug = options.storeSlug || curMerchant?.slug || activeStoreSlug || 'drip-fit';
 
     const newPath = getPathForTab(tab, { 
       product: prod, 
@@ -555,9 +604,9 @@ export function AppProvider({ children }) {
 
     if (window.location.pathname !== newPath || options.forceUrl) {
       if (options.replace) {
-        window.history.replaceState({ tab, productId: prod?.id, categorySlug: cat?.slug, profileHandle: profHandle, storeSlug: sSlug }, '', targetUrl);
+        window.history.replaceState({ tab, productId: prod?.id, categorySlug: cat?.slug, profileHandle: profHandle, storeSlug: sSlug, merchantId: options.merchantId || selectedMerchantId }, '', targetUrl);
       } else {
-        window.history.pushState({ tab, productId: prod?.id, categorySlug: cat?.slug, profileHandle: profHandle, storeSlug: sSlug }, '', targetUrl);
+        window.history.pushState({ tab, productId: prod?.id, categorySlug: cat?.slug, profileHandle: profHandle, storeSlug: sSlug, merchantId: options.merchantId || selectedMerchantId }, '', targetUrl);
       }
     }
   };
@@ -572,7 +621,10 @@ export function AppProvider({ children }) {
       if (currentUser.role) setRole(currentUser.role);
       if (currentUser.merchant_id) {
         activeMerchantId = currentUser.merchant_id;
-        setSelectedMerchantId(prev => prev || currentUser.merchant_id);
+        const onStoreRoute = typeof window !== 'undefined' && window.location.pathname.startsWith('/store/');
+        if (!onStoreRoute) {
+          setSelectedMerchantId(prev => prev || currentUser.merchant_id);
+        }
       }
       try {
         const balance = await RewardService.getBalance(currentUser.id);
@@ -604,6 +656,26 @@ export function AppProvider({ children }) {
     // Step 3: Load merchants list (always full, includes all registered custom merchants)
     const fetchedMerchants = await ProductService.getMerchants();
     setMerchants(fetchedMerchants);
+
+    // Sync active merchant from current route if visiting a store
+    if (typeof window !== 'undefined') {
+      const currentRoute = parseRouteFromLocation(window.location.pathname, window.location.search, isSubdomainMode);
+      const targetSlug = currentRoute.storeSlug || (window.location.pathname.startsWith('/store/') ? window.location.pathname.replace('/store/', '').split('/')[0].split('?')[0].trim() : null);
+      if (targetSlug) {
+        const cleanSlug = targetSlug.toLowerCase().trim();
+        const found = (fetchedMerchants || []).find(m => 
+          (m.slug && m.slug.toLowerCase() === cleanSlug) ||
+          (m.id && m.id.toLowerCase() === cleanSlug) ||
+          (m.shortName && m.shortName.toLowerCase() === cleanSlug) ||
+          (m.subdomain && m.subdomain.toLowerCase().includes(cleanSlug)) ||
+          (m.handle && m.handle.toLowerCase().replace(/^@/, '') === cleanSlug)
+        );
+        if (found) {
+          setSelectedMerchantId(found.id);
+          setActiveStoreSlug(found.slug);
+        }
+      }
+    }
 
     // Step 4: Load creators list (always full, includes all registered creators)
     const fetchedCreators = await AuthService.getCreators();
@@ -659,11 +731,37 @@ export function AppProvider({ children }) {
 
   // Sync Subdomain & Storefront if window location or merchants change
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    // 1. Check path-based store (/store/:slug)
+    const currentRoute = parseRouteFromLocation(window.location.pathname, window.location.search, isSubdomainMode);
+    const storeSlug = currentRoute.storeSlug || (window.location.pathname.startsWith('/store/') ? window.location.pathname.replace('/store/', '').split('/')[0].split('?')[0].trim() : null);
+
+    if (storeSlug) {
+      const cleanSlug = storeSlug.toLowerCase().trim();
+      const match = (merchants || []).find(m => 
+        (m.slug && m.slug.toLowerCase() === cleanSlug) || 
+        (m.id && m.id.toLowerCase() === cleanSlug) || 
+        (m.shortName && m.shortName.toLowerCase() === cleanSlug) ||
+        (m.subdomain && m.subdomain.toLowerCase().includes(cleanSlug)) ||
+        (m.handle && m.handle.toLowerCase().replace(/^@/, '') === cleanSlug)
+      );
+      if (match) {
+        setSelectedMerchantId(match.id);
+        setActiveStoreSlug(match.slug);
+        return;
+      }
+    }
+
+    // 2. Check subdomain
     const detected = detectSubdomain();
     if (detected.isSubdomain) {
       setIsSubdomainMode(true);
       if (detected.merchantId) {
         setSelectedMerchantId(detected.merchantId);
+      }
+      if (detected.merchantSlug) {
+        setActiveStoreSlug(detected.merchantSlug);
       }
     }
   }, [merchants]);
@@ -697,8 +795,18 @@ export function AppProvider({ children }) {
         setActiveProfileHandle(route.profileHandle);
       }
       if (route.storeSlug) {
-        const foundM = (merchants || []).find(m => m.slug === route.storeSlug || m.id === route.storeSlug);
-        if (foundM) setSelectedMerchantId(foundM.id);
+        const cleanSlug = route.storeSlug.toLowerCase().trim();
+        const foundM = (merchants || []).find(m => 
+          (m.slug && m.slug.toLowerCase() === cleanSlug) || 
+          (m.id && m.id.toLowerCase() === cleanSlug) ||
+          (m.shortName && m.shortName.toLowerCase() === cleanSlug)
+        );
+        if (foundM) {
+          setSelectedMerchantId(foundM.id);
+          setActiveStoreSlug(foundM.slug);
+        } else {
+          setActiveStoreSlug(route.storeSlug);
+        }
       }
       if (route.productId) {
         const found = products.find(p => p.id === route.productId);
@@ -969,6 +1077,8 @@ export function AppProvider({ children }) {
       setCreators,
       selectedMerchantId,
       setSelectedMerchantId,
+      activeStoreSlug,
+      setActiveStoreSlug,
       orders,
       setOrders,
       updateOrderStatus,

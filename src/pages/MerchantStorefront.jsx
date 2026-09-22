@@ -8,6 +8,8 @@ export default function MerchantStorefront() {
     merchants,
     selectedMerchantId,
     setSelectedMerchantId,
+    activeStoreSlug,
+    setActiveStoreSlug,
     products,
     setActiveTab,
     isSubdomainMode,
@@ -20,22 +22,87 @@ export default function MerchantStorefront() {
 
   const canManageStore = user && (user.role === 'superadmin' || user.role === 'admin' || user.role === 'merchant');
 
-  const currentMerchant = (merchants && merchants.length > 0)
-    ? (merchants.find(m => m.id === selectedMerchantId) || merchants[0])
-    : {};
+  // Extract store slug from URL if on /store/:slug
+  const urlStoreSlug = typeof window !== 'undefined' && window.location.pathname.startsWith('/store/')
+    ? window.location.pathname.replace('/store/', '').split('/')[0].split('?')[0].trim().toLowerCase()
+    : null;
+
+  // Resolve current merchant with strict priority:
+  // 1. URL slug if on /store/:slug
+  // 2. activeStoreSlug from context
+  // 3. selectedMerchantId from context
+  // 4. First available merchant
+  const currentMerchant = React.useMemo(() => {
+    if (!merchants || merchants.length === 0) return {};
+
+    if (urlStoreSlug) {
+      const match = merchants.find(m => 
+        (m.slug && m.slug.toLowerCase() === urlStoreSlug) ||
+        (m.id && m.id.toLowerCase() === urlStoreSlug) ||
+        (m.shortName && m.shortName.toLowerCase() === urlStoreSlug) ||
+        (m.subdomain && m.subdomain.toLowerCase().includes(urlStoreSlug)) ||
+        (m.handle && m.handle.toLowerCase().replace(/^@/, '') === urlStoreSlug)
+      );
+      if (match) return match;
+    }
+
+    if (activeStoreSlug) {
+      const cleanActive = activeStoreSlug.toLowerCase().trim();
+      const match = merchants.find(m => 
+        (m.slug && m.slug.toLowerCase() === cleanActive) ||
+        (m.id && m.id.toLowerCase() === cleanActive) ||
+        (m.shortName && m.shortName.toLowerCase() === cleanActive) ||
+        (m.subdomain && m.subdomain.toLowerCase().includes(cleanActive))
+      );
+      if (match) return match;
+    }
+
+    if (selectedMerchantId) {
+      const cleanSelected = String(selectedMerchantId).toLowerCase().trim();
+      const match = merchants.find(m => 
+        m.id === selectedMerchantId || 
+        (m.slug && m.slug.toLowerCase() === cleanSelected)
+      );
+      if (match) return match;
+    }
+
+    return merchants[0] || {};
+  }, [merchants, selectedMerchantId, activeStoreSlug, urlStoreSlug]);
+
+  // Keep selectedMerchantId synchronized across app if derived from URL
+  useEffect(() => {
+    if (currentMerchant?.id && currentMerchant.id !== selectedMerchantId) {
+      setSelectedMerchantId(currentMerchant.id);
+    }
+    if (currentMerchant?.slug && currentMerchant.slug !== activeStoreSlug && setActiveStoreSlug) {
+      setActiveStoreSlug(currentMerchant.slug);
+    }
+  }, [currentMerchant?.id, currentMerchant?.slug, selectedMerchantId, activeStoreSlug, setSelectedMerchantId, setActiveStoreSlug]);
 
   const storeReel = (sharedReelsData || []).find(r => 
     (currentMerchant.slug && r.storeSlug?.toLowerCase() === currentMerchant.slug.toLowerCase()) ||
     (currentMerchant.id && r.merchantId === currentMerchant.id) ||
     (r.creatorHandle && currentMerchant.slug && r.creatorHandle.toLowerCase().includes(currentMerchant.slug.toLowerCase()))
   ) || null;
-  const merchantProducts = (products || []).filter(p => 
-    (currentMerchant.id && p.merchantId === currentMerchant.id) || 
-    (currentMerchant.slug && p.merchantId?.includes(currentMerchant.slug)) ||
-    (currentMerchant.shortName && p.merchant?.toLowerCase().includes(currentMerchant.shortName.toLowerCase())) ||
-    (currentMerchant.slug && p.merchant?.toLowerCase().includes(currentMerchant.slug)) ||
-    (!p.merchantId && currentMerchant.id === '171842bd-daed-40ef-853f-917eab2ed437')
-  );
+
+  const merchantProducts = (products || []).filter(p => {
+    if (!currentMerchant?.id && !currentMerchant?.slug) return false;
+    const mId = currentMerchant.id;
+    const mSlug = currentMerchant.slug?.toLowerCase();
+    const mShort = currentMerchant.shortName?.toLowerCase();
+
+    const matchesId = mId && (p.merchantId === mId || p.merchant_id === mId);
+    const matchesSlug = mSlug && (
+      (p.merchantSlug && p.merchantSlug.toLowerCase() === mSlug) ||
+      (p.merchantId && p.merchantId.toLowerCase().includes(mSlug))
+    );
+    const matchesName = (mShort && p.merchant?.toLowerCase().includes(mShort)) ||
+                        (mSlug && p.merchant?.toLowerCase().includes(mSlug));
+
+    if (matchesId || matchesSlug || matchesName) return true;
+    if (!p.merchantId && !p.merchantSlug && mId === '171842bd-daed-40ef-853f-917eab2ed437') return true;
+    return false;
+  });
   
   // Extract dynamic theme and layout configurations with sensible fallbacks
   const themeConfig = currentMerchant.themeConfig || {};
@@ -46,8 +113,8 @@ export default function MerchantStorefront() {
   const fontFamily = themeConfig.fontFamily || 'sans'; // 'cairo' | 'serif' | 'sans'
   const borderRadius = themeConfig.borderRadius || 'rounded-2xl'; // 'rounded-none' | 'rounded-xl' | 'rounded-2xl' | 'rounded-3xl'
   const heroStyle = themeConfig.heroStyle || 'wide_cinema'; // 'wide_cinema' | 'split_editorial' | 'minimal_card'
-  const heroHeadline = themeConfig.heroHeadline || 'أزياء الكتان المصري الفاخر • Authentic Heritage';
-  const heroSubheadline = themeConfig.heroSubheadline || `${currentMerchant.bio} قطع انسيابية مستوحاة من هدوء الطبيعة صممت لتمنحك إطلالة راقية في الصيف والمساء.`;
+  const heroHeadline = themeConfig.heroHeadline || `${currentMerchant.name || 'المتجر'} • تشكيلة حصرية فاخرة`;
+  const heroSubheadline = themeConfig.heroSubheadline || `${currentMerchant.bio ? currentMerchant.bio + ' ' : ''}تصاميم عصرية متميزة بأعلى معايير الجودة وشحن سريع لجميع المحافظات.`;
   const heroCtaText = themeConfig.heroCtaText || 'تسوق الكولكشن الآن';
   const productsGridCols = Number(themeConfig.productsGridCols) || 4;
   const showRatings = themeConfig.showRatings !== false;
@@ -69,7 +136,7 @@ export default function MerchantStorefront() {
   const trustBadgesList = (layoutConfig.trustBadges && layoutConfig.trustBadges.length > 0)
     ? layoutConfig.trustBadges
     : [
-        { id: 'b1', icon: 'dry_cleaning', title: 'أقمشة طبيعية 100%', desc: 'كتان مصري طبيعي خالص مغزول يدوياً، يسمح بالتنفس ومقاوم للانكماش بدون أي ألياف صناعية.' },
+        { id: 'b1', icon: 'verified', title: 'خامات وجودة أصلية 100%', desc: `منتجات وخامات أصلية مختارة بعناية فائقة، صناعة وتصميم مصري بجودة عالمية من ${currentMerchant.shortName || currentMerchant.name || 'المتجر'}.` },
         { id: 'b2', icon: 'local_shipping', title: 'شحن سريع 48 ساعة', desc: 'توصيل آمن لجميع محافظات مصر بالتعاون مع بوسطة Bosta Express مع تتبع لحظي للشحنة.' },
         { id: 'b3', icon: 'payments', title: 'دفع فوري ومرن', desc: 'ادفع فوراً عبر InstaPay أو البطاقات البنكية، أو ادفع نقداً للمندوب عند الاستلام (COD).' },
         { id: 'b4', icon: 'published_with_changes', title: 'معاينة واستبدال 14 يوم', desc: 'حق فتح الشحنة وقياس القطعة بحضور المندوب، مع استبدال مجاني فوري في حالة عدم تناسب المقاس.' },
@@ -520,7 +587,7 @@ export default function MerchantStorefront() {
                               className="px-3 py-1 rounded-full text-white text-[11px] font-bold backdrop-blur-sm"
                               style={{ backgroundColor: `${accentColor}cc` }}
                             >
-                              كولكشن صيف 2026 • Summer Pure Linen
+                              {currentMerchant.categoryAr ? `تشكيلة ${currentMerchant.categoryAr}` : 'كولكشن صيف 2026'} • {currentMerchant.category || 'Exclusive Drop'}
                             </span>
                             <span className="px-3 py-1 rounded-full bg-black/40 text-white text-[11px] font-medium backdrop-blur-sm border border-white/20">
                               صناعة يدوية بالقاهرة 🪡

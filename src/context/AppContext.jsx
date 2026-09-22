@@ -19,42 +19,7 @@ const AppContext = createContext();
 
 export { MERCHANTS_DATA, SOCIAL_PROFILES } from '../data/storesData.js';
 
-export const INITIAL_ORDERS = [
-  {
-    id: 'DF-1092',
-    merchantId: '171842bd-daed-40ef-853f-917eab2ed437',
-    customerName: 'أحمد محمود (Ahmed Mahmoud)',
-    phone: '+20 101 882 3411',
-    address: 'التجمع الخامس، القاهرة - الحي النرجس، عمارة 12',
-    productTitle: 'The Sharp V Yellow Oversized T-Shirt • L',
-    quantity: 1,
-    amount: 680,
-    paymentMethod: 'InstaPay (تم التحقق • Ref: 881294)',
-    paymentStatus: 'paid',
-    shippingStatus: 'ready_for_pickup',
-    courier: 'Bosta Express',
-    trackingNumber: 'BST-DF-88120',
-    date: 'منذ ساعتين',
-    attributedCreator: '@drip_fit'
-  },
-  {
-    id: 'DF-1091',
-    merchantId: '171842bd-daed-40ef-853f-917eab2ed437',
-    customerName: 'كريم عادل (Karim Adel)',
-    phone: '+20 112 345 6789',
-    address: 'المعادي، القاهرة - شارع 15',
-    productTitle: 'The Sharp V Yellow Oversized T-Shirt • XL',
-    quantity: 1,
-    amount: 680,
-    paymentMethod: 'الدفع عند الاستلام (COD)',
-    paymentStatus: 'pending_cod',
-    shippingStatus: 'in_transit',
-    courier: 'Bosta Express',
-    trackingNumber: 'BST-DF-88119',
-    date: 'منذ 5 ساعات',
-    attributedCreator: '@drip_fit'
-  }
-];
+export const INITIAL_ORDERS = [];
 
 export { INITIAL_PRODUCTS } from '../data/storesData.js';
 

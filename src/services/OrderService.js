@@ -55,15 +55,19 @@ function normalizePlatformOrder(row) {
 
   const rawAmount = data.amount ?? row?.total_amount ?? data.total ?? 0;
   const numAmount = typeof rawAmount === 'number' ? rawAmount : (Number(rawAmount) || 0);
+  const orderId = data.id || row.display_id || `EG-${String(row.id || '').slice(-4)}`;
 
   return {
     ...data,
-    id: data.id || row.display_id || `EG-${String(row.id || '').slice(-4)}`,
+    id: orderId,
     merchantId: data.merchantId || row.merchant_id || '171842bd-daed-40ef-853f-917eab2ed437',
     customerName: data.customerName || row.customer_name || 'عميل تجارة مصرية',
-    phone: data.phone || row.phone || '+20 102 345 6789',
+    phone: data.phone || row.phone || '',
+    address: data.address || row.address || '',
     shippingStatus: data.shippingStatus || row.shipping_status || 'ready_for_pickup',
     paymentStatus: data.paymentStatus || row.payment_status || 'pending',
+    trackingNumber: data.trackingNumber || row.tracking_number || `BST-${String(row.id || Math.floor(10000000 + Math.random() * 90000000)).slice(-8)}`,
+    deliveryOtp: data.deliveryOtp || String(Math.floor(1000 + Math.random() * 9000)),
     amount: numAmount,
     total_amount: numAmount,
     createdAt: data.createdAt || row.created_at || new Date().toISOString(),
@@ -136,9 +140,9 @@ export const OrderService = {
     }
 
     const cartItems = payload.cartItems || [];
-    const customerName = payload.customerName || payload.user?.name || 'عميل تجارة مصرية';
-    const phone = payload.phone || payload.user?.phone || '+20 102 345 6789';
-    const address = payload.address || 'القاهرة، مصر الجديدة، شارع الثورة عمارة 14';
+    const customerName = (payload.customerName || payload.user?.name || '').trim() || 'عميل تجارة مصرية';
+    const phone = (payload.phone || payload.user?.phone || '').trim();
+    const address = (payload.address || '').trim();
     const paymentMethodRaw = payload.paymentMethod || 'instapay';
     const paymentMethod = paymentMethodRaw === 'instapay'
       ? `InstaPay (تم التحقق • Ref: ${Math.floor(10000 + Math.random() * 90000)})`
@@ -200,6 +204,7 @@ export const OrderService = {
         shippingStatus: 'ready_for_pickup',
         courier: 'Bosta Express',
         trackingNumber: `BST-${Math.floor(10000000 + Math.random() * 90000000)}`,
+        deliveryOtp: String(Math.floor(1000 + Math.random() * 9000)),
         date: 'الآن',
         createdAt: nowIso,
         userId: payload.userId || payload.user?.id || null,
@@ -358,5 +363,29 @@ export const OrderService = {
     } catch (e) {}
 
     return updated;
+  },
+
+  async trackOrder(query) {
+    if (!query) return null;
+    const clean = String(query).trim().toLowerCase().replace(/#/g, '');
+    const cleanDigits = clean.replace(/\D/g, '').replace(/^20/, '').replace(/^0/, '');
+    const all = await this.getOrders();
+    return all.find(o => {
+      const oid = (o.id || '').toLowerCase();
+      const trk = (o.trackingNumber || '').toLowerCase();
+      const phDigits = (o.phone || '').replace(/\D/g, '').replace(/^20/, '').replace(/^0/, '');
+      return (
+        oid === clean ||
+        oid.replace('eg-', '') === clean ||
+        trk === clean ||
+        trk.replace('bst-', '') === clean ||
+        (cleanDigits.length >= 8 && phDigits.length >= 8 && phDigits === cleanDigits)
+      );
+    }) || null;
+  },
+
+  async getOrderById(orderId) {
+    if (!orderId) return null;
+    return this.trackOrder(orderId);
   }
 };

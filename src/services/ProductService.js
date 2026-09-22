@@ -194,33 +194,55 @@ export const ProductService = {
           allProducts = [...customProducts, ...INITIAL_PRODUCTS];
         }
       } else {
-        // Map DB products to frontend format without inventing mockups
+        // Fetch all merchants once to resolve names for products
+        let merchantsMap = {};
+        try {
+          const { data: merchantsData } = await supabase.from('merchants').select('id, store_name, slug, is_verified');
+          if (merchantsData) {
+            merchantsData.forEach(m => { merchantsMap[m.id] = m; });
+          }
+        } catch (e) {}
+        // Also add MERCHANTS_DATA entries to the map
+        MERCHANTS_DATA.forEach(m => {
+          if (!merchantsMap[m.id]) {
+            merchantsMap[m.id] = { id: m.id, store_name: m.shortName || m.name, slug: m.slug, is_verified: true };
+          }
+        });
+
+        // Map DB products to frontend format using real merchant info
         const legacyDemoMerchants = ['d0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000002'];
         const dbMapped = data
           .filter(dbProduct => !legacyDemoMerchants.includes(dbProduct.merchant_id))
-          .map(dbProduct => ({
-          id: dbProduct.id,
-          sku: dbProduct.slug || `EG-${dbProduct.id.slice(0, 8)}`,
-          title: dbProduct.title,
-          merchant: 'Drip Fit • دريب فيت',
-          merchantId: dbProduct.merchant_id,
-          merchantSlug: 'drip-fit',
-          merchantVerified: true,
-          price: Number(dbProduct.base_price) || 0,
-          originalPrice: dbProduct.sale_price ? Number(dbProduct.base_price) : undefined,
-          rating: 5.0,
-          reviewsCount: 1,
-          stock: dbProduct.stock_quantity ?? 10,
-          isSyndicated: true,
-          image: dbProduct.images && dbProduct.images.length > 0 ? dbProduct.images[0] : null,
-          images: dbProduct.images || [],
-          video: null,
-          pointsEarned: Math.floor((Number(dbProduct.base_price) || 0) * 0.1),
-          category: dbProduct.category_id || 'Streetwear & Casual',
-          description: dbProduct.description || '',
-          sizes: Array.isArray(dbProduct.sizes) ? dbProduct.sizes : [],
-          colors: Array.isArray(dbProduct.colors) ? dbProduct.colors : []
-        }));
+          .map(dbProduct => {
+          const resolvedMerchant = merchantsMap[dbProduct.merchant_id] || null;
+          const merchantName = resolvedMerchant?.store_name || 'متجر معتمد';
+          const merchantSlug = resolvedMerchant?.slug || 'store';
+          const isVerified = resolvedMerchant?.is_verified ?? true;
+
+          return {
+            id: dbProduct.id,
+            sku: dbProduct.slug || `EG-${dbProduct.id.slice(0, 8)}`,
+            title: dbProduct.title,
+            merchant: merchantName,
+            merchantId: dbProduct.merchant_id,
+            merchantSlug: merchantSlug,
+            merchantVerified: isVerified,
+            price: Number(dbProduct.base_price) || 0,
+            originalPrice: dbProduct.sale_price ? Number(dbProduct.base_price) : undefined,
+            rating: 5.0,
+            reviewsCount: 1,
+            stock: dbProduct.stock_quantity ?? 10,
+            isSyndicated: true,
+            image: dbProduct.images && dbProduct.images.length > 0 ? dbProduct.images[0] : null,
+            images: dbProduct.images || [],
+            video: null,
+            pointsEarned: Math.floor((Number(dbProduct.base_price) || 0) * 0.1),
+            category: dbProduct.category_id || 'Streetwear & Casual',
+            description: dbProduct.description || '',
+            sizes: Array.isArray(dbProduct.sizes) ? dbProduct.sizes : [],
+            colors: Array.isArray(dbProduct.colors) ? dbProduct.colors : []
+          };
+        });
 
         if (merchantId) {
           // Scoped strictly to merchant: combine custom for this merchant + dbMapped

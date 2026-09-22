@@ -736,16 +736,9 @@ export function AppProvider({ children }) {
       } catch (e) {}
     }
 
-    // Step 2: Determine the effective merchant scope
-    // - Merchants see ONLY their own data
-    // - Superadmins and buyers see the full catalogue (no filter)
-    const isMerchantRole = currentUser?.role === 'merchant';
-    const scopedMerchantId = isMerchantRole
-      ? (activeMerchantId || currentUser?.merchant_id || null)
-      : null; // buyers / superadmins get unfiltered data
-
-    // Step 3: Load products scoped to the merchant (or all for buyers)
-    let fetchedProducts = await ProductService.getProducts(null, scopedMerchantId);
+    // Step 2: ALWAYS load the FULL product catalogue for marketplace display.
+    // The marketplace must show products from ALL stores, regardless of who is logged in.
+    let fetchedProducts = await ProductService.getProducts(null, null);
     fetchedProducts = (fetchedProducts || []).map(p => {
       const isDripFit = p.title?.toLowerCase().includes('drip fit') || 
                         p.description?.toLowerCase().includes('drip fit') ||
@@ -763,20 +756,24 @@ export function AppProvider({ children }) {
     });
     setProducts(fetchedProducts);
 
-    // Step 4: Load merchants list (always full, includes all registered custom merchants)
+    // Step 3: Load merchants list (always full, includes all registered custom merchants)
     const fetchedMerchants = await ProductService.getMerchants();
     setMerchants(fetchedMerchants);
 
-    // Step 5: Load creators list (always full, includes all registered creators)
+    // Step 4: Load creators list (always full, includes all registered creators)
     const fetchedCreators = await AuthService.getCreators();
     setCreators(fetchedCreators);
 
-    // Step 6: Load cart (always user-scoped)
+    // Step 5: Load cart (always user-scoped)
     const fetchedCart = await CartService.getCartItems();
     setCartItems(fetchedCart);
 
-    // Step 7: Load orders scoped to the merchant
-    const fetchedOrders = await OrderService.getOrders(currentUser?.id || null, scopedMerchantId);
+    // Step 6: Load orders — merchants only see their own orders, buyers/admins see all
+    const isMerchantRole = currentUser?.role === 'merchant';
+    const orderScopedMerchantId = isMerchantRole
+      ? (activeMerchantId || currentUser?.merchant_id || null)
+      : null;
+    const fetchedOrders = await OrderService.getOrders(currentUser?.id || null, orderScopedMerchantId);
     setOrders(fetchedOrders);
   };
 
@@ -833,9 +830,9 @@ export function AppProvider({ children }) {
     const isMerchantRole = user?.role === 'merchant';
     if (!isMerchantRole) return; // buyers don't need re-scoped data
 
+    // Only re-scope ORDERS for the merchant dashboard — NOT products!
+    // Products are always the full catalogue for the marketplace.
     const reloadMerchantData = async () => {
-      const fetchedProducts = await ProductService.getProducts(null, selectedMerchantId);
-      setProducts(fetchedProducts);
       const fetchedOrders = await OrderService.getOrders(user.id, selectedMerchantId);
       setOrders(fetchedOrders);
     };

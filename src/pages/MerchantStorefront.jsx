@@ -170,143 +170,7 @@ export default function MerchantStorefront() {
     }
   ];
 
-  // Community Reels Data - Dynamic per Merchant with Real Hostinger & Local Backend Persistence
-  const defaultCommunityReels = currentMerchant.id === '171842bd-daed-40ef-853f-917eab2ed437' ? [
-    { 
-      id: 'cr-m2-1', 
-      creator: '@maya_accessories', 
-      creatorName: 'مايا إكسسوارات',
-      caption: 'كولكشن الشنط الكلاسيك الجلد بجميع الألوان 😍 فخامة الصناعة المصرية', 
-      views: '48.5K', 
-      likes: '4.2K',
-      image: '/images/reels/fashion_shoulder_bags_thumb.jpg',
-      video: '/images/reels/fashion_shoulder_bags.mp4',
-      taggedProduct: products.find(p => p.id === 'p-fashion-shoulder-bags') || merchantProducts[0]
-    },
-    { 
-      id: 'cr-m2-2', 
-      creator: '@farida.atelier', 
-      creatorName: 'فريدة أتيليه',
-      caption: 'شنطة الجلد المنسوجة يدوياً مع المقبض المضفر ✨ تفاصيل تخطف القلب', 
-      views: '32.1K', 
-      likes: '2.9K',
-      image: '/images/reels/fashion_woven_bag_thumb.jpg',
-      video: '/images/reels/fashion_woven_bag.mp4',
-      taggedProduct: products.find(p => p.id === 'p-fashion-woven-bag') || merchantProducts[1] || merchantProducts[0]
-    },
-    { 
-      id: 'cr-m2-3', 
-      creator: '@huda_leather', 
-      creatorName: 'هدى ليذر',
-      caption: 'شنطة البولينج الأسطوانية الجلد الطبيعي كروكو وبني وسويد 🤎', 
-      views: '29.7K', 
-      likes: '2.4K',
-      image: '/images/reels/fashion_barrel_bag_thumb.jpg',
-      video: '/images/reels/fashion_barrel_bag.mp4',
-      taggedProduct: products.find(p => p.id === 'p-fashion-barrel-bag') || merchantProducts[2] || merchantProducts[0]
-    },
-    { 
-      id: 'cr-m2-4', 
-      creator: '@khan_masters', 
-      creatorName: 'ورش خان الخليلي',
-      caption: 'نقش وتخريم الفوانيس النحاسية الفاطمية يدوياً 🏮 فن أصيل', 
-      views: '21.4K', 
-      likes: '1.8K',
-      image: '/images/products/copper_lantern.jpg',
-      taggedProduct: products.find(p => p.id === 'p-05') || merchantProducts[0]
-    }
-  ] : currentMerchant.id === '171842bd-daed-40ef-853f-917eab2ed437' ? [
-    { 
-      id: 'cr-m3-1', 
-      creator: '@karim.editorial', 
-      creatorName: 'كريم إيديتوريال',
-      caption: 'ساعة يد كلاسيكية بتصميم برميلي وذهب وردي مع إطلالة الصوف الهادية ⌚✨', 
-      views: '54.2K', 
-      likes: '5.1K',
-      image: '/images/reels/fashion_vintage_watch_thumb.jpg',
-      video: '/images/reels/fashion_vintage_watch.mp4',
-      taggedProduct: products.find(p => p.id === 'p-fashion-vintage-watch') || merchantProducts[0]
-    },
-    { 
-      id: 'cr-m3-2', 
-      creator: '@salma_egypt', 
-      creatorName: 'سلمى الأحمدي',
-      caption: 'تنسيق الحلي المستوحاة من زهرة اللوتس مع إطلالة أنيقة 👑', 
-      views: '36.8K', 
-      likes: '3.1K',
-      image: '/images/reels/fashion_oneshoulder_top_thumb.jpg',
-      video: '/images/reels/fashion_oneshoulder_top.mp4',
-      taggedProduct: products.find(p => p.id === 'p-fashion-oneshoulder-top') || merchantProducts[0]
-    },
-    { 
-      id: 'cr-m3-3', 
-      creator: '@farida_fashion', 
-      creatorName: 'فريدة كمال',
-      caption: 'بريق الذهب عيار 18 والفضة 925 بصياغة يدوية دقيقة 💎', 
-      views: '28.4K', 
-      likes: '2.5K',
-      image: '/images/reels/fashion_citrine_blazer_thumb.jpg',
-      video: '/images/reels/fashion_citrine_blazer.mp4',
-      taggedProduct: products.find(p => p.id === 'p-fashion-blazer') || merchantProducts[0]
-    },
-    { 
-      id: 'cr-m3-4', 
-      creator: '@cairo_looks', 
-      creatorName: 'كايرو لوكس',
-      caption: 'لمسات الفخامة الملكية في التفاصيل اليومية ✨', 
-      views: '19.8K', 
-      likes: '1.5K',
-      image: '/images/reels/fashion_oversized_shirt_thumb.jpg',
-      video: '/images/reels/fashion_oversized_shirt.mp4',
-      taggedProduct: products.find(p => p.id === 'p-fashion-oversized-shirt') || merchantProducts[0]
-    }
-  ] : [
-    { 
-      id: 'cr-m1-1', 
-      creator: '@cairo_chic', 
-      creatorName: 'كايرو شيك',
-      caption: 'تنسيق بليزر السيترين الأوفرسايز مع الجينز ونظارة شمسية 💛 فخامة الصيف', 
-      views: '62.4K', 
-      likes: '5.8K',
-      image: '/images/reels/fashion_citrine_blazer_thumb.jpg',
-      video: '/images/reels/fashion_citrine_blazer.mp4',
-      taggedProduct: products.find(p => p.id === 'p-fashion-blazer') || merchantProducts[0]
-    },
-    { 
-      id: 'cr-m1-2', 
-      creator: '@salma.styles', 
-      creatorName: 'سلمى ستايلز',
-      caption: 'قميص كتان مصري سماوي أوفرسايز مع بنطلون واسع ومريح 🩵', 
-      views: '45.1K', 
-      likes: '3.9K',
-      image: '/images/reels/fashion_oversized_shirt_thumb.jpg',
-      video: '/images/reels/fashion_oversized_shirt.mp4',
-      taggedProduct: products.find(p => p.id === 'p-fashion-oversized-shirt') || merchantProducts[1] || merchantProducts[0]
-    },
-    { 
-      id: 'cr-m1-3', 
-      creator: '@zeina_ootd', 
-      creatorName: 'زينة أوفت',
-      caption: 'توب بكتف واحد عاجي ناعم مع جينز كلاسيك عالي الخصر 🤍✨', 
-      views: '38.9K', 
-      likes: '3.4K',
-      image: '/images/reels/fashion_oneshoulder_top_thumb.jpg',
-      video: '/images/reels/fashion_oneshoulder_top.mp4',
-      taggedProduct: products.find(p => p.id === 'p-fashion-oneshoulder-top') || merchantProducts[2] || merchantProducts[0]
-    },
-    { 
-      id: 'cr-m1-4', 
-      creator: '@omar_looks', 
-      creatorName: 'عمر لوكس',
-      caption: 'جاكيت الشمواه البني الهارنجتون مع بنطلون زيتي وحذاء سويد 🤎 رجالي أنيق', 
-      views: '31.2K', 
-      likes: '2.7K',
-      image: '/images/reels/fashion_suede_jacket_thumb.jpg',
-      video: '/images/reels/fashion_suede_jacket.mp4',
-      taggedProduct: products.find(p => p.id === 'p-fashion-suede-jacket') || merchantProducts[3] || merchantProducts[0]
-    }
-  ];
-
+  // Community Reels Data - Dynamic per Merchant with Real Backend Persistence
   const [dynamicStoreReels, setDynamicStoreReels] = useState([]);
 
   useEffect(() => {
@@ -329,18 +193,23 @@ export default function MerchantStorefront() {
             }));
             setDynamicStoreReels(mapped);
           } else {
-            setDynamicStoreReels(defaultCommunityReels);
+            setDynamicStoreReels([]);
           }
         }
       } catch (e) {
-        if (isMounted) setDynamicStoreReels(defaultCommunityReels);
+        if (isMounted) setDynamicStoreReels([]);
       }
     };
     fetchStoreReels();
-    return () => { isMounted = false; };
+    const handleReelsUpdated = () => fetchStoreReels();
+    window.addEventListener('eg_reels_updated', handleReelsUpdated);
+    return () => { 
+      isMounted = false; 
+      window.removeEventListener('eg_reels_updated', handleReelsUpdated);
+    };
   }, [currentMerchant.id, currentMerchant.slug]);
 
-  const communityReels = dynamicStoreReels.length > 0 ? dynamicStoreReels : defaultCommunityReels;
+  const communityReels = dynamicStoreReels;
 
   // Dynamic grid classes based on merchant's productsGridCols choice
   const gridColsClass = productsGridCols === 2
@@ -1061,8 +930,8 @@ export default function MerchantStorefront() {
               </section>
             )}
 
-            {/* SECTION 5: REELS SHOWCASE (Conditional via layoutConfig) */}
-            {showReels && (
+            {/* SECTION 5: REELS SHOWCASE (Conditional via layoutConfig & real reels) */}
+            {showReels && communityReels.length > 0 && (
               <section id="reels-section" className={`p-5 ${borderRadius} border space-y-4 ${cardBgClass}`}>
                 <div className="flex items-center justify-between">
                   <div>
@@ -1119,6 +988,25 @@ export default function MerchantStorefront() {
                     </div>
                   ))}
                 </div>
+              </section>
+            )}
+
+            {showReels && communityReels.length === 0 && canManageStore && (
+              <section id="reels-section" className={`p-6 ${borderRadius} border text-center space-y-3 ${cardBgClass}`}>
+                <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto">
+                  <span className="material-symbols-outlined text-[24px]">video_call</span>
+                </div>
+                <h4 className="text-sm font-bold">لم تقم بنشر أي ريلز لمتجرك بعد</h4>
+                <p className={`text-xs ${textMutedClass} max-w-md mx-auto`}>
+                  الفيديوهات القصيرة تزيد مبيعات متجرك بنسبة تتجاوز 50%. انشر ريل لمنتجاتك وستظهر فوراً في ملفك ومتجرك!
+                </p>
+                <button
+                  onClick={() => setActiveTab('add-product')}
+                  className="px-4 py-2 rounded-xl bg-[#d00000] text-white text-xs font-bold shadow-md hover:brightness-110 transition-all inline-flex items-center gap-1.5"
+                >
+                  <span className="material-symbols-outlined text-[16px]">add_circle</span>
+                  <span>إضافة منتج وريلز جديد</span>
+                </button>
               </section>
             )}
 

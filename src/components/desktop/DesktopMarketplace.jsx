@@ -233,7 +233,14 @@ export default function DesktopMarketplace() {
               >
                 {/* Image */}
                 <div className="aspect-[4/5] relative overflow-hidden bg-gray-100">
-                  <img src={prod.image} alt={prod.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  {prod.image ? (
+                    <img src={prod.image} alt={prod.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 text-gray-400">
+                      <span className="material-symbols-outlined text-[40px] mb-1">image</span>
+                      <span className="text-[9px] font-medium">No Image</span>
+                    </div>
+                  )}
                   {prod.video && (
                     <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-black/70 backdrop-blur-md text-white text-[9px] font-bold flex items-center gap-1 shadow-md border border-white/20">
                       <span className="material-symbols-outlined text-[12px] text-[#ff3b5c]">play_arrow</span>

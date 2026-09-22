@@ -520,7 +520,7 @@ export default function AddProductStudio() {
       } : merchants?.[0]);
 
     const resolvedMerchantName = activeMerchant?.name || (user?.role === 'merchant' ? (user.store_name || user.name) : 'Drip Fit • دريب فيت');
-    const resolvedMerchantId = activeMerchant?.id || (user?.role === 'merchant' ? (user.merchant_id || `m-${user.id}`) : 'd0000000-0000-0000-0000-000000000001');
+    const resolvedMerchantId = activeMerchant?.id || (user?.role === 'merchant' ? (user.merchant_id || `m-${user.id}`) : '171842bd-daed-40ef-853f-917eab2ed437');
     const resolvedMerchantSlug = activeMerchant?.slug || (user?.role === 'merchant' ? (user.store_slug || user.slug || user.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-')) : 'drip-fit');
 
     const newProdPayload = {
@@ -591,10 +591,13 @@ export default function AddProductStudio() {
     setShowSuccessModal(false);
     setProductName('');
     setDescription('');
-    setPrice(980);
-    setOriginalPrice(1300);
-    setQuantity(15);
-    setSelectedSizes(['M']);
+    setPrice('');
+    setOriginalPrice('');
+    setQuantity('');
+    setSelectedSizes([]);
+    setSelectedColorIds([]);
+    setPhotos([]);
+    setVideoUrl('');
   };
 
   return (

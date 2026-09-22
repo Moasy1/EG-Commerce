@@ -18,6 +18,7 @@ export default function DesktopSellerDashboard() {
     selectedMerchantId, 
     setSelectedMerchantId, 
     merchants, 
+    updateMerchant,
     products, 
     deleteProduct, 
     user,
@@ -31,6 +32,15 @@ export default function DesktopSellerDashboard() {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const notifBtnRef = useRef(null);
   const [stats, setStats] = useState({ revenue: 0, orders: 0, reach: 0, engagement: 0 });
+
+  // Store Settings state
+  const [storeNameInput, setStoreNameInput] = useState('');
+  const [storeSubdomainInput, setStoreSubdomainInput] = useState('');
+  const [storeLogoInput, setStoreLogoInput] = useState('');
+  const [isCodEnabled, setIsCodEnabled] = useState(true);
+  const [isBostaEnabled, setIsBostaEnabled] = useState(true);
+  const [isPaymobEnabled, setIsPaymobEnabled] = useState(true);
+  const [settingsSavedToast, setSettingsSavedToast] = useState(false);
 
   // Product CRUD modal state
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
@@ -53,8 +63,38 @@ export default function DesktopSellerDashboard() {
   useEffect(() => {
     if (currentMerchant?.id) {
       MerchantService.getDashboardStats(currentMerchant.id).then(setStats);
+      setStoreNameInput(currentMerchant.name || '');
+      setStoreSubdomainInput(currentMerchant.subdomain?.replace('.egyptian-commerce.com', '').replace('.eg-commerce.com', '') || '');
+      setStoreLogoInput(currentMerchant.logo || '');
+      setIsCodEnabled(currentMerchant.codEnabled !== false);
+      setIsBostaEnabled(currentMerchant.bostaEnabled !== false);
+      setIsPaymobEnabled(currentMerchant.paymobEnabled !== false);
     }
   }, [currentMerchant?.id]);
+
+  const handleSaveStoreSettings = async (e) => {
+    if (e) e.preventDefault();
+    if (!currentMerchant?.id) return;
+    const cleanSub = storeSubdomainInput.trim().toLowerCase().replace(/[^a-z0-9-]/g, '') || currentMerchant.slug || 'store';
+    const updates = {
+      name: storeNameInput.trim() || currentMerchant.name,
+      subdomain: `${cleanSub}.egyptian-commerce.com`,
+      slug: cleanSub,
+      logo: storeLogoInput || currentMerchant.logo,
+      codEnabled: isCodEnabled,
+      bostaEnabled: isBostaEnabled,
+      paymobEnabled: isPaymobEnabled
+    };
+    try {
+      if (updateMerchant) {
+        await updateMerchant(currentMerchant.id, updates);
+      }
+      setSettingsSavedToast(true);
+      setTimeout(() => setSettingsSavedToast(false), 3500);
+    } catch (err) {
+      console.error('Failed saving store settings:', err);
+    }
+  };
 
   const handleOpenAddProduct = () => {
     setProductToEdit(null);
@@ -942,13 +982,24 @@ export default function DesktopSellerDashboard() {
 
           {activeNav === 'settings' && (
             <div className="bg-white rounded-3xl border border-gray-200 p-5 shadow-xs space-y-6 min-h-[400px]">
+              {settingsSavedToast && (
+                <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold flex items-center gap-2 animate-fade-in">
+                  <span className="material-symbols-outlined text-[18px]">check_circle</span>
+                  <span>تم حفظ وتحديث إعدادات المتجر وبيانات الهوية بنجاح! 🚀</span>
+                </div>
+              )}
+
               <div className="flex items-center justify-between border-b border-gray-100 pb-4">
                 <div>
                   <h3 className="text-sm font-black text-slate-900">إعدادات المتجر</h3>
                   <p className="text-xs text-gray-500">إدارة هويتك وطرق الشحن والدفع</p>
                 </div>
-                <button className="px-4 py-2 bg-[#d00000] text-white text-xs font-bold rounded-xl shadow-xs hover:brightness-110 transition-all">
-                  حفظ التغييرات
+                <button 
+                  onClick={handleSaveStoreSettings}
+                  className="px-4 py-2 bg-[#d00000] text-white text-xs font-bold rounded-xl shadow-xs hover:brightness-110 transition-all flex items-center gap-1.5"
+                >
+                  <span className="material-symbols-outlined text-[16px]">save</span>
+                  <span>حفظ التغييرات</span>
                 </button>
               </div>
 
@@ -958,13 +1009,24 @@ export default function DesktopSellerDashboard() {
                   
                   <div className="space-y-1">
                     <label className="text-[11px] font-bold text-gray-600">اسم المتجر</label>
-                    <input type="text" defaultValue={currentMerchant?.name} className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50 text-xs text-slate-700 focus:border-[#d00000] focus:ring-1 focus:ring-[#d00000] outline-none" />
+                    <input 
+                      type="text" 
+                      value={storeNameInput} 
+                      onChange={(e) => setStoreNameInput(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50 text-xs text-slate-700 focus:border-[#d00000] focus:ring-1 focus:ring-[#d00000] outline-none" 
+                    />
                   </div>
 
                   <div className="space-y-1">
                     <label className="text-[11px] font-bold text-gray-600">الرابط الفرعي (Subdomain)</label>
                     <div className="flex items-center">
-                      <input type="text" defaultValue={currentMerchant?.subdomain?.replace('.egyptian-commerce.com', '').replace('.eg-commerce.com', '')} className="flex-1 px-3 py-2 rounded-r-xl border border-gray-200 bg-gray-50 text-xs text-slate-700 focus:border-[#d00000] focus:ring-1 focus:ring-[#d00000] outline-none text-left" dir="ltr" />
+                      <input 
+                        type="text" 
+                        value={storeSubdomainInput} 
+                        onChange={(e) => setStoreSubdomainInput(e.target.value)}
+                        className="flex-1 px-3 py-2 rounded-r-xl border border-gray-200 bg-gray-50 text-xs text-slate-700 focus:border-[#d00000] focus:ring-1 focus:ring-[#d00000] outline-none text-left" 
+                        dir="ltr" 
+                      />
                       <span className="px-3 py-2 bg-gray-100 border border-r-0 border-gray-200 rounded-l-xl text-xs text-gray-500 font-mono" dir="ltr">.egyptian-commerce.com</span>
                     </div>
                   </div>
@@ -972,8 +1034,23 @@ export default function DesktopSellerDashboard() {
                   <div className="space-y-1">
                     <label className="text-[11px] font-bold text-gray-600">لوجو المتجر</label>
                     <div className="flex items-center gap-3 mt-1">
-                      <img src={currentMerchant?.logo} className="w-12 h-12 rounded-lg border border-gray-200 object-cover" alt="Logo" />
-                      <button className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-bold text-slate-700 hover:bg-gray-50">تغيير الصورة</button>
+                      <img src={storeLogoInput || currentMerchant?.logo} className="w-12 h-12 rounded-lg border border-gray-200 object-cover" alt="Logo" />
+                      <label className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-bold text-slate-700 hover:bg-gray-50 cursor-pointer">
+                        <span>تغيير الصورة</span>
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          className="hidden" 
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const r = new FileReader();
+                              r.onload = () => setStoreLogoInput(r.result);
+                              r.readAsDataURL(file);
+                            }
+                          }}
+                        />
+                      </label>
                     </div>
                   </div>
                 </div>
@@ -987,7 +1064,12 @@ export default function DesktopSellerDashboard() {
                       <div className="text-[10px] text-gray-500 mt-0.5">السماح للعملاء بالدفع نقداً عند استلام الشحنة</div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" defaultChecked className="sr-only peer" />
+                      <input 
+                        type="checkbox" 
+                        checked={isCodEnabled} 
+                        onChange={(e) => setIsCodEnabled(e.target.checked)}
+                        className="sr-only peer" 
+                      />
                       <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
                     </label>
                   </div>
@@ -998,7 +1080,12 @@ export default function DesktopSellerDashboard() {
                       <div className="text-[10px] text-gray-500 mt-0.5">إنشاء بوالص الشحن تلقائياً عند تأكيد الطلب</div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" defaultChecked className="sr-only peer" />
+                      <input 
+                        type="checkbox" 
+                        checked={isBostaEnabled} 
+                        onChange={(e) => setIsBostaEnabled(e.target.checked)}
+                        className="sr-only peer" 
+                      />
                       <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#d00000]"></div>
                     </label>
                   </div>
@@ -1009,7 +1096,12 @@ export default function DesktopSellerDashboard() {
                       <div className="text-[10px] text-gray-500 mt-0.5">قبول البطاقات، فوري، والمحافظ الإلكترونية</div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" defaultChecked className="sr-only peer" />
+                      <input 
+                        type="checkbox" 
+                        checked={isPaymobEnabled} 
+                        onChange={(e) => setIsPaymobEnabled(e.target.checked)}
+                        className="sr-only peer" 
+                      />
                       <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
                     </label>
                   </div>

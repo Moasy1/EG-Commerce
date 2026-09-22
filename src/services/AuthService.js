@@ -649,6 +649,26 @@ export const AuthService = {
           if (supaErr) {
             console.warn('Supabase profile update warning:', supaErr.message);
           }
+
+          // If user is a merchant, also synchronize with merchants table
+          if (currentUser.role === 'merchant' || currentUser.merchant_id) {
+            try {
+              const merchUpdates = {
+                name: updatedFields.name,
+                store_name: updatedFields.name,
+                bio: updatedFields.bio,
+                logo: updatedFields.avatar_url,
+                updated_at: updatedFields.updated_at
+              };
+              if (currentUser.merchant_id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(currentUser.merchant_id)) {
+                await supabase.from('merchants').update(merchUpdates).eq('id', currentUser.merchant_id);
+              } else {
+                await supabase.from('merchants').update(merchUpdates).eq('user_id', userId);
+              }
+            } catch (mErr) {
+              console.warn('Supabase merchant profile sync notice:', mErr);
+            }
+          }
         }
       } catch (authErr) {
         console.warn('Supabase auth sync warning:', authErr.message);
@@ -669,6 +689,25 @@ export const AuthService = {
       };
 
       localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(mergedUser));
+
+      if (currentUser.merchant_id) {
+        try {
+          const settingsKey = `eg_merchant_settings_${currentUser.merchant_id}`;
+          const existing = localStorage.getItem(settingsKey);
+          const parsed = existing ? JSON.parse(existing) : {};
+          localStorage.setItem(settingsKey, JSON.stringify({
+            ...parsed,
+            name: updatedFields.name,
+            bio: updatedFields.bio,
+            logo: updatedFields.avatar_url
+          }));
+        } catch (e) {}
+      }
+
+      try {
+        window.dispatchEvent(new CustomEvent('eg_profiles_updated', { detail: { user: mergedUser } }));
+        window.dispatchEvent(new CustomEvent('eg_merchant_updated', { detail: { user: mergedUser } }));
+      } catch (e) {}
 
       return { success: true, user: mergedUser };
     } catch (error) {

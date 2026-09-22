@@ -3,38 +3,7 @@ import { apiConfig } from '../config/apiConfig.js';
 import sharedReelsData from '../../data/shared_reels.json';
 
 
-const DEFAULT_SEED_COMMENTS = [
-  {
-    id: 'c-seed-1',
-    userId: 'b0000000-0000-0000-0000-000000000001',
-    userName: 'مريم الشافعي',
-    userAvatar: '/images/reels/reel_1.jpg',
-    userRole: 'buyer',
-    text: 'الكتان باين عليه تحفة وتفصيله يجنن! هل متاح شحن سريع لإسكندرية؟ ❤️',
-    timeAgo: 'منذ ساعتين',
-    likes: 14
-  },
-  {
-    id: 'c-seed-2',
-    userId: 'u-ahmed',
-    userName: 'أحمد سامي',
-    userAvatar: '/images/reels/reel_2.jpg',
-    userRole: 'buyer',
-    text: 'التطريز متقن جداً.. طلبت الأسبوع الماضي واستلمت في 48 ساعة عبر بوسطة 🚀',
-    timeAgo: 'منذ 5 ساعات',
-    likes: 9
-  },
-  {
-    id: 'c-seed-3',
-    userId: 'c0000000-0000-0000-0000-000000000001',
-    userName: 'ياسمين السيد',
-    userAvatar: '/images/reels/reel_2.jpg',
-    userRole: 'creator',
-    text: 'تنسيق رهيب مع الإكسسوارات النحاسية! الخامة باردة ومريحة جداً في الصيف ✨',
-    timeAgo: 'منذ يوم',
-    likes: 31
-  }
-];
+const DEFAULT_SEED_COMMENTS = [];
 
 export const ReelsService = {
   async getReels(filter = null) {
@@ -284,13 +253,19 @@ export const ReelsService = {
       const key = `eg_reel_comments_${reelId}`;
       const stored = localStorage.getItem(key);
       if (stored) {
-        return JSON.parse(stored);
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          const filtered = parsed.filter(c => !c.id?.startsWith('c-seed-') && !c.id?.startsWith('cc000000-'));
+          if (filtered.length !== parsed.length) {
+            localStorage.setItem(key, JSON.stringify(filtered));
+          }
+          return filtered;
+        }
       }
     } catch (e) {
       console.warn('Failed reading reel comments:', e);
     }
-    // Return default seed comments for this reel
-    return DEFAULT_SEED_COMMENTS;
+    return [];
   },
 
   addComment(reelId, commentPayload) {

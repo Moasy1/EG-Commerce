@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase.js';
 import { apiConfig } from '../config/apiConfig.js';
+import sharedReelsData from '../../data/shared_reels.json';
 
 
 const DEFAULT_SEED_COMMENTS = [
@@ -101,6 +102,8 @@ export const ReelsService = {
       allMerged = [...localReels, ...dbReels.filter(r => !localIds.has(r.id))];
     } else if (dbReels.length > 0) {
       allMerged = dbReels;
+    } else {
+      allMerged = sharedReelsData || [];
     }
 
     if (filter && typeof filter === 'object') {

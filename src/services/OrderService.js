@@ -1,74 +1,10 @@
-import { supabase } from '../lib/supabase';
-import { CommerceApi } from './CommerceApi';
+import { supabase } from '../lib/supabase.js';
+import { CommerceApi } from './CommerceApi.js';
+import { MERCHANTS_DATA } from '../data/storesData.js';
 
-const ORDERS_STORAGE_KEY = 'eg_platform_orders';
+const ORDERS_STORAGE_KEY = 'eg_platform_orders_prod';
 
-export const INITIAL_ORDERS = [
-  {
-    id: 'DF-8841',
-    merchantId: '171842bd-daed-40ef-853f-917eab2ed437',
-    merchantName: 'Drip Fit • دريب فيت',
-    customerName: 'أحمد محمود (Ahmed Mahmoud)',
-    phone: '+20 101 882 3411',
-    address: 'التجمع الخامس، القاهرة - الحي النرجس، عمارة 12',
-    productTitle: 'The Sharp V Yellow Oversized T-Shirt • L',
-    items: [
-      {
-        productId: '11111111-d001-4000-8000-000000000001',
-        title: 'The Sharp V Yellow Oversized T-Shirt',
-        price: 680,
-        quantity: 1,
-        size: 'L',
-        color: 'Yellow أصفر'
-      }
-    ],
-    quantity: 1,
-    amount: 680,
-    subtotal: 680,
-    discount: 0,
-    shipping: 60,
-    paymentMethod: 'InstaPay (تم التحقق • Ref: 881294)',
-    paymentStatus: 'paid',
-    shippingStatus: 'ready_for_pickup',
-    courier: 'Bosta Express',
-    trackingNumber: 'BST-DF-88120',
-    date: 'منذ ساعتين',
-    createdAt: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
-    attributedCreator: '@drip_fit'
-  },
-  {
-    id: 'DF-8840',
-    merchantId: '171842bd-daed-40ef-853f-917eab2ed437',
-    merchantName: 'Drip Fit • دريب فيت',
-    customerName: 'كريم عادل (Karim Adel)',
-    phone: '+20 112 345 6789',
-    address: 'المعادي، القاهرة - شارع 15',
-    productTitle: 'The Sharp V Yellow Oversized T-Shirt • XL',
-    items: [
-      {
-        productId: '11111111-d001-4000-8000-000000000001',
-        title: 'The Sharp V Yellow Oversized T-Shirt',
-        price: 680,
-        quantity: 1,
-        size: 'XL',
-        color: 'Yellow أصفر'
-      }
-    ],
-    quantity: 1,
-    amount: 680,
-    subtotal: 680,
-    discount: 0,
-    shipping: 60,
-    paymentMethod: 'الدفع عند الاستلام (COD)',
-    paymentStatus: 'pending_cod',
-    shippingStatus: 'in_transit',
-    courier: 'Bosta Express',
-    trackingNumber: 'BST-DF-88119',
-    date: 'منذ 5 ساعات',
-    createdAt: new Date(Date.now() - 5 * 3600 * 1000).toISOString(),
-    attributedCreator: '@drip_fit'
-  }
-];
+export const INITIAL_ORDERS = [];
 
 function getStoredOrders() {
   if (typeof window === 'undefined') return INITIAL_ORDERS;
@@ -234,10 +170,13 @@ export const OrderService = {
         .map(i => `${i.title || i.name || 'منتج'} (${i.quantity || 1} قطعة)`)
         .join(' + ');
 
+      const matchedMerchant = MERCHANTS_DATA.find(m => m.id === merchantId || m.slug === merchantId);
+      const merchantName = mItems[0]?.merchant || mItems[0]?.merchantName || matchedMerchant?.name || 'متجر معتمد';
+
       const merchantOrder = {
         id: `EG-${Math.floor(1000 + Math.random() * 9000)}`,
         merchantId: merchantId,
-        merchantName: mItems[0]?.merchant || (merchantId === '171842bd-daed-40ef-853f-917eab2ed437' ? 'Drip Fit • دريب فيت' : merchantId === '171842bd-daed-40ef-853f-917eab2ed437' ? 'Khan El Khalili Craft' : 'Tiba Jewelry'),
+        merchantName: merchantName,
         customerName: customerName,
         phone: phone,
         address: address,

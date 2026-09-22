@@ -15,8 +15,16 @@ export default function NotificationCenter({ isOpen, onClose, anchorRef }) {
 
   // Load notifications for the current role
   useEffect(() => {
-    const list = NotificationService.getNotifications(currentRole, userId);
-    setNotifications(list);
+    const loadNotifs = () => {
+      const list = NotificationService.getNotifications(currentRole, userId);
+      setNotifications(list);
+    };
+    loadNotifs();
+
+    window.addEventListener('eg_notifications_updated', loadNotifs);
+    return () => {
+      window.removeEventListener('eg_notifications_updated', loadNotifs);
+    };
   }, [currentRole, userId, isOpen]);
 
   // Click outside to close

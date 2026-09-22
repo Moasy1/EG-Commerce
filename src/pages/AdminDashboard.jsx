@@ -760,11 +760,11 @@ export default function AdminDashboard() {
                     value={orderStoreFilter}
                     onChange={e => setOrderStoreFilter(e.target.value)}
                   className="h-10 px-3 rounded-lg border border-gray-200 bg-gray-50 text-xs font-bold text-gray-700 cursor-pointer focus:outline-none"
-                  >
+                >
                     <option value="all">{isAr ? 'كل المتاجر' : 'All Stores'}</option>
-                    <option value="171842bd-daed-40ef-853f-917eab2ed437">Drip Fit</option>
-                    <option value="171842bd-daed-40ef-853f-917eab2ed437">Khan El Khalili Craft</option>
-                    <option value="171842bd-daed-40ef-853f-917eab2ed437">Tiba Jewelry</option>
+                    {(merchants || []).map(m => (
+                      <option key={m.id} value={m.id}>{m.name || m.store_name || m.id}</option>
+                    ))}
                   </select>
                   <select
                     value={orderStatusFilter}

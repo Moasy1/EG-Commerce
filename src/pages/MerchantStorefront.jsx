@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { ReelsService } from '../services/ReelsService';
+import sharedReelsData from '../../data/shared_reels.json';
 
 export default function MerchantStorefront() {
   const {
@@ -22,6 +23,12 @@ export default function MerchantStorefront() {
   const currentMerchant = (merchants && merchants.length > 0)
     ? (merchants.find(m => m.id === selectedMerchantId) || merchants[0])
     : {};
+
+  const storeReel = (sharedReelsData || []).find(r => 
+    (currentMerchant.slug && r.storeSlug?.toLowerCase() === currentMerchant.slug.toLowerCase()) ||
+    (currentMerchant.id && r.merchantId === currentMerchant.id) ||
+    (r.creatorHandle && currentMerchant.slug && r.creatorHandle.toLowerCase().includes(currentMerchant.slug.toLowerCase()))
+  ) || null;
   const merchantProducts = (products || []).filter(p => 
     (currentMerchant.id && p.merchantId === currentMerchant.id) || 
     (currentMerchant.slug && p.merchantId?.includes(currentMerchant.slug)) ||
@@ -1016,53 +1023,123 @@ export default function MerchantStorefront() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: accentColor }}>
-                      مواقع التواصل الاجتماعي
+                      ريلز وفيديوهات المتجر
                     </span>
                     <h3 className="text-base sm:text-lg font-bold font-serif">
-                      انضمي إلى مجتمع {currentMerchant.name} ({currentMerchant.instagram || '@drip_fit'})
+                      كولكشن {currentMerchant.name} بالفيديو الحي
                     </h3>
                   </div>
                   <div className="flex items-center gap-2">
-                    <a
-                      href="https://instagram.com" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
+                    <button
+                      onClick={() => navigateToProfile(currentMerchant.slug || 'drip-fit')}
                       className={`px-3.5 py-1.5 ${borderRadius} border text-xs font-bold transition-all flex items-center gap-1.5 ${subCardBgClass} hover:opacity-80`}
                     >
-                      <span className="text-pink-400 font-mono font-bold">IG</span>
-                      <span>42.8K متابعة</span>
-                    </a>
-                    <a
-                      href="https://tiktok.com" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className={`px-3.5 py-1.5 ${borderRadius} border text-xs font-bold transition-all flex items-center gap-1.5 ${subCardBgClass} hover:opacity-80`}
-                    >
-                      <span className="text-cyan-400 font-mono font-bold">TT</span>
-                      <span>1.2M مشاهدة</span>
-                    </a>
+                      <span className="material-symbols-outlined text-[16px] text-rose-500">account_circle</span>
+                      <span>الملف الاجتماعي ({currentMerchant.instagram || `@${currentMerchant.slug}`})</span>
+                    </button>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  {[
-                    { id: 'sm1', label: 'كواليس التطريز اليدوي 🪡', img: '/images/reels/reel_3.jpg' },
-                    { id: 'sm2', label: 'أزياء الكتان في شوارع المعز 🌿', img: '/images/reels/reel_1.jpg' },
-                    { id: 'sm3', label: 'تنسيقات عصرية للرووف لاونج ☀️', img: '/images/reels/reel_2.jpg' },
-                    { id: 'sm4', label: 'ورشة النحاس والتحف الفاطمية 📦', img: '/images/reels/reel_4.jpg' },
-                  ].map((item) => (
-                    <div key={item.id} className={`group aspect-square ${borderRadius} overflow-hidden relative border ${subCardBgClass}`}>
-                      <img 
-                        src={item.img} 
-                        alt={item.label}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-2 text-center">
-                        <span className="text-[11px] font-bold text-white">{item.label}</span>
+                {/* Main Store Reel & Media Showcase */}
+                {storeReel ? (
+                  <div className={`p-4 sm:p-6 ${borderRadius} border ${cardBgClass} grid grid-cols-1 md:grid-cols-12 gap-6 items-center shadow-xs`}>
+                    {/* Vertical 9:16 Video Player */}
+                    <div className="md:col-span-4 flex justify-center">
+                      <div className="w-full max-w-[260px] aspect-[9/16] rounded-2xl overflow-hidden shadow-xl relative border-2 border-white/10 bg-black">
+                        <video
+                          src={storeReel.videoBg || storeReel.video_url}
+                          poster={storeReel.thumbnail || storeReel.avatar}
+                          controls
+                          playsInline
+                          className="w-full h-full object-cover"
+                        />
                       </div>
                     </div>
-                  ))}
-                </div>
+
+                    {/* Reel Information & Tagged Product Quick Buy */}
+                    <div className="md:col-span-8 space-y-4 text-right">
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-red-500/10 text-red-500 border border-red-500/20">
+                        <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                        <span>فيديو الكولكشن الرسمي الحصري</span>
+                      </div>
+
+                      <h4 className="text-base sm:text-lg font-bold leading-relaxed">
+                        {storeReel.caption}
+                      </h4>
+
+                      <div className={`p-3.5 ${borderRadius} border ${subCardBgClass} flex items-center justify-between gap-4 flex-wrap`}>
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={storeReel.products?.[0]?.image || storeReel.thumbnail}
+                            alt={storeReel.products?.[0]?.title || 'Product'}
+                            className={`w-12 h-12 ${borderRadius} object-cover border border-white/10 shrink-0`}
+                          />
+                          <div>
+                            <span className="text-[10px] opacity-70 block font-bold">المنتج المعروض في الفيديو:</span>
+                            <span className="text-xs sm:text-sm font-bold block">{storeReel.products?.[0]?.title || currentMerchant.name}</span>
+                            <span className="text-xs font-black" style={{ color: accentColor }}>
+                              {storeReel.products?.[0]?.price ? `${storeReel.products[0].price} ج.م` : ''}
+                            </span>
+                          </div>
+                        </div>
+
+                        {storeReel.products?.[0] && (
+                          <button
+                            onClick={() => openQuickBuy ? openQuickBuy(storeReel.products[0]) : openProductDetail(storeReel.products[0])}
+                            className={`px-4 py-2 ${borderRadius} text-white text-xs font-bold shadow-md hover:brightness-110 active:scale-95 transition-all flex items-center gap-1`}
+                            style={{ backgroundColor: accentColor }}
+                          >
+                            <span className="material-symbols-outlined text-[16px]">shopping_bag</span>
+                            <span>طلب فوري من الريلز</span>
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Store Media Images Gallery */}
+                      <div className="pt-2">
+                        <span className="text-[11px] font-bold block mb-2 opacity-80">معرض صور وتفاصيل القطع:</span>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                          {displayedProducts.slice(0, 4).map((prod) => (
+                            <div
+                              key={prod.id}
+                              onClick={() => openProductDetail(prod)}
+                              className={`group aspect-square ${borderRadius} overflow-hidden relative border cursor-pointer ${subCardBgClass}`}
+                              title={prod.title || prod.name}
+                            >
+                              <img
+                                src={prod.image || prod.img}
+                                alt={prod.title || prod.name}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              />
+                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-1 text-center">
+                                <span className="text-[10px] font-bold text-white leading-tight">{prod.title || prod.name}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {displayedProducts.slice(0, 4).map((prod) => (
+                      <div
+                        key={prod.id}
+                        onClick={() => openProductDetail(prod)}
+                        className={`group aspect-square ${borderRadius} overflow-hidden relative border cursor-pointer ${subCardBgClass}`}
+                      >
+                        <img
+                          src={prod.image || prod.img}
+                          alt={prod.title || prod.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-2 text-center">
+                          <span className="text-[11px] font-bold text-white">{prod.title || prod.name}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </section>
             )}
 

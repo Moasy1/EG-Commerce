@@ -180,29 +180,23 @@ export const ProductService = {
       );
     }
 
-    // Fetch custom products from shared server backend (cross-device sync)
+    // Fetch custom products from shared server backend (cross-device sync with timeout)
     try {
-      const serverUrl = apiConfig.getApiUrl(merchantId ? `/api/products?merchantId=${encodeURIComponent(merchantId)}` : '/api/products');
-      const sRes = await fetch(serverUrl);
-      if (sRes.ok) {
-        const sData = await sRes.json();
-        if (Array.isArray(sData)) {
-          const sFiltered = merchantId 
-            ? sData.filter(p => p.merchantId === merchantId || p.merchant_id === merchantId)
-            : sData;
-          // Merge server products with local storage products
-          const existingIds = new Set(customProducts.map(p => p.id));
-          sFiltered.forEach(sp => {
-            if (!existingIds.has(sp.id)) {
-              customProducts.push(sp);
-              existingIds.add(sp.id);
-            }
-          });
-        }
+      const endpoint = merchantId ? `/api/products?merchantId=${encodeURIComponent(merchantId)}` : '/api/products';
+      const sRes = await apiConfig.safeFetchJson(endpoint, {}, 2000);
+      if (sRes.ok && Array.isArray(sRes.data)) {
+        const sFiltered = merchantId 
+          ? sRes.data.filter(p => p.merchantId === merchantId || p.merchant_id === merchantId)
+          : sRes.data;
+        const existingIds = new Set(customProducts.map(p => p.id));
+        sFiltered.forEach(sp => {
+          if (!existingIds.has(sp.id)) {
+            customProducts.push(sp);
+            existingIds.add(sp.id);
+          }
+        });
       }
-    } catch (sErr) {
-      console.warn('[ProductService] Server products sync notice:', sErr.message);
-    }
+    } catch (sErr) {}
 
     try {
       let query = supabase.from('products').select('*');
@@ -383,16 +377,16 @@ export const ProductService = {
     }
 
     // 3. Persist product to shared server backend for cross-device sync
+    // 3. Persist product to shared server backend for cross-device sync (background with timeout)
     try {
-      await fetch(apiConfig.getApiUrl('/api/products'), {
+      apiConfig.safeFetchJson('/api/products', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(finalProduct)
-      });
-      console.log('[ProductService] Product synced to shared server backend:', finalProduct.title);
-    } catch (serverErr) {
-      console.warn('[ProductService] Server product sync notice:', serverErr.message);
-    }
+      }, 2500).then(res => {
+        if (res.ok) console.log('[ProductService] Product synced to shared server backend:', finalProduct.title);
+      }).catch(e => {});
+    } catch (serverErr) {}
 
     return finalProduct;
   },
@@ -513,54 +507,44 @@ export const ProductService = {
       }
     } catch (e) {}
 
-    // Fetch shared merchants from server backend (cross-device sync)
+    // Fetch shared merchants from server backend (cross-device sync with timeout)
     try {
-      const mRes = await fetch(apiConfig.getApiUrl('/api/merchants'));
-      if (mRes.ok) {
-        const serverMerchants = await mRes.json();
-        if (Array.isArray(serverMerchants)) {
-          serverMerchants.forEach(sm => {
-            if (!custom.some(c => c.id === sm.id || c.slug === sm.slug)) {
-              custom.push(sm);
-            }
-          });
-        }
+      const mRes = await apiConfig.safeFetchJson('/api/merchants', {}, 2000);
+      if (mRes.ok && Array.isArray(mRes.data)) {
+        mRes.data.forEach(sm => {
+          if (!custom.some(c => c.id === sm.id || c.slug === sm.slug)) {
+            custom.push(sm);
+          }
+        });
       }
-    } catch (mErr) {
-      console.warn('[ProductService] Server merchants fetch notice:', mErr.message);
-    }
+    } catch (mErr) {}
 
-    // Also fetch registered users from server backend to check for merchant accounts
+    // Also fetch registered users from server backend to check for merchant accounts (with timeout)
     try {
-      const uRes = await fetch(apiConfig.getApiUrl('/api/users'));
-      if (uRes.ok) {
-        const serverUsers = await uRes.json();
-        if (serverUsers && typeof serverUsers === 'object') {
-          Object.values(serverUsers).forEach(acc => {
-            if (acc.role === 'merchant') {
-              const id = acc.merchant_id || acc.id;
-              const slug = acc.store_slug || acc.slug || generateStoreSlug(acc.store_name || acc.name, acc.email, id);
-              if (!custom.some(c => c.id === id || c.slug === slug)) {
-                custom.push({
-                  id,
-                  user_id: acc.id,
-                  name: acc.store_name || `${acc.name} Store • متجر ${acc.name}`,
-                  shortName: acc.store_name || acc.name,
-                  slug,
-                  handle: `@${slug}`,
-                  subdomain: `${slug}.egyptian-commerce.com`,
-                  logo: acc.avatar_url || '/images/brands/dripfit_logo.png',
-                  banner: '/images/products/the_sharp_v_yellow_1.webp',
-                  verified: true
-                });
-              }
+      const uRes = await apiConfig.safeFetchJson('/api/users', {}, 2000);
+      if (uRes.ok && uRes.data && typeof uRes.data === 'object') {
+        Object.values(uRes.data).forEach(acc => {
+          if (acc.role === 'merchant') {
+            const id = acc.merchant_id || acc.id;
+            const slug = acc.store_slug || acc.slug || generateStoreSlug(acc.store_name || acc.name, acc.email, id);
+            if (!custom.some(c => c.id === id || c.slug === slug)) {
+              custom.push({
+                id,
+                user_id: acc.id,
+                name: acc.store_name || `${acc.name} Store • متجر ${acc.name}`,
+                shortName: acc.store_name || acc.name,
+                slug,
+                handle: `@${slug}`,
+                subdomain: `${slug}.egyptian-commerce.com`,
+                logo: acc.avatar_url || '/images/brands/dripfit_logo.png',
+                banner: '/images/products/the_sharp_v_yellow_1.webp',
+                verified: true
+              });
             }
-          });
-        }
+          }
+        });
       }
-    } catch (uErr) {
-      console.warn('[ProductService] Server users fetch notice:', uErr.message);
-    }
+    } catch (uErr) {}
 
     // Build map starting from full canonical MERCHANTS_DATA
     const merchantMap = new Map();

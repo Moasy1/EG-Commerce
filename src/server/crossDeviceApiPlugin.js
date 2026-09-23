@@ -75,10 +75,12 @@ function generateStoreSlug(name, email, id) {
 }
 
 function parseBody(req) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     let raw = '';
+    const timer = setTimeout(() => resolve({}), 2000);
     req.on('data', chunk => { raw += chunk; });
     req.on('end', () => {
+      clearTimeout(timer);
       if (!raw) return resolve({});
       try {
         resolve(JSON.parse(raw));
@@ -86,7 +88,10 @@ function parseBody(req) {
         resolve({});
       }
     });
-    req.on('error', reject);
+    req.on('error', () => {
+      clearTimeout(timer);
+      resolve({});
+    });
   });
 }
 

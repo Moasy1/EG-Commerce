@@ -7,14 +7,24 @@ const supabaseAnonKey = (typeof import.meta !== 'undefined' && import.meta.env?.
                        (typeof process !== 'undefined' && process.env?.VITE_SUPABASE_ANON_KEY) || 
                        'sb_publishable_Wa3PBB1IaxacwZLo0pzuzQ_hr1trRPR';
 
-// Safe fetch with 3.5s timeout so asleep databases or network 522s don't freeze the client
+// Safe fetch with 2.5s strict timeout so asleep databases or network issues never freeze the client
 const fetchWithTimeout = async (url, options = {}) => {
   const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), 3500);
+  const id = setTimeout(() => controller.abort(new Error('Supabase request timeout')), 2500);
+
+  let signal = controller.signal;
+  if (options.signal) {
+    if (typeof AbortSignal.any === 'function') {
+      signal = AbortSignal.any([options.signal, controller.signal]);
+    } else {
+      options.signal.addEventListener('abort', () => controller.abort(options.signal.reason), { once: true });
+    }
+  }
+
   try {
     const response = await fetch(url, {
       ...options,
-      signal: options.signal || controller.signal
+      signal
     });
     clearTimeout(id);
     return response;
@@ -25,6 +35,11 @@ const fetchWithTimeout = async (url, options = {}) => {
 };
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true
+  },
   global: {
     fetch: fetchWithTimeout
   }

@@ -50,6 +50,33 @@ export const apiConfig = {
     const cleanPath = mediaPath.startsWith('/') ? mediaPath : `/${mediaPath}`;
     const mediaBase = getHostingerMediaBase();
     return mediaBase ? `${mediaBase}${cleanPath}` : cleanPath;
+  },
+
+  /**
+   * Safe fetch with timeout and JSON validation (safely ignores HTML SPA fallbacks)
+   */
+  async safeFetchJson(endpoint, options = {}, timeoutMs = 2500) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(new Error('Request timeout')), timeoutMs);
+    try {
+      const url = this.getApiUrl(endpoint);
+      const res = await fetch(url, {
+        ...options,
+        signal: controller.signal
+      });
+      clearTimeout(id);
+
+      const contentType = res.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        return { ok: false, status: res.status, data: null, isHtml: contentType.includes('text/html'), error: 'Non-JSON response' };
+      }
+
+      const data = await res.json();
+      return { ok: res.ok, status: res.status, data, error: res.ok ? null : data?.error || 'Request failed' };
+    } catch (err) {
+      clearTimeout(id);
+      return { ok: false, status: 0, data: null, error: err.message };
+    }
   }
 };
 

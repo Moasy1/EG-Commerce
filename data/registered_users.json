@@ -209,5 +209,28 @@
       "slug": "fayrouz-royal-boutique"
     },
     "updated_at": "2026-09-22T23:53:52.997Z"
+  },
+  "fayrouz_1790123201172@egyptian-commerce.com": {
+    "id": "usr-1790123201173",
+    "email": "fayrouz_1790123201172@egyptian-commerce.com",
+    "password": "securepassword123",
+    "name": "بوتيك فيروز الملكي • Fayrouz Royal Boutique",
+    "role": "merchant",
+    "merchant_id": "m-1790123201172",
+    "store_name": "بوتيك فيروز الملكي • Fayrouz Royal Boutique",
+    "store_slug": "fayrouz-royal-boutique",
+    "slug": "fayrouz-royal-boutique",
+    "is_merchant": true,
+    "avatar_url": "/images/brands/dripfit_logo.png",
+    "reward_points_balance": 500,
+    "user_metadata": {
+      "name": "بوتيك فيروز الملكي • Fayrouz Royal Boutique",
+      "role": "merchant",
+      "merchant_id": "m-1790123201172",
+      "store_name": "بوتيك فيروز الملكي • Fayrouz Royal Boutique",
+      "store_slug": "fayrouz-royal-boutique",
+      "slug": "fayrouz-royal-boutique"
+    },
+    "updated_at": "2026-09-23T00:26:41.180Z"
   }
 }

@@ -160,6 +160,12 @@ export default function AuthModal() {
 
     setLoading(true);
 
+    // Safety watchdog: ensure loading never hangs under any circumstance
+    const timeoutWatchdog = setTimeout(() => {
+      setLoading(false);
+      setError(isAr ? 'استغرقت العملية وقتاً أطول من المتوقع. يرجى المحاولة مرة أخرى.' : 'Operation took longer than expected. Please try again.');
+    }, 6000);
+
     try {
       let authRes;
       if (mode === 'login') {
@@ -168,8 +174,9 @@ export default function AuthModal() {
         authRes = await AuthService.signUpWithEmail(trimmedEmail, password, selectedRole, name);
       }
       
-      const currentUser = await AuthService.getCurrentUser();
-      const userToSet = authRes?.user || currentUser;
+      const userToSet = authRes?.user || (await AuthService.getCurrentUser());
+      clearTimeout(timeoutWatchdog);
+
       if (userToSet) {
         setUser(userToSet);
         if (userToSet.role) {
@@ -178,14 +185,26 @@ export default function AuthModal() {
         if (userToSet.role === 'merchant') {
           setSelectedMerchantId(userToSet.merchant_id || `m-${userToSet.id}`);
         }
-        await refreshData(userToSet);
+        
+        // Immediately close modal and unblock UI
+        setIsAuthModalOpen(false);
+        setLoading(false);
+
+        // Run data refresh asynchronously without blocking user
+        try {
+          refreshData(userToSet).catch(err => console.warn('Background refreshData notice:', err));
+        } catch (e) {}
         window.dispatchEvent(new Event('eg_profiles_updated'));
+        return;
       }
       
       setIsAuthModalOpen(false);
     } catch (err) {
+      clearTimeout(timeoutWatchdog);
+      console.error('Auth submit error:', err);
       setError(err.message || (isAr ? 'فشل تسجيل الدخول. يمكنك تجربة الدخول السريع بنقرة واحدة أدناه.' : 'Login failed. You can use 1-Click Quick Demo Login below.'));
     } finally {
+      clearTimeout(timeoutWatchdog);
       setLoading(false);
     }
   };
@@ -200,9 +219,12 @@ export default function AuthModal() {
       if (demoUser.role === 'merchant') {
         setSelectedMerchantId(demoUser.merchant_id || '171842bd-daed-40ef-853f-917eab2ed437');
       }
-      await refreshData(demoUser);
-      window.dispatchEvent(new Event('eg_profiles_updated'));
       setIsAuthModalOpen(false);
+      setLoading(false);
+      try {
+        refreshData(demoUser).catch(err => console.warn('Background refreshData notice:', err));
+      } catch (e) {}
+      window.dispatchEvent(new Event('eg_profiles_updated'));
     } catch (err) {
       setError(err.message || (isAr ? 'حدث خطأ أثناء الدخول التجريبي' : 'Error during demo sign-in'));
     } finally {

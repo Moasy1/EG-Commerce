@@ -339,16 +339,64 @@ export const AuthService = {
 
   async signInWithEmail(email, password) {
     const cleanEmail = (email || '').trim().toLowerCase();
+    if (!cleanEmail) {
+      throw new Error('يرجى إدخال البريد الإلكتروني.');
+    }
 
-    // 0. Verify password match against registered accounts registry if present
+    // 1. Check local persistent registered accounts registry first (instant login)
     const registeredAccount = getRegisteredAccounts()[cleanEmail];
-    if (registeredAccount && registeredAccount.password) {
-      if (password !== registeredAccount.password) {
+    if (registeredAccount) {
+      if (registeredAccount.password && password && registeredAccount.password !== password) {
         throw new Error('كلمة المرور غير صحيحة. يرجى التأكد من كلمة المرور المدخلة.');
+      }
+      localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(registeredAccount));
+      return { user: registeredAccount, session: { access_token: 'reg-token' } };
+    }
+
+    // 2. Match demo accounts (instant demo login)
+    for (const [key, demo] of Object.entries(DEMO_USERS)) {
+      const demoPrefix = demo.email.split('@')[0];
+      const legacyEmail = `${demoPrefix}@eg-commerce.com`;
+      const inputPrefix = cleanEmail.split('@')[0];
+
+      if (cleanEmail === demo.email || cleanEmail === legacyEmail || inputPrefix === demoPrefix) {
+        if (demo.password && password && demo.password !== password) {
+          throw new Error('كلمة المرور غير صحيحة. يرجى التأكد من كلمة المرور المدخلة.');
+        }
+        const sessionUser = {
+          ...demo,
+          user_metadata: { name: demo.name, role: demo.role, merchant_id: demo.merchant_id }
+        };
+        localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(sessionUser));
+        return { user: sessionUser, session: { access_token: 'demo-token' } };
       }
     }
 
-    // 1. Try real Supabase auth
+    // 3. Check shared server backend for multi-device login (safe with 2000ms timeout)
+    try {
+      const serverLoginRes = await apiConfig.safeFetchJson('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: cleanEmail, password })
+      }, 2000);
+
+      if (serverLoginRes.ok && serverLoginRes.data?.user) {
+        const serverUser = serverLoginRes.data.user;
+        saveRegisteredAccount(cleanEmail, serverUser);
+        localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(serverUser));
+        console.log('[AuthService] Successfully logged in from shared server registry:', cleanEmail);
+        return { user: serverUser, session: { access_token: serverLoginRes.data.token || 'server-session' } };
+      } else if (serverLoginRes.status === 401) {
+        throw new Error('كلمة المرور غير صحيحة. يرجى التأكد من كلمة المرور المدخلة.');
+      }
+    } catch (netErr) {
+      if (netErr.message && netErr.message.includes('كلمة المرور غير صحيحة')) {
+        throw netErr;
+      }
+      console.warn('[AuthService] Server login lookup notice:', netErr.message);
+    }
+
+    // 4. Try Supabase live auth
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email: cleanEmail,
@@ -366,9 +414,8 @@ export const AuthService = {
           profile = pData;
         } catch (pErr) {}
 
-        const cachedReg = getRegisteredAccounts()[cleanEmail];
-        const role = profile?.role || data.user.user_metadata?.role || cachedReg?.role || 'buyer';
-        const name = profile?.name || data.user.user_metadata?.name || cachedReg?.name || cleanEmail.split('@')[0];
+        const role = profile?.role || data.user.user_metadata?.role || 'buyer';
+        const name = profile?.name || data.user.user_metadata?.name || cleanEmail.split('@')[0];
         
         let merchantRecord = null;
         if (role === 'merchant') {
@@ -380,43 +427,13 @@ export const AuthService = {
               .maybeSingle();
             if (mData) merchantRecord = mData;
           } catch (e) {}
-
-          if (!merchantRecord) {
-            try {
-              const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-              const { data: mData2 } = await supabase
-                .from('merchants')
-                .select('*')
-                .eq('slug', slug)
-                .maybeSingle();
-              if (mData2) merchantRecord = mData2;
-            } catch (e) {}
-          }
-
-          if (!merchantRecord) {
-            try {
-              const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'store';
-              const { data: newM } = await supabase
-                .from('merchants')
-                .insert({
-                  user_id: data.user.id,
-                  store_name: name,
-                  slug: slug,
-                  is_verified: true
-                })
-                .select()
-                .single();
-              if (newM) merchantRecord = newM;
-            } catch (e) {}
-          }
         }
 
         const merchant_id = merchantRecord?.id || 
           profile?.merchant_id || 
           data.user.user_metadata?.merchant_id || 
-          cachedReg?.merchant_id || 
           (role === 'merchant' ? `m-${data.user.id}` : null);
-        const creator_id = profile?.creator_id || data.user.user_metadata?.creator_id || cachedReg?.creator_id || (role === 'creator' ? `cr-${data.user.id}` : null);
+        const creator_id = profile?.creator_id || data.user.user_metadata?.creator_id || (role === 'creator' ? `cr-${data.user.id}` : null);
         const store_slug = merchantRecord?.slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
         const authenticatedUser = {
@@ -436,60 +453,10 @@ export const AuthService = {
         return { user: authenticatedUser, session: data.session };
       }
     } catch (supaErr) {
-      console.warn('Supabase auth attempt returned error, checking registered accounts:', supaErr.message);
+      console.warn('Supabase auth attempt returned error:', supaErr.message);
     }
 
-    // 2. Check persistent registered accounts registry
-    if (registeredAccount) {
-      if (registeredAccount.password && password && registeredAccount.password !== password) {
-        throw new Error('كلمة المرور غير صحيحة. يرجى التأكد من كلمة المرور المدخلة.');
-      }
-      localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(registeredAccount));
-      return { user: registeredAccount, session: { access_token: 'reg-token' } };
-    }
-
-    // 2.5 Check shared server backend for multi-device login
-    try {
-      const serverLoginRes = await fetch(apiConfig.getApiUrl('/api/auth/login'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: cleanEmail, password })
-      });
-      if (serverLoginRes.ok) {
-        const loginData = await serverLoginRes.json();
-        if (loginData?.user) {
-          saveRegisteredAccount(cleanEmail, loginData.user);
-          localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(loginData.user));
-          console.log('[AuthService] Successfully logged in from shared server registry:', cleanEmail);
-          return { user: loginData.user, session: { access_token: loginData.token || 'server-session' } };
-        }
-      } else if (serverLoginRes.status === 401) {
-        throw new Error('كلمة المرور غير صحيحة. يرجى التأكد من كلمة المرور المدخلة.');
-      }
-    } catch (netErr) {
-      if (netErr.message && netErr.message.includes('كلمة المرور غير صحيحة')) {
-        throw netErr;
-      }
-      console.warn('[AuthService] Server login lookup notice:', netErr.message);
-    }
-
-    // 3. Match demo accounts (support both egyptian-commerce.com and legacy eg-commerce.com)
-    for (const [key, demo] of Object.entries(DEMO_USERS)) {
-      const demoPrefix = demo.email.split('@')[0];
-      const legacyEmail = `${demoPrefix}@eg-commerce.com`;
-      const inputPrefix = cleanEmail.split('@')[0];
-
-      if (cleanEmail === demo.email || cleanEmail === legacyEmail || inputPrefix === demoPrefix) {
-        const sessionUser = {
-          ...demo,
-          user_metadata: { name: demo.name, role: demo.role, merchant_id: demo.merchant_id }
-        };
-        localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(sessionUser));
-        return { user: sessionUser, session: { access_token: 'demo-token' } };
-      }
-    }
-
-    // 4. If account not found in DB or server registry
+    // 5. If account not found in any source
     throw new Error('الحساب غير موجود أو بيانات الدخول غير صحيحة. يرجى التأكد من البريد الإلكتروني وكلمة المرور أو إنشاء حساب جديد.');
   },
 
@@ -625,17 +592,16 @@ export const AuthService = {
     // Save to persistent registry
     saveRegisteredAccount(cleanEmail, newRegisteredUser);
 
-    // Persist to shared server backend for multi-device login
+    // Persist to shared server backend for multi-device login (background with timeout)
     try {
-      await fetch(apiConfig.getApiUrl('/api/auth/register'), {
+      apiConfig.safeFetchJson('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newRegisteredUser)
-      });
-      console.log('[AuthService] Account synced to shared server backend for multi-device access:', cleanEmail);
-    } catch (apiErr) {
-      console.warn('[AuthService] Shared server registration sync notice:', apiErr.message);
-    }
+      }, 2500).then(res => {
+        if (res.ok) console.log('[AuthService] Account synced to shared server backend:', cleanEmail);
+      }).catch(e => {});
+    } catch (apiErr) {}
 
     // If merchant, persist to custom merchants registry
     if (sanitizedRole === 'merchant') {
@@ -664,17 +630,16 @@ export const AuthService = {
         customMerchants = [newMerchantRecord, ...customMerchants.filter(m => m.id !== generatedMerchantId)];
         localStorage.setItem('eg_custom_merchants', JSON.stringify(customMerchants));
 
-        // Persist merchant boutique to shared backend so all devices see it in Marketplace
+        // Persist merchant boutique to shared backend so all devices see it in Marketplace (background with timeout)
         try {
-          await fetch(apiConfig.getApiUrl('/api/merchants'), {
+          apiConfig.safeFetchJson('/api/merchants', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newMerchantRecord)
-          });
-          console.log('[AuthService] Merchant boutique synced to shared server:', newMerchantRecord.name);
-        } catch (mServerErr) {
-          console.warn('[AuthService] Server merchant sync notice:', mServerErr.message);
-        }
+          }, 2500).then(res => {
+            if (res.ok) console.log('[AuthService] Merchant boutique synced to shared server:', newMerchantRecord.name);
+          }).catch(e => {});
+        } catch (mServerErr) {}
       } catch (e) {}
     }
 

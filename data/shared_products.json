@@ -1,5 +1,24 @@
 [
   {
+    "id": "p-1790123201235",
+    "sku": "EG-201235",
+    "title": "فستان ملكي مطرز فاخر",
+    "price": 1450,
+    "originalPrice": 1850,
+    "merchant": "بوتيك فيروز الملكي • Fayrouz Royal Boutique",
+    "merchantId": "m-1790123201172",
+    "merchantSlug": "fayrouz-royal-boutique",
+    "image": "/images/products/the_sharp_v_yellow_1.webp",
+    "images": [
+      "/images/products/the_sharp_v_yellow_1.webp"
+    ],
+    "video": "/images/reels/the_sharp_v_yellow_reel.mp4",
+    "category": "الفساتين",
+    "description": "فستان راقي من تصميم بوتيك فيروز الملكي",
+    "stock": 25,
+    "isSyndicated": true
+  },
+  {
     "id": "p-1790121233000",
     "sku": "EG-233000",
     "title": "فستان ملكي مطرز فاخر",

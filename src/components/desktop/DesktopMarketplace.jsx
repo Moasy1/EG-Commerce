@@ -14,6 +14,7 @@ export default function DesktopMarketplace() {
     setActiveTab, 
     openCategoryPage,
     navigateToProfile,
+    navigateToStorefront,
     language 
   } = useApp();
   const isAr = language === 'ar';
@@ -183,9 +184,9 @@ export default function DesktopMarketplace() {
                 {topStores.map(store => (
                   <div 
                     key={store.id} 
-                    onClick={() => navigateToProfile(store.slug || store.handle || store.id)}
+                    onClick={() => navigateToStorefront(store.slug || store.id)}
                     className="flex flex-col items-center gap-1 cursor-pointer group shrink-0"
-                    title={isAr ? `زيارة بروفايل ${store.name}` : `View ${store.name} profile`}
+                    title={isAr ? `زيارة متجر ${store.name}` : `Visit ${store.name} store`}
                   >
                     <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-sm ring-2 ring-gray-100 group-hover:ring-[#d00000]/50 transition-all">
                       <img src={store.image} alt={store.name} className="w-full h-full object-cover" />

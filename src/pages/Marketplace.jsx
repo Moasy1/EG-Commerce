@@ -15,6 +15,7 @@ export default function Marketplace() {
     addToCart,
     openCategoryPage,
     navigateToProfile,
+    navigateToStorefront,
     language
   } = useApp();
   
@@ -124,7 +125,7 @@ export default function Marketplace() {
           {topStores.map(store => (
             <div 
               key={store.id} 
-              onClick={() => navigateToProfile(store.slug || store.handle || store.id)}
+              onClick={() => navigateToStorefront(store.slug || store.id)}
               className="flex flex-col items-center gap-1.5 shrink-0 cursor-pointer group"
             >
               <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white shadow-sm ring-2 ring-gray-100 group-hover:ring-[#d00000]/50 transition-all">

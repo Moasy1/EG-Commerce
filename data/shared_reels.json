@@ -1,5 +1,75 @@
 [
   {
+    "id": "reel-1790124044816",
+    "creatorId": "usr-1790124044756",
+    "creatorHandle": "@fayrouz-royal-boutique",
+    "creatorName": "بوتيك فيروز الملكي • Fayrouz Royal Boutique",
+    "publisherId": "usr-1790124044756",
+    "publisherRole": "merchant",
+    "merchantId": "m-1790124044756",
+    "storeSlug": "fayrouz-royal-boutique",
+    "isMerchantReel": true,
+    "videoBg": "/images/reels/the_sharp_v_yellow_reel.mp4",
+    "avatar": "/images/brands/dripfit_logo.png",
+    "caption": "إطلالة حصرية جديدة من بوتيك فيروز الملكي 🇪🇬✨ #فستان_ملكي",
+    "products": [
+      {
+        "id": "p-1790124044807",
+        "sku": "EG-044807",
+        "title": "فستان ملكي مطرز فاخر",
+        "price": 1450,
+        "originalPrice": 1850,
+        "merchant": "بوتيك فيروز الملكي • Fayrouz Royal Boutique",
+        "merchantId": "m-1790124044756",
+        "merchantSlug": "fayrouz-royal-boutique",
+        "image": "/images/products/the_sharp_v_yellow_1.webp",
+        "images": [
+          "/images/products/the_sharp_v_yellow_1.webp"
+        ],
+        "video": "/images/reels/the_sharp_v_yellow_reel.mp4",
+        "category": "الفساتين",
+        "description": "فستان راقي من تصميم بوتيك فيروز الملكي",
+        "stock": 25,
+        "isSyndicated": true
+      }
+    ]
+  },
+  {
+    "id": "reel-1790123826278",
+    "creatorId": "usr-1790123826269",
+    "creatorHandle": "@fayrouz-royal-boutique",
+    "creatorName": "بوتيك فيروز الملكي • Fayrouz Royal Boutique",
+    "publisherId": "usr-1790123826269",
+    "publisherRole": "merchant",
+    "merchantId": "m-1790123826269",
+    "storeSlug": "fayrouz-royal-boutique",
+    "isMerchantReel": true,
+    "videoBg": "/images/reels/the_sharp_v_yellow_reel.mp4",
+    "avatar": "/images/brands/dripfit_logo.png",
+    "caption": "إطلالة حصرية جديدة من بوتيك فيروز الملكي 🇪🇬✨ #فستان_ملكي",
+    "products": [
+      {
+        "id": "p-1790123826276",
+        "sku": "EG-826276",
+        "title": "فستان ملكي مطرز فاخر",
+        "price": 1450,
+        "originalPrice": 1850,
+        "merchant": "بوتيك فيروز الملكي • Fayrouz Royal Boutique",
+        "merchantId": "m-1790123826269",
+        "merchantSlug": "fayrouz-royal-boutique",
+        "image": "/images/products/the_sharp_v_yellow_1.webp",
+        "images": [
+          "/images/products/the_sharp_v_yellow_1.webp"
+        ],
+        "video": "/images/reels/the_sharp_v_yellow_reel.mp4",
+        "category": "الفساتين",
+        "description": "فستان راقي من تصميم بوتيك فيروز الملكي",
+        "stock": 25,
+        "isSyndicated": true
+      }
+    ]
+  },
+  {
     "id": "reel-1790123201251",
     "creatorId": "usr-1790123201173",
     "creatorHandle": "@fayrouz-royal-boutique",

@@ -292,6 +292,22 @@ export default function MerchantStorefront() {
     ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4'
     : 'grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 md:gap-4';
 
+  // Guard: if URL has a specific slug but merchants haven't loaded yet, show skeleton
+  // This prevents the wrong store (merchants[0]) from flashing before data arrives
+  const slugMismatch = urlStoreSlug && currentMerchant?.slug && 
+    currentMerchant.slug.toLowerCase() !== urlStoreSlug.toLowerCase();
+  const merchantsNotLoaded = urlStoreSlug && (!merchants || merchants.length === 0);
+  if (merchantsNotLoaded || slugMismatch) {
+    return (
+      <div className="w-full min-h-screen flex flex-col items-center justify-center bg-surface text-on-surface gap-4 pb-24">
+        <div className="w-14 h-14 rounded-2xl bg-surface-container animate-pulse mb-2" />
+        <div className="h-4 w-40 rounded-full bg-surface-container animate-pulse" />
+        <div className="h-3 w-28 rounded-full bg-surface-container animate-pulse" />
+        <p className="text-xs text-on-surface-variant mt-2 opacity-60">جاري تحميل المتجر...</p>
+      </div>
+    );
+  }
+
   return (
     <div className={`w-full min-h-screen flex flex-col selection:bg-primary/20 pb-24 ${themeRootClass} ${fontClass}`}>
       {/* 1. Top B2B SaaS Subdomain & Platform Bridge Bar (Only displayed for authorized store managers/admins in platform preview mode) */}

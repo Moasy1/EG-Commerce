@@ -589,61 +589,76 @@ export const AuthService = {
       }
     };
 
-    // Save to persistent registry
+    // Save to persistent local registry (fallback for offline)
     saveRegisteredAccount(cleanEmail, newRegisteredUser);
 
-    // Persist to shared server backend for multi-device login (background with timeout)
+    // ─── AWAIT backend write for user account (NOT fire-and-forget) ───
+    // This is the critical step - must succeed for cross-device visibility
+    let backendSaved = false;
     try {
-      apiConfig.safeFetchJson('/api/auth/register', {
+      const registerRes = await apiConfig.safeFetchJson('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newRegisteredUser)
-      }, 2500).then(res => {
-        if (res.ok) console.log('[AuthService] Account synced to shared server backend:', cleanEmail);
-      }).catch(e => {});
-    } catch (apiErr) {}
+      }, 5000);
+      if (registerRes.ok) {
+        backendSaved = true;
+        console.log('[AuthService] ✅ Account saved to shared backend (multi-device ready):', cleanEmail);
+      } else {
+        console.warn('[AuthService] ⚠️ Backend register failed:', registerRes.status, registerRes.error);
+      }
+    } catch (apiErr) {
+      console.warn('[AuthService] ⚠️ Backend unreachable during register:', apiErr?.message);
+    }
 
-    // If merchant, persist to custom merchants registry
+    // ─── If merchant, AWAIT merchant record write ───
     if (sanitizedRole === 'merchant') {
+      const newMerchantRecord = {
+        id: generatedMerchantId,
+        user_id: supaUser?.id || generatedUserId,
+        name: `${defaultName} Store • متجر ${defaultName}`,
+        shortName: defaultName,
+        slug: storeSlug,
+        handle: `@${storeSlug}`,
+        subdomain: `${storeSlug}.egyptian-commerce.com`,
+        customDomain: null,
+        category: 'Egyptian Fashion & Retail',
+        categoryAr: 'أزياء وتجارة مصرية معتمدة',
+        bio: `متجر مصري موثق لـ ${defaultName}`,
+        established: '2026',
+        rating: 5.0,
+        reviewsCount: 1,
+        verified: true,
+        logo: avatarUrl,
+        banner: '/images/products/the_sharp_v_yellow_1.webp'
+      };
+
+      // Always save to localStorage
       try {
         const rawMerchants = localStorage.getItem('eg_custom_merchants');
         let customMerchants = rawMerchants ? JSON.parse(rawMerchants) : [];
-        const newMerchantRecord = {
-          id: generatedMerchantId,
-          user_id: supaUser?.id || generatedUserId,
-          name: `${defaultName} Store • متجر ${defaultName}`,
-          shortName: defaultName,
-          slug: storeSlug,
-          handle: `@${storeSlug}`,
-          subdomain: `${storeSlug}.egyptian-commerce.com`,
-          customDomain: null,
-          category: 'Egyptian Fashion & Retail',
-          categoryAr: 'أزياء وتجارة مصرية معتمدة',
-          bio: `متجر مصري موثق لـ ${defaultName}`,
-          established: '2026',
-          rating: 5.0,
-          reviewsCount: 1,
-          verified: true,
-          logo: avatarUrl,
-          banner: '/images/products/the_sharp_v_yellow_1.webp'
-        };
         customMerchants = [newMerchantRecord, ...customMerchants.filter(m => m.id !== generatedMerchantId)];
         localStorage.setItem('eg_custom_merchants', JSON.stringify(customMerchants));
-
-        // Persist merchant boutique to shared backend so all devices see it in Marketplace (background with timeout)
-        try {
-          apiConfig.safeFetchJson('/api/merchants', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newMerchantRecord)
-          }, 2500).then(res => {
-            if (res.ok) console.log('[AuthService] Merchant boutique synced to shared server:', newMerchantRecord.name);
-          }).catch(e => {});
-        } catch (mServerErr) {}
       } catch (e) {}
+
+      // AWAIT merchant backend write (critical for cross-device marketplace visibility)
+      try {
+        const merchantRes = await apiConfig.safeFetchJson('/api/merchants', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newMerchantRecord)
+        }, 5000);
+        if (merchantRes.ok) {
+          console.log('[AuthService] ✅ Merchant boutique saved to backend (visible on all devices):', newMerchantRecord.name);
+        } else {
+          console.warn('[AuthService] ⚠️ Merchant backend write failed:', merchantRes.error);
+        }
+      } catch (mErr) {
+        console.warn('[AuthService] ⚠️ Merchant backend endpoint unreachable:', mErr?.message);
+      }
     }
 
-    // If creator, persist to custom creators registry
+    // If creator, save to localStorage
     if (sanitizedRole === 'creator') {
       try {
         const rawCreators = localStorage.getItem('eg_custom_creators');
@@ -670,7 +685,14 @@ export const AuthService = {
     // Save active session
     localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(newRegisteredUser));
 
-    return { user: newRegisteredUser };
+    // Broadcast update event so any open tab on this machine refreshes data instantly
+    try {
+      window.dispatchEvent(new CustomEvent('eg_profiles_updated', {
+        detail: { type: 'registration', role: sanitizedRole, email: cleanEmail }
+      }));
+    } catch (e) {}
+
+    return { user: newRegisteredUser, backendSaved };
   },
 
   async getCreators() {

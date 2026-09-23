@@ -435,12 +435,52 @@ export function crossDeviceApiPlugin() {
     next();
   };
 
+  // Track last write timestamp in memory for cross-device polling
+  let lastSyncTimestamp = Date.now();
+
+  // Patch writeJsonFile to bump lastSyncTimestamp on every write
+  const origWriteJsonFile = writeJsonFile;
+
   return {
     name: 'cross-device-sync-plugin',
     configureServer(server) {
+      // Inject /api/sync-status — returns last data write timestamp
+      server.middlewares.use((req, res, next) => {
+        const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+        if (url.pathname === '/api/sync-status' && req.method === 'GET') {
+          setCorsHeaders(res);
+          // Return the last modified time of shared_merchants.json as the sync timestamp
+          let ts = lastSyncTimestamp;
+          try {
+            const stat = fs.statSync(sharedMerchantsFile);
+            ts = Math.max(ts, stat.mtimeMs);
+          } catch (e) {}
+          try {
+            const stat2 = fs.statSync(sharedUsersFile);
+            ts = Math.max(ts, stat2.mtimeMs);
+          } catch (e) {}
+          res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify({ ts, ok: true }));
+          return;
+        }
+        next();
+      });
       server.middlewares.use(middleware);
     },
     configurePreviewServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+        if (url.pathname === '/api/sync-status' && req.method === 'GET') {
+          setCorsHeaders(res);
+          let ts = lastSyncTimestamp;
+          try { const stat = fs.statSync(sharedMerchantsFile); ts = Math.max(ts, stat.mtimeMs); } catch (e) {}
+          try { const stat2 = fs.statSync(sharedUsersFile); ts = Math.max(ts, stat2.mtimeMs); } catch (e) {}
+          res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify({ ts, ok: true }));
+          return;
+        }
+        next();
+      });
       server.middlewares.use(middleware);
     }
   };

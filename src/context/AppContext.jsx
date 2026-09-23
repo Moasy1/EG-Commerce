@@ -709,9 +709,35 @@ export function AppProvider({ children }) {
     };
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('eg_profiles_updated', loadData);
+
+    // ─── Cross-device real-time sync polling ───
+    // Poll /api/sync-status every 8 seconds. If the server data changed (new merchant
+    // registered from another device), reload all data so this browser sees it immediately.
+    let lastKnownSyncTs = Date.now();
+    let syncPollInterval = null;
+    const startSyncPolling = () => {
+      syncPollInterval = setInterval(async () => {
+        try {
+          const res = await fetch('/api/sync-status', { cache: 'no-store' });
+          if (!res.ok) return;
+          const { ts } = await res.json();
+          if (ts && ts > lastKnownSyncTs + 500) {
+            // Server data is newer than what we loaded - reload everything
+            lastKnownSyncTs = ts;
+            console.log('[AppContext] 🔄 Remote data change detected — reloading merchant/user data');
+            loadData();
+          }
+        } catch (e) {
+          // Server unreachable or dev server restarting - ignore silently
+        }
+      }, 8000);
+    };
+    startSyncPolling();
+
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('eg_profiles_updated', loadData);
+      if (syncPollInterval) clearInterval(syncPollInterval);
     };
   }, []);
 

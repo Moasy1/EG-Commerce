@@ -24,28 +24,39 @@ export const INITIAL_ORDERS = [];
 export { INITIAL_PRODUCTS } from '../data/storesData.js';
 
 export function detectSubdomain() {
-  if (typeof window === 'undefined') return { isSubdomain: false, merchantSlug: null, merchantId: '171842bd-daed-40ef-853f-917eab2ed437' };
+  if (typeof window === 'undefined') return { isSubdomain: false, merchantSlug: null, merchantId: null };
   
   const hostname = (window.location.hostname || '').toLowerCase().trim();
   const searchParams = new URLSearchParams(window.location.search);
   const querySub = (searchParams.get('subdomain') || searchParams.get('store') || '').toLowerCase().trim();
 
-  // 1. Explicit query parameter (highest precedence for dev / testing e.g. ?subdomain=talieska or ?subdomain=demo)
+  const norm = s => String(s || '').toLowerCase().replace(/[-_]/g, '');
+
+  const findMerchant = (slugCandidate) => {
+    if (!slugCandidate) return null;
+    const target = slugCandidate.toLowerCase();
+    const targetNorm = norm(target);
+    return MERCHANTS_DATA.find(m => 
+      m.slug.toLowerCase() === target || 
+      m.id.toLowerCase() === target || 
+      norm(m.slug) === targetNorm ||
+      norm(m.shortName) === targetNorm ||
+      m.subdomain?.toLowerCase().includes(target)
+    );
+  };
+
+  // 1. Explicit query parameter (highest precedence for dev / testing e.g. ?subdomain=onefourone or ?subdomain=demo)
   if (querySub) {
     const slug = querySub === 'demo' ? 'drip-fit' : querySub;
-    const found = MERCHANTS_DATA.find(m => 
-      m.slug.toLowerCase() === slug || 
-      m.id.toLowerCase() === slug || 
-      m.subdomain?.toLowerCase().includes(slug)
-    );
+    const found = findMerchant(slug);
     return {
       isSubdomain: true,
-      merchantSlug: slug,
-      merchantId: found ? found.id : '171842bd-daed-40ef-853f-917eab2ed437'
+      merchantSlug: found ? found.slug : slug,
+      merchantId: found ? found.id : null
     };
   }
 
-  // 2. Custom domain match (e.g. dripfit-eg.com, khancraft-eg.com)
+  // 2. Custom domain match (e.g. dripfit-eg.com, onefourone.com)
   const customMatched = MERCHANTS_DATA.find(m => 
     m.customDomain && hostname.includes(m.customDomain.toLowerCase())
   );
@@ -63,7 +74,7 @@ export function detectSubdomain() {
     return { isSubdomain: false, merchantSlug: null, merchantId: null };
   }
 
-  // 4. Subdomain on localhost (e.g. talieska.localhost) or production domain (e.g. drip-fit.egyptian-commerce.com)
+  // 4. Subdomain on localhost (e.g. onefourone.localhost) or production domain (e.g. drip-fit.egyptian-commerce.com)
   const parts = hostname.split('.');
   const isLocalhostDomain = hostname.endsWith('.localhost');
   const minParts = isLocalhostDomain ? 2 : 3;
@@ -73,15 +84,11 @@ export function detectSubdomain() {
     const ignored = ['www', 'app', 'shop', 'api', 'admin', 'stage', 'staging', 'mail', 'cpanel', 'webmail', 'eg-commerce'];
     if (!ignored.includes(prefix)) {
       const slug = prefix === 'demo' ? 'drip-fit' : prefix;
-      const found = MERCHANTS_DATA.find(m => 
-        m.slug.toLowerCase() === slug || 
-        m.id.toLowerCase() === slug || 
-        m.subdomain?.toLowerCase().includes(slug)
-      );
+      const found = findMerchant(slug);
       if (found) {
         return {
           isSubdomain: true,
-          merchantSlug: slug,
+          merchantSlug: found.slug,
           merchantId: found.id
         };
       }
@@ -855,14 +862,25 @@ export function AppProvider({ children }) {
   };
 
   const addProduct = async (newProd) => {
-    const activeMerchant = merchants.find(m => m.id === selectedMerchantId) || merchants[0];
-    const merchantName = newProd.merchant || activeMerchant?.name || user?.name || 'Drip Fit • دريب فيت';
-    const merchantId = newProd.merchantId || activeMerchant?.id || 'm0000000-0000-0000-0000-000000000001';
+    // If the authenticated user is a merchant, strictly scope to their merchant store
+    const isUserMerchant = user?.role === 'merchant';
+    const userMerchantId = isUserMerchant ? (user.merchant_id || user.id) : null;
+    const targetMerchantId = newProd.merchantId || userMerchantId || selectedMerchantId;
+
+    const activeMerchant = (merchants || []).find(m => 
+      m.id === targetMerchantId || 
+      m.slug === targetMerchantId || 
+      (isUserMerchant && (m.user_id === user?.id || m.id === user?.merchant_id))
+    ) || (merchants && merchants[0]);
+
+    const merchantName = newProd.merchant || (isUserMerchant && (activeMerchant?.name || user?.name)) || activeMerchant?.name || 'متجر معتمد';
+    const merchantId = activeMerchant?.id || targetMerchantId || 'm-custom';
 
     const enrichedProd = {
       ...newProd,
       merchant: merchantName,
       merchantId: merchantId,
+      merchantSlug: activeMerchant?.slug || null,
       createdBy: user?.id || null
     };
 
@@ -919,9 +937,10 @@ export function AppProvider({ children }) {
     }
   };
 
-  const deleteProduct = async (productId) => {
+  const deleteProduct = async (productId, merchantId = null) => {
+    const targetMerchantId = merchantId || (user?.role === 'merchant' ? user.merchant_id : selectedMerchantId);
     try {
-      await ProductService.deleteProduct(productId);
+      await ProductService.deleteProduct(productId, targetMerchantId);
       await ReelsService.deleteReel(`reel-${productId}`);
     } catch (e) {}
     setProducts(prev => prev.filter(p => p.id !== productId));

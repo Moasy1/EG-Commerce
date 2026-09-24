@@ -314,10 +314,16 @@ export const AuthService = {
         
       // Default to profile role, then metadata role, then registered accounts registry, fallback to 'buyer'
       const cachedReg = getRegisteredAccounts()[user.email?.toLowerCase().trim()];
-      const role = profile?.role || user.user_metadata?.role || cachedReg?.role || 'buyer';
-      const name = profile?.name || user.user_metadata?.name || cachedReg?.name || user.email?.split('@')[0];
-      const merchant_id = profile?.merchant_id || user.user_metadata?.merchant_id || cachedReg?.merchant_id || (role === 'merchant' ? '171842bd-daed-40ef-853f-917eab2ed437' : null);
-      const creator_id = profile?.creator_id || user.user_metadata?.creator_id || cachedReg?.creator_id || (role === 'creator' ? 'cr-01' : null);
+      let merchant_id = profile?.merchant_id || user.user_metadata?.merchant_id || cachedReg?.merchant_id || null;
+      if (!merchant_id && role === 'merchant') {
+        try {
+          const { data: userMerchant } = await supabase.from('merchants').select('id').eq('user_id', user.id).maybeSingle();
+          merchant_id = userMerchant?.id || `m-${user.id}`;
+        } catch {
+          merchant_id = `m-${user.id}`;
+        }
+      }
+      const creator_id = profile?.creator_id || user.user_metadata?.creator_id || cachedReg?.creator_id || (role === 'creator' ? `cr-${user.id}` : null);
         
       const authenticatedUser = { 
         ...user, 

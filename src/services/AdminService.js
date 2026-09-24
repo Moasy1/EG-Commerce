@@ -383,10 +383,13 @@ export const AdminService = {
     try {
       const stores = await this.getStores();
       const slug = storeData.subdomain.split('.')[0].toLowerCase().replace(/[^a-z0-9-]/g, '');
+      const storeId = storeData.id || `m-${Date.now().toString().slice(-4)}`;
+      const subdomain = storeData.subdomain.includes('.') ? storeData.subdomain : `${slug}.egyptian-commerce.com`;
       const newStore = {
-        id: `m-${Date.now().toString().slice(-4)}`,
+        id: storeId,
         name: storeData.name,
-        subdomain: storeData.subdomain.includes('.') ? storeData.subdomain : `${slug}.egyptian-commerce.com`,
+        slug: slug,
+        subdomain: subdomain,
         customDomain: storeData.customDomain || null,
         owner: storeData.owner || storeData.ownerEmail,
         ownerEmail: storeData.ownerEmail,
@@ -394,10 +397,34 @@ export const AdminService = {
         productsCount: 0,
         revenue: 0,
         themeMode: storeData.themeMode || 'dark',
-        category: storeData.category || 'أزياء وموضة'
+        category: storeData.category || 'أزياء وموضة',
+        created_at: new Date().toISOString()
       };
       const updated = [newStore, ...stores];
       localStorage.setItem(STORAGE_STORES_KEY, JSON.stringify(updated));
+
+      // 1. Sync to Supabase merchants table
+      try {
+        await supabase.from('merchants').upsert({
+          id: storeId.startsWith('m-') ? undefined : storeId,
+          store_name: storeData.name,
+          slug: slug,
+          is_verified: true,
+          email: storeData.ownerEmail || null
+        });
+      } catch (supaErr) {
+        console.warn('Supabase createStore sync notice:', supaErr?.message);
+      }
+
+      // 2. Sync to shared backend API
+      try {
+        apiConfig.safeFetchJson('/api/merchants', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newStore)
+        }, 2000).catch(() => {});
+      } catch (apiErr) {}
+
       return updated;
     } catch {
       return DEFAULT_STORES;
@@ -409,11 +436,36 @@ export const AdminService = {
       const stores = await this.getStores();
       const updated = stores.map(s => {
         if (s.id === storeId) {
-          return { ...s, ...storeData };
+          return { ...s, ...storeData, updated_at: new Date().toISOString() };
         }
         return s;
       });
       localStorage.setItem(STORAGE_STORES_KEY, JSON.stringify(updated));
+
+      // 1. Sync to Supabase merchants table
+      try {
+        const supaFields = {};
+        if (storeData.name) supaFields.store_name = storeData.name;
+        if (storeData.slug) supaFields.slug = storeData.slug;
+        if (Object.keys(supaFields).length > 0) {
+          await supabase.from('merchants').update(supaFields).eq('id', storeId);
+        }
+      } catch (supaErr) {
+        console.warn('Supabase updateStore sync notice:', supaErr?.message);
+      }
+
+      // 2. Sync to shared backend API
+      try {
+        const targetStore = updated.find(s => s.id === storeId);
+        if (targetStore) {
+          apiConfig.safeFetchJson('/api/merchants', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(targetStore)
+          }, 2000).catch(() => {});
+        }
+      } catch (apiErr) {}
+
       return updated;
     } catch {
       return DEFAULT_STORES;
@@ -425,6 +477,12 @@ export const AdminService = {
       const stores = await this.getStores();
       const updated = stores.filter(s => s.id !== storeId);
       localStorage.setItem(STORAGE_STORES_KEY, JSON.stringify(updated));
+
+      // Delete from Supabase
+      try {
+        await supabase.from('merchants').delete().eq('id', storeId);
+      } catch (e) {}
+
       return updated;
     } catch {
       return DEFAULT_STORES;

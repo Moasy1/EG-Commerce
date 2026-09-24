@@ -400,8 +400,8 @@ export function crossDeviceApiPlugin() {
       }
     }
 
-    // 9. GET & POST /api/products
-    if (pathname === '/api/products') {
+    // 9. GET, POST & DELETE /api/products (Tenant-Scoped)
+    if (pathname === '/api/products' || pathname.startsWith('/api/products/')) {
       const productsStore = readJsonFile(sharedProductsFile, []);
       if (req.method === 'GET') {
         const merchantId = url.searchParams.get('merchantId');
@@ -418,6 +418,13 @@ export function crossDeviceApiPlugin() {
             res.end(JSON.stringify({ error: 'Product id is required' }));
             return;
           }
+          // Prevent cross-tenant product overwrite: if product exists, merchantId must match
+          const existing = productsStore.find(p => p.id === newProduct.id);
+          if (existing && existing.merchantId && newProduct.merchantId && existing.merchantId !== newProduct.merchantId) {
+            res.writeHead(403, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Unauthorized: Cannot modify product belonging to another merchant store' }));
+            return;
+          }
           const updatedProducts = [newProduct, ...productsStore.filter(p => p.id !== newProduct.id)];
           writeJsonFile(sharedProductsFile, updatedProducts);
           console.log(`[CrossDevice API] Product updated across devices: ${newProduct.title} (${newProduct.id})`);
@@ -428,6 +435,23 @@ export function crossDeviceApiPlugin() {
           res.end(JSON.stringify({ error: err.message }));
         }
         return;
+      }
+      if (req.method === 'DELETE') {
+        const prodId = pathname.replace('/api/products/', '').trim() || url.searchParams.get('id');
+        const reqMerchantId = url.searchParams.get('merchantId');
+        if (prodId) {
+          const target = productsStore.find(p => p.id === prodId);
+          if (target && reqMerchantId && target.merchantId && target.merchantId !== reqMerchantId) {
+            res.writeHead(403, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Unauthorized: Cannot delete product belonging to another merchant' }));
+            return;
+          }
+          const filtered = productsStore.filter(p => p.id !== prodId);
+          writeJsonFile(sharedProductsFile, filtered);
+          res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify({ success: true, deleted: prodId }));
+          return;
+        }
       }
     }
 

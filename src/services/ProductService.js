@@ -424,9 +424,13 @@ export const ProductService = {
     return updates;
   },
 
-  async deleteProduct(productId) {
+  async deleteProduct(productId, merchantId = null) {
     try {
-      await supabase.from('products').delete().eq('id', productId);
+      let query = supabase.from('products').delete().eq('id', productId);
+      if (merchantId) {
+        query = query.eq('merchant_id', merchantId);
+      }
+      await query;
     } catch (e) {}
 
     try {
@@ -436,6 +440,12 @@ export const ProductService = {
         localStorage.setItem('eg_custom_products', JSON.stringify(customProducts));
       }
     } catch (e) {}
+
+    // Sync deletion to shared backend
+    try {
+      const delUrl = merchantId ? `/api/products?id=${productId}&merchantId=${merchantId}` : `/api/products?id=${productId}`;
+      apiConfig.safeFetchJson(delUrl, { method: 'DELETE' }, 2000).catch(() => {});
+    } catch (apiErr) {}
   },
 
   async updateMerchant(merchantId, updates) {

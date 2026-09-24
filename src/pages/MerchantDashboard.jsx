@@ -52,8 +52,19 @@ export default function MerchantDashboard() {
   }
 
   const fallbackMerchant = (merchants && merchants.length > 0) ? merchants[0] : (MERCHANTS_DATA?.[0] || {});
+  const isPlatformAdmin = user && (user.role === 'admin' || user.role === 'superadmin');
+
+  // Enforce tenant isolation: merchants are locked to their own store; only admins can switch stores
   const currentMerchant = (merchants && merchants.length > 0)
-    ? (merchants.find(m => m.id === selectedMerchantId || m.id === user?.merchant_id || m.user_id === user?.id) || fallbackMerchant)
+    ? (
+        isPlatformAdmin
+          ? (merchants.find(m => m.id === selectedMerchantId) || merchants[0])
+          : (merchants.find(m => 
+              (user?.merchant_id && m.id === user.merchant_id) || 
+              (user?.id && m.user_id === user.id) || 
+              (user?.slug && m.slug === user.slug)
+            ) || fallbackMerchant)
+      )
     : fallbackMerchant;
 
   const merchantProducts = (products || []).filter(p => p && (p.merchantId === currentMerchant?.id || p.merchant_id === currentMerchant?.id));

@@ -235,16 +235,15 @@ export const OrderService = {
   async getOrders(userId = null, merchantId = null) {
     const localOrders = getStoredOrders();
 
-    // Helper to apply merchant filter
+    // Helper to apply merchant and user isolation filters
     const applyFilters = (list) => {
       let filtered = list;
       if (merchantId) {
         filtered = filtered.filter(o => o.merchantId === merchantId || o.merchant_id === merchantId);
       }
       if (userId && !merchantId) {
-        // Only filter by userId when not scoping by merchant (buyer order history)
-        const userOrders = filtered.filter(o => o.userId === userId);
-        return userOrders.length > 0 ? userOrders : filtered;
+        // Strictly return only this user's orders (never leak all orders if length is 0)
+        return filtered.filter(o => o.userId === userId);
       }
       return filtered;
     };
@@ -257,14 +256,17 @@ export const OrderService = {
 
       if (merchantId) {
         query = query.eq('merchant_id', merchantId);
+      } else if (userId) {
+        // Filter by user in platform_orders JSON payload
+        query = query.filter('order_data->>userId', 'eq', userId);
       }
 
       const { data, error } = await query;
 
-      if (!error && Array.isArray(data) && data.length > 0) {
+      if (!error && Array.isArray(data)) {
         const sharedOrders = data.map(normalizePlatformOrder).filter(Boolean);
         const result = applyFilters(sharedOrders);
-        if (!merchantId) setStoredOrders(sharedOrders); // only cache full set
+        if (!merchantId && !userId) setStoredOrders(sharedOrders); // only cache full set for admin
         return result;
       }
     } catch (err) {
@@ -324,8 +326,7 @@ export const OrderService = {
   },
 
   async getMerchantOrders(merchantId) {
-    const all = await this.getOrders();
-    return all.filter(o => o.merchantId === merchantId);
+    return this.getOrders(null, merchantId);
   },
 
   async updateOrderStatus(orderId, newStatus) {

@@ -345,7 +345,7 @@ export const ProductService = {
       const isUuid = (val) => typeof val === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
       const dbPayload = {
         title: finalProduct.title,
-        slug: finalProduct.sku,
+        slug: finalProduct.sku || `EG-${Date.now().toString(36)}`,
         description: finalProduct.description,
         base_price: finalProduct.price,
         sale_price: finalProduct.originalPrice,
@@ -354,13 +354,36 @@ export const ProductService = {
         images: finalProduct.images,
         category_id: finalProduct.category
       };
-      if (isUuid(finalProduct.merchantId)) {
-        dbPayload.merchant_id = finalProduct.merchantId;
+
+      let resolvedMerchantId = finalProduct.merchantId;
+      if (!isUuid(resolvedMerchantId)) {
+        // Look up merchant in Supabase by current auth user session
+        try {
+          const { data: authUser } = await supabase.auth.getUser();
+          if (authUser?.user?.id) {
+            const { data: userMerch } = await supabase
+              .from('merchants')
+              .select('id')
+              .eq('user_id', authUser.user.id)
+              .maybeSingle();
+            if (userMerch?.id) {
+              resolvedMerchantId = userMerch.id;
+              finalProduct.merchantId = userMerch.id;
+            }
+          }
+        } catch (e) {}
+      }
+
+      if (isUuid(resolvedMerchantId)) {
+        dbPayload.merchant_id = resolvedMerchantId;
       }
 
       const { data, error } = await supabase.from('products').insert(dbPayload).select();
       if (!error && data && data.length > 0) {
         finalProduct.id = data[0].id;
+        console.log('[ProductService] ✅ Product created in Supabase database:', finalProduct.title, finalProduct.id);
+      } else if (error) {
+        console.warn('[ProductService] Supabase insert warning:', error.message);
       }
     } catch (err) {
       console.warn('Backend DB insert skipped (using synchronized local storage):', err.message);
@@ -578,9 +601,9 @@ export const ProductService = {
       });
     });
 
-    // Merge Supabase records if online
+    // Merge Supabase records with profile branding (cross-device database sync)
     try {
-      const { data, error } = await supabase.from('merchants').select('*');
+      const { data, error } = await supabase.from('merchants').select('*, profiles(name, avatar_url, email)');
       if (!error && data && data.length > 0) {
         data.forEach(dbm => {
           const id = dbm.id;
@@ -589,15 +612,22 @@ export const ProductService = {
           if (dbm.slug === 'talieska' || dbm.slug === 'khan-el-khalili') return;
 
           const existing = merchantMap.get(id) || {};
+          const storeName = dbm.store_name || dbm.profiles?.name || existing.name || 'متجر معتمد';
+          const logo = dbm.profiles?.avatar_url || existing.logo || '/images/brands/dripfit_logo.png';
+          const slug = dbm.slug || existing.slug || 'store';
+
           merchantMap.set(id, {
             ...MERCHANTS_DATA[0],
             ...existing,
             id,
             user_id: dbm.user_id,
-            name: dbm.store_name || dbm.name || existing.name || 'متجر معتمد',
-            shortName: dbm.store_name || dbm.name || existing.shortName || 'متجر',
-            slug: dbm.slug || existing.slug || 'store',
-            subdomain: `${dbm.slug || 'store'}.egyptian-commerce.com`,
+            name: storeName,
+            shortName: storeName,
+            slug,
+            handle: `@${slug}`,
+            subdomain: `${slug}.egyptian-commerce.com`,
+            logo,
+            banner: existing.banner || '/images/products/the_sharp_v_yellow_1.webp',
             is_verified: dbm.is_verified ?? true
           });
         });

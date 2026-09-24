@@ -7,10 +7,10 @@ const supabaseAnonKey = (typeof import.meta !== 'undefined' && import.meta.env?.
                        (typeof process !== 'undefined' && process.env?.VITE_SUPABASE_ANON_KEY) || 
                        'sb_publishable_Wa3PBB1IaxacwZLo0pzuzQ_hr1trRPR';
 
-// Safe fetch with 2.5s strict timeout so asleep databases or network issues never freeze the client
+// Safe fetch with 8s timeout so database queries and cold starts never freeze or abort prematurely
 const fetchWithTimeout = async (url, options = {}) => {
   const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(new Error('Supabase request timeout')), 2500);
+  const id = setTimeout(() => controller.abort(new Error('Supabase request timeout')), 8000);
 
   let signal = controller.signal;
   if (options.signal) {

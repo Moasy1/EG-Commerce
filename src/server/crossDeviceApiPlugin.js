@@ -316,7 +316,7 @@ export function crossDeviceApiPlugin() {
           const newMerchant = {
             id: merchantId,
             user_id: userData.id,
-            name: `${merchantName} • متجر ${merchantName}`,
+            name: merchantName,
             shortName: merchantName,
             slug,
             handle: `@${slug}`,

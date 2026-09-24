@@ -14,7 +14,8 @@ export default function AuthModal() {
     setSelectedMerchantId,
     refreshData,
     navigateToMyProfile,
-    navigateToProfile
+    navigateToProfile,
+    setActiveTab
   } = useApp();
   const [mode, setMode] = useState('login'); // 'login' or 'register'
   
@@ -183,7 +184,7 @@ export default function AuthModal() {
           setRole(userToSet.role);
         }
         if (userToSet.role === 'merchant') {
-          setSelectedMerchantId(userToSet.merchant_id || `m-${userToSet.id}`);
+          setSelectedMerchantId(userToSet.merchant_id || userToSet.id);
         }
         
         // Immediately close modal and unblock UI
@@ -195,6 +196,13 @@ export default function AuthModal() {
           refreshData(userToSet).catch(err => console.warn('Background refreshData notice:', err));
         } catch (e) {}
         window.dispatchEvent(new Event('eg_profiles_updated'));
+
+        // If newly registered merchant, redirect immediately to profile settings so they can upload avatar/logo and products
+        if (mode === 'register' && (userToSet.role === 'merchant' || selectedRole === 'merchant')) {
+          if (setActiveTab) {
+            setActiveTab('settings');
+          }
+        }
         return;
       }
       

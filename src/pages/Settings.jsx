@@ -243,7 +243,7 @@ export default function Settings() {
             <form onSubmit={handleSaveProfile} className="space-y-6">
               <div className="flex items-center justify-between border-b border-gray-100 pb-4">
                 <div>
-                  <h2 className="text-lg font-bold text-slate-900">{isAr ? 'تعديل الملف الشخصي' : 'Edit Profile Information'}</h2>
+                  <h2 className="text-lg font-bold text-slate-900">{isAr ? 'تعديل الملف الشخصي والمتجر' : 'Edit Profile & Storefront'}</h2>
                   <p className="text-xs text-gray-400 mt-0.5">
                     {isAr ? 'يتم حفظ التعديلات فوراً ومزامنتها مع الخادم وقاعدة البيانات' : 'Edits are synchronized directly with your account and database'}
                   </p>
@@ -254,6 +254,59 @@ export default function Settings() {
                   </span>
                 )}
               </div>
+
+              {/* Merchant Storefront Setup & Onboarding Action Bar */}
+              {user?.role === 'merchant' && (
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-red-500/10 via-amber-500/5 to-transparent border border-red-200/80 mb-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-[#d00000] text-white flex items-center justify-center shrink-0 shadow-md">
+                        <span className="material-symbols-outlined text-[22px]">store</span>
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-black text-slate-900 flex items-center gap-1.5">
+                          <span>{isAr ? 'إعدادات متجر التاجر المعتمد' : 'Verified Merchant Storefront'}</span>
+                          <span className="material-symbols-outlined text-[16px] text-blue-500">verified</span>
+                        </h3>
+                        <p className="text-xs text-slate-600 mt-0.5">
+                          {isAr 
+                            ? 'أكمل بيانات متجرك وارفع الشعار والاسم، ثم أضف أول منتجاتك لتظهر فوراً في السوق المركزي.' 
+                            : 'Set up your store logo and identity, then publish products to appear live on the marketplace.'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab('add_product')}
+                        className="px-3.5 py-2 rounded-xl bg-[#d00000] text-white text-xs font-bold hover:bg-[#b00000] active:scale-95 transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">add_circle</span>
+                        <span>{isAr ? 'إضافة منتج جديد' : 'Add Product'}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab('merchant')}
+                        className="px-3.5 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-black active:scale-95 transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">dashboard</span>
+                        <span>{isAr ? 'لوحة المبيعات' : 'Seller Hub'}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab('shop')}
+                        className="px-3.5 py-2 rounded-xl border border-gray-200 bg-white text-slate-700 text-xs font-bold hover:bg-gray-50 active:scale-95 transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">storefront</span>
+                        <span>{isAr ? 'السوق العام' : 'Shop'}</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Avatar Selector & Upload */}
               <div>

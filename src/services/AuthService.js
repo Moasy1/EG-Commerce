@@ -487,7 +487,20 @@ export const AuthService = {
     const sanitizedRole = ['creator', 'merchant', 'admin'].includes(requestedRole) ? requestedRole : 'buyer';
     const defaultName = name || cleanEmail.split('@')[0];
     const generatedUserId = `usr-${Date.now()}`;
-    const generatedMerchantId = sanitizedRole === 'merchant' ? `m-${Date.now().toString(36)}` : null;
+    
+    // Standard UUID generator compatible with Postgres UUID columns
+    const generateUuid = () => {
+      if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+        return crypto.randomUUID();
+      }
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+        const r = (Math.random() * 16) | 0;
+        const v = c === 'x' ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+      });
+    };
+
+    let assignedMerchantId = sanitizedRole === 'merchant' ? generateUuid() : null;
     const generatedCreatorId = sanitizedRole === 'creator' ? `cr-${Date.now().toString(36)}` : null;
     const handle = sanitizedRole === 'creator' ? `@${defaultName.replace(/\s+/g, '_').toLowerCase()}` : undefined;
     const avatarUrl = sanitizedRole === 'merchant' 
@@ -497,6 +510,7 @@ export const AuthService = {
         : '/images/reels/reel_1.jpg';
 
     let supaUser = null;
+    let storeSlug = generateStoreSlug(defaultName, cleanEmail, assignedMerchantId);
 
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -506,7 +520,7 @@ export const AuthService = {
           data: {
             name: defaultName,
             role: sanitizedRole,
-            merchant_id: generatedMerchantId,
+            merchant_id: assignedMerchantId,
             creator_id: generatedCreatorId,
             is_merchant: sanitizedRole === 'merchant',
             is_creator: sanitizedRole === 'creator'
@@ -521,29 +535,64 @@ export const AuthService = {
             { 
               id: data.user.id, 
               name: defaultName, 
-              display_name: defaultName,
               role: sanitizedRole, 
               email: cleanEmail,
               avatar_url: avatarUrl,
-              is_merchant: sanitizedRole === 'merchant',
-              is_creator: sanitizedRole === 'creator'
+              reward_points_balance: sanitizedRole === 'merchant' ? 500 : 200
             }
           ]);
         } catch (err) {
           console.warn('Could not auto-create profile in Supabase:', err);
         }
 
-        // If merchant, insert merchant entry
+        // If merchant, insert merchant entry with clean UUID primary key
         if (sanitizedRole === 'merchant') {
           try {
-            await supabase.from('merchants').upsert([
-              {
-                user_id: data.user.id,
-                store_name: defaultName,
-                slug: defaultName.toLowerCase().replace(/\s+/g, '-'),
-                is_verified: true
+            // First check if a merchant already exists for this user_id
+            const { data: existingMerch } = await supabase
+              .from('merchants')
+              .select('id, store_name, slug')
+              .eq('user_id', data.user.id)
+              .maybeSingle();
+
+            if (existingMerch && existingMerch.id) {
+              assignedMerchantId = existingMerch.id;
+              storeSlug = existingMerch.slug || storeSlug;
+            } else {
+              // Ensure storeSlug is unique in merchants table to avoid slug collisions
+              let uniqueSlug = storeSlug;
+              try {
+                const { data: slugCheck } = await supabase
+                  .from('merchants')
+                  .select('id')
+                  .eq('slug', uniqueSlug)
+                  .maybeSingle();
+
+                if (slugCheck) {
+                  const suffix = String(Date.now()).slice(-4);
+                  uniqueSlug = `${storeSlug}-${suffix}`;
+                }
+              } catch (sErr) {}
+              storeSlug = uniqueSlug;
+
+              const { data: insertedMerch, error: merchErr } = await supabase.from('merchants').insert([
+                {
+                  id: assignedMerchantId,
+                  user_id: data.user.id,
+                  store_name: defaultName,
+                  slug: storeSlug,
+                  is_verified: true
+                }
+              ]).select();
+
+              if (!merchErr && insertedMerch && insertedMerch[0]) {
+                assignedMerchantId = insertedMerch[0].id;
+                storeSlug = insertedMerch[0].slug || storeSlug;
+                console.log('[AuthService] ✅ Merchant record created in Supabase with UUID:', assignedMerchantId);
+              } else if (merchErr) {
+                console.warn('Could not auto-create merchant record in Supabase:', merchErr);
               }
-            ]);
+            }
           } catch (merchErr) {
             console.warn('Could not auto-create merchant record in Supabase:', merchErr);
           }
@@ -553,8 +602,6 @@ export const AuthService = {
       console.warn('Supabase signUp error, proceeding with local persistent registration:', err.message);
     }
 
-    const storeSlug = generateStoreSlug(defaultName, cleanEmail, generatedMerchantId);
-
     // Persistent registered account object with real privileges
     const newRegisteredUser = {
       id: supaUser?.id || generatedUserId,
@@ -562,7 +609,7 @@ export const AuthService = {
       password, // retained locally so re-login works with 100% privilege preservation
       name: defaultName,
       role: sanitizedRole,
-      merchant_id: generatedMerchantId,
+      merchant_id: sanitizedRole === 'merchant' ? assignedMerchantId : null,
       creator_id: generatedCreatorId,
       store_name: defaultName,
       store_slug: storeSlug,
@@ -575,7 +622,7 @@ export const AuthService = {
       user_metadata: {
         name: defaultName,
         role: sanitizedRole,
-        merchant_id: generatedMerchantId,
+        merchant_id: sanitizedRole === 'merchant' ? assignedMerchantId : null,
         creator_id: generatedCreatorId,
         store_name: defaultName,
         store_slug: storeSlug,
@@ -586,7 +633,7 @@ export const AuthService = {
         email: cleanEmail,
         name: defaultName,
         role: sanitizedRole,
-        merchant_id: generatedMerchantId,
+        merchant_id: sanitizedRole === 'merchant' ? assignedMerchantId : null,
         creator_id: generatedCreatorId,
         store_name: defaultName,
         store_slug: storeSlug,
@@ -620,9 +667,9 @@ export const AuthService = {
     // ─── If merchant, AWAIT merchant record write ───
     if (sanitizedRole === 'merchant') {
       const newMerchantRecord = {
-        id: generatedMerchantId,
+        id: assignedMerchantId,
         user_id: supaUser?.id || generatedUserId,
-        name: `${defaultName} Store • متجر ${defaultName}`,
+        name: defaultName,
         shortName: defaultName,
         slug: storeSlug,
         handle: `@${storeSlug}`,
@@ -643,7 +690,7 @@ export const AuthService = {
       try {
         const rawMerchants = localStorage.getItem('eg_custom_merchants');
         let customMerchants = rawMerchants ? JSON.parse(rawMerchants) : [];
-        customMerchants = [newMerchantRecord, ...customMerchants.filter(m => m.id !== generatedMerchantId)];
+        customMerchants = [newMerchantRecord, ...customMerchants.filter(m => m.id !== assignedMerchantId && m.slug !== storeSlug)];
         localStorage.setItem('eg_custom_merchants', JSON.stringify(customMerchants));
       } catch (e) {}
 
@@ -688,14 +735,20 @@ export const AuthService = {
       } catch (e) {}
     }
 
-    // Save active session
-    localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(newRegisteredUser));
+    // Save active session safely
+    try {
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(newRegisteredUser));
+      }
+    } catch (e) {}
 
     // Broadcast update event so any open tab on this machine refreshes data instantly
     try {
-      window.dispatchEvent(new CustomEvent('eg_profiles_updated', {
-        detail: { type: 'registration', role: sanitizedRole, email: cleanEmail }
-      }));
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('eg_profiles_updated', {
+          detail: { type: 'registration', role: sanitizedRole, email: cleanEmail }
+        }));
+      }
     } catch (e) {}
 
     return { user: newRegisteredUser, backendSaved };
@@ -809,44 +862,59 @@ export const AuthService = {
             }
           });
 
-          // Update profiles database table
-          const { error: supaErr } = await supabase
-            .from('profiles')
-            .update({
+          // Update profiles database table safely
+          try {
+            const profilePayload = {
               name: updatedFields.name,
-              display_name: updatedFields.display_name,
-              phone: updatedFields.phone,
-              bio: updatedFields.bio,
               avatar_url: updatedFields.avatar_url,
-              username: updatedFields.username,
-              location: updatedFields.location,
-              website: updatedFields.website,
+              phone: updatedFields.phone,
               updated_at: updatedFields.updated_at
-            })
-            .eq('id', userId);
+            };
+            const { error: supaErr } = await supabase
+              .from('profiles')
+              .update(profilePayload)
+              .eq('id', userId);
 
-          if (supaErr) {
-            console.warn('Supabase profile update warning:', supaErr.message);
-          }
+            if (supaErr) {
+              console.warn('Supabase profile update warning:', supaErr.message);
+            }
+          } catch (pErr) {}
 
-          // If user is a merchant, also synchronize with merchants table
+          // If user is a merchant, synchronize with merchants table and backend
           if (currentUser.role === 'merchant' || currentUser.merchant_id) {
+            const merchantId = currentUser.merchant_id;
             try {
-              const merchUpdates = {
-                name: updatedFields.name,
+              const merchDbUpdates = {
                 store_name: updatedFields.name,
-                bio: updatedFields.bio,
-                logo: updatedFields.avatar_url,
                 updated_at: updatedFields.updated_at
               };
-              if (currentUser.merchant_id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(currentUser.merchant_id)) {
-                await supabase.from('merchants').update(merchUpdates).eq('id', currentUser.merchant_id);
+              if (merchantId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(merchantId)) {
+                await supabase.from('merchants').update(merchDbUpdates).eq('id', merchantId);
               } else {
-                await supabase.from('merchants').update(merchUpdates).eq('user_id', userId);
+                await supabase.from('merchants').update(merchDbUpdates).eq('user_id', userId);
               }
             } catch (mErr) {
               console.warn('Supabase merchant profile sync notice:', mErr);
             }
+
+            // Sync updated merchant boutique to shared backend API
+            try {
+              const fullMerchantPayload = {
+                id: merchantId || `m-${userId}`,
+                user_id: userId,
+                name: updatedFields.name,
+                shortName: updatedFields.name,
+                slug: currentUser.store_slug || currentUser.slug,
+                logo: updatedFields.avatar_url,
+                bio: updatedFields.bio || `متجر مصري موثق لـ ${updatedFields.name}`,
+                verified: true
+              };
+              apiConfig.safeFetchJson('/api/merchants', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(fullMerchantPayload)
+              }, 3000).catch(() => {});
+            } catch (bErr) {}
           }
         }
       } catch (authErr) {

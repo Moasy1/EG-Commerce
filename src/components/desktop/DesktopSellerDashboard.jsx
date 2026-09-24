@@ -52,11 +52,29 @@ export default function DesktopSellerDashboard() {
   const [activeInvoiceOrder, setActiveInvoiceOrder] = useState(null);
 
   const isSuperadmin = user?.role === 'superadmin' || user?.role === 'admin';
-  const fallbackMerchant = (merchants && merchants.length > 0) ? merchants[0] : (MERCHANTS_DATA?.[0] || {});
+  const userMerchantFallback = (user && user.role === 'merchant') ? {
+    id: user.merchant_id || `m-${user.id}`,
+    user_id: user.id,
+    name: user.store_name || user.name || 'متجري المعتمد',
+    shortName: user.store_name || user.name || 'متجري',
+    slug: user.store_slug || user.slug || 'my-store',
+    handle: `@${user.store_slug || user.slug || 'store'}`,
+    subdomain: `${user.store_slug || user.slug || 'my-store'}.egyptian-commerce.com`,
+    verified: true,
+    logo: user.avatar_url || '/images/brands/dripfit_logo.png',
+    banner: '/images/products/the_sharp_v_yellow_1.webp'
+  } : null;
+
+  const fallbackMerchant = userMerchantFallback || ((merchants && merchants.length > 0) ? merchants[0] : (MERCHANTS_DATA?.[0] || {}));
   const currentMerchant = (merchants && merchants.length > 0)
     ? (
         (!isSuperadmin && user?.role === 'merchant')
-          ? (merchants.find(m => m.id === user?.merchant_id || m.user_id === user?.id || (user?.store_slug && m.slug === user.store_slug)) || fallbackMerchant)
+          ? (merchants.find(m => 
+              m.id === user?.merchant_id || 
+              m.user_id === user?.id || 
+              (user?.store_slug && m.slug === user.store_slug) ||
+              (user?.slug && m.slug === user.slug)
+            ) || userMerchantFallback || fallbackMerchant)
           : (merchants.find(m => m.id === selectedMerchantId || m.id === user?.merchant_id || m.user_id === user?.id) || fallbackMerchant)
       )
     : fallbackMerchant;

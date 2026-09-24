@@ -14,6 +14,7 @@ const sharedCommentsFile = path.join(dataDir, 'shared_comments.json');
 const sharedUsersFile = path.join(dataDir, 'registered_users.json');
 const sharedMerchantsFile = path.join(dataDir, 'shared_merchants.json');
 const sharedProductsFile = path.join(dataDir, 'shared_products.json');
+const sharedOrdersFile = path.join(dataDir, 'shared_orders.json');
 
 // Ensure directories exist
 function ensureDirs() {
@@ -40,6 +41,9 @@ function ensureDirs() {
   }
   if (!fs.existsSync(sharedProductsFile)) {
     fs.writeFileSync(sharedProductsFile, JSON.stringify([], null, 2), 'utf-8');
+  }
+  if (!fs.existsSync(sharedOrdersFile)) {
+    fs.writeFileSync(sharedOrdersFile, JSON.stringify([], null, 2), 'utf-8');
   }
 }
 
@@ -124,11 +128,28 @@ export function crossDeviceApiPlugin() {
 
     setCorsHeaders(res);
 
-    // 1. GET /api/reels
+    // 1. GET /api/reels (Tenant-Aware)
     if (req.method === 'GET' && pathname === '/api/reels') {
       const reels = readJsonFile(sharedReelsFile, CANONICAL_REELS);
+      const merchantId = url.searchParams.get('merchantId');
+      const storeSlug = url.searchParams.get('storeSlug');
+      const creatorId = url.searchParams.get('creatorId');
+      let filtered = reels;
+      if (merchantId) {
+        filtered = filtered.filter(r => 
+          r.merchantId === merchantId || 
+          r.creatorId === merchantId || 
+          (Array.isArray(r.products) && r.products.some(p => p.merchantId === merchantId))
+        );
+      }
+      if (storeSlug) {
+        filtered = filtered.filter(r => r.storeSlug?.toLowerCase() === storeSlug.toLowerCase());
+      }
+      if (creatorId) {
+        filtered = filtered.filter(r => r.creatorId === creatorId || r.publisherId === creatorId);
+      }
       res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-      res.end(JSON.stringify(reels));
+      res.end(JSON.stringify(filtered));
       return;
     }
 
@@ -452,6 +473,45 @@ export function crossDeviceApiPlugin() {
           res.end(JSON.stringify({ success: true, deleted: prodId }));
           return;
         }
+      }
+    }
+
+    // 10. GET & POST /api/orders (Tenant-Scoped)
+    if (pathname === '/api/orders' || pathname.startsWith('/api/orders/')) {
+      const ordersStore = readJsonFile(sharedOrdersFile, []);
+      if (req.method === 'GET') {
+        const merchantId = url.searchParams.get('merchantId');
+        const userId = url.searchParams.get('userId');
+        let list = ordersStore;
+        if (merchantId) {
+          list = list.filter(o => o.merchantId === merchantId || o.merchant_id === merchantId);
+        } else if (userId) {
+          list = list.filter(o => o.userId === userId || o.user_id === userId);
+        }
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify(list));
+        return;
+      }
+      if (req.method === 'POST') {
+        try {
+          const orderBody = await parseBody(req);
+          if (!orderBody) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Order data is required' }));
+            return;
+          }
+          const incoming = Array.isArray(orderBody) ? orderBody : [orderBody];
+          const incomingIds = new Set(incoming.map(o => o.id));
+          const updated = [...incoming, ...ordersStore.filter(o => !incomingIds.has(o.id))];
+          writeJsonFile(sharedOrdersFile, updated);
+          console.log(`[CrossDevice API] Order(s) synced across devices: ${incoming.map(o => o.id).join(', ')}`);
+          res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify({ success: true, count: incoming.length }));
+        } catch (err) {
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: err.message }));
+        }
+        return;
       }
     }
 

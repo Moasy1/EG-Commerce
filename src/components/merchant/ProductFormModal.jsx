@@ -3,9 +3,28 @@ import { useApp, MERCHANTS_DATA } from '../../context/AppContext';
 
 export default function ProductFormModal({ isOpen, onClose, productToEdit = null }) {
   const { addProduct, updateProduct, selectedMerchantId, merchants, user } = useApp();
-  const fallbackMerchant = (merchants && merchants.length > 0) ? merchants[0] : (MERCHANTS_DATA?.[0] || {});
+  const isPlatformAdmin = user && (user.role === 'admin' || user.role === 'superadmin');
+  const userMerchantFallback = (user && user.role === 'merchant') ? {
+    id: user.merchant_id || `m-${user.id}`,
+    user_id: user.id,
+    name: user.store_name || user.name || 'متجر معتمد',
+    shortName: user.store_name || user.name || 'متجر',
+    slug: user.store_slug || user.slug || 'store',
+    logo: user.avatar_url || '/images/brands/dripfit_logo.png'
+  } : null;
+
+  const fallbackMerchant = userMerchantFallback || ((merchants && merchants.length > 0) ? merchants[0] : (MERCHANTS_DATA?.[0] || {}));
   const currentMerchant = (merchants && merchants.length > 0)
-    ? (merchants.find(m => m.id === selectedMerchantId || m.id === user?.merchant_id || m.user_id === user?.id) || fallbackMerchant)
+    ? (
+        isPlatformAdmin
+          ? (merchants.find(m => m.id === selectedMerchantId) || merchants[0])
+          : (merchants.find(m => 
+              m.id === user?.merchant_id || 
+              m.user_id === user?.id || 
+              (user?.store_slug && m.slug === user.store_slug) ||
+              (user?.slug && m.slug === user.slug)
+            ) || userMerchantFallback || fallbackMerchant)
+      )
     : fallbackMerchant;
 
   const [activeFormTab, setActiveFormTab] = useState('general'); // 'general' | 'pricing' | 'inventory' | 'syndication'
@@ -89,9 +108,9 @@ export default function ProductFormModal({ isOpen, onClose, productToEdit = null
       id: productToEdit ? productToEdit.id : `p-${Date.now()}`,
       sku: sku || `SKU-${Date.now().toString().slice(-4)}`,
       title: title.trim(),
-      merchant: currentMerchant?.name || 'متجر معتمد',
-      merchantId: currentMerchant?.id || '171842bd-daed-40ef-853f-917eab2ed437',
-      merchantSlug: currentMerchant?.slug || 'store',
+      merchant: currentMerchant?.name || (user?.store_name || user?.name || 'متجر معتمد'),
+      merchantId: currentMerchant?.id || user?.merchant_id || (user?.id ? `m-${user.id}` : '171842bd-daed-40ef-853f-917eab2ed437'),
+      merchantSlug: currentMerchant?.slug || user?.store_slug || user?.slug || 'store',
       createdBy: user?.id || null,
       merchantVerified: true,
       price: numPrice,

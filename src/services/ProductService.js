@@ -592,10 +592,11 @@ export const ProductService = {
         ...existing,
         ...cm,
         id,
+        user_id: cm.user_id || existing.user_id,
         name: cm.name || cm.store_name || existing.name || 'متجر معتمد',
         shortName: cm.shortName || cm.name || 'متجر',
-        slug: cm.slug || 'store',
-        subdomain: cm.subdomain || `${cm.slug || 'store'}.egyptian-commerce.com`,
+        slug: cm.slug || existing.slug || 'store',
+        subdomain: cm.subdomain || `${cm.slug || existing.slug || 'store'}.egyptian-commerce.com`,
         logo: cm.logo || existing.logo || '/images/brands/dripfit_logo.png',
         banner: cm.banner || existing.banner || '/images/products/the_sharp_v_yellow_1.webp'
       });
@@ -645,13 +646,13 @@ export const ProductService = {
           if (acc.role === 'merchant') {
             const id = acc.merchant_id || acc.id;
             if (!merchantMap.has(id)) {
-              const slug = acc.name?.toLowerCase().replace(/\s+/g, '-') || 'store';
+              const slug = acc.store_slug || acc.slug || generateStoreSlug(acc.store_name || acc.name, acc.email, id);
               merchantMap.set(id, {
                 ...MERCHANTS_DATA[0],
                 id,
                 user_id: acc.id,
-                name: `${acc.name} Store • متجر ${acc.name}`,
-                shortName: acc.name,
+                name: acc.store_name || `${acc.name} Store • متجر ${acc.name}`,
+                shortName: acc.store_name || acc.name,
                 slug,
                 handle: `@${slug}`,
                 subdomain: `${slug}.egyptian-commerce.com`,

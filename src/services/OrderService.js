@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabase.js';
 import { CommerceApi } from './CommerceApi.js';
 import { MERCHANTS_DATA } from '../data/storesData.js';
+import { apiConfig } from '../config/apiConfig.js';
 
 const ORDERS_STORAGE_KEY = 'eg_platform_orders_prod';
 
@@ -91,13 +92,24 @@ async function syncPlatformOrders(createdOrders) {
     updated_at: new Date().toISOString()
   }));
 
-  const { error } = await supabase
-    .from('platform_orders')
-    .upsert(rows, { onConflict: 'display_id' });
+  try {
+    const { error } = await supabase
+      .from('platform_orders')
+      .upsert(rows, { onConflict: 'display_id' });
 
-  if (error) {
-    console.warn('Platform order sync failed:', error.message);
-  }
+    if (error) {
+      console.warn('Platform order sync failed:', error.message);
+    }
+  } catch (dbErr) {}
+
+  // Sync to shared backend API for real-time cross-device visibility
+  try {
+    apiConfig.safeFetchJson('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(orders)
+    }, 2500).catch(() => {});
+  } catch (apiErr) {}
 }
 
 export const OrderService = {
@@ -272,6 +284,18 @@ export const OrderService = {
     } catch (err) {
       // Use local orders when the shared sync table has not been installed yet.
     }
+
+    // Try fetching from shared cross-device backend API
+    try {
+      const qParams = new URLSearchParams();
+      if (merchantId) qParams.append('merchantId', merchantId);
+      if (userId) qParams.append('userId', userId);
+      const url = `/api/orders${qParams.toString() ? '?' + qParams.toString() : ''}`;
+      const serverRes = await apiConfig.safeFetchJson(url, {}, 2000);
+      if (serverRes.ok && Array.isArray(serverRes.data) && serverRes.data.length > 0) {
+        return applyFilters(serverRes.data);
+      }
+    } catch (apiErr) {}
 
     try {
       let query = supabase.from('orders').select('*, order_items(*)');

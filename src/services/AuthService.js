@@ -449,10 +449,11 @@ export const AuthService = {
           merchant_id,
           creator_id,
           store_slug: store_slug || merchantRecord?.slug || (role === 'merchant' ? name.toLowerCase().replace(/[^a-z0-9]+/g, '-') : null),
+          slug: store_slug || merchantRecord?.slug || (role === 'merchant' ? name.toLowerCase().replace(/[^a-z0-9]+/g, '-') : null),
           store_name: merchantRecord?.store_name || name,
           is_merchant: role === 'merchant',
           is_creator: role === 'creator',
-          profile: { ...(profile || {}), role, name, merchant_id, creator_id, store_slug }
+          profile: { ...(profile || {}), role, name, merchant_id, creator_id, store_slug, slug: store_slug }
         };
 
         localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(authenticatedUser));

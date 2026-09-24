@@ -36,7 +36,23 @@ export const reelService = {
             } catch (e) {}
           }
           const hiddenIds = this.getHiddenReelIds();
-          return normalized.filter(r => !hiddenIds.includes(r.id));
+          let filtered = normalized.filter(r => !hiddenIds.includes(r.id));
+          if (filter && typeof filter === 'object') {
+            filtered = filtered.filter(r => {
+              if (filter.merchantId && (
+                r.merchantId === filter.merchantId ||
+                r.creatorId === filter.merchantId ||
+                (Array.isArray(r.products) && r.products.some(p => p.merchantId === filter.merchantId))
+              )) return true;
+              if (filter.creatorId && (
+                r.creatorId === filter.creatorId || r.publisherId === filter.creatorId
+              )) return true;
+              if (filter.storeSlug && r.storeSlug?.toLowerCase() === filter.storeSlug.toLowerCase()) return true;
+              if (filter.creatorHandle && r.creatorHandle?.toLowerCase() === filter.creatorHandle.toLowerCase()) return true;
+              return false;
+            });
+          }
+          return filtered;
         }
       }
     } catch (err) {

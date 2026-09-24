@@ -17,6 +17,7 @@ export default function MerchantDashboard() {
     setActiveTab,
     updateProductSyndication,
     updateProduct,
+    updateMerchant,
     deleteProduct,
     user,
     language,
@@ -51,7 +52,21 @@ export default function MerchantDashboard() {
     );
   }
 
-  const fallbackMerchant = (merchants && merchants.length > 0) ? merchants[0] : (MERCHANTS_DATA?.[0] || {});
+  // Synthesize self-contained tenant record for logged-in merchant if not yet loaded in merchants array
+  const userMerchantFallback = (user && user.role === 'merchant') ? {
+    id: user.merchant_id || `m-${user.id}`,
+    user_id: user.id,
+    name: user.store_name || user.name || 'متجري المعتمد',
+    shortName: user.store_name || user.name || 'متجري',
+    slug: user.store_slug || user.slug || 'my-store',
+    handle: `@${user.store_slug || user.slug || 'store'}`,
+    subdomain: `${user.store_slug || user.slug || 'my-store'}.egyptian-commerce.com`,
+    verified: true,
+    logo: user.avatar_url || '/images/brands/dripfit_logo.png',
+    banner: '/images/products/the_sharp_v_yellow_1.webp'
+  } : null;
+
+  const fallbackMerchant = userMerchantFallback || ((merchants && merchants.length > 0) ? merchants[0] : (MERCHANTS_DATA?.[0] || {}));
   const isPlatformAdmin = user && (user.role === 'admin' || user.role === 'superadmin');
 
   // Enforce tenant isolation: merchants are locked to their own store; only admins can switch stores
@@ -62,8 +77,9 @@ export default function MerchantDashboard() {
           : (merchants.find(m => 
               (user?.merchant_id && m.id === user.merchant_id) || 
               (user?.id && m.user_id === user.id) || 
+              (user?.store_slug && m.slug === user.store_slug) ||
               (user?.slug && m.slug === user.slug)
-            ) || fallbackMerchant)
+            ) || userMerchantFallback || fallbackMerchant)
       )
     : fallbackMerchant;
 
@@ -141,13 +157,22 @@ export default function MerchantDashboard() {
     setActiveUgcReviewDraft(null);
   };
 
-  const handleSaveStoreSettings = (e) => {
+  const handleSaveStoreSettings = async (e) => {
     e.preventDefault();
-    setMerchants(prev => prev.map(m => 
-      m.id === currentMerchant.id 
-        ? { ...m, announcement: announcementInput, promoCode: promoCodeInput, customDomain: customDomainInput, themeColor: themeColor }
-        : m
-    ));
+    if (!currentMerchant?.id) return;
+    const updates = {
+      announcement: announcementInput,
+      promoCode: promoCodeInput,
+      customDomain: customDomainInput,
+      themeColor: themeColor
+    };
+    if (updateMerchant) {
+      await updateMerchant(currentMerchant.id, updates);
+    } else {
+      setMerchants(prev => prev.map(m => 
+        m.id === currentMerchant.id ? { ...m, ...updates } : m
+      ));
+    }
     setThemeSavedToast(true);
     setTimeout(() => setThemeSavedToast(false), 3000);
   };

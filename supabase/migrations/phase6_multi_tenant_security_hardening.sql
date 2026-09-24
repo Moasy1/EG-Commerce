@@ -93,6 +93,16 @@ CREATE POLICY "Admins can manage all merchants"
     (current_user = 'service_role')
   );
 
+-- Merchants can insert their own store entry during self-service registration
+DROP POLICY IF EXISTS "Merchants can insert own store" ON merchants;
+CREATE POLICY "Merchants can insert own store"
+  ON merchants FOR INSERT
+  WITH CHECK (
+    user_id = auth.uid() OR
+    (auth.jwt() ->> 'role' IN ('admin', 'superadmin')) OR
+    (current_user = 'service_role')
+  );
+
 
 -- 3. HARDEN PLATFORM ORDERS & PREVENT PII LEAKS
 ALTER TABLE IF EXISTS platform_orders ENABLE ROW LEVEL SECURITY;

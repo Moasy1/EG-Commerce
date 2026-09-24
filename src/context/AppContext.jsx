@@ -32,16 +32,60 @@ export function detectSubdomain() {
 
   const norm = s => String(s || '').toLowerCase().replace(/[-_]/g, '');
 
+  const getAllKnownMerchants = () => {
+    let list = [...MERCHANTS_DATA];
+    if (typeof localStorage !== 'undefined') {
+      try {
+        const rawCustom = localStorage.getItem('eg_custom_merchants');
+        if (rawCustom) {
+          const parsed = JSON.parse(rawCustom);
+          if (Array.isArray(parsed)) {
+            parsed.forEach(cm => {
+              if (cm && !list.some(m => m.id === cm.id || m.slug === cm.slug)) {
+                list.push(cm);
+              }
+            });
+          }
+        }
+      } catch (e) {}
+
+      try {
+        const rawReg = localStorage.getItem('eg_registered_users_registry');
+        if (rawReg) {
+          const regObj = JSON.parse(rawReg);
+          Object.values(regObj).forEach(acc => {
+            if (acc && acc.role === 'merchant') {
+              const id = acc.merchant_id || acc.id;
+              const slug = acc.store_slug || acc.slug;
+              if (slug && !list.some(m => m.id === id || m.slug === slug)) {
+                list.push({
+                  id,
+                  slug,
+                  name: acc.store_name || acc.name,
+                  shortName: acc.store_name || acc.name,
+                  subdomain: `${slug}.egyptian-commerce.com`,
+                  customDomain: acc.customDomain || null
+                });
+              }
+            }
+          });
+        }
+      } catch (e) {}
+    }
+    return list;
+  };
+
   const findMerchant = (slugCandidate) => {
     if (!slugCandidate) return null;
     const target = slugCandidate.toLowerCase();
     const targetNorm = norm(target);
-    return MERCHANTS_DATA.find(m => 
-      m.slug.toLowerCase() === target || 
-      m.id.toLowerCase() === target || 
-      norm(m.slug) === targetNorm ||
-      norm(m.shortName) === targetNorm ||
-      m.subdomain?.toLowerCase().includes(target)
+    const allMerchants = getAllKnownMerchants();
+    return allMerchants.find(m => 
+      (m.slug && m.slug.toLowerCase() === target) || 
+      (m.id && m.id.toLowerCase() === target) || 
+      (m.slug && norm(m.slug) === targetNorm) ||
+      (m.shortName && norm(m.shortName) === targetNorm) ||
+      (m.subdomain && m.subdomain.toLowerCase().includes(target))
     );
   };
 
@@ -57,7 +101,8 @@ export function detectSubdomain() {
   }
 
   // 2. Custom domain match (e.g. dripfit-eg.com, onefourone.com)
-  const customMatched = MERCHANTS_DATA.find(m => 
+  const allKnown = getAllKnownMerchants();
+  const customMatched = allKnown.find(m => 
     m.customDomain && hostname.includes(m.customDomain.toLowerCase())
   );
   if (customMatched) {
